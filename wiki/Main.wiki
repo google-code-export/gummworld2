@@ -29,7 +29,6 @@ To do:
     * Object classifications: ground tiles, static fixtures
     * Buckets for different ways of looking up game objects
     * Tileset loading and saving
-    * Dynamic object management
   * Procedural object makers for things that need patterned run-time placement: immovable, mobile, etc.
   * Scrolling (DONE)
   * Menus (DONE)
