@@ -1,0 +1,55 @@
+#summary Miscellaneous notes.
+
+= Introduction =
+
+This just serves as a messy desktop for now, to collect notes on.
+
+
+= Details =
+
+The map editor performs basic scrolling of tiles.
+
+The physics scale is intended to be based on pixels, however all attempts will be made to support sub-pixel math, i.e. floating point. Sub-pixel math is compatible with the underlying physics engine, pymunk (chipmunk), and allows fractional object speeds. The display code must round and convert physics values to integers where appropriate.
+
+Also, beware that many underlying coordinate "points" are implemented as Vec2d. Attempts will be made to protect them from direct assignment, as clobbering with a tuple, for example, will break some library routines. Keep this in mind when subclassing or choosing to directly access the underlying {{{obj._attribues}}}.
+
+==Initial focus==
+
+Getting organized.
+
+Developing a map editor, which seconds as a practical test of the library and the requirements driver for library features.
+
+Anything marked DONE in the to-do list is not necessarily frozen. It is just considered adequately usable for the purpose it is most recently needed. They will surely evolve as needed.
+
+To do:
+  * Basic crap: global state, display, events, timers, physics framework (partially done)
+  * Camera: world-to-screen, screen-to-world, sprite rendering (DONE)
+  * Map
+    * Basic ground tile serving (DONE)
+    * Object classifications: ground tiles, static fixtures
+    * Tileset loading and saving
+    * Dynamic object management
+  * Procedural object makers for things that need patterned run-time placement: immovable, mobile, etc.
+  * Scrolling (DONE)
+  * Menus (DONE)
+  * Grid (DONE)
+  * HUD (DONE)
+  * Map drawing primitives
+    * Line
+    * Triangle
+    * Quad
+    * Poly
+    * Selection
+    * Resizing
+    * Delete
+    * Undo/redo
+    * Region selection
+  * Map decorating and tiling
+    * Tileset loading
+    * Palette picking
+    * Screen picking
+    * Paint
+    * Erase
+    * Undo/redo
+    * Region selection
+    * Fill
