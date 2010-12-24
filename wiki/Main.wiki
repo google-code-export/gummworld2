@@ -1,17 +1,17 @@
-#summary Miscellaneous notes.
+#summary Miscellaneous project notes.
 
 = Introduction =
 
-This just serves as a messy desktop for now, to collect notes on.
+This just serves as a messy desktop for now to collect notes on.
 
 
 = Details =
 
-The map editor performs basic scrolling of tiles.
+The map editor performs basic scrolling of tiles, with numbered labels, grid, HUD, and a popup menu.
 
-The physics scale is intended to be based on pixels, however all attempts will be made to support sub-pixel math, i.e. floating point. Sub-pixel math is compatible with the underlying physics engine, pymunk (chipmunk), and allows fractional object speeds. The display code must round and convert physics values to integers where appropriate.
+The physics scale is intended to be based on pixels, however all attempts will be made to support sub-pixel math with floating point numbers. Sub-pixel math is compatible with the underlying physics engine, pymunk (chipmunk), and allows fractional speeds, mass, etc. The display code must round and convert physics values to integers where appropriate.
 
-Also, beware that many underlying coordinate "points" are implemented as Vec2d. Attempts will be made to protect them from direct assignment, as clobbering with a tuple, for example, will break some library routines. Keep this in mind when subclassing or choosing to directly access the underlying {{{obj._attribues}}}.
+Also, beware that many underlying coordinate "points" are implemented as {{{Vec2d}}}. Attempts will be made to protect them from direct assignment, as clobbering them with a sequence or other object will break some library routines. Keep this in mind when subclassing or choosing to directly access the underlying {{{obj._attributes}}}.
 
 ==Initial focus==
 
@@ -27,6 +27,7 @@ To do:
   * Map
     * Basic ground tile serving (DONE)
     * Object classifications: ground tiles, static fixtures
+    * Buckets for different ways of looking up game objects
     * Tileset loading and saving
     * Dynamic object management
   * Procedural object makers for things that need patterned run-time placement: immovable, mobile, etc.
