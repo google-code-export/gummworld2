@@ -16,8 +16,8 @@
 # License along with Gummworld2.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__version__ = '0.1'
-__vernum__ = (0,1)
+__version__ = '0.2'
+__vernum__ = (0,2)
 
 
 """popup_menu.py - A low-fuss, infinitely nested popup menu with simple blocking

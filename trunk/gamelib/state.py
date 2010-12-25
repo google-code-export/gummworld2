@@ -16,8 +16,8 @@
 # License along with Gummworld2.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__version__ = '0.1'
-__vernum__ = (0,1)
+__version__ = '0.2'
+__vernum__ = (0,2)
 
 
 """state.py - A class for convenient global access to Gummworld2 run-time objects.
@@ -42,9 +42,38 @@ class State(object):
     
     # game settings
     running = False
-    speed = 2
+    speed = 4
+    scale = 1,1
     
     # map editor settings
     show_grid = False
     show_labels = False
     show_hud = False
+
+
+# You may add to this if you add your own attributes to State.
+default_attrs = [
+    'screen',
+    'camera',
+    'map',
+    'world',
+    'events',
+    'menu',
+]
+states = {}
+
+
+def save(name, attrs=default_attrs):
+    state_dict = {}
+    for attr in attrs:
+        if hasattr(State, attr):
+            state_dict[attr] = getattr(State, attr)
+    states[name] = state_dict
+
+
+def restore(name, attrs=default_attrs):
+    for attr in attrs:
+        setattr(State, attr, states[name][attr])
+
+save('main')
+restore('main')

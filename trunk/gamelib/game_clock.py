@@ -16,8 +16,8 @@
 # License along with Gummworld2.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__version__ = '0.1'
-__vernum__ = (0,1)
+__version__ = '0.2'
+__vernum__ = (0,2)
 
 
 """game_clock.py - Game clock for Gummworld2.

@@ -16,8 +16,8 @@
 # License along with Gummworld2.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__version__ = '0.1'
-__vernum__ = (0,1)
+__version__ = '0.2'
+__vernum__ = (0,2)
 
 
 """map.py - Map module for Gummworld2.
@@ -49,6 +49,8 @@ State.map and State.world package globals, for example:
     # Restore a map and world.
     State.map,State.world = levels[0]
 """
+
+
 import pygame
 from pygame.locals import Color
 
@@ -132,28 +134,3 @@ class Map(object):
         if xy is not None:
             setattr(self.h_line, anchor, xy)
         return self.h_line
-
-
-if __name__ == '__main__':
-    import view
-    from camera import Camera
-    from map import Map
-    from events import EditorEvents
-    
-    State.screen = view.Screen((400,400))
-    State.camera = Camera((0,0))
-    State.events = EditorEvents()
-
-    State.grid = True
-    State.hud = True
-    State.map = Map((128,128),(4,4))
-
-    dt = int(1.0 / 60.0 * 1000)
-
-    while 1:
-        pygame.time.wait(dt)
-        State.screen.clear()
-        State.map.draw_grid()
-        State.screen.flip()
-        State.events.get()
-        State.camera.update(State.world.avatar.position)
