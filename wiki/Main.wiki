@@ -53,3 +53,9 @@ To do:
     * Undo/redo
     * Region selection
     * Fill
+
+==Working Notes===
+init(screen_size=None, map=None)<br>
+init(screen_size=(600,600), map=(tile_size, map_size))
+
+save_state(), restore_state()
