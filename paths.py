@@ -20,34 +20,16 @@ __version__ = '0.2'
 __vernum__ = (0,2)
 
 
-"""__init__.py - Package initializer for Gummworld2.
+"""paths.py - Path setup for Gummworld2.
+
+Import this at the start of your program to augment the python library path.
 """
 
 
-import pygame
-import pymunk
+import os
+import sys
 
-pygame.init()
-pymunk.init_pymunk()
-
-# Modules
-import model
-import view
-import data
-import pygame_utils
-import popup_menu
-import ui
-import toolkit
-
-# Classes
-from state import State
-from vec2d import Vec2d
-
-from camera import Camera
-from map import Map
-from game_clock import GameClock
-from graphics import Graphics
-from popup_menu import PopupMenu
-from ui import HUD, Stat, Statf
-
-from engine import Engine
+progname = sys.argv[0]
+progdir = os.path.dirname(progname)
+sys.path.append(progdir)
+sys.path.append(os.path.join(progdir,'gamelib'))

@@ -16,8 +16,8 @@
 # License along with Gummworld2.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__version__ = '0.1'
-__vernum__ = (0,1)
+__version__ = '0.2'
+__vernum__ = (0,2)
 
 
 """pygame_utils.py - Collection of pygame utilities for Gummworld2.

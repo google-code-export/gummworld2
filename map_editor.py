@@ -16,8 +16,8 @@
 # License along with Gummworld2.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__version__ = '0.1'
-__vernum__ = (0,1)
+__version__ = '0.2'
+__vernum__ = (0,2)
 
 
 """map_editor.py - A map editor for Gummworld2.
@@ -28,142 +28,131 @@ import os
 import sys
 
 import pygame
-from pygame.locals import Color
+from pygame.locals import Color, K_UP, K_DOWN, K_LEFT, K_RIGHT
 import pymunk
 
-progname = sys.argv[0]
-progdir = os.path.dirname(progname)
-sys.path.append(os.path.join(progdir,'gamelib'))
-
+import paths
 from gamelib import *
 
 
-class MapEditor(object):
+menu_data = (
+    'Main',
+    'Grid',
+    'Labels',
+    'HUD',
+    (
+        'Geometry',
+        'Line',
+        'Triangle',
+        'Quad',
+        'Poly',
+        'Select Region',
+        'Resize',
+        'Delete',
+    ),
+    (
+        'Tiling',
+        'Load Tileset',
+        'Pick from Palette',
+        'Pick from Screen',
+        'Paint',
+        'Erase',
+        'Select Region',
+        'Fill',
+    ),
+    (
+        'Map',
+        'New',
+        'Load',
+        'Save',
+    ),
+    'Quit',
+)
 
-    def __init__(self, size):
-        State.screen = view.Screen(size)
-       
-        State.map = Map((128,128),(10,10))
-        State.world = model.World(State.map.rect)
-        self.make_tiles()
-       
-        State.camera = Camera(State.world.avatar,
-            State.screen.surface, State.screen.surface.get_rect())
-       
-        State.show_labels = True
-        State.show_grid = True
-        State.show_hud = True
 
-        State.graphics = Graphics()
-        State.events = EditorEvents()
-        State.clock = GameClock(60,60)
-       
-        self.make_hud()
-       
-    def run(self):
-        State.running = True
-        while State.running:
-            State.world.step()
-            if State.clock.update_ready():
-                self.update()
-            if State.clock.frame_ready():
-                self.draw()
+class MapEditor(Engine):
 
+    def __init__(self, screen_size):
+        super(MapEditor, self).__init__(screen_size=screen_size)
+        
+        # dict to look up movement keys and their corresponding direction on the
+        # axis.
+        self._Y_KEYS = {K_UP:-1,K_DOWN:1}
+        self._X_KEYS = {K_LEFT:-1,K_RIGHT:1}
+        
+        # These dicts allow robust accumulation of key-presses, and remember the
+        # direction*speed. The original step size is preserved so that a KEYUP
+        # event removes the right value, even if speed is changed while a key is
+        # depressed.
+        self.move_y = {}
+        self.move_x = {}
+        
+        # Make some default content and HUD.
+        toolkit.make_tiles()
+        toolkit.make_hud()
+        
     def update(self):
-        State.events.get()
+        """Overrides Engine.update."""
+        self.update_avatar_position()
         State.camera.update()
         if State.show_hud:
             State.hud.update()
    
     def draw(self):
+        """Overrides Engine.draw."""
         State.screen.clear()
-#        State.canvas.clear()
-#        State.graphics.draw_bounding_box(State.canvas.surface, State.world.bounding_box)
-#        State.canvas.draw()
-        self.draw_tiles()
-        self.draw_labels()
-        self.draw_grid()
+        toolkit.draw_tiles()
+        toolkit.draw_labels()
+        toolkit.draw_grid()
         if State.show_hud:
             State.hud.draw(State.screen.surface)
         State.screen.flip()
 
-    def draw_tiles(self):
-        draw = State.camera.draw
-        for s in State.camera.visible_tiles:
-            draw(s)
+    def update_avatar_position(self):
+        # This method updates the avatar's position if any movement keys are
+        # currently held down.
+        if self.move_y or self.move_x:
+            avatar = State.world.avatar
+            wx,wy = avatar.position
+            for y in self.move_y.values():
+                wy += y
+            for x in self.move_x.values():
+                wx += x
+            # Keep avatar inside world bounds. Note: pymunk.BB.clamp_vect
+            # doesn't work because top is less than bottom.
+            #avatar.position = State.world.bounding_box.clamp_vect((wx,wy))
+            # Instead we'll do this...
+            rect = State.world.rect
+            avatar.position.x = max(min(wx,rect.right),rect.left)
+            avatar.position.y = max(min(wy,rect.bottom),rect.top)
 
-    def draw_labels(self):
-        """Draw visible labels if enabled.
-        """
-        if State.show_labels:
-            x1,y1,x2,y2 = State.camera.visible_tile_range
-            draw_sprite = State.camera.draw
-            get_at = State.map.get_label_at
-            for x in range(x1,x2):
-                for y in range(y1,y2):
-                    s = get_at(x,y)
-                    draw_sprite(s)
-
-    def draw_grid(self):
-        """Draw grid if enabled.
-        """
-        if State.show_grid:
-            x1,y1,x2,y2 = State.camera.visible_tile_range
-            SpriteClass = pygame.sprite.Sprite
-            draw = State.camera.draw
-            grid = State.map.outline
-            rect = grid.rect
-            for s in State.map.get_tiles(x1, y1, x2, y2):
-                if isinstance(s, SpriteClass):
-                    rect.topleft = s.rect.topleft
-                    draw(grid)
-
-    def make_tiles(self):
-        """Create map of tiles.
-        """
-        # Tiles are sprites; each sprite must have a name, an image, and a rect.
-        tw,th = State.tile_size
-        mw,mh = State.map_size
-        for x in range(mw):
-            for y in range(mh):
-                s = pygame.sprite.Sprite()
-                s.name = (x,y)
-                s.image = pygame.surface.Surface((tw,th))
-                facx = max(float(x) / mw, 0.01)
-                facy = max(float(y) / mh, 0.01)
-                s.image.fill((255-255*facx,0,255*facy))
-                s.rect = s.image.get_rect(topleft=(x*tw,y*th))
-                State.map.add(s)
-
-    def make_hud(self):
-        screen_rect = State.screen.rect
-        top = 5
-        height = ui.hud_font.get_height()
-        y = lambda n: top+height*n
-        x = screen_rect.x + 5
-        State.hud = HUD()
-       
-        i = 0
-        State.hud.add('FPS',
-            Statf((x,y(i)), 'FPS %d', callback=State.clock.get_fps))
-       
-        i += 1
-        def get_world_pos(): p = State.camera.position; return int(p.x),int(p.y)
-        State.hud.add('WORLD_POS',
-            Statf((x,y(i)), 'World %s', callback=get_world_pos, interval=100))
-       
-        i += 1
-        def get_camera_pos():
-            x,y = State.camera.rect.center
-            return int(x),int(y)
-        State.hud.add('CAMERA_POS',
-            Statf((x,y(i)), 'Camera %s', callback=get_camera_pos, interval=100))
-       
-        i += 1
-        bb = State.world.bounding_box
-        l,b,r,t = bb.left,bb.bottom,bb.right,bb.top
-        State.hud.add('WORLD_BOUNDS',
-            Stat((x,y(i)), 'Bounds %s'%((int(l),int(b),int(r),int(t),),)))
+    def on_key_down(self, unicode, key, mod):
+        # Turn on key-presses.
+        if key in self._Y_KEYS:
+            self.move_y[key] = self._Y_KEYS[key] * State.speed
+        elif key in self._X_KEYS:
+            self.move_x[key] = self._X_KEYS[key] * State.speed
+    
+    def on_key_up(self, key, mod):
+        # Turn off key-presses.
+        if key in self._Y_KEYS:
+            del self.move_y[key]
+        elif key in self._X_KEYS:
+            del self.move_x[key]
+    
+    def on_mouse_button_up(self, pos, button):
+        PopupMenu(menu_data)
+    
+    def on_user_event(self, e):
+        if e.name == 'Main':
+            if e.text == 'HUD':
+                State.show_hud = not State.show_hud
+            elif e.text == 'Grid':
+                State.show_grid = not State.show_grid
+            elif e.text == 'Labels':
+                State.show_labels = not State.show_labels
+            elif e.text == 'Quit':
+                quit()
 
 
 if __name__ == '__main__':
