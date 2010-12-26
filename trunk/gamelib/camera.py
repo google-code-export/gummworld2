@@ -26,8 +26,7 @@ __vernum__ = (0,2)
 
 import pygame
 
-from state import State
-from vec2d import Vec2d
+from gamelib import State, Vec2d
 
 
 class Camera(object):
@@ -36,10 +35,59 @@ class Camera(object):
         self.target = target
         self.surface = surface
         self.rect = rect
+        self._move_from = Vec2d(target.position)
+        self._move_to = Vec2d(target.position)
+        self._interp = 0.0
+        self.update()
+
+    def interpolate(self):
+        """interpolate camera position towards target for smoother scrolling
+        
+        You typically want to use this or Camera.update(), not both.
+        
+        After updating the target position in the main program's update(), call
+        this every frame in the main program's draw() before any drawing
+        commands. It works best when frame speed is much higher than update
+        speed.
+        """
+        target_pos = self.target.position
+        if self._move_from != target_pos:
+            interp = State.clock.interpolate()
+            if interp < self._interp:
+                # camera has caught up with target
+                self._move_from = self._move_to
+                self._interp = 0.0
+            else:
+                # camera must catch up with target
+                x1,y1 = self._move_from
+                x2,y2 = target_pos
+                x = x1 + (x2-x1) * interp
+                y = y1 + (y2-y1) * interp
+                self.rect.center = int(round(x)), int(round(y))
+                self._interp = interp
+        if self._move_to != target_pos:
+            self._move_from = self._move_to
+            self._move_to = Vec2d(target_pos)
 
     def update(self):
-        if self.rect.center != self.target.position:
-            self.rect.center = self.target.position
+        """relocate camera position immediately to target
+        
+        You typically want to use this or Camera.interpolate(), not both.
+        """
+        v = self.target.position
+        v = int(round(v.x)), int(round(v.y))
+        if self.rect.center != v:
+            self.rect.center = v
+
+    def state_restored(self):
+        """If switching states either manually or via State.save() and
+        State.restore(), you may want to call this to avoid video flashing or
+        whizzing by. This typically happens when using Camera.interpolate() and
+        swapping in the old camera, which has stale values in the _move_to and
+        _move_from attributes.
+        """
+        self.update()
+        self._move_to = self._move_from = Vec2d(self.target.position)
 
     @property
     def position(self):

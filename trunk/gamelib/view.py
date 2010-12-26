@@ -27,7 +27,7 @@ __vernum__ = (0,2)
 import pygame
 from pygame.locals import Color, Rect, SRCALPHA
 
-from state import State
+from gamelib import State
 
 
 class Screen(object):

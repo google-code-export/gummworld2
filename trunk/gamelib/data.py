@@ -27,6 +27,7 @@ __vernum__ = (0,2)
 import os
 from os.path import join as join_path
 
+
 data_py = os.path.abspath(os.path.dirname(__file__))
 data_dir = os.path.normpath(join_path(data_py, '..', 'data'))
 path = dict(
@@ -37,10 +38,12 @@ path = dict(
     text  = join_path(data_dir, 'text'),
 )
 
+
 def filepath(typ, filename):
     '''Determine the path to a file in the data directory.
     '''
     return join_path(path[typ], filename)
+
 
 def load(typ, filename, mode='rb'):
     '''Open a file in the data directory.
@@ -49,17 +52,22 @@ def load(typ, filename, mode='rb'):
     '''
     return open(filepath(typ, filename), mode)
 
+
 def load_font(filename):
     return load('font', filename)
+
 
 def load_image(filename):
     return load('image', filename)
 
+
 def load_map(filename):
     return load('map', filename)
 
+
 def load_sound(filename):
     return load('sound', filename)
+
 
 def load_text(filename):
     return load('text', filename, 'r')

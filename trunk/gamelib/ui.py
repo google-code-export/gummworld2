@@ -29,7 +29,8 @@ import time
 import pygame
 from pygame.locals import Color, RLEACCEL
 
-import data
+from gamelib import data
+
 
 pygame.init()
 hud_font = pygame.font.Font(data.filepath('font', 'Vera.ttf'), 10)
