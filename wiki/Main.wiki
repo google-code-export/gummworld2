@@ -23,6 +23,7 @@ Anything marked DONE in the to-do list is not necessarily frozen. It is just con
 
 To do:
   * Basic crap: global state, display, events, timers, physics framework (partially done)
+  * Application framework, aka "engine" (DONE)
   * Camera: world-to-screen, screen-to-world, sprite rendering (DONE)
   * Map
     * Basic ground tile serving (DONE)
@@ -30,7 +31,7 @@ To do:
     * Buckets for different ways of looking up game objects
     * Tileset loading and saving
   * Procedural object makers for things that need patterned run-time placement: immovable, mobile, etc.
-  * Scrolling (DONE)
+  * Scrolling with interpolated smoothing (DONE)
   * Menus (DONE)
   * Grid (DONE)
   * HUD (DONE)
@@ -55,7 +56,3 @@ To do:
     * Fill
 
 ==Working Notes===
-init(screen_size=None, map=None)<br>
-init(screen_size=(600,600), map=(tile_size, map_size))
-
-save_state(), restore_state()
