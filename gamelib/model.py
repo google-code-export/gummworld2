@@ -27,7 +27,8 @@ Everything in this module is expressed in terms of pymunk space.
 
 import pygame
 import pymunk
-from state import State
+
+from gamelib import State
 
 
 class World(object):

@@ -24,7 +24,25 @@ __vernum__ = (0,2)
 """
 
 
+# You may add to default_attrs if you add your own attributes to State and want
+# them saved and restored by default via the static methods.
+default_attrs = [
+    'camera',
+    'map',
+    'world',
+    'menu',
+]
+
+# The states dict stores lists of saved objects, keyed by a name. Any valid dict
+# key can be used. The contents of this may be changed and read manually or with
+# the State.save() and State.restore() static methods.
+states = {}
+
+
 class State(object):
+    
+    name = 'init'               # name of initial saved state
+    
     # objects
     screen = None               # gamelib.Screen
     camera = None               # gamelib.Camera
@@ -35,8 +53,6 @@ class State(object):
     graphics = None             # gamelib.Graphics
     canvas = None               # gamelib.Canvas
     
-    clock = None                # gamelib.GameClock
-    events = None               # gamelib.GameEvents, gamelib.EditorEvents, or custom
     clock = None                # gamelib.GameClock
     menu = None                 # gamelib.PopupMenu
     
@@ -49,31 +65,40 @@ class State(object):
     show_grid = False
     show_labels = False
     show_hud = False
+    
+    @staticmethod
+    def save(name, attrs=default_attrs):
+        """save a state by name
+        
+        The attrs argument is a sequence of strings naming the State attributes
+        to save. If attrs is not specified then state.default_attrs is used.
+        """
+        state_dict = {}
+        for attr in attrs:
+            if hasattr(State, attr):
+                state_dict[attr] = getattr(State, attr)
+        states[name] = state_dict
+
+    @staticmethod
+    def restore(name, attrs=default_attrs):
+        """restore a state context by name
+        
+        State.name is set to the value of the name argument.
+        
+        The attrs argument is a sequence of strings naming the State attributes
+        to restore. If attrs is not specified then state.default_attrs is used.
+        
+        If an object that is being restored has state_restored() method it will
+        be called. The method is intended to sync the object with other parts of
+        the game that may have updated while it was swapped out.
+        """
+        for attr in attrs:
+            setattr(State, attr, states[name][attr])
+        for attr in attrs:
+            obj = getattr(State, attr)
+            if hasattr(obj, 'state_restored'):
+                obj.state_restored()
+        State.name = name
 
 
-# You may add to this if you add your own attributes to State.
-default_attrs = [
-    'screen',
-    'camera',
-    'map',
-    'world',
-    'events',
-    'menu',
-]
-states = {}
-
-
-def save(name, attrs=default_attrs):
-    state_dict = {}
-    for attr in attrs:
-        if hasattr(State, attr):
-            state_dict[attr] = getattr(State, attr)
-    states[name] = state_dict
-
-
-def restore(name, attrs=default_attrs):
-    for attr in attrs:
-        setattr(State, attr, states[name][attr])
-
-save('main')
-restore('main')
+State.save(State.name)

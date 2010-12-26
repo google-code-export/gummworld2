@@ -27,9 +27,8 @@ __vernum__ = (0,2)
 import pygame
 from pygame.sprite import Sprite
 
-from state import State
-import ui
-from ui import HUD, Stat, Statf
+from gamelib import State
+from gamelib.ui import HUD, Stat, Statf, hud_font
 
 
 def make_tiles():
@@ -57,7 +56,7 @@ def make_hud():
     """
     screen_rect = State.screen.rect
     top = 5
-    height = ui.hud_font.get_height()
+    height = hud_font.get_height()
     y = lambda n: top+height*n
     x = screen_rect.x + 5
     State.hud = HUD()

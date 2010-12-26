@@ -54,10 +54,9 @@ State.map and State.world package globals, for example:
 import pygame
 from pygame.locals import Color
 
-import model
-from state import State
-from ui import hud_font, text_color
-from vec2d import Vec2d
+from gamelib import model, State, Vec2d
+from gamelib.ui import hud_font, text_color
+
 
 class Map(object):
     
@@ -70,9 +69,6 @@ class Map(object):
         mw,mh = map_size
         self.rect = pygame.Rect(0,0,tw*mw,th*mh)
         
-#        rect = self.rect
-#        State.world = model.World(self.rect)
-
         # make a tile outline to blit for optional grid
         s = pygame.sprite.Sprite()
         s.image = pygame.surface.Surface((tw,th))

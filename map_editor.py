@@ -24,11 +24,8 @@ __vernum__ = (0,2)
 """
 
 
-import os
-import sys
-
 import pygame
-from pygame.locals import Color, K_UP, K_DOWN, K_LEFT, K_RIGHT
+from pygame.locals import K_UP, K_DOWN, K_LEFT, K_RIGHT
 import pymunk
 
 import paths
@@ -71,9 +68,9 @@ menu_data = (
 
 
 class MapEditor(Engine):
-
+    
     def __init__(self, screen_size):
-        super(MapEditor, self).__init__(screen_size=screen_size)
+        super(MapEditor, self).__init__(resolution=screen_size, frame_speed=0)
         
         # dict to look up movement keys and their corresponding direction on the
         # axis.
@@ -94,12 +91,13 @@ class MapEditor(Engine):
     def update(self):
         """Overrides Engine.update."""
         self.update_avatar_position()
-        State.camera.update()
         if State.show_hud:
             State.hud.update()
-   
+        
     def draw(self):
         """Overrides Engine.draw."""
+        # Draw stuff.
+        State.camera.interpolate()
         State.screen.clear()
         toolkit.draw_tiles()
         toolkit.draw_labels()
@@ -107,42 +105,41 @@ class MapEditor(Engine):
         if State.show_hud:
             State.hud.draw(State.screen.surface)
         State.screen.flip()
-
+        
     def update_avatar_position(self):
         # This method updates the avatar's position if any movement keys are
         # currently held down.
         if self.move_y or self.move_x:
             avatar = State.world.avatar
             wx,wy = avatar.position
-            for y in self.move_y.values():
-                wy += y
-            for x in self.move_x.values():
-                wx += x
+            wx = reduce(float.__add__, self.move_x.values(), wx)
+            wy = reduce(float.__add__, self.move_y.values(), wy)
             # Keep avatar inside world bounds. Note: pymunk.BB.clamp_vect
             # doesn't work because top is less than bottom.
             #avatar.position = State.world.bounding_box.clamp_vect((wx,wy))
             # Instead we'll do this...
             rect = State.world.rect
-            avatar.position.x = max(min(wx,rect.right),rect.left)
-            avatar.position.y = max(min(wy,rect.bottom),rect.top)
-
+            wx = max(min(wx,rect.right), rect.left)
+            wy = max(min(wy,rect.bottom), rect.top)
+            avatar.position = wx,wy
+        
     def on_key_down(self, unicode, key, mod):
         # Turn on key-presses.
         if key in self._Y_KEYS:
             self.move_y[key] = self._Y_KEYS[key] * State.speed
         elif key in self._X_KEYS:
             self.move_x[key] = self._X_KEYS[key] * State.speed
-    
+        
     def on_key_up(self, key, mod):
         # Turn off key-presses.
         if key in self._Y_KEYS:
             del self.move_y[key]
         elif key in self._X_KEYS:
             del self.move_x[key]
-    
+        
     def on_mouse_button_up(self, pos, button):
         PopupMenu(menu_data)
-    
+        
     def on_user_event(self, e):
         if e.name == 'Main':
             if e.text == 'HUD':

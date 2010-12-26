@@ -30,15 +30,6 @@ import pymunk
 pygame.init()
 pymunk.init_pymunk()
 
-# Modules
-import model
-import view
-import data
-import pygame_utils
-import popup_menu
-import ui
-import toolkit
-
 # Classes
 from state import State
 from vec2d import Vec2d
@@ -51,3 +42,12 @@ from popup_menu import PopupMenu
 from ui import HUD, Stat, Statf
 
 from engine import Engine
+
+# Modules
+import model
+import view
+import data
+import pygame_utils
+import popup_menu
+import ui
+import toolkit

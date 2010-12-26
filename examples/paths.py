@@ -20,23 +20,16 @@ __version__ = '0.2'
 __vernum__ = (0,2)
 
 
-"""graphics.py - Graphics module for Gummworld2.
+"""paths.py - Path setup for Gummworld2.
+
+Import this at the start of your program to augment the python library path.
 """
 
 
-import pygame
-from pygame.locals import Color, Rect
+import os
+import sys
 
-from gamelib import State
-
-
-class Graphics(object):
-
-    _rect = Rect(0,0,0,0)
-    
-    def draw_bounding_box(self, surface, bb):
-        rect = self._rect
-        world_to_screen = State.camera.world_to_screen
-        rect.topleft = world_to_screen((bb.left,bb.top))
-        rect.size = world_to_screen((bb.right,bb.bottom)) - rect.topleft
-        pygame.draw.rect(surface, Color('white'), rect, 1)
+progname = sys.argv[0]
+progdir = os.path.dirname(progname)
+sys.path.append(os.path.join(progdir,'..'))
+sys.path.append(os.path.join(progdir,'..','gamelib'))
