@@ -34,6 +34,8 @@ from gamelib.ui import HUD, Stat, Statf, hud_font
 def make_tiles():
     """Create tiles to fill the current map. This is a utility for easily making
     visible content to aid early game design or debugging.
+    
+    Tiles transition from top-left to bottom-right, red to blue.
     """
     # Tiles are sprites; each sprite must have a name, an image, and a rect.
     tw,th = State.tile_size
@@ -46,6 +48,29 @@ def make_tiles():
             facx = max(float(x) / mw, 0.01)
             facy = max(float(y) / mh, 0.01)
             s.image.fill((255-255*facx,0,255*facy))
+            s.rect = s.image.get_rect(topleft=(x*tw,y*th))
+            State.map.add(s)
+
+
+def make_tiles2():
+    """Create tiles to fill the current map. This is a utility for easily making
+    visible content to aid early game design or debugging.
+    
+    Tiles transition from top to bottom, light blue to brown.
+    """
+    # Tiles are sprites; each sprite must have a name, an image, and a rect.
+    tw,th = State.tile_size
+    mw,mh = State.map_size
+    for x in range(mw):
+        for y in range(mh):
+            s = pygame.sprite.Sprite()
+            s.name = (x,y)
+            s.image = pygame.surface.Surface((tw,th))
+            facy = max(float(y) / mh, 0.01)
+            R = 200-100*facy
+            G = 150-100*facy
+            B = 255-255*facy
+            s.image.fill((R,G,B))
             s.rect = s.image.get_rect(topleft=(x*tw,y*th))
             State.map.add(s)
 

@@ -31,8 +31,8 @@ pygame.init()
 pymunk.init_pymunk()
 
 # Classes
-from state import State
 from vec2d import Vec2d
+from state import State
 
 from camera import Camera
 from map import Map

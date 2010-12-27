@@ -75,7 +75,7 @@ class Map(object):
         s.rect = s.image.get_rect()
         pygame.draw.rect(s.image, Color('white'), s.rect, 1)
         s.image.set_colorkey(Color('black'))
-        s.image.set_alpha(99)
+        s.image.set_alpha(25)
         self.outline = s
 
         # make grid labels to blit
@@ -84,7 +84,6 @@ class Map(object):
             for y in range(0,State.map_size.y):
                 s = pygame.sprite.Sprite()
                 s.image = hud_font.render('%d,%d'%(x,y), True, text_color)
-                s.image.set_alpha(99)
                 s.rect = s.image.get_rect(
                     topleft=Vec2d(x*tw,y*th)+(2,2))
                 self.labels[x,y] = s

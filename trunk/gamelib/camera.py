@@ -104,6 +104,9 @@ class Camera(object):
         v = int(round(v.x)), int(round(v.y))
         if self.rect.center != v:
             self.rect.center = v
+        if self._move_from != v:
+            self._move_from = Vec2d(v)
+            self._move_to = Vec2d(v)
         
     def state_restored(self):
         """If switching states either manually or via State.save() and
