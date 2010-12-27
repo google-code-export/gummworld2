@@ -58,5 +58,5 @@ To do:
 ==Working Notes===
 
 Debating:
-* Use an external tile map editor (e.g. tiled), and have map_editor.py load the tile map and just add pymunk geometry?
-* Have map_editor.py do it all?
+  * Use an external tile map editor (e.g. tiled), and have map_editor.py load the tile map and just add pymunk geometry?
+  * Have map_editor.py do it all?
