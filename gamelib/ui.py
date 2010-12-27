@@ -29,7 +29,7 @@ import time
 import pygame
 from pygame.locals import Color, RLEACCEL
 
-from gamelib import data
+from gamelib import data, State
 
 
 pygame.init()
@@ -43,7 +43,17 @@ class HUD(pygame.sprite.OrderedUpdates):
     def __init__(self):
         super(HUD, self).__init__()
         self.stats = {}
-    
+        self.top = 5
+        self.font_height = hud_font.get_height()
+        self.y = lambda n: self.top + self.font_height * n
+        self.x = State.screen.rect.x + 5
+        self.i = 0
+
+    def next_pos(self):
+        i = self.i
+        self.i += 1
+        return self.x, self.y(i)
+
     def add(self, *args):
         """args: name, stat"""
         if args:
@@ -67,6 +77,12 @@ class HUD(pygame.sprite.OrderedUpdates):
     def update(self):
         for stat in self.stats.values():
             stat.update()
+
+    def draw(self, surface=None):
+        if surface is None:
+            super(HUD, self).draw(State.camera.surface)
+        else:
+            super(HUD, self).draw(surface)
 
 
 class Stat(pygame.sprite.Sprite):

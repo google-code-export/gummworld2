@@ -103,7 +103,7 @@ class MapEditor(Engine):
         toolkit.draw_labels()
         toolkit.draw_grid()
         if State.show_hud:
-            State.hud.draw(State.screen.surface)
+            State.hud.draw()
         State.screen.flip()
         
     def update_avatar_position(self):
