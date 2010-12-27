@@ -59,7 +59,6 @@ class State(object):
     # game settings
     running = False
     speed = 4
-    scale = 1,1
     
     # map editor settings
     show_grid = False

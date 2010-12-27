@@ -20,7 +20,7 @@ __version__ = '0.2'
 __vernum__ = (0,2)
 
 
-"""map_editor.py - An example of using a hud in Gummworld2.
+"""map_editor.py - An example of using movement aspect in Gummworld2.
 """
 
 
@@ -35,8 +35,18 @@ from gamelib import *
 class App(Engine):
     
     def __init__(self):
-        super(App, self).__init__(frame_speed=0)
-        
+        ## Make tiles wider than they are high to an give illusion of depth.
+        ## This is not necessary for the effect, as the scrolling suggests more
+        ## playfield is visible along the y-axis. However, if the tiling pattern
+        ## is visible a "squat" appearance to the tiles can add to the effect.
+        super(App, self).__init__(
+            tile_size=(128,64), map_size=(10,20), frame_speed=0)
+
+        ## Map scrolls 1.0X on x-axis, 0.5X on y-axis. See on_key_down() for the
+        ## application of these values. The net visual effect is that the map
+        ## scrolls slower along the y-axis than the x-axis.
+        self.aspect = Vec2d(1.0, 0.5)
+
         pygame.display.set_caption('Press TAB to cycle views')
         
         # Save the main state.
@@ -59,20 +69,19 @@ class App(Engine):
         }
         
         # Make some default content.
-        toolkit.make_tiles()
-        
-        ## Make the hud and turn it on.
-        toolkit.make_hud()
-        State.show_hud = True
+        toolkit.make_tiles2()
+        State.show_grid = True
         
         self.move_x = 0
         self.move_y = 0
         
+        ## Warp avatar to center map.
+        State.world.avatar.position = State.world.rect.center
+        State.camera.update()
+        
     def update(self):
         """overrides Engine.update"""
         self.update_avatar_position()
-        ## Update the hud.
-        State.hud.update()
         
     def draw(self):
         """overrides Engine.draw"""
@@ -80,8 +89,7 @@ class App(Engine):
         State.camera.interpolate()
         State.screen.clear()
         toolkit.draw_tiles()
-        ## Draw the hud.
-        State.hud.draw()
+        toolkit.draw_grid()
         if State.name == 'small':
             pygame.draw.rect(State.screen.surface, (99,99,99), self.view_rect, 1)
         State.screen.flip()
@@ -99,14 +107,15 @@ class App(Engine):
         
     def on_key_down(self, unicode, key, mod):
         # Turn on key-presses.
+        ## Factor X and Y aspect into speed.
         if key == K_DOWN:
-            self.move_y = 1 * State.speed
+            self.move_y = 1 * State.speed * self.aspect.y
         elif key == K_UP:
-            self.move_y = -1 * State.speed
+            self.move_y = -1 * State.speed * self.aspect.y
         elif key == K_RIGHT:
-            self.move_x = 1 * State.speed
+            self.move_x = 1 * State.speed * self.aspect.x
         elif key == K_LEFT:
-            self.move_x = -1 * State.speed
+            self.move_x = -1 * State.speed * self.aspect.x
         elif key == K_TAB:
             # Select the next state name and and restore it.
             State.restore(self.next_state[State.name])
