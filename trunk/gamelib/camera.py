@@ -30,16 +30,42 @@ from gamelib import State, Vec2d
 
 
 class Camera(object):
-  
-    def __init__(self, target, surface, rect):
-        self.target = target
-        self.surface = surface
-        self.rect = rect
-        self._move_from = Vec2d(target.position)
-        self._move_to = Vec2d(target.position)
+    
+    def __init__(self, target, surface):
+        self._target = target
+        self._surface = surface
+        self._init()
+    
+    @property
+    def target(self):
+        return self._target
+    @target.setter
+    def target(self, val):
+        self._target = val
+        self.update()
+    
+    @property
+    def surface(self):
+        return self._surface
+    @surface.setter
+    def surface(self, val):
+        self._surface = val
+        self._init()
+    
+    def _init(self):
+        """must be called after setting surface
+        """
+        self.rect = self.surface.get_rect()
+        
+        # Offsets used in conversions
+        self.abs_offset = Vec2d(self.surface.get_abs_offset())
+        self.screen_offset = Vec2d(self.rect.center) - self.rect.topleft + self.abs_offset
+        
+        self._move_from = Vec2d(self.target.position)
+        self._move_to = Vec2d(self.target.position)
         self._interp = 0.0
         self.update()
-
+        
     def interpolate(self):
         """interpolate camera position towards target for smoother scrolling
         
@@ -68,7 +94,7 @@ class Camera(object):
         if self._move_to != target_pos:
             self._move_from = self._move_to
             self._move_to = Vec2d(target_pos)
-
+        
     def update(self):
         """relocate camera position immediately to target
         
@@ -78,7 +104,7 @@ class Camera(object):
         v = int(round(v.x)), int(round(v.y))
         if self.rect.center != v:
             self.rect.center = v
-
+        
     def state_restored(self):
         """If switching states either manually or via State.save() and
         State.restore(), you may want to call this to avoid video flashing or
@@ -88,27 +114,27 @@ class Camera(object):
         """
         self.update()
         self._move_to = self._move_from = Vec2d(self.target.position)
-
+        
     @property
     def position(self):
         return self.target.position
-   
+        
     @property
     def screen_position(self):
-        return Vec2d(self.world_position) - self.rect.topleft
-
+        return self.world_to_screen(self.world_position)
+        
     def world_to_screen(self, xy):
-        cx,cy = self.rect.center
-        sx,sy = State.screen.rect.center
-        x,y = xy
-        return Vec2d(cx-x+sx, cy-y+sy)
-
+        """convert world space to screen space
+        """
+        world = self.target.position - xy
+        return self.screen_offset - world
+        
     def screen_to_world(self, xy):
-        cx,cy = self.rect.center
-        sx,sy = State.screen.rect.center
-        x,y = xy
-        return Vec2d(sx-x+cx, sy-y+cy)
-
+        """convert screen space to world space
+        """
+        camera = self.target.position
+        return xy + camera - self.screen_offset
+        
     @property
     def visible_tile_range(self):
         tile_x,tile_y = State.tile_size
@@ -118,7 +144,7 @@ class Camera(object):
         top = int(round(float(t) / tile_y - 1))
         bottom = int(round(float(b) / tile_y + 2))
         return left,top,right,bottom
-
+        
     @property
     def visible_tiles(self):
         return State.map.get_tiles(*self.visible_tile_range)

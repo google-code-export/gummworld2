@@ -66,8 +66,7 @@ class Engine(object):
         State.map = Map(tile_size, map_size)
         State.world = model.World(State.map.rect)
         
-        State.camera = Camera(State.world.avatar,
-            State.screen.surface, State.screen.surface.get_rect())
+        State.camera = Camera(State.world.avatar, State.screen.surface)
             
         State.show_labels = True
         State.show_grid = True

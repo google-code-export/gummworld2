@@ -54,34 +54,30 @@ def make_hud():
     """Create a HUD with dynamic items. This creates a default hud to serve
     both as an example, and for an early design and debugging convenience.
     """
-    screen_rect = State.screen.rect
-    top = 5
-    height = hud_font.get_height()
-    y = lambda n: top+height*n
-    x = screen_rect.x + 5
     State.hud = HUD()
+    next_pos = State.hud.next_pos
     
-    i = 0
     State.hud.add('FPS',
-        Statf((x,y(i)), 'FPS %d', callback=State.clock.get_fps))
+        Statf(next_pos(), 'FPS %d', callback=State.clock.get_fps))
     
-    i += 1
-    def get_world_pos(): p = State.camera.position; return int(p.x),int(p.y)
-    State.hud.add('WORLD_POS',
-        Statf((x,y(i)), 'World %s', callback=get_world_pos, interval=100))
+    rect = State.world.rect
+    l,t,r,b = rect.left,rect.top,rect.right,rect.bottom
+    State.hud.add('Bounds',
+        Stat(next_pos(), 'Bounds %s'%((int(l),int(t),int(r),int(b)),)) )
     
-    i += 1
-    def get_camera_pos():
-        x,y = State.camera.rect.center
-        return int(x),int(y)
-    State.hud.add('CAMERA_POS',
-        Statf((x,y(i)), 'Camera %s', callback=get_camera_pos, interval=100))
+    def get_mouse():
+        s = pygame.mouse.get_pos()
+        w = State.camera.screen_to_world(s)
+        return 'S'+str(s) + ' W'+str((int(w.x),int(w.y),))
+    State.hud.add('Mouse',
+        Statf(next_pos(), 'Mouse %s', callback=get_mouse, interval=100))
     
-    i += 1
-    bb = State.world.bounding_box
-    l,b,r,t = bb.left,bb.bottom,bb.right,bb.top
-    State.hud.add('WORLD_BOUNDS',
-        Stat((x,y(i)), 'Bounds %s'%((int(l),int(b),int(r),int(t),),)))
+    def get_world_pos():
+        s = State.camera.world_to_screen(State.camera.position)
+        w = State.camera.position
+        return 'S'+str((int(s.x),int(s.y),)) + ' W'+str((int(w.x),int(w.y),))
+    State.hud.add('Camera',
+        Statf(next_pos(), 'Camera %s', callback=get_world_pos, interval=100))
 
 
 def draw_sprite(s):
