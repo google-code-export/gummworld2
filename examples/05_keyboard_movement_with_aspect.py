@@ -70,7 +70,9 @@ class App(Engine):
         
         # Make some default content.
         toolkit.make_tiles2()
-        State.show_grid = True
+        toolkit.make_hud()
+        State.show_hud = True
+        State.show_labels = True
         
         self.move_x = 0
         self.move_y = 0
@@ -89,7 +91,8 @@ class App(Engine):
         State.camera.interpolate()
         State.screen.clear()
         toolkit.draw_tiles()
-        toolkit.draw_grid()
+        toolkit.draw_labels()
+        State.hud.draw()
         if State.name == 'small':
             pygame.draw.rect(State.screen.surface, (99,99,99), self.view_rect, 1)
         State.screen.flip()

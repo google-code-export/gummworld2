@@ -47,6 +47,7 @@ from engine import Engine
 import model
 import view
 import data
+import geometry
 import pygame_utils
 import popup_menu
 import ui
