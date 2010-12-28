@@ -48,14 +48,16 @@ State.map and State.world package globals, for example:
     ...
     # Restore a map and world.
     State.map,State.world = levels[0]
+    
+Alternatively State.save() and State.restore() can be used to facilitate this.
 """
 
 
 import pygame
 from pygame.locals import Color
 
-from gamelib import model, State, Vec2d
-from gamelib.ui import hud_font, text_color
+from gamelib import data, model, State, Vec2d
+from gamelib.ui import text_color
 
 
 class Map(object):
@@ -64,7 +66,7 @@ class Map(object):
         State.tile_size = Vec2d(tile_size)
         State.map_size = Vec2d(map_size)
         self.tiles = {}
-
+        
         tw,th = tile_size
         mw,mh = map_size
         self.rect = pygame.Rect(0,0,tw*mw,th*mh)
@@ -77,17 +79,18 @@ class Map(object):
         s.image.set_colorkey(Color('black'))
         s.image.set_alpha(25)
         self.outline = s
-
+        
         # make grid labels to blit
         self.labels = {}
+        font = pygame.font.Font(data.filepath('font', 'Vera.ttf'), 8)
         for x in range(0,State.map_size.x):
             for y in range(0,State.map_size.y):
                 s = pygame.sprite.Sprite()
-                s.image = hud_font.render('%d,%d'%(x,y), True, text_color)
+                s.image = font.render('%d,%d'%(x,y), True, text_color)
                 s.rect = s.image.get_rect(
                     topleft=Vec2d(x*tw,y*th)+(2,2))
                 self.labels[x,y] = s
-
+    
     def add(self, *tiles):
         for s in tiles:
             if not isinstance(s, pygame.sprite.Sprite):
@@ -95,15 +98,15 @@ class Map(object):
             if not isinstance(s.name, tuple):
                 raise pygame.error, 'name property must be an (x,y) tuple'
             self.tiles[s.name] = s
-
+    
     def clear(self):
         self.tiles.clear()
-
+    
     def remove(self, x, y):
         tile = self.get_tile_at(x, y)
         del self.tiles[x,y]
         return tile
-
+    
     def get_tile_at(self, x, y):
         return self.tiles.get((x,y), (None,(x,y)))
 
@@ -111,20 +114,20 @@ class Map(object):
         return [self.tiles.get((x,y), (None,(x,y)))
             for x in range(x1,x2)
                 for y in range(y1,y2)]
-
+    
     def get_label_at(self, x, y):
         return self.labels.get((x,y), (None,(x,y)))
-
+    
     def get_labels(self, x1, y1, x2, y2):
         return [self.labels.get((x,y), (None,(x,y)))
             for x in range(x1,x2)
                 for y in range(y1,y2)]
-
+    
     def vertical_grid_line(self, xy=None, anchor='topleft'):
         if xy is not None:
             setattr(self.v_line, anchor, xy)
         return self.v_line
-
+    
     def horizontal_grid_line(self, xy=None, anchor='topleft'):
         if xy is not None:
             setattr(self.h_line, anchor, xy)

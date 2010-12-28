@@ -27,23 +27,30 @@ __vernum__ = (0,2)
 import pygame
 from pygame.locals import Color, Rect, SRCALPHA
 
-from gamelib import State
+from gamelib import State, Vec2d
 
 
 class Screen(object):
     
-    def __init__(self, size):
-        self.surface = pygame.display.set_mode(size)
+    def __init__(self, size, flags=0):
+        self.surface = pygame.display.set_mode(size, flags)
         self._eraser = self.surface.copy()
         self.rect = self.surface.get_rect()
         State.canvas = Canvas()
-
+    
+    @property
+    def size(self): return Vec2d(self.width, self.height)
+    @property
+    def width(self): return self.rect.width
+    @property
+    def height(self): return self.rect.height
+    
     def clear(self):
         self.surface.blit(self._eraser, (0,0))
-
+    
     def blit(self, surf, pos, rect=None):
         self.surface.blit(surf, pos, rect)
-
+    
     def flip(self):
         pygame.display.flip()
 
@@ -62,9 +69,9 @@ class Canvas(object):
             self.viewer, Color('white'), rect.center, rect.width/2-2
         )
         self.viewer.set_colorkey(Color('white'))
-
+        
         self.draw_viewer = False
-
+    
     def clear(self):
         self.surface.blit(self.eraser, (0,0))
     

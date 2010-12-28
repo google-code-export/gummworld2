@@ -33,14 +33,18 @@ from gamelib import State
 
 class World(object):
     
-    def __init__(self, rect):
+    def __init__(self, rect, avatar=None):
         """left, bottom, right, top are bounding box edges in pymunk space"""
         self.space = pymunk.Space()
         
         self.rect = pygame.Rect(rect)
         self.bounding_box = pymunk.BB(rect.left, rect.bottom, rect.right, rect.top)
         
-        self.avatar = Avatar()
+        if avatar is None:
+            self.avatar = Avatar()
+            State.avatar = self.avatar
+        else:
+            self.avatar = State.avatar
         self.add(self.avatar.body, self.avatar.shape)
 
     def add(self, *objects):
