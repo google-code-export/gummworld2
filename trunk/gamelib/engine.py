@@ -54,19 +54,19 @@ class Engine(object):
     on_* event handlers if you want to get a particular event type.
     """
 
-    def __init__(self, resolution=(600,600),
+    def __init__(self, resolution=(600,600), display_flags=0,
         tile_size=(128,128), map_size=(10,10),
         update_speed=30, frame_speed=30):
         
-        ## If you don't subclass this engine, then in general you will still
+        ## If you don't use this engine, then in general you will still
         ## want to initialize yours in the same order you see here.
         
-        State.screen = view.Screen(resolution)
+        State.screen = view.Screen(resolution, display_flags)
         
         State.map = Map(tile_size, map_size)
         State.world = model.World(State.map.rect)
         
-        State.camera = Camera(State.world.avatar, State.screen.surface)
+        State.camera = Camera(State.avatar, State.screen.surface)
             
         State.graphics = Graphics()
         State.clock = GameClock(update_speed, frame_speed)

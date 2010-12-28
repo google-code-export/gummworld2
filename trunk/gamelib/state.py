@@ -28,9 +28,9 @@ __vernum__ = (0,2)
 # them saved and restored by default via the static methods.
 default_attrs = [
     'camera',
-    'map',
+    'canvas',
     'world',
-    'menu',
+    'map',
 ]
 
 # The states dict stores lists of saved objects, keyed by a name. Any valid dict
@@ -44,14 +44,15 @@ class State(object):
     name = 'init'               # name of initial saved state
     
     # objects
-    screen = None               # gamelib.Screen
-    camera = None               # gamelib.Camera
+    screen = None               # gamelib.view.Screen
+    canvas = None               # gamelib.view.Canvas
+    world = None                # gamelib.model.World
+    avatar = None               # gamelib.model.Avatar
     
+    camera = None               # gamelib.Camera
     map = None                  # gamelib.Map
-    world = None                # gamelib.World
     
     graphics = None             # gamelib.Graphics
-    canvas = None               # gamelib.Canvas
     
     clock = None                # gamelib.GameClock
     menu = None                 # gamelib.PopupMenu

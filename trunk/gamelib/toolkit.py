@@ -27,12 +27,15 @@ __vernum__ = (0,2)
 import pygame
 from pygame.sprite import Sprite
 
-from gamelib import State
+from gamelib import data, State, Map
 from gamelib.ui import HUD, Stat, Statf, hud_font
+from tiledtmxloader import TileMapParser, ImageLoaderPygame
 
 
 def make_tiles():
-    """Create tiles to fill the current map. This is a utility for easily making
+    """make_tiles() : None
+    
+    Create tiles to fill the current map. This is a utility for easily making
     visible content to aid early game design or debugging.
     
     Tiles transition from top-left to bottom-right, red to blue.
@@ -56,7 +59,9 @@ def make_tiles():
 
 
 def make_tiles2():
-    """Create tiles to fill the current map. This is a utility for easily making
+    """make_tiles2() : None
+    
+    Create tiles to fill the current map. This is a utility for easily making
     visible content to aid early game design or debugging.
     
     Tiles transition from top to bottom, light blue to brown.
@@ -80,7 +85,9 @@ def make_tiles2():
 
 
 def make_hud():
-    """Create a HUD with dynamic items. This creates a default hud to serve
+    """make_hud() : None
+    
+    Create a HUD with dynamic items. This creates a default hud to serve
     both as an example, and for an early design and debugging convenience.
     """
     State.hud = HUD()
@@ -109,25 +116,79 @@ def make_hud():
         Statf(next_pos(), 'Camera %s', callback=get_world_pos, interval=100))
 
 
-def draw_sprite(s):
-    """Draw a sprite on the camera's surface using world-to-screen conversion.
+def load_tiled_map(map_file_name):
+    """load_tiled_map(map_file_name) : gamelib.Map
+    
+    Load an orthogonal TMX map file that was created by the Tiled Map Editor.
+    
+    Thanks to dr0id for his nice tiledtmxloader module:
+        http://www.pygame.org/project-map+loader+for+%27tiled%27-1158-2951.html
+
+    And the creators of Tiled Map Editor:
+        http://www.mapeditor.org/
+    """
+    
+    # Taken pretty much verbatim from the tiledtmxloader module.
+    #
+    # gamelib.Map does not support layers (yet). We loop through them here
+    # but there is no benefit, and will give undesirable results if the map
+    # does have multiple layers.
+    
+    world_map = TileMapParser().parse_decode_load(
+        data.filepath('map', map_file_name), ImageLoaderPygame())
+    tile_size = (world_map.tilewidth, world_map.tileheight)
+    map_size = (world_map.width, world_map.height)
+    gummworld_map = Map(tile_size, map_size)
+    for layer in world_map.layers:
+        if not layer.visible:
+            continue
+        for ypos in xrange(0, layer.height):
+            for xpos in xrange(0, layer.width):
+                x = (xpos + layer.x) * world_map.tilewidth
+                y = (ypos + layer.y) * world_map.tileheight
+                img_idx = layer.content2D[xpos][ypos]
+                offx, offy, screen_img = world_map.indexed_tiles[img_idx]
+                sprite = Sprite()
+                if screen_img.get_alpha():
+                    screen_img = screen_img.convert_alpha()
+                else:
+                    screen_img = screen_img.convert()
+                    if layer.opacity > -1:
+                        screen_img.set_alpha(None)
+                        alpha_value = int(255. * float(layer.opacity))
+                        screen_img.set_alpha(alpha_value)
+                sprite.image = screen_img.convert_alpha()
+                sprite.rect = screen_img.get_rect(topleft=(x,y))
+                sprite.name = xpos,ypos
+                gummworld_map.add(sprite)
+    return gummworld_map
+
+
+def draw_sprite(s, blit_flags=0):
+    """draw_sprite(s, blit_flags=0) : None
+    
+    Draw a sprite on the camera's surface using world-to-screen conversion.
     """
     camera = State.camera
     if isinstance(s, Sprite):
         cr = camera.rect
         sr = s.rect
-        camera.surface.blit(s.image, (sr.x-cr.x, sr.y-cr.y))
+        camera.surface.blit(s.image, (sr.x-cr.x, sr.y-cr.y), special_flags=blit_flags)
 
 
 def draw_tiles():
-    """Draw visible tiles.
+    """draw_tiles() : None
+    
+    Draw visible tiles.
     """
     for s in State.camera.visible_tiles:
         draw_sprite(s)
 
 
 def draw_labels():
-    """Draw visible labels if enabled.
+    """draw_labels() : None
+    
+    Draw visible labels if enabled.
     """
     if State.show_labels:
         x1,y1,x2,y2 = State.camera.visible_tile_range
@@ -139,7 +200,9 @@ def draw_labels():
 
 
 def draw_grid():
-    """Draw grid if enabled.
+    """draw_grid() : None
+    
+    Draw grid if enabled.
     """
     if State.show_grid:
         x1,y1,x2,y2 = State.camera.visible_tile_range
