@@ -48,8 +48,12 @@ def split_thousands(s, sep=','):
     return split_thousands(s[:-3], sep) + sep + s[-3:]
 
 
-def sign(number):
-    return number / abs(number)
+def sign(n):
+    """return the sign of number n"""
+    if n >= 0:
+        return 1
+    else:
+        return -1
 
 
 def cw_corners(r):
@@ -64,18 +68,6 @@ def ccw_corners(r):
     order starting with topleft
     """
     return r.topleft,r.bottomleft,r.bottomright,r.topright
-
-
-def distance(a, b):
-    """calculate the distance between points a and b
-    
-    Returns distance as a float.
-    a and b should be float. a is point x1,y1, b is point x2,y2.
-    """
-    diffx = a[0] - b[0]
-    diffy = a[1] - b[1]
-#    return sqrt(pow(diffx,2) + pow(diffy,2))
-    return (diffx*diffx) ** 0.5 + (diffy*diffy) ** 0.5
 
 
 def fill_gradient(surface, color, gradient, rect=None, vertical=True, forward=True):
@@ -243,21 +235,6 @@ def draw_text(image, text, pos=(0,0), font='default', fg=(254,254,254),
     return font.size(text)
 
 
-def circumference_point(center, radius, degrees_):
-    """x,y on the circumference of a circle defined by center and radius"""
-    radians_ = radians(degrees_ - 90)
-    x = center[0] + radius * cos(radians_)
-    y = center[1] + radius * sin(radians_)
-    return x,y
-
-
-def screen_angle(origin, point):
-    """screen angle between a vector and Y axis from a common origin"""
-    x1,y1 = origin
-    x2,y2 = point
-    return (atan2(y2-y1, x2 - x1) * 180.0 / pi + 90.0) % 360.0
-
-
 def calc_line(p0, p1):
     """use Bresenham's algorithm to calculate a set of closed points forming a line
     
@@ -340,14 +317,6 @@ def rot_center(image, angle):
     rot_rect.center = rot_image.get_rect().center
     rot_image = rot_image.subsurface(rot_rect).copy()
     return rot_image
-
-
-def sign(n):
-    """return the sign of number n"""
-    if n >= 0:
-        return 1
-    else:
-        return -1
 
 
 def plot_curve(p):

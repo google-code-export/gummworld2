@@ -47,7 +47,10 @@ def make_tiles():
             s.image = pygame.surface.Surface((tw,th))
             facx = max(float(x) / mw, 0.01)
             facy = max(float(y) / mh, 0.01)
-            s.image.fill((255-255*facx,0,255*facy))
+            R = 255-255*facx
+            G = 0
+            B = 255*facy
+            s.image.fill((R,G,B))
             s.rect = s.image.get_rect(topleft=(x*tw,y*th))
             State.map.add(s)
 
@@ -69,8 +72,9 @@ def make_tiles2():
             facy = max(float(y) / mh, 0.01)
             R = 200-100*facy
             G = 150-100*facy
-            B = 255-255*facy
+            B = 249-249*facy
             s.image.fill((R,G,B))
+            pygame.draw.line(s.image, (R+9,G+9,B+9), (0,0), (0,th))
             s.rect = s.image.get_rect(topleft=(x*tw,y*th))
             State.map.add(s)
 

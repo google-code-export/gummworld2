@@ -79,6 +79,8 @@ class HUD(pygame.sprite.OrderedUpdates):
             stat.update()
 
     def draw(self, surface=None):
+        if not State.show_hud:
+            return
         if surface is None:
             super(HUD, self).draw(State.camera.surface)
         else:

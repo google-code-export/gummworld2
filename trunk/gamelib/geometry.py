@@ -249,3 +249,20 @@ def lines_intersection(line_1, line_2):
 
     # No collision
     return (False,False)
+
+
+def point_on_circumference(center, radius, degrees_):
+    """point_on_circumference(center, radius, degrees_) : (x,y)
+    
+    center -> tuple; (x,y) origin of the circle.
+    radius -> number; length of the radius.
+    degrees_ -> number; angle of radius. 0 is at the top of the screen, with
+        values increasing clockwise.
+    
+    Return point (x,y) on the circumference of a circle defined by center and
+    radius along the given angle.
+    """
+    radians_ = radians(degrees_ - 90)
+    x = center[0] + radius * cos(radians_)
+    y = center[1] + radius * sin(radians_)
+    return x,y

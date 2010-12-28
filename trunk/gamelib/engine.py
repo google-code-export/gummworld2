@@ -68,10 +68,6 @@ class Engine(object):
         
         State.camera = Camera(State.world.avatar, State.screen.surface)
             
-        State.show_labels = True
-        State.show_grid = True
-        State.show_hud = True
-        
         State.graphics = Graphics()
         State.clock = GameClock(update_speed, frame_speed)
         

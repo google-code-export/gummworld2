@@ -62,8 +62,7 @@ class App(Engine):
         
         # Set up the subsurface as the camera's drawing surface.
         subsurface = State.screen.surface.subsurface(self.view_rect)
-        State.camera = Camera(State.world.avatar,
-            subsurface, subsurface.get_rect())
+        State.camera = Camera(State.world.avatar, subsurface)
         State.name = 'small'
         State.save(State.name)
         

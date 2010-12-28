@@ -30,12 +30,26 @@ from gamelib import State, Vec2d
 
 
 class Camera(object):
+    """Camera(target, surface) : camera
+    
+    target -> The object that camera should track. target must have an attribute
+        'position', which should be in world coordinates.
+    surface -> The pygame surface or subsurface upon which to base conversions
+        between world and screen space.
+        
+    Note that using mouse position can be tricky if the camera is using a
+    subsurface of the screen, or an alternate surface. pygame always reports
+    mouse position relative to the top-level surface. Keep this in mind when
+    positioning graphics based on the mouse position under these circumstances.
+    Sometimes it may just be simplest, for example, to blit directly to the
+    top-level surface.
+    """
     
     def __init__(self, target, surface):
         self._target = target
         self._surface = surface
         self._init()
-    
+        
     @property
     def target(self):
         return self._target
@@ -43,7 +57,7 @@ class Camera(object):
     def target(self, val):
         self._target = val
         self.update()
-    
+        
     @property
     def surface(self):
         return self._surface
@@ -51,7 +65,7 @@ class Camera(object):
     def surface(self, val):
         self._surface = val
         self._init()
-    
+        
     def _init(self):
         """must be called after setting surface
         """
