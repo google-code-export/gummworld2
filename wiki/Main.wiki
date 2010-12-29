@@ -35,25 +35,25 @@ To do:
   * Menus (DONE)
   * Grid (DONE)
   * HUD (DONE)
-  * Map drawing primitives
+  * pymunk editing primitives
     * Line
-    * Triangle
-    * Quad
+    * Circle
     * Poly
-    * Selection
-    * Resizing
+    * Select
+    * Multi-select
+    * Move
+    * Resize
     * Delete
-    * Undo/redo
-    * Region selection
-  * Map decorating and tiling
-    * Tileset loading
-    * Palette picking
-    * Screen picking
-    * Paint
-    * Erase
-    * Undo/redo
-    * Region selection
-    * Fill
+    * Undo/Redo
+  * ~~~Map decorating and tiling
+    * ~~~Tileset loading
+    * ~~~Palette picking
+    * ~~~Screen picking
+    * ~~~Paint
+    * ~~~Erase
+    * ~~~Undo/redo
+    * ~~~Region selection
+    * ~~~Fill
 
 ==Working Notes==
 
@@ -61,6 +61,6 @@ To do:
 
 I am liking Tiled Map Editor and pytmxloader. It is looking like map_editor.py will simply load the tile map, and (initially) just let one add pymunk objects.
 
-Since the Map class is already source agnostic, it may be easy enough to support multiple map editor formats just by adding another toolkit.load_* function.
+Since the Map class is already source agnostic, it may be easy enough to support multiple map editor formats just by adding another toolkit.load_`*` function.
 
 The (Tiled) map layers feature can be used to classify terrain objects, for example "trees go on layer 5". Game makers (i.e. me) may want to do special things with these, like let mobile objects pass under or behind them and temporarily lower the image alpha so the mobile object is not entirely obscured. (Note that this aspect weakens the case for map decorating and tiling in map_editor.py.)
