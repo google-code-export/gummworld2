@@ -26,6 +26,8 @@ This demo uses small tiles from a tileset distributed with Tiled 0.7.2, the
 Java version. They are 32x32 pixels. For better performance one will want to
 use larger tiles.
 
+This demo also uses pymunk to manage the avatar's motion.
+
 Thanks to dr0id for his nice tiledtmxloader module:
     http://www.pygame.org/project-map+loader+for+%27tiled%27-1158-2951.html
 
@@ -147,7 +149,7 @@ class App(Engine):
         """update the avatar's position if any movement keys are held down
         """
         if self.move_to is not None:
-            avatar = State.world.avatar
+            avatar = State.avatar
             wx,wy = avatar.position
             # Speed formula.
             speed = self.speed * State.speed
@@ -164,7 +166,10 @@ class App(Engine):
             rect = State.world.rect
             wx = max(min(wx,rect.right), rect.left)
             wy = max(min(wy,rect.bottom), rect.top)
-            avatar.position = wx,wy
+#            avatar.position = wx,wy
+            avatar.slew(Vec2d(wx,wy), State.dt)
+        elif State.avatar.velocity != (0,0):
+            State.avatar.velocity = (0,0)
         
     def on_mouse_button_down(self, pos, button):
         self.update_mouse_movement(pos)
