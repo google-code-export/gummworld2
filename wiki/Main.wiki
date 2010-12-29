@@ -2,8 +2,9 @@
 
 = Introduction =
 
-This just serves as a messy desktop for now to collect notes on.
+This is Gummworld2. It's designed as a light pygame framework for a scrolling game, where the map is larger than the display. It emphasizes simplicity and performance. One should not have to struggle with making the game concept fit into a finicky paradigm, and juggling game speed with frame rates.
 
+One may wonder where is the original Gummworld. While it was a great learning experience, it became obvious it was more ambitious than it should have been. It turned out overly complex and restrictive, with a higher learning curve than intended. Consequently it became hard to do anything outside the box.
 
 = Details =
 
@@ -21,17 +22,11 @@ Developing a map editor, which seconds as a practical test of the library and th
 
 Anything marked DONE in the to-do list is not necessarily frozen. It is just considered adequately usable for the purpose it is most recently needed. They will surely evolve as needed.
 
-To do:
-  * Basic crap: global state, display, events, timers, physics framework (partially done)
+Features:
   * Application framework, aka "engine" (DONE)
-  * Camera: world-to-screen, screen-to-world, sprite rendering (DONE)
-  * Map
-    * Basic ground tile serving (DONE)
-    * Object classifications: ground tiles, static fixtures
-    * Buckets for different ways of looking up game objects
-    * Tileset loading and saving
-  * Procedural object makers for things that need patterned run-time placement: immovable, mobile, etc.
-  * Scrolling with interpolated smoothing (DONE)
+  * Camera: world-to-screen, screen-to-world, tile picking, interpolated scrolling (DONE)
+  * Map: layered tile serving (DONE)
+  * Procedural object makers, e.g. random groups of baddies
   * Menus (DONE)
   * Grid (DONE)
   * HUD (DONE)
