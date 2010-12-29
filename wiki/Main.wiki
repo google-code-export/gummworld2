@@ -18,40 +18,40 @@ The map editor performs basic scrolling of tiles by syncing a camera with a targ
 
 These are the key classes.
 
-State: A storage container for run-time objects, settings, and values. Because it's easy to access globally, this minimizes the need to pass around key objects in arguments. States can also be saved and restored by name, if desired. The mechanism is straightforward, thus easy to use and extend.
+  State: A storage container for run-time objects, settings, and values. Because it's easy to access globally, this minimizes the need to pass around key objects in arguments. States can also be saved and restored by name, if desired. The mechanism is straightforward, thus easy to use and extend.
 
-Engine: A super class providing the framework for initialization, run loop, update and draw methods, and pygame event handlers. If you decide to write your own engine, look in here to see how the key objects are created. Don't be afraid, no voodoo in here.
+  Engine: A superclass providing the framework for initialization, run loop, update and draw methods, and pygame event handlers. If you decide to write your own engine, look in here to see how the key objects are created. Don't be afraid, no voodoo in here.
 
-Screen: Just yer basic display interface.
+  Screen: Just yer basic display interface.
 
-Camera: Follows a target object around the map. Calculates 2D range of visible tiles. Constructs map layer lists of visible tiles. Converts 2D coordinates between world and screen space. Supports warping and interpolated scrolling.
+  Camera: Follows a target object around the map. Calculates 2D range of visible tiles. Constructs map layer lists of visible tiles. Converts 2D coordinates between world and screen space. Supports warping and interpolated scrolling.
 
-Map: Serves map tiles in layers. Also serves labels and grid lines.
+  Map: Serves map tiles in layers. Also serves labels and grid lines.
 
-World: The underlying physics, based on pymunk. The Engine class uses this to maintain physical bodies for motion and collision. If you do not decide to use pymunk you can ignore this object. If you do not have pymunk installed, the World class will automatically live without it.
+  World: The underlying physics, based on pymunk. The Engine class uses this to maintain physical bodies for motion and collision. If you do not decide to use pymunk you can ignore this object. If you do not have pymunk installed, the World class will automatically live without it.
 
-GameClock: Keeps constant game time. Supports variable frame rate. Calculates interpolated fraction of a game tick, which can be used for prediction and sub-pixel motion.
+  GameClock: Keeps constant game time. Supports variable frame rate. Calculates interpolated fraction of a game tick, which can be used for prediction and sub-pixel motion.
 
 There are a few utilities--a HUD, tile grid lines, tile labels, popup menu, toolkit (map generators, tile renders), pygame utilities module--to ease experimentation with concepts, but they are entirely optional. One can use Gummworld2 and easily ignore them.
 
-The physics scale is intended to be based on pixels, however all attempts will be made to support sub-pixel math with floating point numbers. Sub-pixel math is compatible with the underlying physics engine, pymunk (chipmunk), and allows fractional speeds, mass, etc. The display code must round and convert physics values to integers where appropriate.
+The pymunk physics scale is intended to be based on pixels, however all attempts will be made to support sub-pixel math with floating point numbers. Sub-pixel math is compatible with the underlying physics engine, pymunk (chipmunk), and allows fractional speeds, mass, dimensions, etc. The display code must round and convert physics values to integers for pygame where appropriate.
 
-Also, beware that many underlying coordinate "points" are implemented as {{{Vec2d}}}. Attempts will be made to protect them from direct assignment, as clobbering them with a sequence or other object will break some library routines. Keep this in mind when subclassing or choosing to directly access the underlying {{{obj._attributes}}}.
+Also, a general caution. Many underlying coordinate "points" are implemented as {{{Vec2d}}}. Attempts will be made to protect them from direct assignment, as clobbering them with a sequence or other object will break some library routines. Keep this in mind when subclassing or choosing to directly access the underlying {{{obj._attributes}}}.
 
-==Initial focus==
+==Current focus==
 
-Getting organized.
+Getting organized. Shuffling modules and classes around.
 
 Developing a map editor, which seconds as a practical test of the library and the requirements driver for library features.
 
-Anything marked DONE in the to-do list is not necessarily frozen. It is just considered adequately usable for the purpose it is most recently needed. They will surely evolve as needed.
+Anything marked DONE in the to-do list is not necessarily frozen. It is just considered adequately usable for the purpose it is most recently needed. They will certainly evolve as needed.
 
 Features:
   * Application framework, aka "engine" (DONE)
   * Camera: world-to-screen, screen-to-world, tile picking, interpolated scrolling (DONE)
   * Map: layered tile serving (DONE)
   * Procedural object makers, e.g. random groups of baddies
-  * Menus (DONE)
+  * Menu (DONE)
   * Grid (DONE)
   * HUD (DONE)
   * pymunk editing primitives
