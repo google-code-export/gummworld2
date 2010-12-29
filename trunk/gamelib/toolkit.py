@@ -27,7 +27,7 @@ __vernum__ = (0,2)
 import pygame
 from pygame.sprite import Sprite
 
-from gamelib import data, State, Map
+from gamelib import data, State, Map, MapLayer
 from gamelib.ui import HUD, Stat, Statf, hud_font
 from tiledtmxloader import TileMapParser, ImageLoaderPygame
 
@@ -41,8 +41,9 @@ def make_tiles():
     Tiles transition from top-left to bottom-right, red to blue.
     """
     # Tiles are sprites; each sprite must have a name, an image, and a rect.
-    tw,th = State.tile_size
-    mw,mh = State.map_size
+    tw,th = State.map.tile_size
+    mw,mh = State.map.map_size
+    State.map.layers.append(MapLayer())
     for x in range(mw):
         for y in range(mh):
             s = pygame.sprite.Sprite()
@@ -67,8 +68,9 @@ def make_tiles2():
     Tiles transition from top to bottom, light blue to brown.
     """
     # Tiles are sprites; each sprite must have a name, an image, and a rect.
-    tw,th = State.tile_size
-    mw,mh = State.map_size
+    tw,th = State.map.tile_size
+    mw,mh = State.map.map_size
+    State.map.layers.append(MapLayer())
     for x in range(mw):
         for y in range(mh):
             s = pygame.sprite.Sprite()
@@ -130,16 +132,17 @@ def load_tiled_map(map_file_name):
     
     # Taken pretty much verbatim from the tiledtmxloader module.
     #
-    # gamelib.Map does not support layers (yet). We loop through them here
-    # but there is no benefit, and will give undesirable results if the map
-    # does have multiple layers.
+    # The tiledtmxloader.TileMap object is stored in the returned
+    # gamelib.Map object in attribute 'tiled_map'.
     
     world_map = TileMapParser().parse_decode_load(
         data.filepath('map', map_file_name), ImageLoaderPygame())
     tile_size = (world_map.tilewidth, world_map.tileheight)
     map_size = (world_map.width, world_map.height)
     gummworld_map = Map(tile_size, map_size)
-    for layer in world_map.layers:
+    gummworld_map.tiled_map = world_map
+    for layeri,layer in enumerate(world_map.layers):
+        gummworld_map.layers.append(MapLayer(layer.visible))
         if not layer.visible:
             continue
         for ypos in xrange(0, layer.height):
@@ -160,7 +163,7 @@ def load_tiled_map(map_file_name):
                 sprite.image = screen_img.convert_alpha()
                 sprite.rect = screen_img.get_rect(topleft=(x,y))
                 sprite.name = xpos,ypos
-                gummworld_map.add(sprite)
+                gummworld_map.add(sprite, layer=layeri)
     return gummworld_map
 
 
@@ -181,8 +184,9 @@ def draw_tiles():
     
     Draw visible tiles.
     """
-    for s in State.camera.visible_tiles:
-        draw_sprite(s)
+    for layer in State.camera.visible_tiles:
+        for s in layer:
+            draw_sprite(s)
 
 
 def draw_labels():

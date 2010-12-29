@@ -154,7 +154,7 @@ class Camera(object):
         
     @property
     def visible_tile_range(self):
-        tile_x,tile_y = State.tile_size
+        tile_x,tile_y = State.map.tile_size
         (l,t),(r,b) = self.rect.topleft,self.rect.bottomright
         left = int(round(float(l) / tile_x - 1))
         right = int(round(float(r) / tile_x + 2))
@@ -164,4 +164,10 @@ class Camera(object):
         
     @property
     def visible_tiles(self):
-        return State.map.get_tiles(*self.visible_tile_range)
+        """
+        """
+        tile_range = self.visible_tile_range
+        map = State.map
+        get_tiles = map.get_tiles
+        layer_range = range(len(map.layers))
+        return [get_tiles(*tile_range, layer=n) for n in layer_range]
