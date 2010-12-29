@@ -4,15 +4,19 @@
 
 This is Gummworld2. It's designed as a light pygame framework for a scrolling game, where the map is larger than the display. It emphasizes simplicity, openness, and performance.
 
-One should not have to struggle with making a game concept fit into a restrictive paradigm and juggling game speed with frame rates. Gummworld2 helps solve these issues with a clean and simple update-and-draw run loop, and a clock that maintains steady game time and variable frame rate.
+One should not have to struggle with making a game concept fit into a restrictive paradigm. Gummworld2 solves this with a clean and simple update-and-draw run loop.
 
-One should also be free to choose one's own audiovisual presentation, intelligence, and GUIs. The benefits should be obvious: use whatever you want; you don't have to learn "The Gummworld Way".
+One should also be free to choose one's own audiovisual presentation, intelligence, and GUIs. The benefits should be obvious. Low learning curve: use what you know. Freedom: use whatever you want; you are not forced to learn "The Gummworld Way", and wade through bloated features. Gummworld2 does this by providing just a few management classes, driven by a very simple (optional) engine. It is merely a _suggestion_ to use Tiled for maps and pymunk for physics, as it is quite easy to substitute your own.
 
-One may wonder where is the original Gummworld. While it was a great learning experience, it became obvious it was more ambitious than it should have been. It turned out overly complex and restrictive, with a higher learning curve than intended. Consequently it became hard to do anything outside the box.
+One should not have to worry about juggling game speed and frame rates. Gummworld2's clock maintains steady game time and variable frame rate without the headaches.
+
+One may wonder about the original Gummworld. While it was a great learning experience, it became obvious it was more ambitious than it should have been. It turned out overly complex and restrictive, with a higher learning curve than intended. Consequently it became hard to do anything outside the box.
 
 = Details =
 
-The map editor performs basic scrolling of tiles, with numbered labels, grid, HUD, and a popup menu.
+The map editor performs basic scrolling of tiles by syncing a camera with a target object that moves about the map. Change the target object's position and the camera follows.
+
+There are a few utilities--a HUD, tile grid lines, tile labels, popup menu, toolkit (map generators, tile renders), pygame utilities module--to ease experimentation with concepts, but they are entirely optional. One can use Gummworld2 and easily ignore them.
 
 The physics scale is intended to be based on pixels, however all attempts will be made to support sub-pixel math with floating point numbers. Sub-pixel math is compatible with the underlying physics engine, pymunk (chipmunk), and allows fractional speeds, mass, etc. The display code must round and convert physics values to integers where appropriate.
 
