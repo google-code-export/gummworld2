@@ -58,8 +58,9 @@ class State(object):
     menu = None                 # gamelib.PopupMenu
     
     # game settings
-    running = False
-    speed = 4
+    running = False             # Engine.run() terminator
+    speed = 4                   # max run speed
+    dt = 0                      # milliseconds elapsed in previous game tick
     
     # map editor settings
     show_grid = False

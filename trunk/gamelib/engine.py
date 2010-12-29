@@ -76,6 +76,7 @@ class Engine(object):
     def run(self):
         State.running = True
         while State.running:
+            State.dt = State.clock.tick()
             if State.clock.update_ready():
                 self._get_events()
                 self.update()

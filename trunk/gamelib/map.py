@@ -62,7 +62,6 @@ class Map(object):
         self.tile_size = Vec2d(tile_size)
         self.map_size = Vec2d(map_size)
         self.layers = []
-        self.visible = []
         
         tw,th = tile_size
         mw,mh = map_size
@@ -100,14 +99,18 @@ class Map(object):
             self.layers[layer][s.name] = s
     
     def clear(self):
+        """Map.clear() : None
+        
+        Clear all layers.
+        """
         del self.layers[:]
     
-    def remove(self, x, y, layer=0):
-        tile = self.get_tile_at(x, y, layer=layer)
-        del self.layers[layer][x,y]
-        return tile
-    
     def get_tile_at(self, x, y, layer=0):
+        """Map.get_tile_at(self, x, y, layer=0) : tile
+        
+        Return the tile at grid location (x,y) in the specified layer. If no
+        tile exists at the location, return None.
+        """
         return self.layers[layer].get((x,y), (None,(x,y)))
 
     def get_tiles(self, x1, y1, x2, y2, layer=0):
@@ -117,7 +120,9 @@ class Map(object):
         layer -> int; Tile layer to select.
         
         Return the list of tiles at the specified layer in range (x1,y1)
-        through (x2,y2). If the layer is not visible, an empty list is returned.
+        through (x2,y2). If a grid location in the range does not have a tile,
+        None is stored in its place. If the layer is not visible, an empty list
+        is returned.
         """
         if self.layers[layer].visible:
             return [self.layers[layer].get((x,y), (None,(x,y)))
@@ -127,19 +132,42 @@ class Map(object):
             return []
 
     def get_label_at(self, x, y):
+        """Map.get_label_at(self, x, y) : sprite
+        
+        Return the label sprite at grid location (x,y). If no sprite exists at
+        that location, return None.
+        """
         return self.labels.get((x,y), (None,(x,y)))
     
     def get_labels(self, x1, y1, x2, y2):
+        """Map.get_labels(self, x1, y1, x2, y2) : list
+        
+        x1,y1,x2,y2 -> int; Range of tiles to select.
+        
+        Return the list of tiles in range (x1,y1) through (x2,y2). If a grid
+        location in the range does not have a label, None is stored in its
+        place.
+        """
         return [self.labels.get((x,y), (None,(x,y)))
             for x in xrange(x1,x2)
                 for y in xrange(y1,y2)]
     
     def vertical_grid_line(self, xy=None, anchor='topleft'):
+        """Map.vertical_grid_line(self, xy=None, anchor='topleft') : sprite
+        
+        Return the vertical grid sprite. If specified, the sprite.rect's
+        attribute specified by anchor is set to the value of xy.
+        """
         if xy is not None:
             setattr(self.v_line, anchor, xy)
         return self.v_line
     
     def horizontal_grid_line(self, xy=None, anchor='topleft'):
+        """Map.horizontal_grid_line(self, xy=None, anchor='topleft') : sprite
+        
+        Return the horizontal grid sprite. If specified, the sprite.rect's
+        attribute specified by anchor is set to the value of xy.
+        """
         if xy is not None:
             setattr(self.h_line, anchor, xy)
         return self.h_line
