@@ -2,7 +2,11 @@
 
 = Introduction =
 
-This is Gummworld2. It's designed as a light pygame framework for a scrolling game, where the map is larger than the display. It emphasizes simplicity and performance. One should not have to struggle with making the game concept fit into a finicky paradigm, and juggling game speed with frame rates.
+This is Gummworld2. It's designed as a light pygame framework for a scrolling game, where the map is larger than the display. It emphasizes simplicity, openness, and performance.
+
+One should not have to struggle with making a game concept fit into a restrictive paradigm and juggling game speed with frame rates. Gummworld2 helps solve these issues with a clean and simple update-and-draw run loop, and a clock that maintains steady game time and variable frame rate.
+
+One should also be free to choose one's own audiovisual presentation, intelligence, and GUIs. The benefits should be obvious: use whatever you want; you don't have to learn "The Gummworld Way".
 
 One may wonder where is the original Gummworld. While it was a great learning experience, it became obvious it was more ambitious than it should have been. It turned out overly complex and restrictive, with a higher learning curve than intended. Consequently it became hard to do anything outside the box.
 
