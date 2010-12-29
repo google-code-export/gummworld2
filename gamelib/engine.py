@@ -76,10 +76,10 @@ class Engine(object):
     def run(self):
         State.running = True
         while State.running:
-            State.world.step()
             if State.clock.update_ready():
                 self._get_events()
                 self.update()
+                State.world.step()
             if State.clock.frame_ready():
                 self.draw()
         

@@ -22,15 +22,11 @@ __vernum__ = (0,2)
 
 """map.py - Map module for Gummworld2.
 
-Defines the Map, which serves tiles, tile labels, and grid outlines.
+Defines the Map, which serves tiles, tile labels, and grid outlines. Supports
+tile layers.
 
-Map also sets these package globals:
-    
-    State.tile_size
-    State.map_size
-
-Map is purely view (pygame). It contains a rect attribute defining its
-dimensions, and observes pygame coordinate space.
+Map combines view (pygame) and model (world coordinates). It contains a rect
+attribute defining its dimensions, and observes pygame coordinate space.
 
 The caller must manage maps and their corresponding worlds by swapping the
 State.map and State.world package globals, for example:
@@ -63,9 +59,10 @@ from gamelib.ui import text_color
 class Map(object):
     
     def __init__(self, tile_size, map_size):
-        State.tile_size = Vec2d(tile_size)
-        State.map_size = Vec2d(map_size)
-        self.tiles = {}
+        self.tile_size = Vec2d(tile_size)
+        self.map_size = Vec2d(map_size)
+        self.layers = []
+        self.visible = []
         
         tw,th = tile_size
         mw,mh = map_size
@@ -83,45 +80,59 @@ class Map(object):
         # make grid labels to blit
         self.labels = {}
         font = pygame.font.Font(data.filepath('font', 'Vera.ttf'), 8)
-        for x in range(0,State.map_size.x):
-            for y in range(0,State.map_size.y):
+        for x in range(0,mw):
+            for y in range(0,mh):
                 s = pygame.sprite.Sprite()
                 s.image = font.render('%d,%d'%(x,y), True, text_color)
                 s.rect = s.image.get_rect(
                     topleft=Vec2d(x*tw,y*th)+(2,2))
                 self.labels[x,y] = s
     
-    def add(self, *tiles):
+    def add(self, *tiles, **kwargs):
+        """Map.add(*tiles, layer=0)
+        """
+        layer = kwargs.get('layer', 0)
         for s in tiles:
             if not isinstance(s, pygame.sprite.Sprite):
                 raise pygame.error, '*tiles argument must be one or more sprites'
             if not isinstance(s.name, tuple):
                 raise pygame.error, 'name property must be an (x,y) tuple'
-            self.tiles[s.name] = s
+            self.layers[layer][s.name] = s
     
     def clear(self):
-        self.tiles.clear()
+        del self.layers[:]
     
-    def remove(self, x, y):
-        tile = self.get_tile_at(x, y)
-        del self.tiles[x,y]
+    def remove(self, x, y, layer=0):
+        tile = self.get_tile_at(x, y, layer=layer)
+        del self.layers[layer][x,y]
         return tile
     
-    def get_tile_at(self, x, y):
-        return self.tiles.get((x,y), (None,(x,y)))
+    def get_tile_at(self, x, y, layer=0):
+        return self.layers[layer].get((x,y), (None,(x,y)))
 
-    def get_tiles(self, x1, y1, x2, y2):
-        return [self.tiles.get((x,y), (None,(x,y)))
-            for x in range(x1,x2)
-                for y in range(y1,y2)]
-    
+    def get_tiles(self, x1, y1, x2, y2, layer=0):
+        """Map.get_tiles(self, x1, y1, x2, y2, layer=0) : list
+        
+        x1,y1,x2,y2 -> int; Range of tiles to select.
+        layer -> int; Tile layer to select.
+        
+        Return the list of tiles at the specified layer in range (x1,y1)
+        through (x2,y2). If the layer is not visible, an empty list is returned.
+        """
+        if self.layers[layer].visible:
+            return [self.layers[layer].get((x,y), (None,(x,y)))
+                for x in xrange(x1,x2)
+                    for y in xrange(y1,y2)]
+        else:
+            return []
+
     def get_label_at(self, x, y):
         return self.labels.get((x,y), (None,(x,y)))
     
     def get_labels(self, x1, y1, x2, y2):
         return [self.labels.get((x,y), (None,(x,y)))
-            for x in range(x1,x2)
-                for y in range(y1,y2)]
+            for x in xrange(x1,x2)
+                for y in xrange(y1,y2)]
     
     def vertical_grid_line(self, xy=None, anchor='topleft'):
         if xy is not None:
@@ -132,3 +143,10 @@ class Map(object):
         if xy is not None:
             setattr(self.h_line, anchor, xy)
         return self.h_line
+
+
+class MapLayer(dict):
+    
+    def __init__(self, visible=True):
+        super(MapLayer, self).__init__()
+        self.visible = visible

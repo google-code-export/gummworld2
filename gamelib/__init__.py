@@ -35,7 +35,7 @@ from vec2d import Vec2d
 from state import State
 
 from camera import Camera
-from map import Map
+from map import Map, MapLayer
 from game_clock import GameClock
 from graphics import Graphics
 from popup_menu import PopupMenu

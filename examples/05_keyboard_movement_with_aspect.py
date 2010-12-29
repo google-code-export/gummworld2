@@ -84,6 +84,7 @@ class App(Engine):
     def update(self):
         """overrides Engine.update"""
         self.update_avatar_position()
+        State.hud.update()
         
     def draw(self):
         """overrides Engine.draw"""
