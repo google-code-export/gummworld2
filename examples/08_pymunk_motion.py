@@ -20,17 +20,9 @@ __version__ = '0.2'
 __vernum__ = (0,2)
 
 
-"""map_editor.py - An example of using Tiled maps in Gummworld2.
+"""map_editor.py - An example of using pymunk motion in Gummworld2.
 
-This demo uses small tiles from a tileset distributed with Tiled 0.7.2, the
-Java version. They are 32x32 pixels. For better performance one will want to
-use larger tiles.
-
-Thanks to dr0id for his nice tiledtmxloader module:
-    http://www.pygame.org/project-map+loader+for+%27tiled%27-1158-2951.html
-
-And the creators of Tiled Map Editor:
-    http://www.mapeditor.org/
+The Camera.target is a pymunk.Body object. The pymunk API is used for motion.
 """
 
 
@@ -41,6 +33,11 @@ from pygame.locals import (
     Color,
     K_TAB, K_ESCAPE, K_g, K_l,
 )
+try:
+    import pymunk
+except:
+    print 'This demo requires pymunk'
+    quit()
 
 import paths
 from gamelib import *
@@ -50,13 +47,15 @@ class App(Engine):
     
     def __init__(self, resolution=(640,480)):
         super(App, self).__init__(
+            camera_target=model.CircleBody(),
             resolution=resolution,
             ##display_flags=FULLSCREEN|DOUBLEBUF,
-            frame_speed=0)
+            frame_speed=0,
+            use_pymunk=True)
         
         pygame.display.set_caption('TAB: view | G: grid | L: labels')
         
-        ## Load Tiled TMX map, then update the world's dimensions. Really, all
+        ## Load Tiled TMX map, then update the world and camera. Really, all
         ## there is to it. See the toolkit module for more detail.
         State.map = toolkit.load_tiled_map('Gumm no swamps.tmx')
         State.world.rect = State.map.rect.copy()
@@ -68,7 +67,7 @@ class App(Engine):
         # draw a border around the subsurface.
         self.view_rect = pygame.Rect(30,20,*State.screen.size*2//3)
         
-        # Set up the subsurface as the alternate camera's drawing surface.
+        # Set up the subsurface as the camera's drawing surface.
         subsurface = State.screen.surface.subsurface(self.view_rect)
         State.camera = Camera(State.camera.target, subsurface)
         State.name = 'small'
@@ -162,7 +161,10 @@ class App(Engine):
             rect = State.world.rect
             wx = max(min(wx,rect.right), rect.left)
             wy = max(min(wy,rect.bottom), rect.top)
-            avatar.position = wx,wy
+#            avatar.position = wx,wy
+            avatar.slew(Vec2d(wx,wy), State.dt)
+        elif State.camera.target.velocity != (0,0):
+            State.camera.target.velocity = (0,0)
         
     def on_mouse_button_down(self, pos, button):
         self.update_mouse_movement(pos)

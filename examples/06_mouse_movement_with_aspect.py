@@ -69,9 +69,9 @@ class App(Engine):
         size = (State.screen.width*3/4, State.screen.height*3/4)
         self.view_rect = pygame.Rect(30,20,*size)
         
-        # Set up the subsurface as the camera's drawing surface.
+        # Set up the subsurface as the alternate camera's drawing surface.
         subsurface = State.screen.surface.subsurface(self.view_rect)
-        State.camera = Camera(State.world.avatar, subsurface)
+        State.camera = Camera(State.camera.target, subsurface)
         State.name = 'small'
         State.save(State.name)
         
@@ -87,7 +87,7 @@ class App(Engine):
         State.show_hud = True
         
         # Warp avatar to center map.
-        State.world.avatar.position = State.world.rect.center
+        State.camera.target.position = State.world.rect.center
         State.camera.update()
         
         ## Mouse movement is going to use a diamond geometry to calculate a
@@ -155,7 +155,7 @@ class App(Engine):
         """update the avatar's position if any movement keys are held down
         """
         if self.move_to is not None:
-            avatar = State.world.avatar
+            avatar = State.camera.target
             wx,wy = avatar.position
             ## Avatar speed is product of the aspect calculation (from
             ## update_mouse_movement) and the global State.speed.

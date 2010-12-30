@@ -69,7 +69,7 @@ class App(Engine):
         """update the avatar's position if any movement keys are held down
         """
         if self.move_y or self.move_x:
-            avatar = State.world.avatar
+            avatar = State.camera.target
             wx,wy = avatar.position + (self.move_x,self.move_y)
             rect = State.world.rect
             wx = max(min(wx,rect.right), rect.left)
