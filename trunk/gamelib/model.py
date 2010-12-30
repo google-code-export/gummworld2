@@ -26,45 +26,78 @@ Everything in this module is expressed in terms of pymunk space.
 """
 
 import pygame
-import pymunk
+try:
+    import pymunk
+except:
+    pymunk = None
 
-from gamelib import State
+from gamelib import State, Vec2d
 
 
-class World(object):
+class Avatar(object):
+    """A dumb avatar model that can be used as a camera target. It has only a
+    position attribute as Vec2d.
+    """
     
-    def __init__(self, rect, avatar=None):
-        """left, bottom, right, top are bounding box edges in pymunk space"""
-        self.space = pymunk.Space()
-        
+    def __init__(self, position=(0,0)):
+        self._position = Vec2d(position)
+    
+    @property
+    def position(self): return self._position
+    @position.setter
+    def position(self, val):
+        p = self._position
+        p.x,p.y = val
+
+
+class World(list):
+    """If pymunk is not available, use World. This World class is minimally
+    compatible with WorldPymunk class for pymunk. However, any code calling
+    unsupported pymunk.Space methods will fail.
+    """
+    
+    def __init__(self, rect):
+        """rect is bounding box edges in pygame space"""
+        super(World, self).__init__()
         self.rect = pygame.Rect(rect)
-        self.bounding_box = pymunk.BB(rect.left, rect.bottom, rect.right, rect.top)
-        
-        if avatar is None:
-            self.avatar = CircleBody()
-            State.avatar = self.avatar
-        else:
-            self.avatar = State.avatar
-        if avatar not in self.space.bodies:
-            self.add(self.avatar, self.avatar.shape)
-
-    def add(self, *objects):
-        for o in objects:
-            self.space.add(o)
-
-    def step(self):
-        self.space.step(State.dt)
-
-
-class CircleBody(pymunk.Body):
     
-    def __init__(self, mass=1.0, radius=1.0,
-        position=(0.0,0.0), angle=0.0, velocity=(0,0)):
+    def add(self, *objects):
+        """Add objects to the world."""
+        self.extend(objects)
+    
+    def step(self):
+        """Override this method if your world is supposed to do something."""
+        pass
 
-        inertia = pymunk.moment_for_circle(mass, 0, radius, (0,0))
-        super(CircleBody, self).__init__(mass, inertia)
-        self.shape = pymunk.Circle(self, radius)
 
-        self.position = position
-        self.angle = angle
-        self.velocity = velocity
+if pymunk is not None:
+    
+    class WorldPymunk(pymunk.Space):
+        """If pymunk is available use WorldPymunk. This WorldPymunk class sets up
+        the pymunk space, and abstracts the step() method.
+        """
+        
+        def __init__(self, rect):
+            """left, bottom, right, top are bounding box edges in pygame space"""
+            super(WorldPymunk, self).__init__()
+            self.rect = pygame.Rect(rect)
+        
+        def step(self):
+            super(WorldPymunk, self).step(State.dt)
+
+
+    class CircleBody(pymunk.Body):
+        """A pymunk.Circle with defaults for position, angle, velocity, radius,
+        mass, and the shape.
+        """
+        
+        def __init__(self, mass=1.0, radius=1.0,
+            position=(0.0,0.0), angle=0.0, velocity=(0,0)):
+
+            inertia = pymunk.moment_for_circle(mass, 0, radius, (0,0))
+            super(CircleBody, self).__init__(mass, inertia)
+            self.shape = pymunk.Circle(self, radius)
+
+            self.position = position
+            self.angle = angle
+            self.velocity = velocity

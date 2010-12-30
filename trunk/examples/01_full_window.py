@@ -26,7 +26,6 @@ __vernum__ = (0,2)
 
 import pygame
 from pygame.locals import K_UP, K_DOWN, K_LEFT, K_RIGHT
-import pymunk
 
 import paths
 from gamelib import *
@@ -35,6 +34,7 @@ from gamelib import *
 class App(Engine):
     
     def __init__(self):
+        
         super(App, self).__init__(frame_speed=0)
         
         # Make some default content.
@@ -60,7 +60,7 @@ class App(Engine):
         """update the avatar's position if any movement keys are held down
         """
         if self.move_y or self.move_x:
-            avatar = State.world.avatar
+            avatar = State.camera.target
             wx,wy = avatar.position + (self.move_x,self.move_y)
             rect = State.world.rect
             wx = max(min(wx,rect.right), rect.left)

@@ -20,40 +20,34 @@ __version__ = '0.2'
 __vernum__ = (0,2)
 
 
-"""__init__.py - Package initializer for Gummworld2.
+"""screen.py - Yer basic display class for Gummworld2.
 """
 
 
-try:
-    import pymunk
-except:
-    print 'pymunk not found: proceeding without'
-else:
-    pymunk.init_pymunk()
-
 import pygame
-pygame.init()
 
-# Classes
-from vec2d import Vec2d
-from state import State
+from gamelib import State, Vec2d
 
-from screen import Screen
-from camera import Camera
-from map import Map, MapLayer
-from game_clock import GameClock
-from graphics import Graphics
-from popup_menu import PopupMenu
-from ui import HUD, Stat, Statf
-from canvas import Canvas
 
-from engine import Engine
-
-# Toolkits and utilities
-import model
-import data
-import geometry
-import pygame_utils
-import popup_menu
-import ui
-import toolkit
+class Screen(object):
+    
+    def __init__(self, size, flags=0):
+        self.surface = pygame.display.set_mode(size, flags)
+        self._eraser = self.surface.copy()
+        self.rect = self.surface.get_rect()
+    
+    @property
+    def size(self): return Vec2d(self.width, self.height)
+    @property
+    def width(self): return self.rect.width
+    @property
+    def height(self): return self.rect.height
+    
+    def clear(self):
+        self.surface.blit(self._eraser, (0,0))
+    
+    def blit(self, surf, pos, rect=None):
+        self.surface.blit(surf, pos, rect)
+    
+    def flip(self):
+        pygame.display.flip()

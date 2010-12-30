@@ -42,9 +42,13 @@ from pygame.locals import (
     VIDEOEXPOSE,
     USEREVENT,
 )
+try:
+    import pymunk
+except:
+    pymunk = None
 
 from gamelib import (
-    State, view, model, Map, Camera, Graphics, GameClock,
+    State, Screen, model, Map, Camera, Graphics, GameClock,
 )
 
 
@@ -52,22 +56,51 @@ class Engine(object):
 
     """Subclass this class and override update() and draw(). Also override the
     on_* event handlers if you want to get a particular event type.
+    
+    The only thing worthy of note here is that if use_pymunk==True and a
+    camera_target is specified, the camera_target must be similarly constructed
+    to a model.CircleBody object. Which is to say it must be an instance of
+    pymunk.Body, and have a shape attribute that is an instance of pymunk.Shape.
+    
+    If use_pymunk==False then camera_target can be any class that has a
+    position attribute that is an instance of Vec2d.
+    
+    If camera_target is None, the Engine constructor will create the right type.
     """
 
-    def __init__(self, resolution=(600,600), display_flags=0,
+    def __init__(self, camera_target=None,
+        resolution=(600,600), display_flags=0,
         tile_size=(128,128), map_size=(10,10),
-        update_speed=30, frame_speed=30):
+        update_speed=30, frame_speed=30,
+        use_pymunk=False):
         
         ## If you don't use this engine, then in general you will still
         ## want to initialize yours in the same order you see here.
         
-        State.screen = view.Screen(resolution, display_flags)
+        State.use_pymunk = use_pymunk
+        
+        State.screen = Screen(resolution, display_flags)
         
         State.map = Map(tile_size, map_size)
-        State.world = model.World(State.map.rect)
         
-        State.camera = Camera(State.avatar, State.screen.surface)
-            
+        ## This is the only convoluted thing in here. If you want to use pymunk
+        ## you have to use the right object type for a camera target. Type
+        ## checking and exception handling is purposely not done so that the
+        ## code is easier to read. If it blows up you should be able to figure
+        ## it out from the default stack trace.
+        if not use_pymunk:
+            State.world = model.World(State.map.rect)
+            if camera_target is None:
+                camera_target = model.Avatar()
+            State.world.add()
+        else:
+            State.world = model.WorldPymunk(State.map.rect)
+            if camera_target is None:
+                camera_target = model.CircleBody()
+            State.world.add(camera_target, camera_target.shape)
+        
+        State.camera = Camera(camera_target, State.screen.surface)
+        
         State.graphics = Graphics()
         State.clock = GameClock(update_speed, frame_speed)
         

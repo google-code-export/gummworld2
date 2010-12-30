@@ -46,9 +46,9 @@ class App(Engine):
         # draw a border around the subsurface.
         self.view_rect = pygame.Rect(30,20,500,500)
         
-        # Set up the subsurface as the camera's drawing surface.
+        # Set up the subsurface as the alternate camera's drawing surface.
         subsurface = State.screen.surface.subsurface(self.view_rect)
-        State.camera = Camera(State.world.avatar, subsurface)
+        State.camera = Camera(State.camera.target, subsurface)
         State.name = 'small'
         State.save(State.name)
         
@@ -90,7 +90,7 @@ class App(Engine):
         """update the avatar's position if any movement keys are held down
         """
         if self.move_y or self.move_x:
-            avatar = State.world.avatar
+            avatar = State.camera.target
             wx,wy = avatar.position + (self.move_x,self.move_y)
             rect = State.world.rect
             wx = max(min(wx,rect.right), rect.left)
