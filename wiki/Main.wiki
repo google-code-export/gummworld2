@@ -50,7 +50,7 @@ Getting organized. Shuffling modules and classes around.
 
 Developing a map editor, which seconds as a practical test of the library and the requirements driver for library features.
 
-Anything marked DONE in the to-do list is not necessarily frozen. It is just considered adequately usable for the purpose it is most recently needed. They will certainly evolve as needed.
+Anything marked DONE in the to-do list is not necessarily frozen. It is just considered adequately usable for the purpose it is most recently needed. These will certainly evolve as needed.
 
 Features:
   * Application framework, aka "engine" (DONE)
@@ -88,4 +88,4 @@ I am liking Tiled Map Editor and pytmxloader. It is looking like map_editor.py w
 
 Since the Map class is already source agnostic, it may be easy enough to support multiple map editor formats just by adding another toolkit.load_`*` function.
 
-The (Tiled) map layers feature can be used to classify terrain objects, for example "trees go on layer 5". Game makers (i.e. me) may want to do special things with these, like let mobile objects pass under or behind them and temporarily lower the image alpha so the mobile object is not entirely obscured. (Note that this aspect weakens the case for map decorating and tiling in map_editor.py.)
+The (Tiled) map layers feature can be used to classify terrain objects, for example "trees go on layer 5". Game makers (i.e. me) may want to do special things with these, like let mobile objects pass under or behind them and temporarily lower the image alpha so the mobile object is not entirely obscured. (This aspect weakens the case for map decorating and tiling in map_editor.py.)
