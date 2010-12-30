@@ -32,7 +32,11 @@ These are the key classes.
 
   GameClock: Keeps constant game time. Supports variable frame rate. Calculates interpolated fraction of a game tick, which can be used for prediction and sub-pixel motion.
 
-There are a few utilities--a HUD, tile grid lines, tile labels, popup menu, toolkit (map generators, tile renders), pygame utilities module--to ease experimentation with concepts, but they are entirely optional. One can use Gummworld2 and easily ignore them. The toolkit module provides "quickie" functions for practical use and demonstration.
+The data module provides resource loaders for various data in the data/ subdirectories, a la skellington. It should be very easy to figure out and customize as needed.
+
+There are a few utilities--a HUD, tile grid lines, tile labels, popup menu, toolkit (map generators, tile renders), pygame utilities module--to ease experimentation with concepts, but they are not required (except by the examples and map_editor.py). One can use Gummworld2 and easily ignore them. The toolkit module provides a number of "quickie" functions for practical use and demonstration.
+
+Some examples use Tiled maps. While this is one of the easiest way to make and import tile maps, it is not required. Any map source can be used as long as its data can be converted to the Map class's meager requirements. See the toolkit module for a few functions that load maps, and the Map class for documentation.
 
 Note that if you want to use pymunk via the Engine class, you need to turn it on with use_pymunk=True. This explicitly tells the Engine constructor whether to use pymunk when initializing library objects. This avoids any problems that might arise if pymunk is installed but the game does not want to use pymunk objects. This is only of special note for the Engine constructor. The library doesn't assume anything. If pymunk can be imported, the package is available and pymunk subclasses are created in the model module; your game code can choose to use them, or ignore them. The library only uses them if you specify {{{Engine(use_pymunk=True)}}}. This is a very small amount of code; it should be pretty clear in `engine.Engine.__init__` and the model module.
 
