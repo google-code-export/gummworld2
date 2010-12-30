@@ -16,8 +16,8 @@
 # License along with Gummworld2.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__version__ = '0.2'
-__vernum__ = (0,2)
+__version__ = '0.3'
+__vernum__ = (0,3)
 
 
 """state.py - A class for convenient global access to Gummworld2 run-time objects.
@@ -28,7 +28,6 @@ __vernum__ = (0,2)
 # them saved and restored by default via the static methods.
 default_attrs = [
     'camera',
-    'canvas',
     'world',
     'map',
 ]
@@ -45,9 +44,7 @@ class State(object):
     
     # objects
     screen = None               # gamelib.view.Screen
-    canvas = None               # gamelib.view.Canvas
     world = None                # gamelib.model.World
-    avatar = None               # gamelib.model.Avatar
     
     camera = None               # gamelib.Camera
     map = None                  # gamelib.Map

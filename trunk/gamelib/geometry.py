@@ -16,11 +16,13 @@
 # License along with Gummworld2.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__version__ = '0.2'
-__vernum__ = (0,2)
+__version__ = '0.3'
+__vernum__ = (0,3)
 
 
-"""geometry.py - Geometry module for Gummworld2.
+__doc__ = """geometry.py - Geometry module for Gummworld2.
+
+Geometry classes and functions.
 """
 
 
@@ -32,11 +34,14 @@ import pygame
 class Ellipse(object):
     
     def __init__(self, origin, radius_x, radius_y):
-        """Ellipse(origin, radius_x, radius_y) : Ellipse
+        """Construct an instance of Ellipse.
         
-        origin -> sequence of int or float; origin (x,y)
-        radius_x -> int or float; radius along x-axis
-        radius_y -> int or float; radius along y-axis
+        The origin argument is a sequence of two numbers representing the origin
+        (x,y).
+        
+        The radius_x argument is a number representing the radius along x-axis.
+        
+        The radius_y argument is a number representing the radius along y-axis.
         """
         self.origin = origin
         self.radius_x = radius_x
@@ -47,6 +52,7 @@ class Ellipse(object):
     
     @property
     def origin(self):
+        """Set or get origin."""
         return self._origin
     @origin.setter
     def origin(self, val):
@@ -55,6 +61,7 @@ class Ellipse(object):
         
     @property
     def radius_y(self):
+        """Set or get radius_y."""
         return self._radius_y
     @radius_y.setter
     def radius_y(self, val):
@@ -63,6 +70,7 @@ class Ellipse(object):
         
     @property
     def radius_x(self):
+        """Set or get radius_x."""
         return self._radius_x
     @radius_x.setter
     def radius_x(self, val):
@@ -70,14 +78,15 @@ class Ellipse(object):
         self._dirty = True
         
     def draw(self, surface, color, arcs=360):
-        """Ellipse.draw(surface, color, arcs=360) : None
+        """Draw an ellipse on a pygame surface in the specified color.
         
-        Draw an ellipse on a pygame surface in the specified color.
+        The surface argument is the target pygame surface.
         
-        surface -> pygame surface
-        color -> pygame color
-        arcs -> number of slices in the circumference; normally 360 or 720 will
-            suffice
+        The color argument is the pygame color to draw in.
+        
+        The arcs argument is the number of points in the circumference to draw;
+        normally 360 or 720 will suffice. More than 720 will draw many duplicate
+        pixels.
         """
         if not self._dirty:
             points = self._points
@@ -87,12 +96,11 @@ class Ellipse(object):
             [(int(round(x)),int(round(y))) for x,y in points])
         
     def plot(self, arcs=360):
-        """Ellipse.plot(arcs) : list
+        """Plot the circumference of an ellipse and return the points in a list.
         
-        Plot the circumference of an ellipse and return the points in a list.
-        
-        arcs -> number of slices in the circumference; normally 360 or 720 will
-            suffice
+        The arcs argument is the number of points in the circumference to
+        generate; normally 360 or 720 will suffice. More than 720 will result in
+        many duplicate points.
         
         The list that is returned is a sequence of (x,y) tuples suitable for
         use with pygame.draw.lines().
@@ -111,12 +119,11 @@ class Ellipse(object):
             return circumference
         
     def point(self, angle):
-        """Ellipse.point(angle) : (x,y)
-        
-        Plot a point on the circumference of an ellipse at the specified angle.
+        """Plot a point on the circumference of an ellipse at the specified angle.
         The point is returned as an (x,y) tuple.
         
-        angle -> the angle in degrees
+        The angle argument is the angle in degrees from the origin. The angle 0
+        and 360 are oriented at the top of the screen, and increase clockwise.
         """
         # angle-90 converts screen space to math function space
         rad = radians(angle-90)
@@ -172,14 +179,17 @@ class Diamond(pygame.Rect):
 
 
 def angle_of(origin, end_point):
-    """angle_of(point) : float
-    
-    Calculate the angle between the vector defined by end points (origin,point)
+    """Calculate the angle between the vector defined by end points (origin,point)
     and the Y axis. All input and output values are in terms of pygame screen
     space. Returns degrees as a float.
     
-    origin -> sequence; origin point (x1,y1).
-    point -> sequence; end point (x2,y2).
+    The origin argument is a sequence of two numbers representing the origin
+    point.
+    
+    The point argument is a sequence of two numbers representing the end point.
+    
+    The angle 0 and 360 are oriented at the top of the screen, and increase
+    clockwise.
     """
     x1,y1 = origin
     x2,y2 = end_point
@@ -187,12 +197,11 @@ def angle_of(origin, end_point):
 
 
 def distance(a, b):
-    """distance(a, b) : int
+    """Calculate the distance between points a and b. Returns distance as a float.
     
-    Calculate the distance between points a and b. Returns distance as a float.
+    The a argument is a sequence representing one end point (x1,y1).
     
-    a -> sequence; point (x1,y1).
-    b -> sequence; point (x2,y2).
+    The b argument is a sequence representing the other end point (x2,y2).
     """
     x1,y1 = a
     x2,y2 = b
@@ -202,25 +211,29 @@ def distance(a, b):
 
 
 def lines_intersection(line_1, line_2):
-    """lines_intersection(line_1, line_2) : (x,y)
+    """Determine the intersection point of the line segment defined by line_1 with
+    the line segment defined by line_2.  Returns a tuple (x,y) representing the
+    point of intersection.
+
+    The line_1 argument is a sequence representing two end points of the first
+    line ((x1,y1),(x2,y2)).
     
-    line_1 -> sequence; the two end points of the first line.
-    line_2 -> sequence; the two end points of the second line.
+    The line_2 argument is a sequence representing two end points of the second
+    line ((x3,y3),(x4,y4)).
     
-    Determines the intersection point of the line segment defined by line_1 with
-    the line segment defined by line_2.
+    If no point of intersection is found, (False,False) is returned.
     
-    Returns tuple (x,y) representing the intersection point. If no determinable
-    intersection point is found, (False,False) is returned. If the lines
-    coincide, in which case all points intersect, (True,True) is returned.
-    
-        x,y = lines_intersection(...)
-        if x is True: ... lines coincide
-        elif x is False: ... no intersection
-        else: ... use x,y as a point
+    If the lines coincide, in which case all points intersect, (True,True) is
+    returned.
     
     This function always returns a tuple. This is intended to simplify handling
-    the return data type.
+    the return data type. The following is an example of processing the possible
+    return values.
+    
+        x,y = lines_intersection(A, B)
+        if x is True: print 'lines coincide'
+        elif x is False: print 'no intersection'
+        else: print 'x,y is a point'
     """
     a,b = (x1,y1),(x2,y2) = line_1
     c,d = (x3,y3),(x4,y4) = line_2
@@ -252,15 +265,16 @@ def lines_intersection(line_1, line_2):
 
 
 def point_on_circumference(center, radius, degrees_):
-    """point_on_circumference(center, radius, degrees_) : (x,y)
+    """Calculate the point on the circumference of a circle defined by center and
+    radius along the given angle. Returns a tuple (x,y).
     
-    center -> tuple; (x,y) origin of the circle.
-    radius -> number; length of the radius.
-    degrees_ -> number; angle of radius. 0 is at the top of the screen, with
-        values increasing clockwise.
+    The center argument is a representing the origin of the circle.
     
-    Return point (x,y) on the circumference of a circle defined by center and
-    radius along the given angle.
+    The radius argument is a number representing the length of the radius.
+    
+    The degrees_ argument is a number representing the angle of radius from
+    origin. The angles 0 and 360 are at the top of the screen, with values
+    increasing clockwise.
     """
     radians_ = radians(degrees_ - 90)
     x = center[0] + radius * cos(radians_)

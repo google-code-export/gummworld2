@@ -16,11 +16,17 @@
 # License along with Gummworld2.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__version__ = '0.2'
-__vernum__ = (0,2)
+__version__ = '0.3'
+__vernum__ = (0,3)
 
 
-"""data.py - Data resource loader for Gummworld2.
+__doc__ = """
+data.py - Data resource loader for Gummworld2.
+
+Module data:
+    * data_py is the absolute path for this module file's directory.
+    * data_dir is the root data directory.
+    * path is a dict containing lookups for subdirectories of each data type.
 """
 
 
@@ -40,34 +46,44 @@ path = dict(
 
 
 def filepath(typ, filename):
-    '''Determine the path to a file in the data directory.
+    '''Return the path to a file in the data directory.
     '''
     return join_path(path[typ], filename)
 
 
 def load(typ, filename, mode='rb'):
-    '''Open a file in the data directory.
+    '''Open a file in the data directory and return its file handle.
 
-    "mode" is passed as the second arg to open().
+    The mode argument is passed as the second argument to open().
     '''
     return open(filepath(typ, filename), mode)
 
 
 def load_font(filename):
+    """Open a font file from the font dir and return its file handle.
+    """
     return load('font', filename)
 
 
 def load_image(filename):
+    """Open an image file from the image dir and return its file handle.
+    """
     return load('image', filename)
 
 
 def load_map(filename):
+    """Open a map file from the map dir and return its file handle.
+    """
     return load('map', filename)
 
 
 def load_sound(filename):
+    """Open a sound file from the sound dir and return its file handle.
+    """
     return load('sound', filename)
 
 
 def load_text(filename):
+    """Open a text file from the text dir and return its file handle.
+    """
     return load('text', filename, 'r')

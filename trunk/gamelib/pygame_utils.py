@@ -16,30 +16,21 @@
 # License along with Gummworld2.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__version__ = '0.2'
-__vernum__ = (0,2)
+__version__ = '0.3'
+__vernum__ = (0,3)
 
 
-"""pygame_utils.py - Collection of pygame utilities for Gummworld2.
+__doc__ = """pygame_utils.py - Collection of pygame utilities for Gummworld2.
 """
 
 
-###Python imports
 from math import sqrt, pow, pi, atan2, sin, cos, degrees, radians
 import os
 import re
 import sys
 
 import pygame
-from pygame.locals import Color
-
-try:
-    ### Pygame imports
-    import pygame
-    from pygame.locals import MOUSEBUTTONDOWN, RLEACCEL
-except ImportError, e:
-    print 'ImportError: %s' % e
-    print '    in file "%s"' % os.path.abspath(sys.argv[0])
+from pygame.locals import Color, MOUSEBUTTONDOWN, RLEACCEL
 
 
 def split_thousands(s, sep=','): 

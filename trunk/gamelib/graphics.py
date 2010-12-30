@@ -16,11 +16,13 @@
 # License along with Gummworld2.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__version__ = '0.2'
-__vernum__ = (0,2)
+__version__ = '0.3'
+__vernum__ = (0,3)
 
 
-"""graphics.py - Graphics module for Gummworld2.
+__doc__ = """graphics.py - Graphics module for Gummworld2.
+
+Various tools for creating graphics.
 """
 
 

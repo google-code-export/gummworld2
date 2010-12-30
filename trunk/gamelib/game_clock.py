@@ -16,8 +16,8 @@
 # License along with Gummworld2.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__version__ = '0.2'
-__vernum__ = (0,2)
+__version__ = '0.3'
+__vernum__ = (0,3)
 
 
 """game_clock.py - Game clock for Gummworld2.
@@ -96,6 +96,7 @@ class GameClock(object):
     
     @property
     def ticks_per_second(self):
+        """Get or set ticks per second."""
         return self._ticks_per_second
     @ticks_per_second.setter
     def ticks_per_second(self, n):
@@ -108,6 +109,7 @@ class GameClock(object):
     
     @property
     def max_fps(self):
+        """Get or set max_fps."""
         return self._max_fps
     @max_fps.setter
     def max_fps(self, n):
@@ -121,6 +123,7 @@ class GameClock(object):
     
     @property
     def use_wait(self):
+        """Get or set use_wait."""
         return self._use_wait
     @use_wait.setter
     def use_wait(self, enabled):
@@ -129,6 +132,7 @@ class GameClock(object):
 
     @property
     def max_frame_skip(self):
+        """Get or set max_frame_skip."""
         return self._max_frame_skip
     @max_frame_skip.setter
     def max_frame_skip(self, n):
@@ -139,11 +143,11 @@ class GameClock(object):
         self.reset()
 
     def update_ready(self):
-        """Call once per game loop. If True, update the game physics."""
+        """Call once per game loop. If True is returned, update the game physics."""
         return self._update_ready
     
     def frame_ready(self):
-        """Call once per game loop. If True, display a graphics frame."""
+        """Call once per game loop. If True is returned, display a graphics frame."""
         return self._frame_ready
 
     def _flip(self):

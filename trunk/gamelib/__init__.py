@@ -16,11 +16,17 @@
 # License along with Gummworld2.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__version__ = '0.2'
-__vernum__ = (0,2)
+__version__ = '0.3'
+__vernum__ = (0,3)
 
 
 """__init__.py - Package initializer for Gummworld2.
+"""
+
+__doc__="""
+Gummworld2 is designed as a light pygame framework for a scrolling game, where
+the map is larger than the display. It emphasizes simplicity, openness, and
+performance.
 """
 
 

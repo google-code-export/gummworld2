@@ -16,11 +16,11 @@
 # License along with Gummworld2.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__version__ = '0.2'
-__vernum__ = (0,2)
+__version__ = '0.3'
+__vernum__ = (0,3)
 
 
-"""screen.py - Yer basic display class for Gummworld2.
+__doc__ = """screen.py - Yer basic display class for Gummworld2.
 """
 
 

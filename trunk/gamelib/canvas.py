@@ -16,11 +16,12 @@
 # License along with Gummworld2.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__version__ = '0.2'
-__vernum__ = (0,2)
+__version__ = '0.3'
+__vernum__ = (0,3)
 
 
-"""canvas.py - A canvas for intermediate drawing and rotation.
+__doc__ = """
+canvas.py - A canvas for intermediate drawing and rotation.
 """
 
 
@@ -46,12 +47,18 @@ class Canvas(object):
         self.draw_viewer = False
     
     def clear(self):
+        """Clear the canvas's surface.
+        """
         self.surface.blit(self.eraser, (0,0))
     
     def blit(self, sprite):
+        """Blit a sprite to the canvas's surface.
+        """
         self.surface.blit(sprite.image, sprite.rect)
     
     def rotate(self, angle):
+        """Rotate the canvas by angle.
+        """
         rotated_surface = pygame.transform.rotate(
             self.surface, angle)
         screen = State.screen.surface
@@ -60,4 +67,6 @@ class Canvas(object):
         screen.blit(rotated_surface, rect)
         
     def draw(self):
+        """Draw the canvas on the display.
+        """
         screen.blit(self.viewer, (0,0))
