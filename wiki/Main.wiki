@@ -20,7 +20,7 @@ These are the key classes.
 
   State: A storage container for run-time objects, settings, and values. Because it's easy to access globally, this minimizes the need to pass around key objects in arguments. States can also be saved and restored by name, if desired. The mechanism is straightforward, thus easy to use and extend.
 
-  Engine: A superclass providing the framework for initialization, run loop, update and draw methods, and pygame event handlers. If you decide to write your own engine, look in here to see how the key objects are created. Don't be afraid, no voodoo in here.
+  Engine: A superclass providing the framework for initialization, run loop, update and draw methods, and pygame event handlers. If you decide to write your own engine, look in here to see how the key objects are created. Don't be afraid, no voodoo in here. Note that if you want to use pymunk via the Engine, you need to turn it on with use_pymunk=True.
 
   Screen: Just yer basic display interface.
 
@@ -33,6 +33,8 @@ These are the key classes.
   GameClock: Keeps constant game time. Supports variable frame rate. Calculates interpolated fraction of a game tick, which can be used for prediction and sub-pixel motion.
 
 There are a few utilities--a HUD, tile grid lines, tile labels, popup menu, toolkit (map generators, tile renders), pygame utilities module--to ease experimentation with concepts, but they are entirely optional. One can use Gummworld2 and easily ignore them.
+
+Note that if you want to use pymunk via the Engine class, you need to turn it on with use_pymunk=True. This explicitly tells the Engine constructor whether to use pymunk when initializing library objects. This avoids potential problems if pymunk is installed but the game does not want to use pymunk objects. This is only of special note for the Engine constructor. The library doesn't assume anything. If pymunk can be imported, the package is available and pymunk subclasses are created in the model module; your game code can choose to use them, or ignore them.
 
 The pymunk physics scale is intended to be based on pixels, however all attempts will be made to support sub-pixel math with floating point numbers. Sub-pixel math is compatible with the underlying physics engine, pymunk (chipmunk), and allows fractional speeds, mass, dimensions, etc. The display code must round and convert physics values to integers for pygame where appropriate.
 
