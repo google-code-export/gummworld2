@@ -16,11 +16,11 @@
 # License along with Gummworld2.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__version__ = '0.2'
-__vernum__ = (0,2)
+__version__ = '0.3'
+__vernum__ = (0,3)
 
 
-"""toolkit.py - Some helper tools for Gummworld2.
+__doc__ = """toolkit.py - Some helper tools for Gummworld2.
 """
 
 
@@ -33,9 +33,7 @@ from tiledtmxloader import TileMapParser, ImageLoaderPygame
 
 
 def make_tiles():
-    """make_tiles() : None
-    
-    Create tiles to fill the current map. This is a utility for easily making
+    """Create tiles to fill the current map. This is a utility for easily making
     visible content to aid early game design or debugging.
     
     Tiles transition from top-left to bottom-right, red to blue.
@@ -60,9 +58,7 @@ def make_tiles():
 
 
 def make_tiles2():
-    """make_tiles2() : None
-    
-    Create tiles to fill the current map. This is a utility for easily making
+    """Create tiles to fill the current map. This is a utility for easily making
     visible content to aid early game design or debugging.
     
     Tiles transition from top to bottom, light blue to brown.
@@ -87,9 +83,7 @@ def make_tiles2():
 
 
 def make_hud():
-    """make_hud() : None
-    
-    Create a HUD with dynamic items. This creates a default hud to serve
+    """Create a HUD with dynamic items. This creates a default hud to serve
     both as an example, and for an early design and debugging convenience.
     """
     State.hud = HUD()
@@ -119,9 +113,7 @@ def make_hud():
 
 
 def load_tiled_map(map_file_name):
-    """load_tiled_map(map_file_name) : gamelib.Map
-    
-    Load an orthogonal TMX map file that was created by the Tiled Map Editor.
+    """Load an orthogonal TMX map file that was created by the Tiled Map Editor.
     
     Thanks to dr0id for his nice tiledtmxloader module:
         http://www.pygame.org/project-map+loader+for+%27tiled%27-1158-2951.html
@@ -168,9 +160,7 @@ def load_tiled_map(map_file_name):
 
 
 def draw_sprite(s, blit_flags=0):
-    """draw_sprite(s, blit_flags=0) : None
-    
-    Draw a sprite on the camera's surface using world-to-screen conversion.
+    """Draw a sprite on the camera's surface using world-to-screen conversion.
     """
     camera = State.camera
     if isinstance(s, Sprite):
@@ -180,9 +170,7 @@ def draw_sprite(s, blit_flags=0):
 
 
 def draw_tiles():
-    """draw_tiles() : None
-    
-    Draw visible tiles.
+    """Draw visible tiles.
     """
     for layer in State.camera.visible_tiles:
         for s in layer:
@@ -190,9 +178,7 @@ def draw_tiles():
 
 
 def draw_labels():
-    """draw_labels() : None
-    
-    Draw visible labels if enabled.
+    """Draw visible labels if enabled.
     """
     if State.show_labels:
         x1,y1,x2,y2 = State.camera.visible_tile_range
@@ -204,9 +190,7 @@ def draw_labels():
 
 
 def draw_grid():
-    """draw_grid() : None
-    
-    Draw grid if enabled.
+    """Draw grid if enabled.
     """
     if State.show_grid:
         x1,y1,x2,y2 = State.camera.visible_tile_range

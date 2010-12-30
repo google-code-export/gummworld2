@@ -16,11 +16,14 @@
 # License along with Gummworld2.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__version__ = '0.2'
-__vernum__ = (0,2)
+__version__ = '0.3'
+__vernum__ = (0,3)
 
 
-"""ui.py - User Interface module for Gummworld2.
+__doc__ = """ui.py - User Interface module for Gummworld2.
+
+Currently there is only HUD. And some dynamic stats classes with timers for
+callback.
 """
 
 

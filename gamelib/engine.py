@@ -16,11 +16,27 @@
 # License along with Gummworld2.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__version__ = '0.2'
-__vernum__ = (0,2)
+__version__ = '0.3'
+__vernum__ = (0,3)
 
 
-"""engine.py - A sample engine for Gummworld2.
+__doc__ = """
+engine.py - A sample engine for Gummworld2.
+
+This module provides an Engine class that can be subclassed for an application
+framework that's easy to use.
+
+The run loop keeps time via the game clock. update() and event handlers are
+called every time an update cycle is ready. draw() is called every time a frame
+cycle is ready.
+
+The subclass should override update() and draw() for its own purposes. If the
+subclass wants to get events for a particular type, all it needs to do is
+override the event handler for that type.
+
+If you want to write your own engine instead of using this one, then in general
+you will still want to initialize yours in the same order as this class. See
+__init__() and run() for the details.
 """
 
 
@@ -54,25 +70,39 @@ from gamelib import (
 
 class Engine(object):
 
-    """Subclass this class and override update() and draw(). Also override the
-    on_* event handlers if you want to get a particular event type.
-    
-    The only thing worthy of note here is that if use_pymunk==True and a
-    camera_target is specified, the camera_target must be similarly constructed
-    to a model.CircleBody object. Which is to say it must be an instance of
-    pymunk.Body, and have a shape attribute that is an instance of pymunk.Shape.
-    
-    If use_pymunk==False then camera_target can be any class that has a
-    position attribute that is an instance of Vec2d.
-    
-    If camera_target is None, the Engine constructor will create the right type.
-    """
-
     def __init__(self, camera_target=None,
         resolution=(600,600), display_flags=0,
         tile_size=(128,128), map_size=(10,10),
         update_speed=30, frame_speed=30,
         use_pymunk=False):
+        """Construct an instance of Engine.
+        
+        The camera_target argument is the target that the camera will track. If
+        camera_target is None Engine will create a default target depending on
+        whether pymunk is used (see following notes).
+        
+        The resolution argument specifies the width and height of the display.
+        
+        The display_flags argument specifies the pygame display flags to pass
+        to the display initializer.
+        
+        The tile_size and map_size arguments specify the width and height of
+        a map tile, and width and height of a map in tiles, respectively.
+        
+        The update_speed and frame_speed arguments control the game clock.
+        update_speed specifies the maximum updates that can occur per second.
+        frame_speed specifies the maximum frames that can occur per second. The
+        clock sacrifices frames per second in order to achieve the desired
+        updates per second. If frame_speed is 0 the frame rate is uncapped.
+        
+        The use_pymunk argument specifies whether to use pymunk for the model
+        (world and camera.target). If use_pymunk is True and a camera_target is
+        specified, the camera_target must be similarly constructed to a
+        model.CircleBody object. Which is to say it must be an instance of
+        pymunk.Body, and have a shape attribute that is an instance of
+        pymunk.Shape. If use_pymunk is False then camera_target can be any class
+        that has a position attribute that is an instance of Vec2d.
+        """
         
         ## If you don't use this engine, then in general you will still
         ## want to initialize yours in the same order you see here.
@@ -144,8 +174,8 @@ class Engine(object):
         pass
         
     def _get_events(self):
-        """Called automatically by run() each time the clock indicates an
-        update cycle is ready.
+        """Get events and call the handler. Called automatically by run() each
+        time the clock indicates an update cycle is ready.
         """
         for e in self._get_pygame_events():
             typ = e.type
@@ -180,19 +210,19 @@ class Engine(object):
             elif typ == ACTIVEEVENT:
                 self.on_active_event(e.gain, e.state)
         
-    ## Override these as desired to get specific event types.
-    def on_key_down(self, unicode, key, mod): pass
-    def on_key_up(self, key, mod): pass
-    def on_mouse_motion(self, pos, rel, buttons): pass
-    def on_mouse_button_up(self, pos, button): pass
-    def on_mouse_button_down(self, pos, button): pass
+    ## Override an event handler to get specific events.
+    def on_active_event(self, gain, state): pass
     def on_joy_axis_motion(self, joy, axis, value): pass
     def on_joy_ball_motion(self, joy, ball, rel): pass
-    def on_joy_hat_motion(self, joy, hat, value): pass
-    def on_joy_button_up(self, joy, button): pass
     def on_joy_button_down(self, joy, button): pass
-    def on_video_resize(self, size, w, h): pass
-    def on_video_expose(self): pass
-    def on_user_event(self, e): pass
+    def on_joy_button_up(self, joy, button): pass
+    def on_joy_hat_motion(self, joy, hat, value): pass
+    def on_key_down(self, unicode, key, mod): pass
+    def on_key_up(self, key, mod): pass
+    def on_mouse_button_down(self, pos, button): pass
+    def on_mouse_button_up(self, pos, button): pass
+    def on_mouse_motion(self, pos, rel, buttons): pass
     def on_quit(self): pass
-    def on_active_event(self, gain, state): pass
+    def on_user_event(self, e): pass
+    def on_video_expose(self): pass
+    def on_video_resize(self, size, w, h): pass

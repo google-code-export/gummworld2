@@ -16,13 +16,15 @@
 # License along with Gummworld2.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__version__ = '0.2'
-__vernum__ = (0,2)
+__version__ = '0.3'
+__vernum__ = (0,3)
 
 
-"""model.py - Physics model for Gummworld2.
+__doc__ = """model.py - Physics model for Gummworld2.
 
-Everything in this module is expressed in terms of pymunk space.
+If pymunk is installed and can be imported, then the pymunk subclasses
+WorldPymunk and various bodies will be created. Otherwise, only the simple
+classes World and Avatar will be available.
 """
 
 import pygame

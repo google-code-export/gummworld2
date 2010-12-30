@@ -1,0 +1,13 @@
+#!/usr/bin/env python
+
+"""pydoc - Start a pydoc server in GUI mode to view docs for gummworld2/gamelib.
+"""
+
+import sys
+import pydoc
+import paths
+if __name__ == '__main__':
+#    help(pydoc)
+    sys.path.append('gamelib')
+    sys.argv[1:] = ['-g']
+    pydoc.cli()

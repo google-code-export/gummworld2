@@ -16,17 +16,21 @@
 # License along with Gummworld2.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__version__ = '0.2'
-__vernum__ = (0,2)
+__version__ = '0.3'
+__vernum__ = (0,3)
 
 
-"""map.py - Map module for Gummworld2.
+__doc__ = """map.py - Map module for Gummworld2.
 
 Defines the Map, which serves tiles, tile labels, and grid outlines. Supports
 tile layers.
 
 Map combines view (pygame) and model (world coordinates). It contains a rect
 attribute defining its dimensions, and observes pygame coordinate space.
+
+The layers attribute is a two-dimensional list of tile sprites. This can be
+accessed directly, or via the class methods. See also the Camera class for
+its tile range calculations.
 
 The caller must manage maps and their corresponding worlds by swapping the
 State.map and State.world package globals, for example:
@@ -59,6 +63,14 @@ from gamelib.ui import text_color
 class Map(object):
     
     def __init__(self, tile_size, map_size):
+        """Construct an instance of Map.
+        
+        The tile_size argument is a sequence of two ints representing the width
+        and height of a tile in pixels.
+        
+        The map_size argument is a sequence of two ints representing the width
+        and height of the map in tiles.
+        """
         self.tile_size = Vec2d(tile_size)
         self.map_size = Vec2d(map_size)
         self.layers = []
@@ -99,30 +111,27 @@ class Map(object):
             self.layers[layer][s.name] = s
     
     def clear(self):
-        """Map.clear() : None
-        
-        Clear all layers.
+        """Clear all layers.
         """
         del self.layers[:]
     
     def get_tile_at(self, x, y, layer=0):
-        """Map.get_tile_at(self, x, y, layer=0) : tile
-        
-        Return the tile at grid location (x,y) in the specified layer. If no
+        """Return the tile at grid location (x,y) in the specified layer. If no
         tile exists at the location, return None.
         """
         return self.layers[layer].get((x,y), (None,(x,y)))
 
     def get_tiles(self, x1, y1, x2, y2, layer=0):
-        """Map.get_tiles(self, x1, y1, x2, y2, layer=0) : list
+        """Return the list of tiles at the specified layer in range (x1,y1)
+        through (x2,y2).
         
-        x1,y1,x2,y2 -> int; Range of tiles to select.
-        layer -> int; Tile layer to select.
+        The arguments x1,y1,x2,y2 are ints representing the range of tiles to
+        select.
         
-        Return the list of tiles at the specified layer in range (x1,y1)
-        through (x2,y2). If a grid location in the range does not have a tile,
-        None is stored in its place. If the layer is not visible, an empty list
-        is returned.
+        The layer argument is an int representing the tile layer to select.
+        
+        If a grid location in the range does not have a tile, None is stored in
+        its place. If the layer is not visible, an empty list is returned.
         """
         if self.layers[layer].visible:
             return [self.layers[layer].get((x,y), (None,(x,y)))
@@ -132,30 +141,26 @@ class Map(object):
             return []
 
     def get_label_at(self, x, y):
-        """Map.get_label_at(self, x, y) : sprite
-        
-        Return the label sprite at grid location (x,y). If no sprite exists at
+        """Return the label sprite at grid location (x,y). If no sprite exists at
         that location, return None.
         """
         return self.labels.get((x,y), (None,(x,y)))
     
     def get_labels(self, x1, y1, x2, y2):
-        """Map.get_labels(self, x1, y1, x2, y2) : list
+        """Return the list of tiles in range (x1,y1) through (x2,y2).
         
-        x1,y1,x2,y2 -> int; Range of tiles to select.
+        The arguments x1,y1,x2,y2 are ints representing the range of labels to
+        select.
         
-        Return the list of tiles in range (x1,y1) through (x2,y2). If a grid
-        location in the range does not have a label, None is stored in its
-        place.
+        If a grid location in the range does not have a label, None is stored in
+        its place.
         """
         return [self.labels.get((x,y), (None,(x,y)))
             for x in xrange(x1,x2)
                 for y in xrange(y1,y2)]
     
     def vertical_grid_line(self, xy=None, anchor='topleft'):
-        """Map.vertical_grid_line(self, xy=None, anchor='topleft') : sprite
-        
-        Return the vertical grid sprite. If specified, the sprite.rect's
+        """Return the vertical grid sprite. If specified, the sprite.rect's
         attribute specified by anchor is set to the value of xy.
         """
         if xy is not None:
@@ -163,9 +168,7 @@ class Map(object):
         return self.v_line
     
     def horizontal_grid_line(self, xy=None, anchor='topleft'):
-        """Map.horizontal_grid_line(self, xy=None, anchor='topleft') : sprite
-        
-        Return the horizontal grid sprite. If specified, the sprite.rect's
+        """Return the horizontal grid sprite. If specified, the sprite.rect's
         attribute specified by anchor is set to the value of xy.
         """
         if xy is not None:
@@ -176,5 +179,12 @@ class Map(object):
 class MapLayer(dict):
     
     def __init__(self, visible=True):
+        """Construct an instance of MapLayer.
+        
+        Instances of this class can be accessed as dicts to retrieve tiles.
+        
+        If the visible attribute is True, then this layer is visible. If False,
+        it is not visible.
+        """
         super(MapLayer, self).__init__()
         self.visible = visible
