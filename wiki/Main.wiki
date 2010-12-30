@@ -70,15 +70,15 @@ Features:
     * Resize
     * Delete
     * Undo/Redo
-  * ~~Map decorating and tiling
-    * ~~Tileset loading
-    * ~~Palette picking
-    * ~~Screen picking
-    * ~~Paint
-    * ~~Erase
-    * ~~Undo/redo
-    * ~~Region selection
-    * ~~Fill
+  * ~~Map decorating and tiling~~
+    * ~~Tileset loading~~
+    * ~~Palette picking~~
+    * ~~Screen picking~~
+    * ~~Paint~~
+    * ~~Erase~~
+    * ~~Undo/redo~~
+    * ~~Region selection~~
+    * ~~Fill~~
 
 ==Working Notes==
 
