@@ -38,7 +38,7 @@ Thanks to dr0id for his nice tiledtmxloader module:
 import pygame
 from pygame.sprite import Sprite
 from pygame.locals import (
-    FULLSCREEN, DOUBLEBUF,
+    FULLSCREEN,
     Color,
     K_TAB, K_ESCAPE, K_g, K_l,
 )
@@ -53,7 +53,7 @@ class App(Engine):
         super(App, self).__init__(
             caption='07 Tiled Map - TAB: view | G: grid | L: labels',
             resolution=resolution,
-            ##display_flags=FULLSCREEN|DOUBLEBUF,
+            ##display_flags=FULLSCREEN,
             frame_speed=0)
         
         ## Load Tiled TMX map, then update the world's dimensions. Really, all

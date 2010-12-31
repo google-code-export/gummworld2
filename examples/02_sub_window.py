@@ -26,7 +26,6 @@ __vernum__ = (0,3)
 
 import pygame
 from pygame.locals import K_UP, K_DOWN, K_LEFT, K_RIGHT
-import pymunk
 
 import paths
 from gamelib import *

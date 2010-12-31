@@ -39,10 +39,9 @@ whether the mouse position is more vertical or horizontal.
 
 import pygame
 from pygame.locals import (
-    FULLSCREEN, DOUBLEBUF,
+    FULLSCREEN,
     Color, K_TAB, K_ESCAPE, K_g, K_l,
 )
-import pymunk
 
 import paths
 from gamelib import *
@@ -58,7 +57,7 @@ class App(Engine):
         super(App, self).__init__(
             caption='06 Mouse Movement with Aspect - TAB: view | G: grid | L: labels',
             resolution=(640,480),
-            ##display_flags=FULLSCREEN|DOUBLEBUF,
+            ##display_flags=FULLSCREEN,
             tile_size=(128,64), map_size=(10,20), frame_speed=0)
 
         # Save the main state.

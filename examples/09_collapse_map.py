@@ -45,7 +45,7 @@ Watch what happens to the frame rate as tile size increases.
 import pygame
 from pygame.sprite import Sprite
 from pygame.locals import (
-    FULLSCREEN, DOUBLEBUF,
+    FULLSCREEN,
     Color,
     K_TAB, K_ESCAPE, K_g, K_l, K_0, K_1, K_2, K_9,
 )
@@ -68,9 +68,8 @@ class App(Engine):
         )
         super(App, self).__init__(
             caption=caption,
-            camera_target=model.CircleBody(),
-            resolution=(0,0),
-            display_flags=FULLSCREEN|DOUBLEBUF,
+            resolution=(800,600),
+            display_flags=FULLSCREEN,
             frame_speed=0,
             use_pymunk=False)
         
@@ -111,6 +110,13 @@ class App(Engine):
             State.hud.next_pos(),
             'Tile size %s', callback=lambda:str(tuple(State.map.tile_size)),
             interval=2000))
+        def screen_info():
+            res = State.screen.size
+            vis = State.camera.visible_tile_range
+            tiles = Vec2d(vis[2]-vis[0], vis[3]-vis[1])
+            return 'Screen %dx%d / Visible tiles %dx%d' % (res.x,res.y,tiles.x,tiles.y,)
+        State.hud.add('Screen', Stat(
+            State.hud.next_pos(), '', callback=screen_info, interval=2000))
         State.show_hud = True
         
         # Warp avatar to location on map.

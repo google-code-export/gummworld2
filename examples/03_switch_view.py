@@ -37,7 +37,6 @@ about fashioning an object to be sensitive to its state being restored.
 
 import pygame
 from pygame.locals import K_TAB, K_UP, K_DOWN, K_LEFT, K_RIGHT
-import pymunk
 
 import paths
 from gamelib import *
