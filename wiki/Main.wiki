@@ -17,9 +17,9 @@ One may wonder about the original Gummworld. While it was a great learning exper
 
 The library performs basic scrolling of tiles by syncing a camera with a target object that moves about the map. Change the target object's position and the camera follows.
 
-These are the key classes.
+These are the core classes.
 
-  State: A storage container for run-time objects, settings, and values. Because it's easy to access globally, this minimizes the need to pass around key objects in arguments. States can also be saved and restored by name, if desired. The mechanism is straightforward, thus easy to use and extend.
+  State: A storage container for run-time objects, settings, and values. Because it's easy to access globally, this minimizes the need to pass around core objects in arguments. States can also be saved and restored by name, if desired. The mechanism is straightforward, thus easy to use and extend.
 
   Engine: A superclass providing the framework for initialization, run loop, update and draw methods, and pygame event handlers. If you decide to write your own engine, look in here to see how the key objects are created. Don't be afraid, no voodoo in here. Note that if you want to use pymunk via the Engine, you need to turn it on with use_pymunk=True.
 
