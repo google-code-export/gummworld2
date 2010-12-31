@@ -84,11 +84,15 @@ Features:
 
 ==Working Notes==
 
-pymunk is barely more than a concept at this time. It is fundamentally proven in examples/08_pymunk_motion.py. The library is about ready for use in map_editor.py, where game makers will be able to load a map in the editor, draw pymunk shapes on them, then save a "physics map". Games will then be able to load the graphics map and physics map, and rely on pymunk for run-time physics.
+===pymunk===
+
+pymunk is barely more than a concept thus far. It is fundamentally proven in examples/08_pymunk_motion.py. The pygame portion of the library is about ready for use in map_editor.py.
 
 ===Map Editor===
 
-I am liking Tiled Map Editor and pytmxloader. It is looking like map_editor.py will simply load the tile map, and (initially) just let one add pymunk objects.
+The plan is for game makers to be able to load a map in the editor, draw pymunk shapes on them to define obstacles, then save a "physics map". Games will then be able to load the graphics map and physics map, and rely on pymunk for run-time physics.
+
+I am liking the combination of Tiled Map Editor and pytmxloader. Initially map_editor.py will simply load the tile map, and let one add pymunk objects.
 
 Since the Map class is already source agnostic, it may be easy enough to support multiple map editor formats just by adding another toolkit.load_`*` function.
 
