@@ -1,4 +1,4 @@
-#summary Start-up project notes.
+#summary Design and implementation progress.
 #labels Featured
 
 = Introduction =
