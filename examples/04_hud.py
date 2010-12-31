@@ -20,12 +20,12 @@ __version__ = '0.3'
 __vernum__ = (0,3)
 
 
-"""map_editor.py - An example of using a hud in Gummworld2.
+"""04_hud.py - An example of using a hud in Gummworld2.
 """
 
 
 import pygame
-from pygame.locals import K_TAB, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_ESCAPE
+from pygame.locals import K_TAB, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_ESCAPE, K_h
 import pymunk
 
 import paths
@@ -35,9 +35,9 @@ from gamelib import *
 class App(Engine):
     
     def __init__(self):
-        super(App, self).__init__(frame_speed=0)
-        
-        pygame.display.set_caption('Press TAB to cycle views')
+        super(App, self).__init__(
+            caption='04 HUD - TAB: view | H: HUD',
+            frame_speed=0)
         
         # Save the main state.
         State.save('main')
@@ -107,6 +107,8 @@ class App(Engine):
             self.move_x = 1 * State.speed
         elif key == K_LEFT:
             self.move_x = -1 * State.speed
+        elif key == K_h:
+            State.show_hud = not State.show_hud
         elif key == K_TAB:
             # Select the next state name and and restore it.
             State.restore(self.next_state[State.name])

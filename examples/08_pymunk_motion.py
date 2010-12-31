@@ -20,9 +20,14 @@ __version__ = '0.3'
 __vernum__ = (0,3)
 
 
-"""map_editor.py - An example of using pymunk motion in Gummworld2.
+"""08_pymunk_motion.py - An example of using pymunk motion in Gummworld2.
 
 The Camera.target is a pymunk.Body object. The pymunk API is used for motion.
+
+This demo uses small tiles from a tileset distributed with Tiled 0.7.2, the
+Java version. They are 32x32 pixels. For better performance one will want to
+use larger tiles. See 09_collapse_map.py for a small-to-large tile conversion
+demo.
 """
 
 
@@ -47,13 +52,12 @@ class App(Engine):
     
     def __init__(self, resolution=(640,480)):
         super(App, self).__init__(
+            caption='08 pymunk Motion -  TAB: view | G: grid | L: labels',
             camera_target=model.CircleBody(),
             resolution=resolution,
             ##display_flags=FULLSCREEN|DOUBLEBUF,
             frame_speed=0,
             use_pymunk=True)
-        
-        pygame.display.set_caption('TAB: view | G: grid | L: labels')
         
         ## Load Tiled TMX map, then update the world and camera. Really, all
         ## there is to it. See the toolkit module for more detail.
@@ -138,7 +142,6 @@ class App(Engine):
         if self.move_to is not None:
             self.speed = geometry.distance(
                 self.speed_box.center, (x,y)) / self.max_speed_box
-        self.mouse_down = True
         
     def update_avatar_position(self):
         """update the avatar's position if any movement keys are held down
@@ -161,13 +164,12 @@ class App(Engine):
             rect = State.world.rect
             wx = max(min(wx,rect.right), rect.left)
             wy = max(min(wy,rect.bottom), rect.top)
-#            avatar.position = wx,wy
             avatar.slew(Vec2d(wx,wy), State.dt)
         elif State.camera.target.velocity != (0,0):
             State.camera.target.velocity = (0,0)
         
     def on_mouse_button_down(self, pos, button):
-        self.update_mouse_movement(pos)
+        self.mouse_down = True
         
     def on_mouse_button_up(self, pos, button):
         self.mouse_down = False

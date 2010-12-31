@@ -20,7 +20,7 @@ __version__ = '0.3'
 __vernum__ = (0,3)
 
 
-"""map_editor.py - An example of a sub-window view for Gummworld2.
+"""02_sub_window.py - An example of a sub-window view for Gummworld2.
 """
 
 
@@ -35,7 +35,9 @@ from gamelib import *
 class App(Engine):
     
     def __init__(self):
-        super(App, self).__init__(frame_speed=0)
+        super(App, self).__init__(
+            caption='02 Sub-window',
+            frame_speed=0)
         
         # The rect that defines the screen subsurface. It will also be used to
         # draw a border around the subsurface.

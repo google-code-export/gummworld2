@@ -71,7 +71,7 @@ from gamelib import (
 class Engine(object):
 
     def __init__(self, camera_target=None,
-        resolution=(600,600), display_flags=0,
+        resolution=(600,600), display_flags=0, caption=None,
         tile_size=(128,128), map_size=(10,10),
         update_speed=30, frame_speed=30,
         use_pymunk=False):
@@ -85,6 +85,8 @@ class Engine(object):
         
         The display_flags argument specifies the pygame display flags to pass
         to the display initializer.
+        
+        The caption argument is a string to use as the window caption.
         
         The tile_size and map_size arguments specify the width and height of
         a map tile, and width and height of a map in tiles, respectively.
@@ -110,6 +112,8 @@ class Engine(object):
         State.use_pymunk = use_pymunk
         
         State.screen = Screen(resolution, display_flags)
+        if caption is not None:
+            pygame.display.set_caption(caption)
         
         State.map = Map(tile_size, map_size)
         
@@ -157,8 +161,8 @@ class Engine(object):
         
         As an alternative to using Camera.update() you can modify the
         Camera.target.position in Engine.update(), and then call
-        Camera.interpolate in Engine.draw(). In this case you will also want to
-        initialize the frame speed to unlimited (0).
+        Camera.interpolate() in Engine.draw(). In this case you will also want
+        to initialize the frame speed to unlimited (0).
         """
         State.camera.update()
         
@@ -168,6 +172,7 @@ class Engine(object):
         
         Suggestion:
             State.screen.clear()
+            State.camera.interpolate()
             ... custom draw the screen ...
             State.screen.flip()
         """

@@ -20,7 +20,7 @@ __version__ = '0.3'
 __vernum__ = (0,3)
 
 
-"""map_editor.py - An example of a full-window view for Gummworld2.
+"""01_full_window.py - An example of a full-window view for Gummworld2.
 """
 
 
@@ -35,7 +35,9 @@ class App(Engine):
     
     def __init__(self):
         
-        super(App, self).__init__(frame_speed=0)
+        super(App, self).__init__(
+            caption='01 Full Window',
+            frame_speed=0)
         
         # Make some default content.
         toolkit.make_tiles()
@@ -47,6 +49,7 @@ class App(Engine):
     def update(self):
         """overrides Engine.update"""
         self.update_avatar_position()
+#        State.camera.update()
 
     def draw(self):
         """overrides Engine.draw"""
