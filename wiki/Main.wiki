@@ -29,31 +29,35 @@ These are the core classes.
 
   Map: Serves map tiles in layers. Also serves labels and grid lines.
 
-  World: The underlying physics, based on pymunk. The Engine class uses this to maintain physical bodies for motion and collision. If you do not decide to use pymunk you can ignore this object. If you do not have pymunk installed, the World class will automatically live without it.
+  World: Container for objects that are subject to the game physics. If you decide to use pyymunk this is where space and bodies exist. If you decide not to use pymunk you can build your own physics into it, or ignore it entirely.
 
-  GameClock: Keeps constant game time. Supports variable frame rate. Calculates interpolated fraction of a game tick, which can be used for prediction and sub-pixel motion.
+  GameClock: Keeps constant game time. Supports variable frame rate. Calculates interpolated fraction of a game tick, which can be used for prediction, sub-pixel motion, and precision timing.
 
-The data module provides resource loaders for various data in the data/ subdirectories, a la skellington. It should be very easy to figure out and customize as needed.
+The data module provides resource loaders for various data in the data subdirectories, a la skellington. It should be very easy to figure out and customize as needed.
 
-There are a few utilities--a HUD, tile grid lines, tile labels, popup menu, toolkit (map generators, tile renders), pygame utilities module--to ease experimentation with concepts, but they are not required (except by the examples and map_editor.py). One can use Gummworld2 and easily ignore them. The toolkit module provides a number of "quickie" functions for practical use and demonstration.
+There are a few utilities to simplify laborious tasks and ease experimentation with concepts: a HUD, map grid, tile labels, popup menu, map generators, Tiled map loader, tile renders, pygame utilities module. The examples and map_editor.py rely upon those modules. However, they are not required for games, with the exception that pygame_utils.py is required by the Engine class. One can certainly use Gummworld2 for map scrolling and easily ignore them. Of special interest, the toolkit module provides a number of "quickie" functions for both practical use and demonstration.
 
-Some examples use Tiled maps. While this is one of the easiest way to make and import tile maps, it is not required. Any map source can be used as long as its data can be converted to the Map class's meager requirements. See the toolkit module for a few functions that load maps, and the Map class for documentation.
+Some examples use Tiled maps. While this is one of the easiest ways to make and import tile maps, it is not required. Any map source can be used as long as its data can be converted to the Map class's meager requirements. See the toolkit module for a few functions that load maps, and the Map class documentation.
 
-Note that if you want to use pymunk via the Engine class, you need to turn it on with use_pymunk=True. This explicitly tells the Engine constructor whether to use pymunk when initializing library objects. This avoids any problems that might arise if pymunk is installed but the game does not want to use pymunk objects. This is only of special note for the Engine constructor. The library doesn't assume anything. If pymunk can be imported, the package is available and pymunk subclasses are created in the model module; your game code can choose to use them, or ignore them. The library only uses them if you specify {{{Engine(use_pymunk=True)}}}. This is a very small amount of code; it should be pretty clear in `engine.Engine.__init__` and the model module.
+Note that if you want to use pymunk via the Engine class, you need to turn it on with use_pymunk=True. This explicitly tells the Engine constructor whether to use pymunk when initializing library objects. This avoids any problems that might arise if pymunk is installed but the game does not want to use the pymunk package. This is only of special note for the Engine constructor. The library doesn't assume anything. If pymunk can be imported, then it is available and pymunk subclasses are created in the `model` module; your game code can choose to use them, or ignore them. The engine only creates pymunk core objects if you specify `Engine(use_pymunk=True)`. This "if pymunk" logic is a very small amount of code in `engine.Engine.__init__` and the model module; it should be pretty clear.
 
-The pymunk physics scale is intended to be based on pixels, however all attempts will be made to support sub-pixel math with floating point numbers. Sub-pixel math is compatible with the underlying physics engine, pymunk (chipmunk), and allows fractional speeds, mass, dimensions, etc. The display code must round and convert physics values to integers for pygame where appropriate.
+The default pymunk physics scale is intended to be based on pixels (see `model.CircleBody`), however all attempts will be made to support sub-pixel math with floating point numbers. Sub-pixel math allows fractional speeds, mass, dimensions, etc. The display code must round and convert physics values to integers for pygame where appropriate.
 
-Also, a general caution. Many underlying coordinate "points" are implemented as {{{Vec2d}}}. Attempts will be made to protect them from direct assignment, as clobbering them with a sequence or other object will break some library routines. Keep this in mind when subclassing or choosing to directly access the underlying {{{obj._attributes}}}.
+Also, a general caution. The instance variables representing 2D coordinates are typically implemented as `Vec2d`. Attempts will be made to protect them from direct assignment, as clobbering them with a sequence or other object will break some library routines. Keep this in mind when subclassing or choosing to directly access the underlying `obj._attributes`.
 
-==Current focus==
+==Current Status==
 
-Getting organized. Shuffling modules and classes around.
+In the past few commits the API has seen less restructuring.
 
 Developing a map editor, which seconds as a practical test of the library and the requirements driver for library features.
 
-Anything marked DONE in the to-do list is not necessarily frozen. It is just considered adequately usable for the purpose it is most recently needed. These will certainly evolve as needed.
+Performance is extremely good on my Intel Core i3 laptop. Not so great on my older AMD Athlon X2 desktop, but still much better than the original Gummworld; it screams at Diablo resolution (800x600), presumably leaving plenty of capacity for dynamic content.
 
-Features:
+===Features===
+
+Anything marked DONE in the following list is not necessarily frozen. It is just considered adequately usable for recent SVN revisions. These will certainly evolve as needed.
+
+Library:
   * Application framework, aka "engine" (DONE)
   * Camera: world-to-screen, screen-to-world, tile picking, interpolated scrolling (DONE)
   * Map: layered tile serving (DONE)
@@ -62,6 +66,8 @@ Features:
   * Grid (DONE)
   * HUD (DONE)
   * Toolkit: hud and tile generators; map loader; render routines; map optimizer (DONE)
+
+Editor:
   * pymunk editing primitives
     * Line
     * Circle
