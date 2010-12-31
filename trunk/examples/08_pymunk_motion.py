@@ -34,7 +34,7 @@ demo.
 import pygame
 from pygame.sprite import Sprite
 from pygame.locals import (
-    FULLSCREEN, DOUBLEBUF,
+    FULLSCREEN,
     Color,
     K_TAB, K_ESCAPE, K_g, K_l,
 )
@@ -55,7 +55,7 @@ class App(Engine):
             caption='08 pymunk Motion -  TAB: view | G: grid | L: labels',
             camera_target=model.CircleBody(),
             resolution=resolution,
-            ##display_flags=FULLSCREEN|DOUBLEBUF,
+            ##display_flags=FULLSCREEN,
             frame_speed=0,
             use_pymunk=True)
         

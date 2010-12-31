@@ -104,6 +104,26 @@ def fill_gradient(surface, color, gradient, rect=None, vertical=True, forward=Tr
             fn_line(surface, color, (col,y1), (col,y2))
 
 
+def init_joystick(joy_id=-1):
+    """Initialize joysticks. This must be called before PyGame will
+    start sending joystick events. If joy_id is -1 all joysticks
+    will be intialized. The initialized joysticks are returned as a
+    dict keyed by joystick id.
+    """
+    joysticks = {}
+    if joy_id in range(pygame.joystick.get_count()):
+        joy_ids = [joy_id]
+    elif joy_id == -1:
+        joy_ids = range(pygame.joystick.get_count())
+    else:
+        raise pygame.error('Invalid joystick device number: %d' % joy_id)
+    for joy_id in joy_ids:
+        joystick = pygame.joystick.Joystick(joy_id)
+        joystick.init()
+        joysticks[joy_id] = joystick
+    return joysticks
+
+
 def _init_fonts():
     """Initializes the shared font cache."""
     global _fonts

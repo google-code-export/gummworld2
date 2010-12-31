@@ -65,6 +65,7 @@ except:
 
 from gamelib import (
     State, Screen, model, Map, Camera, Graphics, GameClock,
+    pygame_utils,
 )
 
 
@@ -138,6 +139,7 @@ class Engine(object):
         State.graphics = Graphics()
         State.clock = GameClock(update_speed, frame_speed)
         
+        self._joysticks = pygame_utils.init_joystick()
         self._get_pygame_events = pygame.event.get
         
     def run(self):
@@ -178,6 +180,12 @@ class Engine(object):
         """
         pass
         
+    @property
+    def joysticks(self):
+        """List of initialized joysticks.
+        """
+        return list(self._joysticks)
+    
     def _get_events(self):
         """Get events and call the handler. Called automatically by run() each
         time the clock indicates an update cycle is ready.

@@ -27,7 +27,6 @@ Gummworld2.
 
 import pygame
 from pygame.locals import K_TAB, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_ESCAPE
-import pymunk
 
 import paths
 from gamelib import *
