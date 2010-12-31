@@ -2,19 +2,19 @@
 
 = Introduction =
 
-This is Gummworld2. It's designed as a light pygame framework for a scrolling game, where the map is larger than the display. It emphasizes simplicity, openness, and performance.
+This is Gummworld2. It's designed as a light pygame framework for a scrolling game, where the map is larger than the display. It emphasizes simplicity, freedom, and performance.
 
 One should not have to struggle with making a game concept fit into a restrictive paradigm. Gummworld2 solves this with a clean and simple update-and-draw run loop.
 
-One should also be free to choose one's own audiovisual presentation, intelligence, and GUIs. The benefits should be obvious. Low learning curve: use what you know. Freedom: use whatever you want; you are not forced to learn "The Gummworld Way", and wade through bloated features. Gummworld2 does this by providing just a few management classes, driven by a very simple (optional) engine. It is merely a _suggestion_ to use Tiled for maps and pymunk for physics, as it is quite easy to substitute your own.
+One should also be free to choose one's own audiovisual presentation, game intelligence, and GUIs. The benefits should be obvious. Low learning curve: use what you know. Freedom: use whatever you want; you are not forced to learn "The Gummworld Way", and wade through bloated features. Gummworld2 provides just a few management classes, driven by a very simple (optional) engine. It is merely a _suggestion_ to use the engine for the game framework, Tiled for maps, and pymunk for physics. It is quite easy to substitute your own.
 
 One should not have to worry about juggling game speed and frame rates. Gummworld2's clock maintains steady game time and variable frame rate without the headaches.
 
-One may wonder about the original Gummworld. While it was a great learning experience, it became obvious it was more ambitious than it should have been. It turned out overly complex and restrictive, with a higher learning curve than intended. Consequently it became hard to do anything outside the box.
+One may wonder about the original Gummworld. While it was a great learning experience and a lot of fun, it became obvious it was more ambitious than it should have been. It turned out overly complex and restrictive, with a higher learning curve than intended. Consequently it became hard to do anything outside the box.
 
 = Details =
 
-The map editor performs basic scrolling of tiles by syncing a camera with a target object that moves about the map. Change the target object's position and the camera follows.
+The library performs basic scrolling of tiles by syncing a camera with a target object that moves about the map. Change the target object's position and the camera follows.
 
 These are the key classes.
 
