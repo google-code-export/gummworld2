@@ -9,7 +9,7 @@ One should not have to struggle with making a game concept fit into a restrictiv
 
 One should also be free to choose one's own audiovisual presentation, game intelligence, and GUIs. The benefits should be obvious. Low learning curve: use what you know. Freedom: use whatever you want; you are not forced to learn "The Gummworld Way", and wade through bloated features. Gummworld2 provides just a few management classes, driven by a very simple (optional) engine. It is merely a _suggestion_ to use the engine for the game framework, Tiled for maps, and pymunk for physics. It is quite easy to substitute your own.
 
-One should not have to worry about juggling game speed and frame rates. Gummworld2's clock maintains steady game time and variable frame rate without the headaches, and the management classes do what they do with efficiency leaving more computer resources for the game content.
+One should not have to worry about juggling game speed and frame rates. Gummworld2's clock maintains steady game time and variable frame rate without the headaches, and the management classes do what they do with efficiency leaving more computer resources for game content.
 
 One may wonder about the original Gummworld. While it was a great learning experience and a lot of fun, it became obvious it was more ambitious than it should have been. It turned out overly complex and restrictive, with a higher learning curve than intended. Consequently it became hard to do anything outside the box.
 
