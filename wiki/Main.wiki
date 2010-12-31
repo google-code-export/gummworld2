@@ -1,4 +1,5 @@
-#summary Miscellaneous project notes.
+#summary Start-up project notes.
+#labels Featured
 
 = Introduction =
 
@@ -60,6 +61,7 @@ Features:
   * Menu (DONE)
   * Grid (DONE)
   * HUD (DONE)
+  * Toolkit: hud and tile generators; map loader; render routines; map optimizer (DONE)
   * pymunk editing primitives
     * Line
     * Circle
@@ -82,6 +84,8 @@ Features:
 
 ==Working Notes==
 
+pymunk is barely more than a concept at this time. It is fundamentally proven in examples/08_pymunk_motion.py. The library is about ready for use in map_editor.py, where game makers will be able to load a map in the editor, draw pymunk shapes on them, then save a "physics map". Games will then be able to load the graphics map and physics map, and rely on pymunk for run-time physics.
+
 ===Map Editor===
 
 I am liking Tiled Map Editor and pytmxloader. It is looking like map_editor.py will simply load the tile map, and (initially) just let one add pymunk objects.
@@ -89,3 +93,5 @@ I am liking Tiled Map Editor and pytmxloader. It is looking like map_editor.py w
 Since the Map class is already source agnostic, it may be easy enough to support multiple map editor formats just by adding another toolkit.load_`*` function.
 
 The (Tiled) map layers feature can be used to classify terrain objects, for example "trees go on layer 5". Game makers (i.e. me) may want to do special things with these, like let mobile objects pass under or behind them and temporarily lower the image alpha so the mobile object is not entirely obscured. (This aspect weakens the case for map decorating and tiling in map_editor.py.)
+
+_Maybe_ later the map editor can be extended to handle placement of dynamic game objects, for example, groups of orcs, gates, siege weapons. It would be nice to be able to insert the physical "device" into the map, and provide a handle for map loaders to detect "Ah, here is a Mark IV Gizmo. I'll load the graphics and game mechanics for it". This would be highly preferable to eyeballing map coordinates in the editor and hand entering code or data sets to place the many gizmos.
