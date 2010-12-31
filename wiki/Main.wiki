@@ -3,15 +3,15 @@
 
 = Introduction =
 
-This is Gummworld2. It's designed as a light pygame framework for a scrolling game, where the map is larger than the display. It emphasizes simplicity, freedom, and performance.
+This is Gummworld2. It's designed as a light [http://www.pygame.org pygame] framework for a scrolling game, where the map is larger than the display. It emphasizes simplicity, freedom, and performance.
 
 One should not have to struggle with making a game concept fit into a restrictive paradigm. Gummworld2 solves this with a clean and simple update-and-draw run loop.
 
-One should also be free to choose one's own audiovisual presentation, game intelligence, and GUIs. The benefits should be obvious. Low learning curve: use what you know. Freedom: use whatever you want; you are not forced to learn "The Gummworld Way", and wade through bloated features. Gummworld2 provides just a few management classes, driven by a very simple (optional) engine. It is merely a _suggestion_ to use the engine for the game framework, Tiled for maps, and pymunk for physics. It is quite easy to substitute your own.
+One should also be free to choose one's own audiovisual presentation, game intelligence, and GUIs. The benefits should be obvious. Low learning curve: use what you know. Freedom: use whatever you want. You are not forced to learn "The Gummworld Way", and wade through bloated features. Gummworld2 provides just a few management classes, driven by a very simple (optional) engine. It is merely a _suggestion_ to use the engine for the game framework, [http://www.mapeditor.org/ Tiled] for maps, and [http://www.pygame.org/project-pymunk-780-2576.html pymunk] for physics. If you prefer to use other libraries and utilities, it is quite easy to use Gummworld2 for scrolling maps and leverage your own tools.
 
 One should not have to worry about juggling game speed and frame rates. Gummworld2's clock maintains steady game time and variable frame rate without the headaches, and the management classes do what they do with efficiency leaving more computer resources for game content.
 
-One may wonder about the original Gummworld. While it was a great learning experience and a lot of fun, it became obvious it was more ambitious than it should have been. It turned out overly complex and restrictive, with a higher learning curve than intended. Consequently it became hard to do anything outside the box.
+Since this is Gummworld2, one may wonder about the original [http://www.pygame.org/project-Gummworld-1107-.html Gummworld]. While it was a great learning experience and a lot of fun, it became obvious it was more ambitious than it should have been. It turned out overly complex and restrictive, with a higher learning curve than intended. Consequently it became hard to do anything outside the box.
 
 = Details =
 
@@ -98,7 +98,7 @@ pymunk is barely more than a concept thus far. It is fundamentally proven in exa
 
 The plan is for game makers to be able to load a map in the editor, draw pymunk shapes on them to define obstacles, then save a "physics map". Games will then be able to load the graphics map and physics map, and rely on pymunk for run-time physics.
 
-I am liking the combination of Tiled Map Editor and pytmxloader. Initially map_editor.py will simply load the tile map, and let one add pymunk objects.
+I am liking the combination of [http://www.mapeditor.org/ Tiled Map Editor] and [http://www.pygame.org/project-map+loader+for+%27tiled%27-1158-2951.html pytmxloader]. Initially the map editor will simply load the tile map, and let one add pygame or pymunk geometry.
 
 Since the Map class is already source agnostic, it may be easy enough to support multiple map editor formats just by adding another toolkit.load_`*` function.
 
