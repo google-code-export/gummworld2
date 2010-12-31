@@ -104,9 +104,10 @@ Since the Map class is already source agnostic, it may be easy enough to support
 
 Map layers--Tiled or other--can be used to classify terrain objects, for example "trees go on layer 5". Game makers (i.e., me) may want to do special things with these, like let mobile objects pass under or behind them and temporarily lower the image alpha so the mobile object is not entirely obscured. (This aspect weakens the case for map decorating and tiling in map_editor.py.)
 
-The map editor must also handle placement of dynamic game objects, for example, groups of orcs, gates, siege weapons. It' essential to be able to insert the physical "device" into the map, and provide a handle for two reasons:
+The map editor must also handle placement of dynamic game objects, for example, groups of orcs, gates, siege weapons. It is undecided yet if this will include loading tilesets for visual cues or content design; but it's essential to at least be able to insert a physical "device" into the map, and provide a handle and some data for a few reasons:
 
-  # Map loaders can detect "Ah, here is a Mark IV Gizmo. I'll load the graphics and game mechanics for it". Or the related non-physics game elements can spring into life as their physics are activated by game progression.
+  # Shapes are needed for dimensions; and potentially more, in the case of pymunk.
   # Obviously, if objects in the physics dimension are interacting those interactions need to be correlated to the display, or the network, or whatever.
+  # Map loaders can detect "Ah, here is a Mark IV Gizmo. I'll load the graphics and game intelligence for it". Or the related non-physics game elements can spring into life as their physics are activated by game progression.
 
 Using a map editor for placement would be highly preferable to eyeballing map coordinates in the map editor and hand entering code or data sets to place the many gizmos on a map.
