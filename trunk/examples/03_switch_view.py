@@ -20,7 +20,7 @@ __version__ = '0.3'
 __vernum__ = (0,3)
 
 
-"""map_editor.py - An example of switching state in Gummworld2.
+"""03_switch_view.py - An example of switching state in Gummworld2.
 
 This example has two views: a full-window view and a sub-window view. Use TAB to
 switch between them. This example only uses the State tricks to swap two
@@ -46,9 +46,9 @@ from gamelib import *
 class App(Engine):
     
     def __init__(self):
-        super(App, self).__init__(frame_speed=0)
-        
-        pygame.display.set_caption('Press TAB to cycle views')
+        super(App, self).__init__(
+            caption='03 Switch View - Press TAB to cycle views',
+            frame_speed=0)
         
         ## Save the main state.
         State.save('main')

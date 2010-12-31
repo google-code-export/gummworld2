@@ -79,14 +79,16 @@ class Map(object):
         mw,mh = map_size
         self.rect = pygame.Rect(0,0,tw*mw,th*mh)
         
-        # make a tile outline to blit for optional grid
-        s = pygame.sprite.Sprite()
-        s.image = pygame.surface.Surface((tw,th))
-        s.rect = s.image.get_rect()
-        pygame.draw.rect(s.image, Color('white'), s.rect, 1)
-        s.image.set_colorkey(Color('black'))
-        s.image.set_alpha(25)
-        self.outline = s
+        # grid lines
+        def make_line(size):
+            s = pygame.sprite.Sprite()
+            s.image = pygame.surface.Surface(size)
+            s.image.fill(Color('white'))
+            s.image.set_alpha(75)
+            s.rect = s.image.get_rect()
+            return s
+        self.h_line = make_line((tw,1))
+        self.v_line = make_line((1,th))
         
         # make grid labels to blit
         self.labels = {}
@@ -117,9 +119,9 @@ class Map(object):
     
     def get_tile_at(self, x, y, layer=0):
         """Return the tile at grid location (x,y) in the specified layer. If no
-        tile exists at the location, return None.
+        tile exists at the location, None is returned.
         """
-        return self.layers[layer].get((x,y), (None,(x,y)))
+        return self.layers[layer].get((x,y), None)
 
     def get_tiles(self, x1, y1, x2, y2, layer=0):
         """Return the list of tiles at the specified layer in range (x1,y1)
@@ -130,50 +132,60 @@ class Map(object):
         
         The layer argument is an int representing the tile layer to select.
         
-        If a grid location in the range does not have a tile, None is stored in
-        its place. If the layer is not visible, an empty list is returned.
+        If the layer is not visible, an empty list is returned.
         """
         if self.layers[layer].visible:
-            return [self.layers[layer].get((x,y), (None,(x,y)))
-                for x in xrange(x1,x2)
-                    for y in xrange(y1,y2)]
+            # this is dict.get()
+            get = self.layers[layer].get
+            return [
+                s for s in (
+                    get((x,y), None)
+                        for x in range(x1,x2)
+                            for y in range(y1,y2)
+                ) if s
+            ]
         else:
             return []
 
     def get_label_at(self, x, y):
         """Return the label sprite at grid location (x,y). If no sprite exists at
-        that location, return None.
+        that location, None is returned.
         """
-        return self.labels.get((x,y), (None,(x,y)))
+        return self.labels.get((x,y), None)
     
     def get_labels(self, x1, y1, x2, y2):
-        """Return the list of tiles in range (x1,y1) through (x2,y2).
+        """Return the list of labels in range (x1,y1) through (x2,y2).
         
         The arguments x1,y1,x2,y2 are ints representing the range of labels to
         select.
-        
-        If a grid location in the range does not have a label, None is stored in
-        its place.
         """
-        return [self.labels.get((x,y), (None,(x,y)))
-            for x in xrange(x1,x2)
-                for y in xrange(y1,y2)]
+        # this is dict.get()
+        get = self.labels.get
+        return [
+            s for s in (
+                get((x,y), None)
+                    for x in range(x1,x2)
+                        for y in range(y1,y2)
+            ) if s
+        ]
     
     def vertical_grid_line(self, xy=None, anchor='topleft'):
         """Return the vertical grid sprite. If specified, the sprite.rect's
         attribute specified by anchor is set to the value of xy.
         """
+        v_line = self.v_line
         if xy is not None:
-            setattr(self.v_line, anchor, xy)
-        return self.v_line
+            setattr(v_line.rect, anchor, xy)
+        return v_line
     
     def horizontal_grid_line(self, xy=None, anchor='topleft'):
         """Return the horizontal grid sprite. If specified, the sprite.rect's
         attribute specified by anchor is set to the value of xy.
         """
+        h_line = self.h_line
         if xy is not None:
-            setattr(self.h_line, anchor, xy)
-        return self.h_line
+            setattr(h_line.rect, anchor, xy)
+        return h_line
 
 
 class MapLayer(dict):

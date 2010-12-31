@@ -107,6 +107,13 @@ class Camera(object):
         self._move_from = Vec2d(self.target.position)
         self._move_to = Vec2d(self.target.position)
         self._interp = 0.0
+        self.map = None
+        if State.map:
+            self._get_visible_tile_range()
+            self._get_visible_tiles()
+        else:
+            self._visible_tile_range = []
+            self._visible_tiles = []
         self.update()
         
     def interpolate(self):
@@ -137,6 +144,8 @@ class Camera(object):
         if self._move_to != target_pos:
             self._move_from = self._move_to
             self._move_to = Vec2d(target_pos)
+        self._get_visible_tile_range()
+        self._get_visible_tiles()
         
     def update(self):
         """Relocate camera position immediately to target.
@@ -150,6 +159,8 @@ class Camera(object):
         if self._move_from != v:
             self._move_from = Vec2d(v)
             self._move_to = Vec2d(v)
+        self._get_visible_tile_range()
+        self._get_visible_tiles()
         
     def state_restored(self):
         """Sync a stale camera after swapping it in.
@@ -192,13 +203,18 @@ class Camera(object):
         """The range of tiles that would be visible on the display surface. The
         value is a tuple(x1,y1,x2,y2) representing map grid positions.
         """
+        return self._visible_tile_range
+    
+    def _get_visible_tile_range(self):
         tile_x,tile_y = State.map.tile_size
-        (l,t),(r,b) = self.rect.topleft,self.rect.bottomright
-        left = int(round(float(l) / tile_x - 1))
-        right = int(round(float(r) / tile_x + 2))
-        top = int(round(float(t) / tile_y - 1))
-        bottom = int(round(float(b) / tile_y + 2))
-        return left,top,right,bottom
+        l,t,w,h = self.rect
+        r = l+w
+        b = t+h
+        left = int(round(float(l) / tile_x)) - 1
+        right = int(round(float(r) / tile_x)) + 2
+        top = int(round(float(t) / tile_y)) - 1
+        bottom = int(round(float(b) / tile_y)) + 2
+        self._visible_tile_range = left,top,right,bottom
         
     @property
     def visible_tiles(self):
@@ -206,8 +222,11 @@ class Camera(object):
         The first dimension is the map layer, the second is the tile. Tile lists
         are sorted in (column,row) order.
         """
+        return self._visible_tiles
+    
+    def _get_visible_tiles(self):
         tile_range = self.visible_tile_range
         map = State.map
         get_tiles = map.get_tiles
         layer_range = range(len(map.layers))
-        return [get_tiles(*tile_range, layer=n) for n in layer_range]
+        self._visible_tiles = [get_tiles(*tile_range, layer=n) for n in layer_range]

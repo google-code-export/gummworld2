@@ -20,17 +20,18 @@ __version__ = '0.3'
 __vernum__ = (0,3)
 
 
-"""map_editor.py - An example of using Tiled maps in Gummworld2.
+"""07_tiled_map.py - An example of using Tiled maps in Gummworld2.
 
 This demo uses small tiles from a tileset distributed with Tiled 0.7.2, the
 Java version. They are 32x32 pixels. For better performance one will want to
-use larger tiles.
+use larger tiles. See 09_collapse_map.py for a small-to-large tile conversion
+demo.
+
+Thanks to the creators of Tiled Map Editor:
+    http://www.mapeditor.org/
 
 Thanks to dr0id for his nice tiledtmxloader module:
     http://www.pygame.org/project-map+loader+for+%27tiled%27-1158-2951.html
-
-And the creators of Tiled Map Editor:
-    http://www.mapeditor.org/
 """
 
 
@@ -50,11 +51,10 @@ class App(Engine):
     
     def __init__(self, resolution=(640,480)):
         super(App, self).__init__(
+            caption='07 Tiled Map - TAB: view | G: grid | L: labels',
             resolution=resolution,
             ##display_flags=FULLSCREEN|DOUBLEBUF,
             frame_speed=0)
-        
-        pygame.display.set_caption('TAB: view | G: grid | L: labels')
         
         ## Load Tiled TMX map, then update the world's dimensions. Really, all
         ## there is to it. See the toolkit module for more detail.
@@ -139,7 +139,6 @@ class App(Engine):
         if self.move_to is not None:
             self.speed = geometry.distance(
                 self.speed_box.center, (x,y)) / self.max_speed_box
-        self.mouse_down = True
         
     def update_avatar_position(self):
         """update the avatar's position if any movement keys are held down
@@ -165,7 +164,7 @@ class App(Engine):
             avatar.position = wx,wy
         
     def on_mouse_button_down(self, pos, button):
-        self.update_mouse_movement(pos)
+        self.mouse_down = True
         
     def on_mouse_button_up(self, pos, button):
         self.mouse_down = False

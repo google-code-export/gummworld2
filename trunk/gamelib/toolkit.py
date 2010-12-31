@@ -27,9 +27,42 @@ __doc__ = """toolkit.py - Some helper tools for Gummworld2.
 import pygame
 from pygame.sprite import Sprite
 
-from gamelib import data, State, Map, MapLayer
+from gamelib import data, State, Map, MapLayer, Vec2d
 from gamelib.ui import HUD, Stat, Statf, hud_font
 from tiledtmxloader import TileMapParser, ImageLoaderPygame
+
+
+def make_hud(caption=None):
+    """Create a HUD with dynamic items. This creates a default hud to serve
+    both as an example, and for an early design and debugging convenience.
+    """
+    State.hud = HUD()
+    next_pos = State.hud.next_pos
+    
+    if caption:
+        State.hud.add('Caption', Stat(next_pos(), caption))
+    
+    State.hud.add('FPS',
+        Statf(next_pos(), 'FPS %d', callback=State.clock.get_fps))
+    
+    rect = State.world.rect
+    l,t,r,b = rect.left,rect.top,rect.right,rect.bottom
+    State.hud.add('Bounds',
+        Stat(next_pos(), 'Bounds %s'%((int(l),int(t),int(r),int(b)),)) )
+    
+    def get_mouse():
+        s = pygame.mouse.get_pos()
+        w = State.camera.screen_to_world(s)
+        return 'S'+str(s) + ' W'+str((int(w.x),int(w.y),))
+    State.hud.add('Mouse',
+        Statf(next_pos(), 'Mouse %s', callback=get_mouse, interval=100))
+    
+    def get_world_pos():
+        s = State.camera.world_to_screen(State.camera.position)
+        w = State.camera.position
+        return 'S'+str((int(s.x),int(s.y),)) + ' W'+str((int(w.x),int(w.y),))
+    State.hud.add('Camera',
+        Statf(next_pos(), 'Camera %s', callback=get_world_pos, interval=100))
 
 
 def make_tiles():
@@ -82,34 +115,47 @@ def make_tiles2():
             State.map.add(s)
 
 
-def make_hud():
-    """Create a HUD with dynamic items. This creates a default hud to serve
-    both as an example, and for an early design and debugging convenience.
-    """
-    State.hud = HUD()
-    next_pos = State.hud.next_pos
-    
-    State.hud.add('FPS',
-        Statf(next_pos(), 'FPS %d', callback=State.clock.get_fps))
-    
-    rect = State.world.rect
-    l,t,r,b = rect.left,rect.top,rect.right,rect.bottom
-    State.hud.add('Bounds',
-        Stat(next_pos(), 'Bounds %s'%((int(l),int(t),int(r),int(b)),)) )
-    
-    def get_mouse():
-        s = pygame.mouse.get_pos()
-        w = State.camera.screen_to_world(s)
-        return 'S'+str(s) + ' W'+str((int(w.x),int(w.y),))
-    State.hud.add('Mouse',
-        Statf(next_pos(), 'Mouse %s', callback=get_mouse, interval=100))
-    
-    def get_world_pos():
-        s = State.camera.world_to_screen(State.camera.position)
-        w = State.camera.position
-        return 'S'+str((int(s.x),int(s.y),)) + ' W'+str((int(w.x),int(w.y),))
-    State.hud.add('Camera',
-        Statf(next_pos(), 'Camera %s', callback=get_world_pos, interval=100))
+def collapse_map(map, tiles=(2,2)):
+    # new map dimensions
+    tiles = Vec2d(tiles)
+    tw,th = map.tile_size * tiles
+    mw,mh = map.map_size // tiles
+    if mw * tiles.x != map.map_size.x:
+        mw += 1
+    if mh * tiles.y != map.map_size.y:
+        mh += 1
+    # new map
+    new_map = Map((tw,th), (mw,mh))
+    # collapse the tiles in each layer...
+    for layeri,layer in enumerate(map.layers):
+        # add a new layer
+        new_map.layers.append(MapLayer(layer.visible))
+        # walk the old map, stepping by the number of the tiles argument...
+        for x in range(0, map.map_size.x, tiles.x):
+            for y in range(0, map.map_size.y, tiles.y):
+                # make a new sprite
+                s = Sprite()
+                s.image = pygame.surface.Surface((tw,th))
+                s.rect = s.image.get_rect()
+                s.name = tuple((x,y) / tiles)
+                # blit the (x,y) tile and neighboring tiles to right and lower
+##                print '-'*5
+##                print 'new tile',(x,y)
+                for nx in range(tiles.x):
+                    for ny in range(tiles.y):
+                        tile = map.get_tile_at(x+nx, y+ny, layeri)
+                        if tile:
+                            p = s.rect.topleft + map.tile_size * (nx,ny)
+##                            print 'blit',p
+                            s.image.blit(tile.image, p)
+##                            s.image.set_alpha(tile.image.get_alpha())
+                s.rect.topleft = Vec2d(x,y) * map.tile_size
+##                print 'position',s.rect.topleft
+                #
+                new_map.add(s, layer=layeri)
+    if hasattr(map, 'tiled_map'):
+        new_map.tiled_map = map.tiled_map
+    return new_map
 
 
 def load_tiled_map(map_file_name):
@@ -163,16 +209,18 @@ def draw_sprite(s, blit_flags=0):
     """Draw a sprite on the camera's surface using world-to-screen conversion.
     """
     camera = State.camera
-    if isinstance(s, Sprite):
-        cr = camera.rect
-        sr = s.rect
-        camera.surface.blit(s.image, (sr.x-cr.x, sr.y-cr.y), special_flags=blit_flags)
+    cx,cy = camera.rect.topleft
+    sx,sy = s.rect.topleft
+    camera.surface.blit(s.image, (sx-cx, sy-cy), special_flags=blit_flags)
 
 
 def draw_tiles():
     """Draw visible tiles.
+    
+    This function assumes that the tiles stored in the map are sprites.
     """
     for layer in State.camera.visible_tiles:
+        # the list comprehension filters out sprites that are None
         for s in layer:
             draw_sprite(s)
 
@@ -182,11 +230,8 @@ def draw_labels():
     """
     if State.show_labels:
         x1,y1,x2,y2 = State.camera.visible_tile_range
-        get_at = State.map.get_label_at
-        for x in range(x1,x2):
-            for y in range(y1,y2):
-                s = get_at(x,y)
-                draw_sprite(s)
+        for s in State.map.get_labels(x1,y1,x2,y2):
+            draw_sprite(s)
 
 
 def draw_grid():
@@ -194,10 +239,15 @@ def draw_grid():
     """
     if State.show_grid:
         x1,y1,x2,y2 = State.camera.visible_tile_range
-        SpriteClass = pygame.sprite.Sprite
-        grid = State.map.outline
-        rect = grid.rect
-        for s in State.map.get_tiles(x1, y1, x2, y2):
-            if isinstance(s, SpriteClass):
-                rect.topleft = s.rect.topleft
-                draw_sprite(grid)
+        # speed up access to grid lines and their rects
+        map = State.map
+        hline = map.h_line
+        vline = map.v_line
+        hrect = hline.rect
+        vrect = vline.rect
+        for s in map.get_tiles(x1, y1, x2, y2):
+            srect = s.rect
+            hrect.topleft = srect.bottomleft
+            draw_sprite(hline)
+            vrect.topleft = srect.topright
+            draw_sprite(vline)

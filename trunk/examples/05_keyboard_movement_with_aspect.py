@@ -20,7 +20,8 @@ __version__ = '0.3'
 __vernum__ = (0,3)
 
 
-"""map_editor.py - An example of using movement aspect in Gummworld2.
+"""05_keyboard_movement_with_aspect.py - An example of using movement aspect in
+Gummworld2.
 """
 
 
@@ -40,6 +41,7 @@ class App(Engine):
         ## playfield is visible along the y-axis. However, if the tiling pattern
         ## is visible a "squat" appearance to the tiles can add to the effect.
         super(App, self).__init__(
+            caption='05 Keyboard Movement with Aspect - Press TAB to cycle views',
             tile_size=(128,64), map_size=(10,20), frame_speed=0)
 
         ## Map scrolls 1.0X on x-axis, 0.5X on y-axis. See on_key_down() for the
@@ -47,8 +49,6 @@ class App(Engine):
         ## scrolls slower along the y-axis than the x-axis.
         self.aspect = Vec2d(1.0, 0.5)
 
-        pygame.display.set_caption('Press TAB to cycle views')
-        
         # Save the main state.
         State.save('main')
         
