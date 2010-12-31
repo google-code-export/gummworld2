@@ -25,7 +25,7 @@ __vernum__ = (0,3)
 
 __doc__="""
 Gummworld2 is designed as a light pygame framework for a scrolling game, where
-the map is larger than the display. It emphasizes simplicity, openness, and
+the map is larger than the display. It emphasizes simplicity, freedom, and
 performance.
 """
 
