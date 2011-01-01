@@ -61,7 +61,7 @@ class App(Engine):
         
         ## Load Tiled TMX map, then update the world and camera. Really, all
         ## there is to it. See the toolkit module for more detail.
-        State.map = toolkit.load_tiled_map('Gumm no swamps.tmx')
+        State.map = toolkit.load_tiled_tmx_map('Gumm no swamps.tmx')
         State.world.rect = State.map.rect.copy()
         
         # Save the main state.

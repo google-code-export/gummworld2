@@ -27,7 +27,7 @@ camera.py - Camera module for Gummworld2.
 
 import pygame
 
-from gamelib import State, Vec2d
+from gamelib import State, MapLayer, Vec2d
 
 
 class Camera(object):
@@ -73,6 +73,8 @@ class Camera(object):
         """
         self._target = target
         self._surface = surface
+        self._visible_tile_range = []
+        self._visible_tiles = []
         self._init()
         
     @property
@@ -146,6 +148,7 @@ class Camera(object):
             self._move_to = Vec2d(target_pos)
         self._get_visible_tile_range()
         self._get_visible_tiles()
+        return self._interp
         
     def update(self):
         """Relocate camera position immediately to target.
@@ -201,20 +204,34 @@ class Camera(object):
     @property
     def visible_tile_range(self):
         """The range of tiles that would be visible on the display surface. The
-        value is a tuple(x1,y1,x2,y2) representing map grid positions.
+        value is a list of tuples(x1,y1,x2,y2) representing map grid positions
+        for each layer. The per layer metrics are necessary because maps can
+        have layers with different tile sizes, and therefore different grids.
         """
         return self._visible_tile_range
     
     def _get_visible_tile_range(self):
-        tile_x,tile_y = State.map.tile_size
-        l,t,w,h = self.rect
-        r = l+w
-        b = t+h
-        left = int(round(float(l) / tile_x)) - 1
-        right = int(round(float(r) / tile_x)) + 2
-        top = int(round(float(t) / tile_y)) - 1
-        bottom = int(round(float(b) / tile_y)) + 2
-        self._visible_tile_range = left,top,right,bottom
+##        tile_x,tile_y = State.map.tile_size
+##        l,t,w,h = self.rect
+##        r = l+w
+##        b = t+h
+##        left = int(round(float(l) / tile_x)) - 1
+##        right = int(round(float(r) / tile_x)) + 2
+##        top = int(round(float(t) / tile_y)) - 1
+##        bottom = int(round(float(b) / tile_y)) + 2
+##        self._visible_tile_range = left,top,right,bottom
+        range_per_layer = self._visible_tile_range
+        del range_per_layer[:]
+        for layeri,layer in enumerate(State.map.layers):
+            tile_x,tile_y = layer.tile_size
+            l,t,w,h = self.rect
+            r = l+w
+            b = t+h
+            left = int(round(float(l) / tile_x)) - 1
+            right = int(round(float(r) / tile_x)) + 2
+            top = int(round(float(t) / tile_y)) - 1
+            bottom = int(round(float(b) / tile_y)) + 2
+            range_per_layer.append((left,top,right,bottom))
         
     @property
     def visible_tiles(self):
@@ -225,8 +242,22 @@ class Camera(object):
         return self._visible_tiles
     
     def _get_visible_tiles(self):
+##        tile_range = self.visible_tile_range
+##        map = State.map
+##        get_tiles = map.get_tiles
+##        layer_range = range(len(map.layers))
+##        self._visible_tiles = [get_tiles(*tile_range, layer=n) for n in layer_range]
+        tile_per_layer = self._visible_tiles
+        del tile_per_layer[:]
         tile_range = self.visible_tile_range
         map = State.map
         get_tiles = map.get_tiles
-        layer_range = range(len(map.layers))
-        self._visible_tiles = [get_tiles(*tile_range, layer=n) for n in layer_range]
+        for layeri,layer in enumerate(State.map.layers):
+            tile_size,map_size,visible = layer.tile_size, layer.map_size, layer.visible
+            new_layer = MapLayer(tile_size,map_size,visible)
+            if visible:
+                tiles = get_tiles(*tile_range[layeri], layer=layeri)
+                new_layer.update([(tile.name,tile)
+                    for tile in get_tiles(*tile_range[layeri], layer=layeri)
+                ])
+            tile_per_layer.append(new_layer)

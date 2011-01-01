@@ -74,7 +74,7 @@ class App(Engine):
             use_pymunk=False)
         
         # Load Tiled TMX map, then update the world and camera.
-        self.map = toolkit.load_tiled_map('Gumm no swamps.tmx')
+        self.map = toolkit.load_tiled_tmx_map('Gumm no swamps.tmx')
         State.map = self.map
         State.world.rect = State.map.rect.copy()
         # The collapse stat for the hud.
@@ -112,7 +112,7 @@ class App(Engine):
             interval=2000))
         def screen_info():
             res = State.screen.size
-            vis = State.camera.visible_tile_range
+            vis = State.camera.visible_tile_range[0]
             tiles = Vec2d(vis[2]-vis[0], vis[3]-vis[1])
             return 'Screen %dx%d / Visible tiles %dx%d' % (res.x,res.y,tiles.x,tiles.y,)
         State.hud.add('Screen', Stat(
