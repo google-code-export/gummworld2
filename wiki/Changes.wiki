@@ -10,50 +10,11 @@ This page contains a change log, working notes on issues, items to-do, and items
 
 ===Classes Map and Camera===
 
-Finding a usability issue while trying to implement something slightly more complex than a single-layer map demo. It makes sense to optimize a static background, but perhaps not other layers. Some layers may be sparse, and increasing tile size would increase the total surface area to blit. Some layers may contain tiles that are obstacles, and changing tile size could impact collision detection (if the tiles serve that purpose, as is the common pygame sprite practice).
+Found a usability issue while trying to implement something slightly more complex than a single-layer map demo. It makes sense to optimize a static background, but perhaps not other layers. Some layers may be sparse, and increasing tile size would increase the total surface area to blit. Some layers may contain tiles that are obstacles, and changing tile size could impact collision detection (if the tiles serve that purpose, as is the common pygame sprite practice).
 
-And obvious conclusion is that collapse is not a good trick for all layers.
+And the obvious conclusion is that collapse is not a good trick for all layers.
 
-Therefore... per-layer tile_size and map_size? This will increase map rendering complexity somewhat and consume more CPU.
-
-References to map.tile_size and map.map_size:
-{{{
-./examples/09_collapse_map.py:
-111:            'Tile size %s', callback=lambda:str(tuple(State.map.tile_size)),
-
-./gamelib/camera.py:
-210:        tile_x,tile_y = State.map.tile_size
-
-./gamelib/toolkit.py:
-69: def make_tiles():
-76:    tw,th = State.map.tile_size
-77:    mw,mh = State.map.map_size
-94: def make_tiles2():
-101:    tw,th = State.map.tile_size
-102:    mw,mh = State.map.map_size
-119: def collapse_map(map, num_tiles=(2,2)):
-130:    tw,th = map.tile_size * num_tiles
-131:    mw,mh = map.map_size // num_tiles
-132:    if mw * num_tiles.x != map.map_size.x:
-134:    if mh * num_tiles.y != map.map_size.y:
-148: def collapse_map_layer(map, layeri, num_tiles=(2,2)):
-160:    tw,th = map.tile_size * num_tiles
-161:    mw,mh = map.map_size // num_tiles
-162:    if mw * num_tiles.x != map.map_size.x:
-164:    if mh * num_tiles.y != map.map_size.y:
-169:    for x in range(0, map.map_size.x, num_tiles.x):
-170:        for y in range(0, map.map_size.y, num_tiles.y):
-192:                    p = s.rect.topleft + map.tile_size * (nx,ny)
-200:                s.rect.topleft = Vec2d(x,y) * map.tile_size
-
-./save_the_bunnies.py:
-244:            s.rect.topleft = Vec2d(x,y) * map.tile_size
-279:                s.rect.topleft = Vec2d(x,y) * map.tile_size
-293:    mapw,maph = map.map_size
-294:    tilew,tileh = map.tile_size
-299:    tree_box = pygame.Rect(0,0,*State.map.tile_size)
-315:            mapx,mapy = bunny.position / State.map.tile_size
-}}}
+Therefore... per-layer tile_size and map_size. This will increase map rendering complexity somewhat and consume a bit of CPU. But if you have a map layer with many small tiles the payoff of collapsing a layer can be great.
 
 == Issues ==
 
@@ -61,6 +22,7 @@ References to map.tile_size and map.map_size:
 
 == Changes Since 0.0.0 ==
 
+SVN rev 58:
   * New: function collapse_map_level().
   * Fixed: tile combining for sparse map levels in function collapse_map_level(). Color key was not preserved in some cases.
   * Changed: Camera.interpolate now returns the interpolation value.
