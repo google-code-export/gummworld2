@@ -61,7 +61,13 @@ References to map.tile_size and map.map_size:
 
 == Changes Since 0.0.0 ==
 
-Module toolkit:
-  * Fixed: tile combining for sparse map levels. Color key was not preserved in some cases.
   * New: function collapse_map_level().
+  * Fixed: tile combining for sparse map levels in function collapse_map_level(). Color key was not preserved in some cases.
   * Changed: Camera.interpolate now returns the interpolation value.
+  * Changed: toolkit.load_tiled_maps() renamed to load_tiled_tmx_maps().
+  * Changed: MapLayer now stores per-layer attributes, tile_size and map_size so that individual layers can be collapsed.
+  * Changed: Camera.visible_tile_range now returns a list of (x1,y1,x2,y2) tuples, one for each layer.
+  * Changed: Camera.visible_tiles now returns a list of MapLayer objects, one for each layer.
+  * Changed: toolkit functions modified to use the Map, MapLayer, and Camera changes: make_tiles(), make_tiles2(), load_tiled_tmx_maps(), collapse_map_level(), draw_tiles(), draw_labels(), and draw_grid().
+  * Changed: toolkit functions draw_labels(), and draw_grid() now have a default argument layer=0.
+  * Changed: `__init__.py` now imports Map and MapLayer before Camera.
