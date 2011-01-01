@@ -1,0 +1,22 @@
+#summary Changes, In Progress, Issues, To Do.
+
+= Introduction =
+
+This page contains a change log, working notes on issues, items to-do, and items currently in progress.
+
+
+= In Progress =
+
+Classes Map and Camera:
+  * Handle per-layer tile sizes? Collapse is not the best answer for all layers. For example, some layers may contain tiles that are also obstacles and need their sizes unchanged; while other layers are background and do not have any special constraints.
+
+= Issues =
+
+= To Do =
+
+= Changes Since 0.0.0 =
+
+Module toolkit:
+  * Fixed: tile combining for sparse map levels. Color key was not preserved in some cases.
+  * New: function collapse_map_level().
+  * Changed: Camera.interpolate now returns the interpolation value.
