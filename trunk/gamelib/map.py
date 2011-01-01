@@ -32,6 +32,29 @@ The layers attribute is a two-dimensional list of tile sprites. This can be
 accessed directly, or via the class methods. See also the Camera class for
 its tile range calculations.
 
+IMPORTANT: Map instance variables tile_size and map_size define the *original*
+dimensions of the map. Map layers can support individual tile sizes and map
+sizes. When rendering a layer one should use the MapLayer instance variables
+instead. This is especially important for two cases:
+    
+    1. Loading a map that uses layers with different tile sizes.
+    2. Using toolkit.collapse_map_layer() to resize a layer.
+
+If a map has only one layer, or all layers have the same dimensions it is safe
+to use the Map instance variables.
+
+It may help to see a code representation. Here are two layers, one with 32x32
+tiles and another with 64x64 tiles. Note that both layer sizes in pixels are the
+same (320x320 pixels) but the map grids are at 10 and 5 respectively.
+    
+    map.layers = [
+        MapLayer((32,32), (10,10)),
+        MapLayer((64,64), (5,5)),
+    ]
+
+The sprites for grid lines and grid labels are created when the map is created.
+The map does not maintain per-level versions.
+
 The caller must manage maps and their corresponding worlds by swapping the
 State.map and State.world package globals, for example:
     
@@ -190,7 +213,7 @@ class Map(object):
 
 class MapLayer(dict):
     
-    def __init__(self, visible=True):
+    def __init__(self, tile_size, map_size, visible=True):
         """Construct an instance of MapLayer.
         
         Instances of this class can be accessed as dicts to retrieve tiles.
@@ -199,4 +222,6 @@ class MapLayer(dict):
         it is not visible.
         """
         super(MapLayer, self).__init__()
+        self.tile_size = tile_size
+        self.map_size = map_size
         self.visible = visible

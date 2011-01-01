@@ -25,6 +25,7 @@ __doc__ = """toolkit.py - Some helper tools for Gummworld2.
 
 
 import pygame
+from pygame.locals import RLEACCEL
 from pygame.sprite import Sprite
 
 from gamelib import data, State, Map, MapLayer, Vec2d
@@ -74,7 +75,7 @@ def make_tiles():
     # Tiles are sprites; each sprite must have a name, an image, and a rect.
     tw,th = State.map.tile_size
     mw,mh = State.map.map_size
-    State.map.layers.append(MapLayer())
+    State.map.layers.append(MapLayer(State.map.tile_size, State.map.map_size))
     for x in range(mw):
         for y in range(mh):
             s = pygame.sprite.Sprite()
@@ -99,7 +100,7 @@ def make_tiles2():
     # Tiles are sprites; each sprite must have a name, an image, and a rect.
     tw,th = State.map.tile_size
     mw,mh = State.map.map_size
-    State.map.layers.append(MapLayer())
+    State.map.layers.append(MapLayer(State.map.tile_size, State.map.map_size))
     for x in range(mw):
         for y in range(mh):
             s = pygame.sprite.Sprite()
@@ -115,50 +116,94 @@ def make_tiles2():
             State.map.add(s)
 
 
-def collapse_map(map, tiles=(2,2)):
+def collapse_map(map, num_tiles=(2,2)):
+    """Collapse all layers in a map by combining num_tiles into one tile.
+    Returns a new map.
+    
+    The map argument is the source map. It must be an instance of Map.
+    
+    The num_tiles argument is a tuple representing the number of tiles in the X
+    and Y axes to combine.
+    """
     # new map dimensions
-    tiles = Vec2d(tiles)
-    tw,th = map.tile_size * tiles
-    mw,mh = map.map_size // tiles
-    if mw * tiles.x != map.map_size.x:
+    num_tiles = Vec2d(num_tiles)
+    tw,th = map.tile_size * num_tiles
+    mw,mh = map.map_size // num_tiles
+    if mw * num_tiles.x != map.map_size.x:
         mw += 1
-    if mh * tiles.y != map.map_size.y:
+    if mh * num_tiles.y != map.map_size.y:
         mh += 1
     # new map
     new_map = Map((tw,th), (mw,mh))
     # collapse the tiles in each layer...
     for layeri,layer in enumerate(map.layers):
+        new_layer = collapse_map_layer(map, layeri, num_tiles)
         # add a new layer
-        new_map.layers.append(MapLayer(layer.visible))
-        # walk the old map, stepping by the number of the tiles argument...
-        for x in range(0, map.map_size.x, tiles.x):
-            for y in range(0, map.map_size.y, tiles.y):
-                # make a new sprite
-                s = Sprite()
-                s.image = pygame.surface.Surface((tw,th))
-                s.rect = s.image.get_rect()
-                s.name = tuple((x,y) / tiles)
-                # blit the (x,y) tile and neighboring tiles to right and lower
-##                print '-'*5
-##                print 'new tile',(x,y)
-                for nx in range(tiles.x):
-                    for ny in range(tiles.y):
-                        tile = map.get_tile_at(x+nx, y+ny, layeri)
-                        if tile:
-                            p = s.rect.topleft + map.tile_size * (nx,ny)
-##                            print 'blit',p
-                            s.image.blit(tile.image, p)
-##                            s.image.set_alpha(tile.image.get_alpha())
-                s.rect.topleft = Vec2d(x,y) * map.tile_size
-##                print 'position',s.rect.topleft
-                #
-                new_map.add(s, layer=layeri)
+        new_map.layers.append(new_layer)
     if hasattr(map, 'tiled_map'):
         new_map.tiled_map = map.tiled_map
     return new_map
 
 
-def load_tiled_map(map_file_name):
+def collapse_map_layer(map, layeri, num_tiles=(2,2)):
+    """Collapse a single layer in a map by combining num_tiles into one tile.
+    
+    The map argument is the source map. It must be an instance of Map.
+    
+    The layeri argument is an int representing the layer index to collapse.
+    
+    The num_tiles argument is a tuple representing the number of tiles in the X
+    and Y axes to combine.
+    """
+    # new map dimensions
+    num_tiles = Vec2d(num_tiles)
+    tw,th = map.tile_size * num_tiles
+    mw,mh = map.map_size // num_tiles
+    if mw * num_tiles.x != map.map_size.x:
+        mw += 1
+    if mh * num_tiles.y != map.map_size.y:
+        mh += 1
+    layer = map.layers[layeri]
+    new_layer = MapLayer((tw,th), (mw,mh), layer.visible)
+    # walk the old map, stepping by the number of the tiles argument...
+    for x in range(0, map.map_size.x, num_tiles.x):
+        for y in range(0, map.map_size.y, num_tiles.y):
+            # make a new sprite
+            s = Sprite()
+            s.image = pygame.surface.Surface((tw,th))
+            s.rect = s.image.get_rect()
+            s.name = tuple((x,y) / num_tiles)
+            
+            # blit (x,y) tile and neighboring tiles to right and lower...
+            tiles = map.get_tiles(x, y, x+num_tiles.x, y+num_tiles.y, layer=layeri)
+            if len(tiles):
+                # Detect colorkey.
+                colorkey = None
+                for tile in tiles:
+                    c = tile.image.get_colorkey()
+                    if c is not None:
+                        colorkey = c
+                # Fill dest image if there is a colorkey.
+                if colorkey is not None:
+                    s.image.fill(colorkey)
+                # Blit the images (first turning off source colorkey).
+                for tile in tiles:
+                    nx,ny = Vec2d(tile.name) - (x,y)
+                    p = s.rect.topleft + map.tile_size * (nx,ny)
+                    copy_image = tile.image.copy()
+                    copy_image.set_colorkey(None)
+                    s.image.blit(copy_image, p)
+                # Set the dest colorkey.
+                if colorkey is not None:
+                    s.image.set_colorkey(colorkey, RLEACCEL)
+##                    s.image.set_alpha(tile.image.get_alpha())
+                s.rect.topleft = Vec2d(x,y) * map.tile_size
+                new_layer[s.name] = s
+    
+    return new_layer
+
+
+def load_tiled_tmx_map(map_file_name):
     """Load an orthogonal TMX map file that was created by the Tiled Map Editor.
     
     Thanks to dr0id for his nice tiledtmxloader module:
@@ -180,7 +225,7 @@ def load_tiled_map(map_file_name):
     gummworld_map = Map(tile_size, map_size)
     gummworld_map.tiled_map = world_map
     for layeri,layer in enumerate(world_map.layers):
-        gummworld_map.layers.append(MapLayer(layer.visible))
+        gummworld_map.layers.append(MapLayer(tile_size, map_size, layer.visible))
         if not layer.visible:
             continue
         for ypos in xrange(0, layer.height):
@@ -221,24 +266,33 @@ def draw_tiles():
     """
     for layer in State.camera.visible_tiles:
         # the list comprehension filters out sprites that are None
-        for s in layer:
+        for s in layer.values():
             draw_sprite(s)
 
 
-def draw_labels():
+def draw_labels(layer=0):
     """Draw visible labels if enabled.
+    
+    Labels for the specified layer are blitted to the camera surface. If the
+    layer has been collapsed with the collapse_map_layer() function so that
+    the layer's tile size differs from the grid label sprites, this will look
+    weird.
     """
     if State.show_labels:
-        x1,y1,x2,y2 = State.camera.visible_tile_range
+        x1,y1,x2,y2 = State.camera.visible_tile_range[layer]
         for s in State.map.get_labels(x1,y1,x2,y2):
             draw_sprite(s)
 
 
-def draw_grid():
+def draw_grid(layer=0):
     """Draw grid if enabled.
+    
+    Grids for the specified layer are blitted to the camera surface. If the layer
+    has been collapsed with the collapse_map_layer() function so that the
+    layer's tile size differs from the grid line sprites, this will look weird.
     """
     if State.show_grid:
-        x1,y1,x2,y2 = State.camera.visible_tile_range
+        x1,y1,x2,y2 = State.camera.visible_tile_range[layer]
         # speed up access to grid lines and their rects
         map = State.map
         hline = map.h_line
