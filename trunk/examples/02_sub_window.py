@@ -55,7 +55,8 @@ class App(Engine):
         
     def update(self):
         """overrides Engine.update"""
-        self.update_avatar_position()
+        self.update_camera_position()
+        State.camera.update()
 
     def draw(self):
         """overrides Engine.draw"""
@@ -66,16 +67,16 @@ class App(Engine):
         pygame.draw.rect(State.screen.surface, (99,99,99), self.view_rect, 1)
         State.screen.flip()
         
-    def update_avatar_position(self):
-        """update the avatar's position if any movement keys are held down
+    def update_camera_position(self):
+        """update the camera's position if any movement keys are held down
         """
         if self.move_y or self.move_x:
-            avatar = State.camera.target
-            wx,wy = avatar.position + (self.move_x,self.move_y)
+            camera = State.camera
+            wx,wy = camera.position + (self.move_x,self.move_y)
             rect = State.world.rect
             wx = max(min(wx,rect.right), rect.left)
             wy = max(min(wy,rect.bottom), rect.top)
-            avatar.position = wx,wy
+            camera.position = wx,wy
         
     def on_key_down(self, unicode, key, mod):
         # Turn on key-presses.

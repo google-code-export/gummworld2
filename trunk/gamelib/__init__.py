@@ -44,7 +44,7 @@ pygame.init()
 from vec2d import Vec2d
 from state import State
 
-from screen import Screen
+from screen import Screen, Surface
 from map import Map, MapLayer
 from camera import Camera
 from game_clock import GameClock

@@ -75,6 +75,8 @@ class Camera(object):
         self._surface = surface
         self._visible_tile_range = []
         self._visible_tiles = []
+        self.target_moved = Vec2d(0,0)
+        self._target_was_moved = False
         self._init()
         
     @property
@@ -85,7 +87,10 @@ class Camera(object):
     @target.setter
     def target(self, val):
         self._target = val
-        self.update()
+#        self.update()
+        self._move_to = Vec2d(self.position)
+        self._move_from = Vec2d(self.position)
+        self._interp = 0.0
         
     @property
     def surface(self):
@@ -118,7 +123,7 @@ class Camera(object):
             self._visible_tiles = []
         self.update()
         
-    def interpolate(self):
+    def interpolate(self, sprites=None):
         """Interpolate camera position towards target for smoother scrolling
         
         You typically want to use this or Camera.update(), not both.
@@ -128,60 +133,61 @@ class Camera(object):
         commands. It works best when frame speed is much higher than update
         speed.
         """
-        target_pos = self.target.position
-        if self._move_from != target_pos:
-            interp = State.clock.interpolate()
-            if interp < self._interp:
-                # camera has caught up with target
-                self._move_from = self._move_to
-                self._interp = 0.0
-            else:
-                # camera must catch up with target
-                x1,y1 = self._move_from
-                x2,y2 = target_pos
-                x = x1 + (x2-x1) * interp
-                y = y1 + (y2-y1) * interp
-                self.rect.center = int(round(x)), int(round(y))
-                self._interp = interp
-        if self._move_to != target_pos:
-            self._move_from = self._move_to
-            self._move_to = Vec2d(target_pos)
-        self._get_visible_tile_range()
-        self._get_visible_tiles()
-        return self._interp
+        target_moved = self.target_moved
+        interp = State.clock.interpolate()
+        interpolated_step = target_moved - target_moved * interp
+        x,y = self.target.position - interpolated_step
+        self.rect.center = int(round(x)), int(round(y))
+        self.interp = interp
         
+        if sprites:
+            world_to_screen = self.world_to_screen
+            for s in sprites:
+                abs_screen_pos = world_to_screen(s.position)
+                interpolated_step = target_moved - target_moved * interp
+                x,y = abs_screen_pos + interpolated_step
+                s.rect.center = int(round(x)), int(round(y))
+        
+        return interp
+    
     def update(self):
         """Relocate camera position immediately to target.
         
         You typically want to use this or Camera.interpolate(), not both.
         """
-        v = self.target.position
-        v = int(round(v.x)), int(round(v.y))
-        if self.rect.center != v:
-            self.rect.center = v
-        if self._move_from != v:
-            self._move_from = Vec2d(v)
-            self._move_to = Vec2d(v)
+        target_was_moved = self._target_was_moved
+        if target_was_moved == 1:
+            self._target_was_moved = 0
+        elif target_was_moved == 0:
+            self.target_moved = Vec2d(0,0)
+            self._target_was_moved = -1
         self._get_visible_tile_range()
         self._get_visible_tiles()
+    
+    def slew(self, vec, dt):
+        """Move target via pymunk.
         
-    def state_restored(self):
-        """Sync a stale camera after swapping it in.
-        
-        If switching states either manually, you may want to call this to
-        avoid video flashing or whizzing by. This typically happens when using
-        Camera.interpolate() and swapping in the old camera, which has stale
-        values in the _move_to and _move_from attributes. When swapping a camera
-        in via State.restore(), this method is called automatically.
+        If using pymunk, use this instead of Camera.position.
         """
-        self.update()
-        self._move_to = self._move_from = Vec2d(self.target.position)
-        
+        vec = Vec2d(vec)
+        self._target_was_moved = 1
+        self.target_moved = vec - self.target.position
+        self.target.slew(vec, State.dt)
+    
     @property
     def position(self):
-        """The camera's (target's) position in world coordinates.
+        """The camera target's position in world coordinates.
+        
+        IMPORTANT: Call this instead of directly modifying the target object's
+        position.
         """
         return self.target.position
+    @position.setter
+    def position(self, val):
+        target = self.target
+        self.target_moved = val - target.position
+        target.position = val
+        self._target_was_moved = 1
         
     @property
     def screen_position(self):
@@ -261,3 +267,15 @@ class Camera(object):
                     for tile in get_tiles(*tile_range[layeri], layer=layeri)
                 ])
             tile_per_layer.append(new_layer)
+    
+    def state_restored(self):
+        """Sync a stale camera after swapping it in.
+        
+        If switching states either manually, you may want to call this to
+        avoid video flashing or whizzing by. This typically happens when using
+        Camera.interpolate() and swapping in the old camera, which has stale
+        values in the _move_to and _move_from attributes. When swapping a camera
+        in via State.restore(), this method is called automatically.
+        """
+        self.update()
+        self._move_to = self._move_from = Vec2d(self.target.position)
