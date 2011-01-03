@@ -46,3 +46,7 @@ SVN rev 60:
   * Changed: camera.py, interpolate() simplified.
   * Changed: screen.py, Screen class split off into a Surface class for subsurfaces.
   * Changed: examples tweaked for compatibility.
+
+SVN rev 61:
+  * New: sprite.py with BucketSprite and BucketGroup.
+  * Changed: __init__.py imports classes from sprite.py.
