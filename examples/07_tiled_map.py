@@ -97,6 +97,7 @@ class App(Engine):
         # Mouse and movement state. move_to is in world coordinates.
         self.move_to = None
         self.speed = None
+        self.target_moved = (0,0)
         self.mouse_down = False
         
     def update(self):
@@ -104,7 +105,8 @@ class App(Engine):
         # If mouse button is held down update for continuous walking.
         if self.mouse_down:
             self.update_mouse_movement(pygame.mouse.get_pos())
-        self.update_avatar_position()
+        self.update_camera_position()
+        State.camera.update()
         State.hud.update()
         
     def draw(self):
@@ -140,12 +142,12 @@ class App(Engine):
             self.speed = geometry.distance(
                 self.speed_box.center, (x,y)) / self.max_speed_box
         
-    def update_avatar_position(self):
-        """update the avatar's position if any movement keys are held down
+    def update_camera_position(self):
+        """update the camera's position if any movement keys are held down
         """
         if self.move_to is not None:
-            avatar = State.camera.target
-            wx,wy = avatar.position
+            camera = State.camera
+            wx,wy = camera.position
             # Speed formula.
             speed = self.speed * State.speed
             # If we're within spitting distance, then taking a full step would
@@ -161,7 +163,7 @@ class App(Engine):
             rect = State.world.rect
             wx = max(min(wx,rect.right), rect.left)
             wy = max(min(wy,rect.bottom), rect.top)
-            avatar.position = wx,wy
+            camera.position = wx,wy
         
     def on_mouse_button_down(self, pos, button):
         self.mouse_down = True
