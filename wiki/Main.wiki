@@ -90,6 +90,12 @@ Editor:
 
 ==Working Notes==
 
+===Library===
+
+BucketGroup gets its dimensions from layer 0 of the map. This should be independently configurable; or perhaps the constructor should simply be passed bucket dimensions (similar to the map constructor) instead of a map object.
+
+Is a target sprite class needed? The target sprite does not render on screen the same as an environment sprite, even though it moves in the world like an environment sprite.
+
 ===pymunk===
 
 pymunk is barely more than a concept thus far. It is fundamentally proven in examples/08_pymunk_motion.py. The pygame portion of the library is about ready for use in map_editor.py.
