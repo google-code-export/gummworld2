@@ -53,3 +53,6 @@ SVN rev 64:
 
 SVN rev 71:
   * Fixed: "TypeError: integer argument expected, got float" when passing a float tuple to pygame.draw.circle() in examples 6 through 9. Apparently at some point in the near future this will raise an exception rather than give a warning.
+
+SVN rev 75:
+  * Changed: BucketGroup constructor now takes tile_size and map_size arguments instead of a map.
