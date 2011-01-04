@@ -106,6 +106,8 @@ pymunk is barely more than a concept thus far. It is fundamentally proven in exa
 
 ===Map Editor===
 
+(Temporarily on hold as the proof-of-concept bunny game is driving redefinition of the pygame library.)
+
 The plan is for game makers to be able to load a map in the editor, draw pymunk shapes on them to define obstacles, then save a "physics map". Games will then be able to load the graphics map and physics map, and rely on pymunk for run-time physics.
 
 I am liking the combination of [http://www.mapeditor.org/ Tiled Map Editor] and [http://www.pygame.org/project-map+loader+for+%27tiled%27-1158-2951.html pytmxloader]. Initially the map editor will simply load the tile map, and let one add pygame or pymunk geometry.
