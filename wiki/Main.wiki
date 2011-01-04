@@ -23,7 +23,7 @@ These are the core classes.
 
   Engine: A superclass providing the framework for initialization, run loop, update and draw methods, and pygame event handlers. If you decide to write your own engine, look in here to see how the core objects are created. Don't be afraid, no voodoo in here. Note that if you want to use pymunk via the Engine, you need to turn it on with use_pymunk=True.
 
-  Screen: Just yer basic display interface.
+  Screen and Surface: Basic display and subsurface wrappers.
 
   Camera: Follows a target object around the map. Calculates 2D range of visible tiles. Constructs map layer lists of visible tiles. Converts 2D coordinates between world and screen space. Supports warping and interpolated scrolling.
 
@@ -32,6 +32,8 @@ These are the core classes.
   World: Container for objects that are subject to the game physics. If you decide to use pyymunk this is where space and bodies exist. If you decide not to use pymunk you can build your own physics into it, or ignore it entirely.
 
   GameClock: Keeps constant game time. Supports variable frame rate. Calculates interpolated fraction of a game tick, which can be used for prediction, sub-pixel motion, and precision timing.
+
+  BucketSprite and BucketGroup: Classes that manage sprites in buckets for optimized batching and rendering. BucketGroup also has a tweaked draw() method necessary to render sprites whose rects are expressed in world coordinates (versus pygame's which expect sprite rects to be expressed in screen coordinates).
 
 The data module provides resource loaders for various data in the data subdirectories, a la skellington. It should be very easy to figure out and customize as needed.
 
