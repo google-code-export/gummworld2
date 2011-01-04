@@ -25,7 +25,7 @@ These are the core classes.
 
   Screen and Surface: Basic display and subsurface wrappers.
 
-  Camera: Follows a target object around the map. Calculates 2D range of visible tiles. Constructs map layer lists of visible tiles. Converts 2D coordinates between world and screen space. Supports warping and interpolated scrolling.
+  Camera: Follows a target object around the map. Calculates 2D range of visible tiles. Constructs map layer lists of visible tiles. Converts 2D coordinates between world and screen space. Provides interpolated scrolling (takes advantage of faster frame rates).
 
   Map: Serves map tiles in layers. Also serves labels and grid lines.
 
@@ -97,6 +97,8 @@ Editor:
 BucketGroup gets its dimensions from layer 0 of the map. This should be independently configurable; or perhaps the constructor should simply be passed bucket dimensions (similar to the map constructor) instead of a map object.
 
 Is a target sprite class needed? The target sprite does not render on screen the same as an environment sprite, even though it moves in the world like an environment sprite.
+
+Map should serve labels and grid lines per layer since layers can have different size tiles, a la tile collapsing.
 
 ===pymunk===
 
