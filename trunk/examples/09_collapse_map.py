@@ -152,9 +152,10 @@ class App(Engine):
         toolkit.draw_grid()
         toolkit.draw_labels()
         State.hud.draw()
-        avatar_location = State.camera.world_to_screen(State.camera.position)
+        target_pos = State.camera.world_to_screen(State.camera.position)
+        circle_origin = int(round(target_pos.x)), int(round(target_pos.y))
         pygame.draw.circle(State.screen.surface,
-            Color('yellow'), avatar_location, 4)
+            Color('yellow'), circle_origin, 4)
         if State.name == 'small':
             pygame.draw.rect(State.screen.surface, (99,99,99), self.view_rect, 1)
         State.screen.flip()
