@@ -88,13 +88,14 @@ class BucketGroup(pygame.sprite.Group):
     built in.)
     """
     
-    def __init__(self, map, *sprites):
+    def __init__(self, tile_size, map_size, *sprites):
         """Construct an instance of BucketGroup.
         """
         super(BucketGroup, self).__init__()
-        self.map = map
+        self.tile_size = Vec2d(tile_size)
+        self.map_size = Vec2d(map_size)
         x1,y1 = 0,0
-        x2,y2 = map.map_size
+        x2,y2 = map_size
         self.buckets = dict()
         self.buckets.update([ ((x,y), {})
             for x in range(x1,x2+1)
@@ -109,7 +110,7 @@ class BucketGroup(pygame.sprite.Group):
     def add(self, *sprites):
         if len(sprites):
             super(BucketGroup, self).add(*sprites)
-            tw,th = self.map.tile_size
+            tw,th = self.tile_size
             for s in sprites:
                 tx,ty = s.rect.center
                 mx,my = tx//tw, ty//th
