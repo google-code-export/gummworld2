@@ -47,6 +47,6 @@ SVN rev 60:
   * Changed: screen.py, Screen class split off into a Surface class for subsurfaces.
   * Changed: examples tweaked for compatibility.
 
-SVN rev 61:
+SVN rev 64:
   * New: sprite.py with BucketSprite and BucketGroup.
   * Changed: __init__.py imports classes from sprite.py.
