@@ -50,3 +50,6 @@ SVN rev 60:
 SVN rev 64:
   * New: sprite.py with BucketSprite and BucketGroup.
   * Changed: __init__.py imports classes from sprite.py.
+
+SVN rev 71:
+  * Fixed: "TypeError: integer argument expected, got float" when passing a float tuple to pygame.draw.circle() in examples 6 through 9. Apparently at some point in the near future this will raise an exception rather than give a warning.
