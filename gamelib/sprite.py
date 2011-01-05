@@ -1,6 +1,84 @@
+#!/usr/bin/env python
+
+# This file is part of Gummworld2.
+#
+# Gummworld2 is free software: you can redistribute it and/or modify it
+# under the terms of the GNU Lesser General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Gummworld2 is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with Gummworld2.  If not, see <http://www.gnu.org/licenses/>.
+
+
+__version__ = '0.3'
+__vernum__ = (0,3)
+
+
+__doc__ = """sprite.py - Camera target sprite, free-roaming bucket sprite, and
+a bucket sprite group.
+"""
+
+
 import pygame
 
 from gamelib import toolkit, State, Vec2d
+
+
+class CameraTargetSprite(pygame.sprite.Sprite):
+    """A sample camera target sprite, a la pygame.
+    
+    An instance of this class is intended to be the Camera.target. It differs
+    from other sprites in that its screen position is stationary even though it
+    moves around the game's map.
+    
+    A position property is required. It is highly recommended the points be a
+    Vec2d(float,float). Setting position should also set Sprite.rect.center,
+    which should be rounded. Sprite.rect.center can be used in collision tests
+    versus other sprites, or rects expressed in terms of world coordinates.
+    
+    This sprite should typically be blitted using the value in screen_position.
+    It is never changed, so it will always be drawn in the same location on the
+    screen.
+    """
+    
+    def __init__(self):
+        super(CameraTargetSprite, self).__init__()
+        self._position = Vec2d(0.0,0.0)
+        self._screen_position = Vec2d(0.0,0.0)
+    
+    @property
+    def position(self):
+        """Map position in float coordinates.
+        
+        For rounded integer (pixel) position read the rect attributes.
+        
+        The property setter updates rect.center. If a different rect attribute
+        is desired, subclass CameraTargetSprite and override the setter.
+        """
+        return self._position
+    @position.setter
+    def position(self, val):
+        p = self._position
+        p.x,p.y = float(val[0]),float(val[1])
+        self.rect.center = int(round(p.x)), int(round(p.y))
+    
+    @property
+    def screen_position(self):
+        """Screen position in int coordinates.
+        """
+        return self._screen_position - Vec2d(self.rect.size) // 2
+    @screen_position.setter
+    def screen_position(self, val):
+        x,y = val
+        pos = self._screen_position
+        pos.x,pos.y = int(round(x)), int(round(y))
+
 
 class BucketSprite(pygame.sprite.Sprite):
     """A sample sprite, a la pygame.
@@ -40,7 +118,7 @@ class BucketSprite(pygame.sprite.Sprite):
     
     @property
     def position(self):
-        """Float position in map coordinates.
+        """Map position in float coordinates.
         
         For rounded integer (pixel) position read the rect attributes.
         

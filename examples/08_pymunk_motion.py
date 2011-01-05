@@ -36,7 +36,7 @@ from pygame.sprite import Sprite
 from pygame.locals import (
     FULLSCREEN,
     Color,
-    K_TAB, K_ESCAPE, K_g, K_l,
+    K_ESCAPE, K_g, K_l,
 )
 try:
     import pymunk
@@ -48,9 +48,21 @@ import paths
 from gamelib import *
 
 
+class Avatar(pygame.sprite.Sprite):
+    
+    def __init__(self, screen_pos):
+        super(Avatar, self).__init__()
+        self.image = pygame.surface.Surface((10,10))
+        self.rect = self.image.get_rect()
+        pygame.draw.circle(self.image, Color('yellow'), self.rect.center, 4)
+        self.rect.center = screen_pos
+        self.image.set_colorkey(Color('black'))
+
+
 class App(Engine):
     
     def __init__(self, resolution=(640,480)):
+        ## Camera target is a pymunk body.
         super(App, self).__init__(
             caption='08 pymunk Motion -  TAB: view | G: grid | L: labels',
             camera_target=model.CircleBody(),
@@ -59,49 +71,33 @@ class App(Engine):
             frame_speed=0,
             use_pymunk=True)
         
-        ## Load Tiled TMX map, then update the world and camera. Really, all
-        ## there is to it. See the toolkit module for more detail.
+        # Make an avatar sprite so we have something to draw.
+        resolution = Vec2d(resolution)
+        self.avatar = Avatar(resolution//2)
+        
+        # Load Tiled TMX map, then update the world's dimensions.
         State.map = toolkit.load_tiled_tmx_map('Gumm no swamps.tmx')
         State.world.rect = State.map.rect.copy()
-        
-        # Save the main state.
-        State.save('main')
-        
-        # The rect that defines the screen subsurface. It will also be used to
-        # draw a border around the subsurface.
-        self.view_rect = pygame.Rect(30,20,*State.screen.size*2//3)
-        
-        # Set up the subsurface as the camera's drawing surface.
-        subsurface = State.screen.surface.subsurface(self.view_rect)
-        State.camera = Camera(State.camera.target, subsurface)
-        State.name = 'small'
-        State.save(State.name)
-        
-        # Easy way to select the "next" state name.
-        self.next_state = {
-            'main' : 'small',
-            'small' : 'main',
-        }
         
         # I like huds.
         toolkit.make_hud()
         State.show_hud = True
         
         # Warp avatar to location on map.
-        State.camera.target.position = 260,420
+        State.camera.target.position = 325,420
         State.camera.update()
         
         # Create a speed box for converting mouse position to destination
         # and scroll speed.
         self.speed_box = geometry.Diamond(0,0,4,2)
-        self.speed_box.center = self.view_rect.center
+        self.speed_box.center = Vec2d(State.camera.rect.size) // 2
         self.max_speed_box = float(self.speed_box.width) / 2.0
         
         # Mouse and movement state. move_to is in world coordinates.
         self.move_to = None
         self.speed = None
         self.mouse_down = False
-        
+
     def update(self):
         """overrides Engine.update"""
         # If mouse button is held down update for continuous walking.
@@ -110,23 +106,6 @@ class App(Engine):
         self.update_camera_position()
         State.camera.update()
         State.hud.update()
-        
-    def draw(self):
-        """overrides Engine.draw"""
-        # Draw stuff.
-        State.camera.interpolate()
-        State.screen.clear()
-        toolkit.draw_tiles()
-        toolkit.draw_grid()
-        toolkit.draw_labels()
-        State.hud.draw()
-        target_pos = State.camera.world_to_screen(State.camera.position)
-        circle_origin = int(round(target_pos.x)), int(round(target_pos.y))
-        pygame.draw.circle(State.screen.surface,
-            Color('yellow'), circle_origin, 4)
-        if State.name == 'small':
-            pygame.draw.rect(State.screen.surface, (99,99,99), self.view_rect, 1)
-        State.screen.flip()
         
     def update_mouse_movement(self, pos):
         # Angle of movement.
@@ -170,6 +149,22 @@ class App(Engine):
         elif State.camera.target.velocity != (0,0):
             State.camera.target.velocity = (0,0)
         
+    def draw(self):
+        """overrides Engine.draw"""
+        # Draw stuff.
+        State.camera.interpolate()
+        State.screen.clear()
+        toolkit.draw_tiles()
+        toolkit.draw_grid()
+        toolkit.draw_labels()
+        State.hud.draw()
+        self.draw_avatar()
+        State.screen.flip()
+        
+    def draw_avatar(self):
+        avatar = self.avatar
+        State.camera.surface.blit(avatar.image, avatar.rect)
+    
     def on_mouse_button_down(self, pos, button):
         self.mouse_down = True
         
@@ -178,14 +173,7 @@ class App(Engine):
         
     def on_key_down(self, unicode, key, mod):
         # Turn on key-presses.
-        if key == K_TAB:
-            # Select the next state name and and restore it.
-            State.restore(self.next_state[State.name])
-            if State.name == 'small':
-                self.speed_box.center = self.view_rect.center
-            else:
-                self.speed_box.center = State.screen.rect.center
-        elif key == K_g:
+        if key == K_g:
             State.show_grid = not State.show_grid
         elif key == K_l:
             State.show_labels = not State.show_labels

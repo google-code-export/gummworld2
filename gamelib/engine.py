@@ -127,7 +127,7 @@ class Engine(object):
             State.world = model.World(State.map.rect)
             if camera_target is None:
                 camera_target = model.Avatar()
-            State.world.add()
+            State.world.add(camera_target)
         else:
             State.world = model.WorldPymunk(State.map.rect)
             if camera_target is None:
