@@ -96,13 +96,7 @@ Editor:
 
 ===Library===
 
-BucketGroup gets its dimensions from layer 0 of the map. This should be independently configurable; or perhaps the constructor should simply be passed bucket dimensions (similar to the map constructor) instead of a map object.
-
-Is a target sprite class needed? The target sprite does not render on screen the same as an environment sprite, even though it moves in the world like an environment sprite.
-
-Sprites maybe should have an undo_move method to step back from a collision with a obstacle. This would only be useful for do-it-yerself physics, as pymunk manages the motion of colliding bodies on its own.
-
-Map should serve labels and grid lines per layer since layers can have different size tiles, a la tile collapsing.
+The camera target sprite, at least, should have an default hit_obstacle method to step back from a collision with a obstacle. This would only be useful for do-it-yerself physics, as pymunk manages the motion of colliding bodies on its own. But it is one common problem that game makers would be glad they do not have to dig deep into Camera to figure out. (See save_the_bunnies.py: App.update_avatar_vs_trees().)
 
 ===pymunk===
 
