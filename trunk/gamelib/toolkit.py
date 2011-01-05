@@ -75,7 +75,8 @@ def make_tiles():
     # Tiles are sprites; each sprite must have a name, an image, and a rect.
     tw,th = State.map.tile_size
     mw,mh = State.map.map_size
-    State.map.layers.append(MapLayer(State.map.tile_size, State.map.map_size))
+    State.map.layers.append(MapLayer(
+        State.map.tile_size, State.map.map_size, True, True))
     for x in range(mw):
         for y in range(mh):
             s = pygame.sprite.Sprite()
@@ -100,7 +101,8 @@ def make_tiles2():
     # Tiles are sprites; each sprite must have a name, an image, and a rect.
     tw,th = State.map.tile_size
     mw,mh = State.map.map_size
-    State.map.layers.append(MapLayer(State.map.tile_size, State.map.map_size))
+    State.map.layers.append(MapLayer(
+        State.map.tile_size, State.map.map_size, True, True))
     for x in range(mw):
         for y in range(mh):
             s = pygame.sprite.Sprite()
@@ -164,7 +166,7 @@ def collapse_map_layer(map, layeri, num_tiles=(2,2)):
     if mh * num_tiles.y != map.map_size.y:
         mh += 1
     layer = map.layers[layeri]
-    new_layer = MapLayer((tw,th), (mw,mh), layer.visible)
+    new_layer = MapLayer((tw,th), (mw,mh), layer.visible, True, True)
     # walk the old map, stepping by the number of the tiles argument...
     for x in range(0, map.map_size.x, num_tiles.x):
         for y in range(0, map.map_size.y, num_tiles.y):
@@ -225,7 +227,8 @@ def load_tiled_tmx_map(map_file_name):
     gummworld_map = Map(tile_size, map_size)
     gummworld_map.tiled_map = world_map
     for layeri,layer in enumerate(world_map.layers):
-        gummworld_map.layers.append(MapLayer(tile_size, map_size, layer.visible))
+        gummworld_map.layers.append(MapLayer(
+            tile_size, map_size, layer.visible, True, True))
         if not layer.visible:
             continue
         for ypos in xrange(0, layer.height):
@@ -280,7 +283,9 @@ def draw_labels(layer=0):
     """
     if State.show_labels:
         x1,y1,x2,y2 = State.camera.visible_tile_range[layer]
-        for s in State.map.get_labels(x1,y1,x2,y2):
+        map_layer = State.map.layers[layer]
+        get = map_layer.get_labels
+        for s in get(x1,y1,x2,y2):
             draw_sprite(s)
 
 
@@ -295,8 +300,9 @@ def draw_grid(layer=0):
         x1,y1,x2,y2 = State.camera.visible_tile_range[layer]
         # speed up access to grid lines and their rects
         map = State.map
-        hline = map.h_line
-        vline = map.v_line
+        map_layer = map.layers[layer]
+        hline = map_layer.h_line
+        vline = map_layer.v_line
         hrect = hline.rect
         vrect = vline.rect
         for s in map.get_tiles(x1, y1, x2, y2):

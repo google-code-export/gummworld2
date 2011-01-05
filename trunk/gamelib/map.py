@@ -101,28 +101,6 @@ class Map(object):
         tw,th = tile_size
         mw,mh = map_size
         self.rect = pygame.Rect(0,0,tw*mw,th*mh)
-        
-        # grid lines
-        def make_line(size):
-            s = pygame.sprite.Sprite()
-            s.image = pygame.surface.Surface(size)
-            s.image.fill(Color('white'))
-            s.image.set_alpha(75)
-            s.rect = s.image.get_rect()
-            return s
-        self.h_line = make_line((tw,1))
-        self.v_line = make_line((1,th))
-        
-        # make grid labels to blit
-        self.labels = {}
-        font = pygame.font.Font(data.filepath('font', 'Vera.ttf'), 8)
-        for x in range(0,mw):
-            for y in range(0,mh):
-                s = pygame.sprite.Sprite()
-                s.image = font.render('%d,%d'%(x,y), True, text_color)
-                s.rect = s.image.get_rect(
-                    topleft=Vec2d(x*tw,y*th)+(2,2))
-                self.labels[x,y] = s
     
     def add(self, *tiles, **kwargs):
         """Map.add(*tiles, layer=0)
@@ -170,6 +148,50 @@ class Map(object):
         else:
             return []
 
+
+class MapLayer(dict):
+    
+    def __init__(self, tile_size, map_size, visible=True,
+        make_labels=False, make_grid=False):
+        """Construct an instance of MapLayer.
+        
+        Instances of this class can be accessed as dicts to retrieve tiles.
+        
+        If the visible attribute is True, then this layer is visible. If False,
+        it is not visible.
+        """
+        super(MapLayer, self).__init__()
+        self.tile_size = tile_size
+        self.map_size = map_size
+        self.visible = visible
+
+        tw,th = tile_size
+        mw,mh = map_size
+        
+        # grid lines
+        if make_grid:
+            def make_line(size):
+                s = pygame.sprite.Sprite()
+                s.image = pygame.surface.Surface(size)
+                s.image.fill(Color('white'))
+                s.image.set_alpha(75)
+                s.rect = s.image.get_rect()
+                return s
+            self.h_line = make_line((tw,1))
+            self.v_line = make_line((1,th))
+        
+        # make grid labels to blit
+        self.labels = {}
+        if make_labels:
+            font = pygame.font.Font(data.filepath('font', 'Vera.ttf'), 8)
+            for x in range(0,mw):
+                for y in range(0,mh):
+                    s = pygame.sprite.Sprite()
+                    s.image = font.render('%d,%d'%(x,y), True, text_color)
+                    s.rect = s.image.get_rect(
+                        topleft=Vec2d(x*tw,y*th)+(2,2))
+                    self.labels[x,y] = s
+    
     def get_label_at(self, x, y):
         """Return the label sprite at grid location (x,y). If no sprite exists at
         that location, None is returned.
@@ -191,7 +213,7 @@ class Map(object):
                         for y in range(y1,y2)
             ) if s
         ]
-    
+
     def vertical_grid_line(self, xy=None, anchor='topleft'):
         """Return the vertical grid sprite. If specified, the sprite.rect's
         attribute specified by anchor is set to the value of xy.
@@ -209,19 +231,3 @@ class Map(object):
         if xy is not None:
             setattr(h_line.rect, anchor, xy)
         return h_line
-
-
-class MapLayer(dict):
-    
-    def __init__(self, tile_size, map_size, visible=True):
-        """Construct an instance of MapLayer.
-        
-        Instances of this class can be accessed as dicts to retrieve tiles.
-        
-        If the visible attribute is True, then this layer is visible. If False,
-        it is not visible.
-        """
-        super(MapLayer, self).__init__()
-        self.tile_size = tile_size
-        self.map_size = map_size
-        self.visible = visible

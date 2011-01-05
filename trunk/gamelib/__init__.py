@@ -52,7 +52,7 @@ from graphics import Graphics
 from popup_menu import PopupMenu
 from ui import HUD, Stat, Statf
 from canvas import Canvas
-from sprite import BucketSprite, BucketGroup
+from sprite import CameraTargetSprite, BucketSprite, BucketGroup
 
 from engine import Engine
 
