@@ -9,20 +9,6 @@ This page contains a change log, working notes on issues, items to-do, and items
 
 == In Progress ==
 
-===Classes Map and Camera===
-
-Found a usability issue while trying to implement something slightly more complex than a single-layer map demo. It makes sense to optimize a static background, but perhaps not other layers. Some layers may be sparse, and increasing tile size would increase the total surface area to blit. Some layers may contain tiles that are obstacles, and changing tile size could impact collision detection (if the tiles serve that purpose, as is the common pygame sprite practice).
-
-And the obvious conclusion is that collapse is not a good trick for all layers.
-
-Therefore... per-layer tile_size and map_size. This will increase map rendering complexity somewhat and consume a bit of CPU. But if you have a map layer with many small tiles the payoff of collapsing a layer can be great.
-
-===Sprites and Sprite Groups===
-
-The library works best when sprites are in world coordinates. Therefore, once cannot use the stock pygame sprite groups to do the drawing. Need to provide at least a basic sprite group with a custom draw() method. The BucketGroup may be a good model.
-
-Need a Sprite class that meets the basic requirements: a position and rect that stay in sync, and maybe some handy methods, like motion and collision move-back (see save_the_bunnies.py, linear interpolation when stepping (see Camera)...
-
 == Issues ==
 
 == To Do ==
