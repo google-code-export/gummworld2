@@ -1,4 +1,5 @@
 #summary Changes, In Progress, Issues, To Do.
+#labels Featured
 
 = Introduction =
 
