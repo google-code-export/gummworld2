@@ -98,6 +98,8 @@ Editor:
 
 The camera target sprite, at least, should have an default hit_obstacle method to step back from a collision with a obstacle. This would only be useful for do-it-yerself physics, as pymunk manages the motion of colliding bodies on its own. But it is one common problem that game makers would be glad they do not have to dig deep into Camera to figure out. (See save_the_bunnies.py: App.update_avatar_vs_trees().)
 
+Need to tidy up doc strings and refresh HTML docs package.
+
 ===pymunk===
 
 pymunk is barely more than a concept thus far. It is fundamentally proven in examples/08_pymunk_motion.py. The pygame portion of the library is about ready for use in map_editor.py.
