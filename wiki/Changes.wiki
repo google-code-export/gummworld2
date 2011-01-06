@@ -54,3 +54,7 @@ SVN rev 77:
   * Changed: Examples 6-9, extraneous "switch view" code removed so the examples are less cluttered with off-topic crap.
   * Changed: grides and grid label sprites moved from Map to MapLevel class. MapLevel.__init__ now takes default args (make_grid=False, make_labels=False).
   * Changed: toolkit.py; map, label, and grid functions tweaked to use the new MapLevel class correctly.
+
+SVN rev __:
+  * Changed: dim is now an optional argument for BucketGroup.draw() and update(). If omitted it defaults to all sprites.
+  * Changed: BucketGroup.update() modified to copy sprites out of the buckets before looping through them. This was required because looping through the buckets caused a sprite to be updated twice if its update() method caused it to move to a bucket pending update.
