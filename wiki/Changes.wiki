@@ -59,3 +59,4 @@ SVN rev __:
   * Changed: dim is now an optional argument for BucketGroup.draw() and update(). If omitted it defaults to all sprites.
   * Changed: BucketGroup.update() modified to copy sprites out of the buckets before looping through them. This was required because looping through the buckets caused a sprite to be updated twice if its update() method caused it to move to a bucket pending update.
   * New: Camera._interp exposed as read-only property interp.
+  * New: toolkit.interpolated_step() calculates the position between poles, given the current position, the step, and the clock interpolation value.
