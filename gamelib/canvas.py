@@ -22,6 +22,8 @@ __vernum__ = (0,4)
 
 __doc__ = """
 canvas.py - A canvas for intermediate drawing and rotation.
+
+This is an unfinished concept.
 """
 
 

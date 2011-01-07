@@ -31,16 +31,17 @@ from gamelib import toolkit, State, Vec2d
 
 
 class CameraTargetSprite(pygame.sprite.Sprite):
-    """A sample camera target sprite, a la pygame.
+    """A sample camera target sprite, a la pygame.sprite.Sprite.
     
-    An instance of this class is intended to be the Camera.target. It differs
-    from other sprites in that its screen position is stationary even though it
-    moves around the game's map.
+    An instance of this class is intended to be the Camera.target for games that
+    want to use a sprite for the Camera target. It differs from other sprites in
+    that its screen position is stationary even though it moves around the
+    game's map.
     
     A position property is required. It is highly recommended the points be a
     Vec2d(float,float). Setting position should also set Sprite.rect.center,
     which should be rounded. Sprite.rect.center can be used in collision tests
-    versus other sprites, or rects expressed in terms of world coordinates.
+    versus other sprites or rects expressed in terms of world coordinates.
     
     This sprite should typically be blitted using the value in screen_position.
     It is never changed, so it will always be drawn in the same location on the
@@ -81,7 +82,10 @@ class CameraTargetSprite(pygame.sprite.Sprite):
 
 
 class BucketSprite(pygame.sprite.Sprite):
-    """A sample sprite, a la pygame.
+    """A sample sprite, a la pygame.sprite.Sprite.
+    
+    This class is for sprites that move around the world and are displayed
+    independently of the camera.
     
     A position property is required. It is highly recommended the points be a
     Vec2d(float,float). Setting position should also set Sprite.rect.center,
@@ -89,16 +93,18 @@ class BucketSprite(pygame.sprite.Sprite):
     
     All sprite positions must be in world coordinates. This means they cannot be
     blitted straight to the screen using methods like pygame.sprite.Group.
-    pygame's Group blits using the rect, which is not expressed in screen
-    coordinates. Instead use something like the draw() function provided here,
-    or better yet a batch draw routine to minimize repetitive attribute access.
+    (pygame's Group blits using the rect, which is not expressed in screen
+    coordinates in Gummworld2.) Instead use something like the draw() function
+    provided here, or better yet a batch draw routine to minimize repetitive
+    attribute access, such as that in BucketGroup.
     
     A final consideration for sprites is the sprite group. If the sprite uses a
     pygame group, then no special consideration need be given other than to
-    avoid using its draw() method. This Sprite is designed for the BucketGroup
-    class. Whenever the sprite moves, it checks what bucket it's in and hops to
-    another bucket if it should. This is required so the BucketGroup's
-    sprites_in_range() and buckets_in_range() methods work properly.
+    use a custom draw() method. However, this Sprite is designed expressly for
+    the BucketGroup class. Whenever the sprite moves, it checks what bucket it's
+    in and hops to another bucket if it should. This is required so the
+    BucketGroup's sprites_in_range() and buckets_in_range() methods work
+    properly and retrieve sprites efficiently.
     """
 
     def __init__(self, position=(0,0)):
@@ -182,8 +188,15 @@ class BucketGroup(pygame.sprite.Group):
         self.add(*sprites)
     
     def copy(self):
-        new_group = self.__class__(self.tile_size, self.map_size, *self.sprites())
-        return new_group
+        ## This certainly won't work. The BucketSprite only tracks one bucket
+        ## group, and copying them would clobber it. BucketSprite.bucket_group
+        ## needs to be implemented as a container before multiple group
+        ## membership would work.
+#        """Return a copy of the bucket group.
+#        """
+#        new_group = self.__class__(self.tile_size, self.map_size, *self.sprites())
+#        return new_group
+        return None
     
     def add(self, *sprites):
         if len(sprites):
@@ -228,6 +241,11 @@ class BucketGroup(pygame.sprite.Group):
         del self.lostsprites[:]
     
     def sprites_in_range(self, dim=None):
+        """Return a list of sprites in the range specified by dim.
+        
+        The optional dim argument is a tuple(x1,y1,x2,y2) range of grid
+        coordinates. If dim is None, all sprites are returned.
+        """
         if dim is None:
             dim = 0,0,self.map_size.x+1,self.map_size.y+1
         sprites = []
@@ -236,6 +254,11 @@ class BucketGroup(pygame.sprite.Group):
         return sprites
     
     def buckets_in_range(self, dim=None):
+        """Return a list of buckets in the range specified by dim.
+        
+        The optional dim argument is a tuple(x1,y1,x2,y2) range of grid
+        coordinates. If dim is None, all buckets are returned.
+        """
         if dim is None:
             dim = 0,0,self.map_size.x+1,self.map_size.y+1
         buckets = self.buckets

@@ -143,6 +143,10 @@ class Engine(object):
         self._get_pygame_events = pygame.event.get
         
     def run(self):
+        """Start the run loop.
+        
+        To exit the run loop gracefully, set State.running=False.
+        """
         State.running = True
         while State.running:
             State.dt = State.clock.tick()
@@ -158,15 +162,11 @@ class Engine(object):
         update cycle is ready.
         
         Suggestion:
+            move_camera()
             State.camera.update()
             ... custom update the rest of the game ...
-        
-        As an alternative to using Camera.update() you can modify the
-        Camera.target.position in Engine.update(), and then call
-        Camera.interpolate() in Engine.draw(). In this case you will also want
-        to initialize the frame speed to unlimited (0).
         """
-        State.camera.update()
+        pass
         
     def draw(self):
         """Override this method. Called by run() when the clock signals a

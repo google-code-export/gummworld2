@@ -37,11 +37,11 @@ class Surface(object):
     
     The surface can be accessed via the surface attribute.
     
-    The surface's rect can be access via the rect attribute.
+    The surface's rect can be accessed via the rect attribute.
     
-    For subsurface's the parent rect that was used to create the subsurface can
+    For subsurfaces the parent rect that was used to create the subsurface can
     be access via the super_rect attribute. If this instance does not represent
-    a subsurface then rect and super_rect will be the same dimensions.
+    a subsurface then rect and super_rect will be equivalent.
     """
     
     def __init__(self, surface, subsurface_rect=None):

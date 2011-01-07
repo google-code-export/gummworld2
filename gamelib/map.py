@@ -30,7 +30,7 @@ attribute defining its dimensions, and observes pygame coordinate space.
 
 The layers attribute is a two-dimensional list of tile sprites. This can be
 accessed directly, or via the class methods. See also the Camera class for
-its tile range calculations.
+its visible tile range utilities.
 
 IMPORTANT: Map instance variables tile_size and map_size define the *original*
 dimensions of the map. Map layers can support individual tile sizes and map
@@ -41,7 +41,7 @@ instead. This is especially important for two cases:
     2. Using toolkit.collapse_map_layer() to resize a layer.
 
 If a map has only one layer, or all layers have the same dimensions it is safe
-to use the Map instance variables.
+to use the Map instance variables tile_size and map_size.
 
 It may help to see a code representation. Here are two layers, one with 32x32
 tiles and another with 64x64 tiles. Note that both layer sizes in pixels are the
@@ -52,8 +52,8 @@ same (320x320 pixels) but the map grids are at 10 and 5 respectively.
         MapLayer((64,64), (5,5)),
     ]
 
-The sprites for grid lines and grid labels are created when the map is created.
-The map does not maintain per-level versions.
+The sprites for grid lines and grid labels are created when each map layer is
+created. The toolkit.collapse_* functions also convert these sprites.
 
 The caller must manage maps and their corresponding worlds by swapping the
 State.map and State.world package globals, for example:

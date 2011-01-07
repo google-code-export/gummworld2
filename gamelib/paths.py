@@ -24,8 +24,18 @@ __vernum__ = (0,4)
 
 !! For game path setup, use the paths.py in the main program directory.
 
-This module sets up the python library path for modules with "if main..." blocks,
-where gamelib cannot be seen in the current directory.
+This module sets up the python library path for modules that want to do unit
+tests in "if main..." blocks, where gamelib cannot be seen in the current
+directory without this special path setup.
+
+Typical usage:
+    if __name__ == '__main__':
+        import paths
+    import gamelib
+    ... gamelib module stuff ...
+    
+    if __name__ == '__main__':
+        ... module unit test ...
 """
 
 
