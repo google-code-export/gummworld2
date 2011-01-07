@@ -22,7 +22,7 @@ __vernum__ = (0,4)
 
 __doc__ = """graphics.py - Graphics module for Gummworld2.
 
-Various tools for creating graphics.
+Various tools for creating graphics. This is an unfinished concept.
 """
 
 

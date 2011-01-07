@@ -45,14 +45,18 @@ class Camera(object):
         * A surface from which to derive its viewing dimensions.
         * State.clock is needed by interpolate().
     
-    Simple usage is just a matter of updating the position of the target, and
-    then calling Camera.update(). Both actions should occur during the clock's
-    update cycle (Engine.update() if using Engine).
+    To use the camera do the following:
+        
+        1.  In the game's update routine set camera.position to move the target.
+        2.  Also in the game's update routine call Camera.update() to update the
+            camera's state.
+        3.  In the game's draw routine call Camera.interpolate() to micro-update
+            the scrolling between the position prior to step 1 and final
+            position specified in step 1. This may sound complicated, but it is
+            all handled behind the scenes.
     
-    Interpolated usage is as simple as updating the position of the target, and
-    then calling Camera.interpolate(). The first action should be called in the
-    clock's update cycle; the latter should be called in the clock's frame cycle
-    (Engine.draw() if using Engine).
+    Screen-to-world and world-to-screen conversions are used to convert between
+    world coordinates and screen coordinates.
     
     Note that using mouse position can be tricky if the camera is using a
     subsurface of the screen, or an alternate surface. pygame always reports
@@ -60,6 +64,11 @@ class Camera(object):
     positioning graphics based on the mouse position under these circumstances.
     Sometimes it may just be simplest, for example, to blit directly to the
     top-level surface.
+    
+    Property visible_tile_range returns a list of map tile positions [(0,0),
+    (0,1), ...] that are visible on the screen.
+    
+    Property visible_tiles returns a list of MapLayer objects that are visible.
     """
     
     def __init__(self, target, surface):
@@ -94,8 +103,6 @@ class Camera(object):
     @target.setter
     def target(self, val):
         self._target = val
-        self._move_to = Vec2d(self.position)
-        self._move_from = Vec2d(self.position)
         self._interp = 0.0
         
     @property
@@ -117,8 +124,6 @@ class Camera(object):
         self.abs_offset = Vec2d(self.surface.get_abs_offset())
         self.screen_offset = Vec2d(self.rect.center) - self.rect.topleft + self.abs_offset
         
-        self._move_from = Vec2d(self.target.position)
-        self._move_to = Vec2d(self.target.position)
         self._interp = 0.0
         self.map = None
         if State.map:
@@ -157,9 +162,9 @@ class Camera(object):
         return interp
     
     def update(self):
-        """Relocate camera position immediately to target.
+        """Update Camera internals to prepare for efficient interpolation.
         
-        You typically want to use this or Camera.interpolate(), not both.
+        Call in the game's update routine after changing Camera.position.
         """
         target_was_moved = self._target_was_moved
         if target_was_moved == 1:
@@ -171,7 +176,7 @@ class Camera(object):
         self._get_visible_tiles()
     
     def slew(self, vec, dt):
-        """Move target via pymunk.
+        """Move Camera.target via pymunk.
         
         If using pymunk, use this instead of Camera.position.
         """
@@ -182,10 +187,16 @@ class Camera(object):
     
     @property
     def position(self):
-        """The camera target's position in world coordinates.
+        """Move Camera.target in world coordinates.
         
         IMPORTANT: Call this instead of directly modifying the target object's
         position.
+        
+        IMPORTANT: In order for interpolated scrolling to be effective, only
+        call this once per update cycle. If you need to adjust the target sprite/
+        model/copter object more than once, then use a temporary object to
+        accumulate adjustments and then set Camera.position once. This will
+        ensure the poles are accurately spaced for interpolation.
         """
         return self.target.position
     @position.setter
@@ -238,9 +249,8 @@ class Camera(object):
         
     @property
     def visible_tiles(self):
-        """A 2D list of tiles that would be visible on the display surface.
-        The first dimension is the map layer, the second is the tile. Tile lists
-        are sorted in (column,row) order.
+        """A list of MapLayer objects that would be visible on the display
+        surface.
         """
         return self._visible_tiles
     
@@ -270,4 +280,3 @@ class Camera(object):
         in via State.restore(), this method is called automatically.
         """
         self.update()
-        self._move_to = self._move_from = Vec2d(self.target.position)

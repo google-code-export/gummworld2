@@ -262,31 +262,23 @@ def draw_sprite(s, blit_flags=0):
     camera.surface.blit(s.image, (sx-cx, sy-cy), special_flags=blit_flags)
 
 
-def draw_sprite_interpolated(s, interp, blit_flags=0):
-    """Draw a sprite on the camera's surface using world-to-screen conversion.
-    """
-    camera = State.camera
-    cx,cy = camera.rect.topleft
-    sx,sy = s.rect.topleft
-    camera.surface.blit(s.image, (sx-cx, sy-cy), special_flags=blit_flags)
-
-
 def interpolated_step(pos, step, interp):
     """Returns (float,float).
     
-    This is utility for draw routines, after pos has been updated by step. For
-    example:
+    This is a utility for drawing routines, after pos has been updated by step.
+    For example:
         def update():
             move_camera()
             State.camera.update()
-            sprite_group.update()  # steps sprite position
+            sprite_group.update()  # e.g. steps a sprite position
         def draw():
             interp = State.camera.interpolate()
             camera_pos = State.camera.rect.topleft
             for s in sprite_group:
                 sprite_pos = Vec2d(s.rect.topleft)
-                interp_pos = toolkit.interpolated_step(
-                    sprite_pos-camera_pos, s.step, interp)
+                pos = sprite_pos - camera_pos
+                step = s.step
+                interp_pos = toolkit.interpolated_step(pos, step, interp)
                 surf.blit(s.image, interp_pos)
     """
     # Interpolated step = step * interpolation factor
