@@ -5,7 +5,7 @@
 
 This is Gummworld2. It's designed as a light [http://www.pygame.org pygame] framework for a scrolling game, where the map is larger than the display. It emphasizes simplicity, freedom, and performance.
 
-One should not have to struggle with making a game concept fit into a restrictive paradigm. Gummworld2 solves this with a clean and simple update-and-draw run loop.
+One should not have to struggle with making a game concept fit into a restrictive paradigm. Gummworld2 solves this with a few core classes and their structural requirements, and a clean and simple update-and-draw run loop.
 
 One should also be free to choose one's own audiovisual presentation, game intelligence, and GUIs. The benefits should be obvious. Low learning curve: use what you know. Freedom: use whatever you want. You are not forced to learn "The Gummworld Way", and wade through bloated features. Gummworld2 provides just a few management classes, driven by a very simple (optional) engine. It is merely a _suggestion_ to use the engine for the game framework, [http://www.mapeditor.org/ Tiled] for maps, and [http://www.pygame.org/project-pymunk-780-2576.html pymunk] for physics. If you prefer to use other libraries and utilities, it is quite easy to use Gummworld2 for scrolling maps and leverage your own tools.
 
