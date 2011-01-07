@@ -16,8 +16,8 @@
 # License along with Gummworld2.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__version__ = '0.3'
-__vernum__ = (0,3)
+__version__ = '0.4'
+__vernum__ = (0,4)
 
 
 """02_sub_window.py - An example of a sub-window view for Gummworld2.
@@ -44,8 +44,6 @@ class App(Engine):
         
         # Set up the subsurface as the camera's drawing surface.
         State.camera.surface = State.screen.surface.subsurface(self.view_rect)
-        State.camera.rect = State.camera.surface.get_rect()
-        State.camera.update()
         
         # Make some default content.
         toolkit.make_tiles()

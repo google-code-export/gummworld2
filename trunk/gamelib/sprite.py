@@ -16,8 +16,8 @@
 # License along with Gummworld2.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__version__ = '0.3'
-__vernum__ = (0,3)
+__version__ = '0.4'
+__vernum__ = (0,4)
 
 
 __doc__ = """sprite.py - Camera target sprite, free-roaming bucket sprite, and
@@ -181,9 +181,9 @@ class BucketGroup(pygame.sprite.Group):
         ])
         self.add(*sprites)
     
-### TO DO ###
-#    def copy(self):
-#        pass
+    def copy(self):
+        new_group = self.__class__(self.tile_size, self.map_size, *self.sprites())
+        return new_group
     
     def add(self, *sprites):
         if len(sprites):
@@ -205,25 +205,39 @@ class BucketGroup(pygame.sprite.Group):
             pass
         super(BucketGroup, self).remove_internal(sprite)
     
-    def update(self, dim, *args):
-        for bucket in self.buckets_in_range(dim):
-            for s in bucket.keys():
-                s.update(*args)
+    def update(self, dim=None, *args):
+        if dim is None:
+            sprites = self.sprites()
+        else:
+            sprites = []
+            for bucket in self.buckets_in_range(dim):
+                sprites.extend(bucket.keys())
+        for s in sprites:
+            s.update(*args)
     
-    def draw(self, dim):
+    def draw(self, dim=None):
         blit = toolkit.draw_sprite
-        for bucket in self.buckets_in_range(dim):
-            for s in bucket:
-                blit(s)
+        if dim is None:
+            for bucket in self.sprites():
+                for s in bucket:
+                    blit(s)
+        else:
+            for bucket in self.buckets_in_range(dim):
+                for s in bucket:
+                    blit(s)
         del self.lostsprites[:]
     
-    def sprites_in_range(self, dim):
+    def sprites_in_range(self, dim=None):
+        if dim is None:
+            dim = 0,0,self.map_size.x+1,self.map_size.y+1
         sprites = []
         for bucket in self.buckets_in_range(dim):
             sprites.extend(bucket.keys())
         return sprites
     
-    def buckets_in_range(self, dim):
+    def buckets_in_range(self, dim=None):
+        if dim is None:
+            dim = 0,0,self.map_size.x+1,self.map_size.y+1
         buckets = self.buckets
         x1,y1,x2,y2 = dim
         get = buckets.get
@@ -233,10 +247,6 @@ class BucketGroup(pygame.sprite.Group):
                     for y in range(y1,y2)
             ) if d
         ]
-    
-### TO DO ###
-#    def clear_in_range(self, surface, dim):
-#        pass
     
     def empty(self):
         super(BucketGroup, self).empty()

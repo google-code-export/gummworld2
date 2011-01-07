@@ -16,8 +16,8 @@
 # License along with Gummworld2.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__version__ = '0.3'
-__vernum__ = (0,3)
+__version__ = '0.4'
+__vernum__ = (0,4)
 
 
 """09_collapse_map.py - An example of using toolkit.collapse_map in Gummworld2.
