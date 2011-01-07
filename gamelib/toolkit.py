@@ -16,8 +16,8 @@
 # License along with Gummworld2.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__version__ = '0.3'
-__vernum__ = (0,3)
+__version__ = '0.4'
+__vernum__ = (0,4)
 
 
 __doc__ = """toolkit.py - Some helper tools for Gummworld2.
@@ -260,6 +260,42 @@ def draw_sprite(s, blit_flags=0):
     cx,cy = camera.rect.topleft
     sx,sy = s.rect.topleft
     camera.surface.blit(s.image, (sx-cx, sy-cy), special_flags=blit_flags)
+
+
+def draw_sprite_interpolated(s, interp, blit_flags=0):
+    """Draw a sprite on the camera's surface using world-to-screen conversion.
+    """
+    camera = State.camera
+    cx,cy = camera.rect.topleft
+    sx,sy = s.rect.topleft
+    camera.surface.blit(s.image, (sx-cx, sy-cy), special_flags=blit_flags)
+
+
+def interpolated_step(pos, step, interp):
+    """Returns (float,float).
+    
+    This is utility for draw routines, after pos has been updated by step. For
+    example:
+        def update():
+            move_camera()
+            State.camera.update()
+            sprite_group.update()  # steps sprite position
+        def draw():
+            interp = State.camera.interpolate()
+            camera_pos = State.camera.rect.topleft
+            for s in sprite_group:
+                sprite_pos = Vec2d(s.rect.topleft)
+                interp_pos = toolkit.interpolated_step(
+                    sprite_pos-camera_pos, s.step, interp)
+                surf.blit(s.image, interp_pos)
+    """
+    # Interpolated step = step * interpolation factor
+    interp_step = Vec2d(step) * interp
+    
+    # Interpolated pos = screen_pos - step + interpolated step
+    x,y = pos
+    pos = float(x),float(y)
+    return pos - step + interp_step
 
 
 def draw_tiles():

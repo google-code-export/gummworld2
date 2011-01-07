@@ -16,8 +16,8 @@
 # License along with Gummworld2.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__version__ = '0.3'
-__vernum__ = (0,3)
+__version__ = '0.4'
+__vernum__ = (0,4)
 
 
 __doc__="""
@@ -80,6 +80,13 @@ class Camera(object):
         self._init()
         
     @property
+    def interp(self):
+        """The clock's interpolation value after the last call to
+        Camera.interpolate.
+        """
+        return self._interp
+    
+    @property
     def target(self):
         """The target that camera is tracking.
         """
@@ -87,7 +94,6 @@ class Camera(object):
     @target.setter
     def target(self, val):
         self._target = val
-#        self.update()
         self._move_to = Vec2d(self.position)
         self._move_from = Vec2d(self.position)
         self._interp = 0.0
@@ -137,8 +143,8 @@ class Camera(object):
         interp = State.clock.interpolate()
         interpolated_step = target_moved - target_moved * interp
         x,y = self.target.position - interpolated_step
-        self.rect.center = int(round(x)), int(round(y))
-        self.interp = interp
+        self.rect.center = round(x), round(y)
+        self._interp = interp
         
         if sprites:
             world_to_screen = self.world_to_screen
@@ -146,7 +152,7 @@ class Camera(object):
                 abs_screen_pos = world_to_screen(s.position)
                 interpolated_step = target_moved - target_moved * interp
                 x,y = abs_screen_pos + interpolated_step
-                s.rect.center = int(round(x)), int(round(y))
+                s.rect.center = round(x), round(y)
         
         return interp
     
@@ -217,15 +223,6 @@ class Camera(object):
         return self._visible_tile_range
     
     def _get_visible_tile_range(self):
-##        tile_x,tile_y = State.map.tile_size
-##        l,t,w,h = self.rect
-##        r = l+w
-##        b = t+h
-##        left = int(round(float(l) / tile_x)) - 1
-##        right = int(round(float(r) / tile_x)) + 2
-##        top = int(round(float(t) / tile_y)) - 1
-##        bottom = int(round(float(b) / tile_y)) + 2
-##        self._visible_tile_range = left,top,right,bottom
         range_per_layer = self._visible_tile_range
         del range_per_layer[:]
         for layeri,layer in enumerate(State.map.layers):
@@ -248,11 +245,6 @@ class Camera(object):
         return self._visible_tiles
     
     def _get_visible_tiles(self):
-##        tile_range = self.visible_tile_range
-##        map = State.map
-##        get_tiles = map.get_tiles
-##        layer_range = range(len(map.layers))
-##        self._visible_tiles = [get_tiles(*tile_range, layer=n) for n in layer_range]
         tile_per_layer = self._visible_tiles
         del tile_per_layer[:]
         tile_range = self.visible_tile_range
