@@ -13,6 +13,8 @@ This page contains a change log, working notes on issues, items to-do, and items
 
 == To Do ==
 
+I think one more demo is in order: having Gummworld2 operate purely on a model (e.g. pygame rects or homegrown constructs), and use loosely related classes (e.g. pygame sprites) for the view. This would provide a very useful segue to the editor.
+
 == Changes in 0.0.1 ==
 
 SVN rev 58:
