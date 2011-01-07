@@ -15,9 +15,9 @@ Since this is Gummworld2, one may wonder about the original [http://www.pygame.o
 
 = Details =
 
-Gummworld2 is currently tested with Windows 7, and built upon Python 2.6, pygame 1.8.1, pymunk 1.0.0, and Tiled Map Editor 0.7.2 (the Java version). Some light testing has been done with Windows XP and Ubuntu 10.
+Gummworld2 is currently developed with Windows 7, Python 2.6, pygame 1.9.1, pymunk 1.0.0, and Tiled Map Editor 0.7.2 (the Java version). Most of the testing is on the development platform. Light testing for demo performance and operation has been done with Windows XP SP 2 and Ubuntu 10. Almost assuredly Gummworld2 will not work with pygame 1.8.1 and earlier, since various classes may not have provided the copy() method (most notably Rect).
 
-The library performs basic scrolling of tiles by syncing a camera with a target object that moves about the map. Change the target object's position and the camera follows.
+The library performs basic scrolling of tiles by syncing a camera with a target object that moves about the large map space. Change the target object's position and the camera follows.
 
 These are the core classes.
 
@@ -49,13 +49,21 @@ The default pymunk physics scale is intended to be based on pixels (see `model.C
 
 Also, a general caution. The instance variables representing 2D coordinates are typically implemented as `Vec2d`. Attempts will be made to protect them from direct assignment, as clobbering them with a sequence or other object will break some library routines. Keep this in mind when overriding in subclasses or choosing to directly access the underlying private `_attributes`.
 
-==Current Status==
+==Status Summary==
 
-In the past few commits the API has change considerably. Developed a game as a proof-of-concept, which has driven some redefinition of the library. There appears to be a few changes yet to come.
+In recent commits the API has seen few changes. The feature set is complete enough to turn attention back to the editor.
 
-Map editor temporarily on hold while the proof-of-concept game is driving API changes.
+A mini game was finished in 0.0.2 as a proof-of-concept, which drove a flurry of changes to the API. The game and all but one example do not use a physics library; I would consider them pygame-only. A few examples use a Tiled map.
 
-Performance is extremely good on my Intel Core i3 laptop. Not so great on my older AMD Athlon X2 desktop, but still much better than the original Gummworld; it screams at Diablo resolution (800x600), presumably leaving plenty of capacity for dynamic content. The proof-of-concept bunny game seems to support this expectation, with a two-layer 2056x2056-pixel map, 400 autonomous sprites, collision handling, and a split screen rendering at nearly 250 FPS on the Intel Core i3.
+The editor concept has changed. It will not do map editing. Tiled already does that well. Gummworld2's editor will supplement Tiled's static maps by visually overlaying tagged generic geometry for physics--e.g. rects and circles for pygame; lines, circles, and polys for pymunk or others--and placement of interactive game content like baddies, doors, traps, anything you can think of. The geometry would typically be invisible in the game, and used for game events like:
+
+  * Did these two space ships collide.
+  * Did my truck venture into this sand pit.
+  * Did the mouse click on this unit of soldiers.
+  * Is this baddy in striking range of the avatar.
+  * Is this defense tower visible in the camera view.
+
+Performance is extremely good on my Intel Core i3 laptop. Not so great on my older AMD Athlon X2 desktop, but still much better than the original Gummworld; it screams at Diablo-like resolution (800x600), presumably leaving plenty of capacity for dynamic content. The proof-of-concept bunny game seems to support this expectation, with a two-layer 2056x2056-pixel map, 400 autonomous sprites, collision handling, and a split screen rendering at nearly 250 FPS on the Intel Core i3.
 
 ===Features===
 
