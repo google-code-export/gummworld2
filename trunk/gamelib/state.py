@@ -20,7 +20,7 @@ __version__ = '0.4'
 __vernum__ = (0,4)
 
 
-"""state.py - A class for convenient global access to Gummworld2 run-time objects.
+__doc__ = """state.py - A class for convenient global access to Gummworld2 run-time objects.
 """
 
 
