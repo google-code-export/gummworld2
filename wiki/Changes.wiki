@@ -57,7 +57,7 @@ SVN rev 77:
 
 == Changes in 0.0.4 ==
 
-SVN rev 89:
+SVN rev 91:
   * Changed: dim is now an optional argument for BucketGroup.draw(), update(), buckets_in_range(). If omitted it defaults to all sprites. sprites_in_range() was not changed in this manner; it would much more efficient to call group.sprites().
   * Changed: BucketGroup.update() modified to copy sprites out of the buckets before looping through them. This was required because looping through the buckets caused a sprite to be updated twice if its update() method caused it to move to a bucket pending update.
   * New: Camera.`_`interp exposed as read-only property interp.
@@ -65,3 +65,4 @@ SVN rev 89:
   * New: Added BucketGroup.copy().
   * New: examples/10_minimap.py.
   * New: examples/11_multiple_maps_and_cameras.py.
+  * Changed: Numerous docstring updates.
