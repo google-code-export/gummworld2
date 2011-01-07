@@ -96,10 +96,6 @@ Editor:
 
 ===Library===
 
-The camera target sprite, at least, should have an default hit_obstacle method to step back from a collision with a obstacle. This would only be useful for do-it-yerself physics, as pymunk manages the motion of colliding bodies on its own. But it is one common problem that game makers would be glad they do not have to dig deep into Camera to figure out. (See save_the_bunnies.py: App.update_avatar_vs_trees().)
-
-Need to tidy up doc strings and refresh HTML docs package.
-
 ===pymunk===
 
 pymunk is barely more than a concept thus far. It is fundamentally proven in examples/08_pymunk_motion.py. The pygame portion of the library is about ready for use in map_editor.py.
@@ -108,7 +104,7 @@ pymunk is barely more than a concept thus far. It is fundamentally proven in exa
 
 (Temporarily on hold as the proof-of-concept bunny game is driving redefinition of the pygame library.)
 
-The plan is for game makers to be able to load a map in the editor, draw pymunk shapes on them to define obstacles, then save a "physics map". Games will then be able to load the graphics map and physics map, and rely on pymunk for run-time physics.
+The plan is for game makers to be able to load a map in the editor, draw pymunk shapes on it to define obstacles, then save a "physics map". Games will then be able to load the graphics map and physics map, and rely on pymunk or other implementations for run-time physics.
 
 I am liking the combination of [http://www.mapeditor.org/ Tiled Map Editor] and [http://www.pygame.org/project-map+loader+for+%27tiled%27-1158-2951.html pytmxloader]. Initially the map editor will simply load the tile map, and let one add pygame or pymunk geometry.
 
@@ -119,7 +115,6 @@ Map layers--Tiled or other--can be used to classify terrain objects, for example
 The map editor must also handle placement of dynamic game objects, for example, groups of orcs, gates, siege weapons. It is undecided yet if this will include loading tilesets for visual cues or content design; but it's essential to at least be able to insert a physical "device" into the map, and provide a handle and some data for a few reasons:
 
   # Shapes are needed for dimensions; and potentially more, in the case of pymunk.
-  # Obviously, if objects in the physics dimension are interacting those interactions need to be correlated to the display, or the network, or whatever.
+  # Obviously, if objects in the physics dimension are interacting those interactions need to correlate with the display, or whatever is representing the colliding objects to the player.
   # Map loaders can detect "Ah, here is a Mark IV Gizmo. I'll load the graphics and game intelligence for it". Or the related non-physics game elements can spring into life as their physics are activated by game progression.
-
-Using a map editor for placement would be highly preferable to eyeballing map coordinates in the map editor and hand entering code or data sets to place the many gizmos on a map.
+  # Using a map editor for placement would be highly preferable to eyeballing map coordinates in the map editor and hand entering code or data sets to place many gizmos on a map.
