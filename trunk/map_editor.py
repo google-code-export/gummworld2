@@ -16,8 +16,8 @@
 # License along with Gummworld2.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__version__ = '0.3'
-__vernum__ = (0,3)
+__version__ = '$Id$'
+__author__ = 'Gummbum, (c) 2011'
 
 
 """map_editor.py - A map editor for Gummworld2.
