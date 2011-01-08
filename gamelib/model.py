@@ -23,8 +23,8 @@ __author__ = 'Gummbum, (c) 2011'
 __doc__ = """model.py - Physics model for Gummworld2.
 
 If pymunk is installed and can be imported, then the pymunk subclasses
-WorldPymunk and various bodies will be created. Otherwise, only the simple
-classes World and Avatar will be available.
+WorldPymunk and various bodies will be created. Otherwise, only the classes
+World and Object will be available.
 """
 
 import pygame
