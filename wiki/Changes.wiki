@@ -71,7 +71,7 @@ SVN rev 91:
 
 == Changes in 0.0.5 ==
 
-SVN rev 91:
+SVN rev 99:
   * Changed: model.Object implemented as a pygame Sprite-alike. Replaces model.Avatar.
   * Changed: model.World implemented as a pygame AbstractGroup-alike.
   * Changed: Engine modified to use model module changes.
