@@ -68,3 +68,11 @@ SVN rev 91:
   * New: examples/10_minimap.py.
   * New: examples/11_multiple_maps_and_cameras.py.
   * Changed: Numerous docstring updates.
+
+== Changes in 0.0.5 ==
+
+SVN rev 91:
+  * Changed: model.Object implemented as a pygame Sprite-alike. Replaces model.Avatar.
+  * Changed: model.World implemented as a pygame AbstractGroup-alike.
+  * Changed: Engine modified to use model module changes.
+  * Changed: examples/11_multiple_maps_and_cameras.py modified to use model module changes.
