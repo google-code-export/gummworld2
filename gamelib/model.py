@@ -36,40 +36,84 @@ except:
 from gamelib import State, Vec2d
 
 
-class Avatar(object):
-    """A dumb avatar model that can be used as a camera target. It has only a
-    position attribute as Vec2d.
+class Object(object):
+    """A dumb object model suitable for use as a camera target or an autonomous
+    object.
     """
     
     def __init__(self, position=(0,0)):
         self._position = Vec2d(position)
+        self._worlds = {}
     
     @property
-    def position(self): return self._position
+    def position(self):
+        return self._position
     @position.setter
     def position(self, val):
         p = self._position
         p.x,p.y = val
+    
+    def update(self, *args):
+        pass
+    
+    def worlds(self):
+        return self._worlds.keys()
+    
+    def kill(self):
+        for w in self._worlds:
+            w.remove(self)
+        self._worlds.clear()
 
 
-class World(list):
+class World(object):
     """If pymunk is not available, use World. This World class is minimally
-    compatible with WorldPymunk class for pymunk. However, any code calling
-    unsupported pymunk.Space methods will fail.
+    compatible with WorldPymunk class for pymunk. Obviously, any code calling
+    unavailable pymunk.Space methods will fail.
     """
     
     def __init__(self, rect):
         """rect is bounding box edges in pygame space"""
-        super(World, self).__init__()
         self.rect = pygame.Rect(rect)
+        self._object_dict = {}
     
-    def add(self, *objects):
+    def add(self, *objs):
         """Add objects to the world."""
-        self.extend(objects)
+        for o in objs:
+            self._object_dict[o] = 1
+            o._worlds[self] = 1
+    
+    def remove(self, *objs):
+        for o in objs:
+            if o in self._object_dict:
+                del self._object_dict[o]
+            if self in o._worlds:
+                del o._worlds[self]
+    
+    def objects(self):
+        return self._object_dict.keys()
     
     def step(self):
-        """Override this method if your world is supposed to do something."""
-        pass
+        for o in self.objects():
+            o.update()
+    
+    def __iter__(self):
+        return iter(self.objects())
+    
+    def __contains__(self, obj):
+        return obj in self._object_dict
+    
+    def __nonzero__(self):
+        return (len(self._object_dict) != 0)
+    
+    def __len__(self):
+        """len(group)
+           number of sprites in group
+    
+           Returns the number of sprites contained in the group."""
+        return len(self._object_dict)
+    
+    def __repr__(self):
+        return "<%s(%d objects)>" % (self.__class__.__name__, len(self))
 
 
 if pymunk is not None:

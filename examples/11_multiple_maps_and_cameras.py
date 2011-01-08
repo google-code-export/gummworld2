@@ -62,7 +62,7 @@ class App(Engine):
         self.view2 = Surface(
             State.screen.surface, pygame.Rect(
                 half_width,0, half_width,full_height))
-        State.camera = Camera(model.Avatar(), self.view2.surface)
+        State.camera = Camera(model.Object(), self.view2.surface)
         State.camera.position = State.world.rect.center
         State.map = Map(State.map.tile_size, State.map.map_size)
         toolkit.make_tiles2()
