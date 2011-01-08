@@ -16,8 +16,8 @@
 # License along with Gummworld2.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__version__ = '0.4'
-__vernum__ = (0,4)
+__version__ = '$Id$'
+__author__ = 'Gummbum, (c) 2011'
 
 
 __doc__ = """model.py - Physics model for Gummworld2.
@@ -37,8 +37,11 @@ from gamelib import State, Vec2d
 
 
 class Object(object):
-    """A dumb object model suitable for use as a camera target or an autonomous
-    object.
+    """An object model suitable for use as a Camera target or an autonomous
+    object in World.
+    
+    Similar to pygame.sprite.Sprite, without the graphics and rect. Subclass
+    this and extend.
     """
     
     def __init__(self, position=(0,0)):
@@ -66,9 +69,13 @@ class Object(object):
 
 
 class World(object):
-    """If pymunk is not available, use World. This World class is minimally
-    compatible with WorldPymunk class for pymunk. Obviously, any code calling
-    unavailable pymunk.Space methods will fail.
+    """A container for model.Objects.
+    
+    Similar to pygame.sprite.AbstractGroup. Not compatible with
+    pygame.sprite.Sprite.
+    
+    If you want the world to store pygame sprites, substitute a group and that
+    has a rect attribute and step() method.
     """
     
     def __init__(self, rect):
