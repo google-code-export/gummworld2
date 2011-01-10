@@ -89,3 +89,7 @@ SVN rev 108:
   * Changed: engine.py has new world_type module data, supports new constructor arguments, and is aware of new QuadTreeWorld.
   * Changed: examples updated to work with library changes.
   * New: examples 12_quad_tree_stress_test.py and 13_simple_world.py.
+
+== Changes in 0.0.6 ==
+
+SVN rev __:
