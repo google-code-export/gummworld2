@@ -38,6 +38,14 @@ Quick and dirty:
         for thing in things_that_moved:
             world.add(thing)
         draw_list(things)
+
+Thanks to:
+    *   Dylan J. Raub for his excellent pygame demo, Quadtree test, after which
+        this module has been fundamentally modeled. Visit the project page:
+        http://www.pygame.org/project-Quadtree+test-1691-.html.
+    *   Jonathan Fararis for his excellent Quadtrees paper on gamedev.net.
+        Original URL: http://www.gamedev.net/reference/programming/features/quadtrees/
+        Archive URL: http://archive.gamedev.net/reference/programming/features/quadtrees/
 """
 
 import math

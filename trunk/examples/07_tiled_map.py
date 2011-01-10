@@ -40,7 +40,7 @@ from pygame.sprite import Sprite
 from pygame.locals import (
     FULLSCREEN,
     Color,
-    K_TAB, K_ESCAPE, K_g, K_l,
+    K_ESCAPE, K_g, K_l,
 )
 
 import paths
@@ -66,10 +66,9 @@ class App(Engine):
         resolution = Vec2d(resolution)
         
         super(App, self).__init__(
-            caption='07 Tiled Map - TAB: view | G: grid | L: labels',
+            caption='07 Tiled Map -  G: grid | L: labels',
             camera_target=Avatar((325,420), resolution//2),
             resolution=resolution,
-            ##display_flags=FULLSCREEN,
             frame_speed=0)
         
         ## Load Tiled TMX map, then update the world's dimensions. Really, all

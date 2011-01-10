@@ -49,10 +49,6 @@ from pygame.locals import (
     Color,
     K_TAB, K_ESCAPE, K_g, K_l, K_0, K_1, K_2, K_9,
 )
-try:
-    import pymunk
-except:
-    pymunk = None
 
 import paths
 from gamelib import *
@@ -87,8 +83,7 @@ class App(Engine):
             camera_target=Avatar((325,420), resolution//2),
             resolution=resolution,
             display_flags=FULLSCREEN,
-            frame_speed=0,
-            use_pymunk=False)
+            frame_speed=0)
         
         # Load Tiled TMX map, then update the world and camera.
         self.map = toolkit.load_tiled_tmx_map('Gumm no swamps.tmx')
@@ -215,12 +210,7 @@ class App(Engine):
             rect = State.world.rect
             wx = max(min(wx,rect.right), rect.left)
             wy = max(min(wy,rect.bottom), rect.top)
-            if State.use_pymunk:
-                camera.slew(Vec2d(wx,wy), State.dt)
-            else:
-                camera.position = wx,wy
-        elif State.use_pymunk and camera.target.velocity != (0,0):
-            camera.target.velocity = (0,0)
+            camera.position = wx,wy
         
     def on_mouse_button_down(self, pos, button):
         self.mouse_down = True

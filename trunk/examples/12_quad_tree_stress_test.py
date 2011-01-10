@@ -76,7 +76,7 @@ the '-' key. Once you see the frame rate around 30 to 50, turn on worst-case
 handling with the W key to see the difference it can make. Keep an eye on the
 Catch-all HUD item, which shows the number of entities in level 1 over the
 number of entities in the 9x9 branches. The Worst case HUD item is an "idiot
-light".
+light" that indicates there are a high number of entities in level 1.
 
 Pick different grid levels to draw and observe the sprite alpha as the shapes
 cross grid lines. This will give you an idea of what levels they hit as they
@@ -96,6 +96,7 @@ Controls:
 """
 
 import sys
+from random import randrange
 import cProfile
 import pstats
 
@@ -104,10 +105,7 @@ from pygame.locals import *
 
 import paths
 from gamelib import *
-from gamelib.quad_tree import *
 
-
-pygame.init()
 
 class Thing(model.Object):
     
@@ -188,6 +186,7 @@ class App(Engine):
             resolution=(600,600),
             tile_size=self.tile_size, map_size=self.map_size,
             update_speed=30, frame_speed=0,
+            world_type=QUADTREE_WORLD,
         )
         State.camera.position = 300,300
         
@@ -212,9 +211,9 @@ class App(Engine):
     
     def make_space(self):
         world_rect = State.world.rect
-        self.space = QuadTree(
+        State.world = model.WorldQuadTree(
             world_rect, min_size=self.min_size, worst_case=self.worst_case)
-        self.space.add(*self.things)
+        State.world.add(*self.things)
     
     def make_hud(self):
         State.hud = HUD()
@@ -226,7 +225,7 @@ class App(Engine):
         
         # Which level's grid is drawn / Number of levels there are
         def get_levels():
-            return str(self.draw_level)+'/'+str(self.space.num_levels)
+            return str(self.draw_level)+'/'+str(State.world.num_levels)
         State.hud.add('Show/Levels', Statf(next_pos(),
             'Show/Levels %s', callback=get_levels))
         
@@ -239,9 +238,9 @@ class App(Engine):
         
         # Entities in level 1 / Entities in catch-all levels (aka level 9x9)
         def get_catch_all():
-            level_1 = len(self.space.entities)
+            level_1 = len(State.world.entities)
             level_9 = 0
-            for b in self.space.branches[4:]:
+            for b in State.world.branches[4:]:
                 level_9 += len(b.entities)
             return '%02d'%level_1 + '/' + '%02d'%level_9
         State.hud.add('Catch-all', Statf(next_pos(),
@@ -249,14 +248,14 @@ class App(Engine):
         
         # Collision tests per tick / Node visits per tick
         def get_collisions():
-            colls = '%05d' % self.space.coll_tests
-            visits = '%05d' % self.space.branch_visits_add
+            colls = '%05d' % State.world.coll_tests
+            visits = '%05d' % State.world.branch_visits_add
             return colls+'/'+visits
         State.hud.add('Colls/Visits', Statf(next_pos(),
             'Colls/Visits %s', callback=get_collisions, interval=66))
 
         def get_worst_case():
-            count = len(self.space.entities)
+            count = len(State.world.entities)
             if count > 15:
                 if count > self.worst_case_count or self.worst_case_cooldown == 0:
                     self.worst_case_cooldown = 30
@@ -277,7 +276,7 @@ class App(Engine):
         State.hud.update()
     
     def update_world(self):
-        space = self.space
+        space = State.world
         space.reset_counters()
         level_of = space.level_of
         num_levels = space.num_levels
@@ -289,7 +288,7 @@ class App(Engine):
         self.things_on_screen = (len(things),len(space))
     
     def update_collisions(self):
-        for c in self.space.collisions:
+        for c in State.world.collisions:
             c[0].hit = 255
     
     def draw(self):
@@ -300,14 +299,14 @@ class App(Engine):
         State.screen.flip()
     
     def draw_world(self):
-        things = self.space.entities_in(State.camera.rect)
+        things = State.world.entities_in(State.camera.rect)
         for thing in things:
             thing.draw()
         State.hud.draw()
     
     def draw_grid(self, level=0, b=None):
         if b is None:
-            b = self.space
+            b = State.world
         if b.level == level or (level == 9 and b.level == 2):
             camera = State.camera
             r = pygame.Rect(b.rect)
@@ -346,19 +345,19 @@ class App(Engine):
                 y = randrange(world_rect.height)
                 new_entities.append(Thing((x,y)))
             self.things.extend(new_entities)
-            self.space.add(*new_entities)
+            State.world.add(*new_entities)
         elif key == K_MINUS:
             # Remove some things.
             del_things = self.things[0:20]
             del self.things[0:20]
-            self.space.remove(*del_things)
+            State.world.remove(*del_things)
 
     def on_quit(self):
         sys.exit()
 
     def on_mouse_motion(self, pos, rel, buttons):
         self.mouse_thing.position = State.camera.screen_to_world(pos)
-        self.space.add(self.mouse_thing)
+        State.world.add(self.mouse_thing)
 
 app = App()
 if True:
