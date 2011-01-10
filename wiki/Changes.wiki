@@ -83,7 +83,7 @@ SVN rev 99:
   * Changed: Engine modified to use model module changes.
   * Changed: examples/11_multiple_maps_and_cameras.py modified to use model module changes.
 
-SVN rev __:
+SVN rev 108:
   * New: quad_tree.py, optional quad tree implementation for model.QuadTreeWorld.
   * Changed: `__init__.py` imports new items from engine.
   * Changed: engine.py has new world_type module data, supports new constructor arguments, and is aware of new QuadTreeWorld.
