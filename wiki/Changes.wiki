@@ -15,7 +15,8 @@ Adding QuadTree to model module and engine.
 
 == To Do ==
 
-Document quad_tree.py.
+  * Document quad_tree.py.
+  * Document world_type and special args in Engine.
 
 == Changes in 0.0.1 ==
 
