@@ -33,7 +33,24 @@ try:
 except:
     pymunk = None
 
+try:
+    from gamelib import quad_tree
+except:
+    quad_tree = None
+
 from gamelib import State, Vec2d
+
+
+class NoWorld(object):
+    
+    def __init__(self, rect):
+        self.rect = pygame.Rect(rect)
+    
+    def add(self, *args):
+        pass
+    
+    def step(self):
+        pass
 
 
 class Object(object):
@@ -87,13 +104,15 @@ class World(object):
         """Add objects to the world."""
         for o in objs:
             self._object_dict[o] = 1
+            if not hasattr(o, '_worlds'):
+                o._worlds = {}
             o._worlds[self] = 1
     
     def remove(self, *objs):
         for o in objs:
             if o in self._object_dict:
                 del self._object_dict[o]
-            if self in o._worlds:
+            if hasattr(o, '_worlds') and self in o._worlds:
                 del o._worlds[self]
     
     def objects(self):
@@ -121,6 +140,33 @@ class World(object):
     
     def __repr__(self):
         return "<%s(%d objects)>" % (self.__class__.__name__, len(self))
+
+
+if quad_tree is not None:
+    
+    class QuadTreeObject(object):
+        """An object model suitable for use as a Camera target or an autonomous
+        object in QuadTreeWorld.
+        """
+        
+        def __init__(self, rect, position=(0,0)):
+            self.rect = pygame.Rect(rect)
+            self._position = Vec2d(position)
+        
+        @property
+        def position(self):
+            return self._position
+        @position.setter
+        def position(self, val):
+            p = self._position
+            p.x,p.y = val
+            self.rect.center = round(p.x), round(p.y)
+
+
+    class WorldQuadTree(quad_tree.QuadTree):
+        
+        def step(self):
+            pass
 
 
 if pymunk is not None:

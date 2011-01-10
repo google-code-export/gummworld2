@@ -64,12 +64,11 @@ class App(Engine):
     def __init__(self, resolution=(640,480)):
         ## Camera target is a pymunk body.
         super(App, self).__init__(
-            caption='08 pymunk Motion -  TAB: view | G: grid | L: labels',
+            caption='08 pymunk Motion -  G: grid | L: labels',
             camera_target=model.CircleBody(),
             resolution=resolution,
-            ##display_flags=FULLSCREEN,
             frame_speed=0,
-            use_pymunk=True)
+            world_type=PYMUNK_WORLD)
         
         # Make an avatar sprite so we have something to draw.
         resolution = Vec2d(resolution)

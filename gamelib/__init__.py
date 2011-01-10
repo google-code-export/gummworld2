@@ -54,7 +54,8 @@ from ui import HUD, Stat, Statf
 from canvas import Canvas
 from sprite import CameraTargetSprite, BucketSprite, BucketGroup
 
-from engine import Engine
+from engine import Engine, NO_WORLD, SIMPLE_WORLD, QUADTREE_WORLD, PYMUNK_WORLD
+
 
 # Toolkits and utilities
 import model

@@ -69,13 +69,20 @@ from gamelib import (
 )
 
 
-class Engine(object):
+NO_WORLD = 0
+SIMPLE_WORLD = 1
+QUADTREE_WORLD = 2
+PYMUNK_WORLD = 3
 
+
+class Engine(object):
+    
     def __init__(self, camera_target=None,
         resolution=(600,600), display_flags=0, caption=None,
         tile_size=(128,128), map_size=(10,10),
         update_speed=30, frame_speed=30,
-        use_pymunk=False):
+        world_type=NO_WORLD,
+        **kwargs):
         """Construct an instance of Engine.
         
         The camera_target argument is the target that the camera will track. If
@@ -110,7 +117,7 @@ class Engine(object):
         ## If you don't use this engine, then in general you will still
         ## want to initialize yours in the same order you see here.
         
-        State.use_pymunk = use_pymunk
+        State.world_type = world_type
         
         State.screen = Screen(resolution, display_flags)
         if caption is not None:
@@ -123,16 +130,30 @@ class Engine(object):
         ## checking and exception handling is purposely not done so that the
         ## code is easier to read. If it blows up you should be able to figure
         ## it out from the default stack trace.
-        if not use_pymunk:
+        if world_type == NO_WORLD:
+            State.world = model.NoWorld(State.map.rect)
+            if camera_target is None:
+                camera_target = model.Object()
+        elif world_type == SIMPLE_WORLD:
             State.world = model.World(State.map.rect)
             if camera_target is None:
                 camera_target = model.Object()
             State.world.add(camera_target)
-        else:
+        elif world_type == PYMUNK_WORLD:
             State.world = model.WorldPymunk(State.map.rect)
             if camera_target is None:
                 camera_target = model.CircleBody()
             State.world.add(camera_target, camera_target.shape)
+        elif world_type == QUADTREE_WORLD:
+            qt_min_size = kwargs.get('quadtree_min_size', (128,128))
+            qt_worst_case = kwargs.get('quadtree_worst_case', 0)
+            State.world = model.WorldQuadTree(
+                State.map.rect, qt_min_size, qt_worst_case)
+            if camera_target is None:
+                qt_position = kwargs.get('quadtree_object_position', (0,0))
+                qt_rect = kwargs.get(
+                    'quadtree_object_rect', pygame.Rect(0,0,20,20))
+                camera_target = model.QuadTreeObject(qt_rect, qt_position)
         
         State.camera = Camera(camera_target, State.screen.surface)
         

@@ -70,10 +70,9 @@ class App(Engine):
         ## playfield is visible along the y-axis. However, if the tiling pattern
         ## is visible a "squat" appearance to the tiles can add to the effect.
         super(App, self).__init__(
-            caption='06 Mouse Movement with Aspect - TAB: view | G: grid | L: labels',
+            caption='06 Mouse Movement with Aspect - G: grid | L: labels',
             camera_target=Avatar((325,420), resolution//2),
             resolution=resolution,
-            ##display_flags=FULLSCREEN,
             tile_size=(128,64), map_size=(10,20), frame_speed=0)
 
         # Make some default content.
