@@ -9,6 +9,12 @@ This page contains a change log, working notes on issues, items to-do, and items
 
 == In Progress ==
 
+Adding QuadTree to model module and engine.
+
+Touching:
+  * Working in engine.PYGAME_WORLD, engine.PYMUNK_WORLD, engine.QUADTREE_WORLD.
+  * State.use_pymunk becomes State.use_world.
+
 == Issues ==
 
 == To Do ==
