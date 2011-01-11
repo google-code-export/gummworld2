@@ -112,16 +112,14 @@ class App(Engine):
         # Final destination.
         self.move_to = None
         for edge in self.speed_box.edges:
-            # lines_intersection() returns (True,True) or (False,False) if there
-            # is no intersection.
-            x,y = geometry.lines_intersection(edge, (self.speed_box.center, pos))
-            if x not in (True,False):
+            # line_intersects_line() returns False or (True,(x,y)).
+            cross = geometry.line_intersects_line(edge, (self.speed_box.center, pos))
+            if cross:
+                x,y = cross[1]
                 self.move_to = State.camera.screen_to_world(pos)
+                self.speed = geometry.distance(
+                    self.speed_box.center, (x,y)) / self.max_speed_box
                 break
-        # Speed of movement.
-        if self.move_to is not None:
-            self.speed = geometry.distance(
-                self.speed_box.center, (x,y)) / self.max_speed_box
         
     def update_camera_position(self):
         """update the camera's position if any movement keys are held down
