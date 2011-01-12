@@ -87,4 +87,6 @@ SVN rev 108:
 
 == Changes in 0.0.6 ==
 
-SVN rev __:
+SVN rev 115:
+  * New: many collision routines added to geometry.py.
+  * New: 14_collision_sandbox.py unit test.
