@@ -13,6 +13,7 @@ This page contains a change log, working notes on issues, items to-do, and items
 
 == To Do ==
 
+  * Integrate geom.collide() into QuadTree.collide().
   * Document quad_tree.py.
   * Document world_type and special args in Engine.
 
