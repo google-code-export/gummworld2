@@ -30,6 +30,8 @@ from math import atan2, cos, sin, sqrt, pi, radians
 
 import pygame
 
+from vec2d import Vec2d
+
 
 class Ellipse(object):
     
@@ -210,59 +212,27 @@ def distance(a, b):
     return (diffx*diffx) ** 0.5 + (diffy*diffy) ** 0.5
 
 
-## Obsolete ##
-##def lines_intersection(line_1, line_2):
-##    """Determine the intersection point of the line segment defined by line_1 with
-##    the line segment defined by line_2.  Returns a tuple (x,y) representing the
-##    point of intersection.
-##
-##    The line_1 argument is a sequence representing two end points of the first
-##    line ((x1,y1),(x2,y2)).
-##    
-##    The line_2 argument is a sequence representing two end points of the second
-##    line ((x3,y3),(x4,y4)).
-##    
-##    If no point of intersection is found, (False,False) is returned.
-##    
-##    If the lines coincide, in which case all points intersect, (True,True) is
-##    returned.
-##    
-##    This function always returns a tuple. This is intended to simplify handling
-##    the return data type. The following is an example of processing the possible
-##    return values.
-##    
-##        x,y = lines_intersection(A, B)
-##        if x is True: print 'lines coincide'
-##        elif x is False: print 'no intersection'
-##        else: print 'x,y is a point'
-##    """
-##    a,b = (x1,y1),(x2,y2) = line_1
-##    c,d = (x3,y3),(x4,y4) = line_2
-##    
-##    # Fail if either line segment is zero-length.
-##    if a == b or c == d:
-##        return (False,False)
-##
-##    sx1 = float(x2 - x1); sy1 = float(y2 - y1)
-##    sx2 = float(x4 - x3); sy2 = float(y4 - y3)
-##
-##    # Fail if lines coincide (end points are along the same line).
-##    s1 = (-sx2 * sy1 + sx1 * sy2)
-##    t1 = (-sx2 * sy1 + sx1 * sy2)
-##    if s1 == 0 or t1 == 0:
-##        return (True,True)
-##
-##    s = (-sy1 * (x1 - x3) + sx1 * (y1 - y3)) / s1
-##    t = ( sx2 * (y1 - y3) - sy2 * (x1 - x3)) / t1
-##
-##    if s >= 0 and s <= 1 and t >= 0 and t <= 1:
-##        # Collision detected
-##        i_x = x1 + (t * sx1)
-##        i_y = y1 + (t * sy1)
-##        return (i_x,i_y)
-##
-##    # No collision
-##    return (False,False)
+def point_in_poly(point, poly):
+    """Poly is assumed to be a sequence of points, length >= 3.
+    """
+    x,y = point
+    inside = False
+    
+    p1x,p1y = poly[0]
+    for p2x,p2y in poly[1:]+[poly[0]]:
+        miny = p1y if p1y<p2y else p2y
+        if y > miny:
+            maxy = p1y if p1y>p2y else p2y
+            if y <= maxy:
+                maxx = p1x if p1x>p2x else p2x
+                if x <= maxx:
+                    if p1y != p2y:
+                        xinters = (y-p1y)*(p2x-p1x)/(p2y-p1y)+p1x
+                    if p1x == p2x or x <= xinters:
+                        inside = not inside
+        p1x,p1y = p2x,p2y
+    
+    return inside
 
 
 def circle_collided_other(self, other):
@@ -286,72 +256,156 @@ def circle_collided_other(self, other):
     
     The fall-through action is to call other.collided(self).
     """
+    origin = self.origin
+    radius = self.radius
     if not hasattr(other, 'collided'):
-        return circle_intersects_rect(self.origin, self.radius, other.rect)
+        return circle_intersects_rect(
+        origin, radius, rect_to_lines(other.rect))
     
     other_collided = other.collided
-    if other_collided is circle_collide_other:
-        return circle_intersects_circle(self.origin, self.radius, other.origin, other.radius)
-    elif other_collided is rect_collide_other:
-        return circle_intersects_rect(self.origin, self.radius, other.rect)
-    elif other_collided is poly_collide_other:
-        return circle_intersects_poly(self.origin, self.radius, other.points)
-    elif other_collided is line_collide_other:
-        return circle_intersects_line(self.origin, self.radius, other.end_points)
+    if other_collided is circle_collided_other:
+        return circle_intersects_circle(origin, radius, other.origin, other.radius)
+    elif other_collided is rect_collided_other:
+        rect = other.rect
+        if circle_intersects_rect(origin, radius, rect):
+            return True
+        return rect.collidepoint(origin)==1
+    elif other_collided is poly_collided_other:
+        points = other.points
+        if circle_intersects_poly(origin, radius, points):
+            return True
+        return point_in_poly(origin, points)
+    elif other_collided is line_collided_other:
+        return circle_intersects_line(origin, radius, other.end_points)
+    
     return other_collided(self)
 
 
 def rect_collided_other(self, other, rect_pre_tested=None):
+    rect = self.rect
     if not hasattr(other, 'collided'):
         if rect_pre_tested is not None:
             return rect_pre_tested
         else:
-            return self.colliderect(other)
+            return rect.colliderect(other.rect)==True
     
     other_collided = other.collided
-    if other_collided is circle_collide_other:
-        return circle_intersects_rect(other.origin, other.radius, self.rect)
-    elif other_collided is rect_collide_other:
+    if other_collided is circle_collided_other:
+        origin = other.origin
+        radius = other.radius
+        if circle_intersects_rect(origin, radius, rect):
+            return True
+        return rect.collidepoint(origin)==1
+    elif other_collided is rect_collided_other:
         if rect_pre_tested is not None:
             return rect_pre_tested
         else:
-            return self.colliderect(other)
-    elif other_collided is poly_collide_other:
-        pass
-    elif other_collided is line_collide_other:
-        pass
+            return rect.colliderect(other.rect)==True
+    elif other_collided is poly_collided_other:
+        points = other.points
+        if len(lines_intersect_lines(
+            rect_to_lines(rect), points_to_lines(points))):
+            return True
+        else:
+            for p in points:
+                if rect.collidepoint(p):
+                    return True
+            return False
+    elif other_collided is line_collided_other:
+        end_points = other.end_points
+        p1,p2 = end_points
+        return len(line_intersects_rect(end_points, rect)) > 0 or \
+            rect.collidepoint(p1)==True or rect.collidepoint(p2)==True
+    
     return other_collided(self)
 
 
 def line_collided_other(self, other):
     if not hasattr(other, 'collided'):
-        return circle_intersects_rect(self.origin, self.radius, other.rect)
+        return circle_intersects_rect(
+            self.origin, self.radius, rect_to_lines(other.rect))
     
     other_collided = other.collided
-    if other_collided is circle_collide_other:
-        pass
-    elif other_collided is rect_collide_other:
-        pass
-    elif other_collided is poly_collide_other:
-        pass
-    elif other_collided is line_collide_other:
-        pass
+    if other_collided is circle_collided_other:
+        return circle_intersects_line(other.origin, other.radius, self.end_points)
+    elif other_collided is rect_collided_other:
+        end_points = self.end_points
+        rect = other.rect
+        p1,p2 = end_points
+        return len(line_intersects_rect(end_points, rect)) > 0 or \
+            rect.collidepoint(p1)==True or rect.collidepoint(p2)==True
+    elif other_collided is poly_collided_other:
+        end_points = self.end_points
+        points = other.points
+        if len(line_intersects_poly(end_points, points)) > 0:
+            return True
+        else:
+            for p in end_points:
+                if point_in_poly(p, points):
+                    return True
+            return False
+    elif other_collided is line_collided_other:
+        return len(line_intersects_line(self.end_points, other.end_points))>0
+    
     return other_collided(self)
 
 
 def poly_collided_other(self, other):
     if not hasattr(other, 'collided'):
-        return circle_intersects_rect(self.origin, self.radius, other.rect)
+        return circle_intersects_rect(
+            self.origin, self.radius, rect_to_lines(other.rect))
     
     other_collided = other.collided
-    if other.collided is circle_collide_other:
-        pass
-    elif other.collided is rect_collide_other:
-        pass
-    elif other.collided is poly_collide_other:
-        pass
-    elif other.collided is line_collide_other:
-        pass
+    if other.collided is circle_collided_other:
+        points = self.points
+        origin = other.origin
+        radius = other.radius
+        if circle_intersects_poly(origin, radius, points):
+            return True
+        return point_in_poly(origin, points)
+    elif other.collided is rect_collided_other:
+        points = self.points
+        rect = other.rect
+        if len(lines_intersect_lines(
+            points_to_lines(points), rect_to_lines(rect))) > 0:
+            return True
+        else:
+            for p in points:
+                if rect.collidepoint(p):
+                    return True
+            for p in (rect.topleft,rect.topright,rect.bottomright,rect.bottomleft):
+                if point_in_poly(p, points):
+                    return True
+            return False
+    elif other.collided is poly_collided_other:
+        self_points = self.points
+        other_points = other.points
+# Shouldn't need to test every point. If they overlap, the lines will collide.
+# If one is inside the other, then any point is in the other poly.
+#        for p in self_points:
+#            if point_in_poly(p, other_points):
+#                return True
+#        for p in other_points:
+#            if point_in_poly(p, self_points):
+#                return True
+        if point_in_poly(self_points[0], other_points):
+            return True
+        if point_in_poly(other_points[0], self_points):
+            return True
+        if poly_intersects_poly(self_points, other_points):
+            return True
+        return False
+    elif other.collided is line_collided_other:
+        points = self.points
+        end_points = other.end_points
+        if len(line_intersects_poly(end_points, points)) > 0:
+            return True
+        else:
+            for p in end_points:
+                if point_in_poly(p, points):
+                    return True
+            return False
+    
     return other.collided(self)
 
 
@@ -407,18 +461,19 @@ def circle_intersects_poly(origin, radius, points):
     for line in points_to_lines(points):
         if circle_intersects_line(origin, radius, line):
             return True
+    return False
 
 
 def line_intersects_line(line_1, line_2):
-    """Returns tuple([True,(x,y)]) if the lines intersect, otherwise None. (x,y)
-    is the point of intersection.
+    """Returns [x,y] if the lines intersect, otherwise []. [x,y] is the point
+    of intersection.
     """
     a,b = (x1,y1),(x2,y2) = line_1
     c,d = (x3,y3),(x4,y4) = line_2
     
     # Fail if either line segment is zero-length.
     if a == b or c == d:
-        return None
+        return []
 
     sx1 = float(x2 - x1); sy1 = float(y2 - y1)
     sx2 = float(x4 - x3); sy2 = float(y4 - y3)
@@ -427,7 +482,7 @@ def line_intersects_line(line_1, line_2):
     s1 = (-sx2 * sy1 + sx1 * sy2)
     t1 = (-sx2 * sy1 + sx1 * sy2)
     if s1 == 0 or t1 == 0:
-        return None
+        return []
 
     s = (-sy1 * (x1 - x3) + sx1 * (y1 - y3)) / s1
     t = ( sx2 * (y1 - y3) - sy2 * (x1 - x3)) / t1
@@ -436,28 +491,21 @@ def line_intersects_line(line_1, line_2):
         # Collision detected
         i_x = x1 + (t * sx1)
         i_y = y1 + (t * sy1)
-        return True,(i_x,i_y)
+        return [(i_x,i_y)]
 
     # No collision
-    return None
+    return []
 
 
 def lines_intersect_lines(lines1, lines2, fast=True):
-    def test_them():
-        crosses = []
-        for line1 in lines1:
-            for line2 in lines2:
-                cross = line_intersects_line(line1, line2)
-                if cross:
-                    crosses.append(cross[1])
-                    if fast:
-                        return crosses
-        return crosses
-    crosses = test_them()
-    if len(crosses):
-        crosses.insert(0, True)
-    else:
-        cross.insert(0, False)
+    crosses = []
+    for line1 in lines1:
+        for line2 in lines2:
+            cross = line_intersects_line(line1, line2)
+            if cross:
+                crosses.append(cross[0])
+                if fast:
+                    return crosses
     return crosses
 
 
@@ -468,7 +516,7 @@ def line_intersects_rect(line, rect, fast=True):
 
 def line_intersects_poly(line, points, fast=True):
     poly_lines = points_to_lines(points)
-    return lines_intersect_lines([lines], poly_lines, fast)
+    return lines_intersect_lines([line], poly_lines, fast)
 
 
 def poly_intersects_rect(points, rect, fast=True):
