@@ -262,8 +262,8 @@ class App(Engine):
             ## make a variety of things
             thing = self.make_thing((x,y))
             self.things.append(thing)
-        self.mouse_thing = CircleGeom((300,300))
-        self.mouse_thing.step = (0,0)
+        self.mouse_thing = RectGeom((300,300))
+        self.mouse_thing.step = Vec2d(0,0)
         self.make_space()
         
         self.show_grid = True
@@ -330,20 +330,22 @@ class App(Engine):
             'Colls/Visits %s', callback=get_collisions, interval=66))
 
         def get_worst_case():
+            alert_threshold = 15
             count = len(State.world.entities)
-            if count > 15:
+            if count >= alert_threshold:
                 if count > self.worst_case_count or self.worst_case_cooldown == 0:
                     self.worst_case_cooldown = 30
                     return '!! %d in level 1' % count
-            elif self.worst_case_cooldown == 0:
+            if self.worst_case_cooldown == 0:
                 self.worst_case_count = 0
                 return 'OK'
             if self.worst_case_cooldown > 0:
                 self.worst_case_cooldown -= 1
+            return None
         self.worst_case_count = 0
         self.worst_case_cooldown = 30
         State.hud.add('Worst case', Statf(next_pos(),
-            'Worst case: %s', callback=get_worst_case, interval=66))
+            'Worst case: %s', value='OK', callback=get_worst_case, interval=66))
 
     def update(self):
         self.update_world()

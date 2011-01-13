@@ -147,8 +147,8 @@ class Engine(object):
         elif world_type == QUADTREE_WORLD:
             qt_min_size = kwargs.get('quadtree_min_size', (128,128))
             qt_worst_case = kwargs.get('quadtree_worst_case', 0)
-            qt_collide_rects = kwargs.get('collide_rects', True)
-            qt_collide_entities = kwargs.get('collide_entities', False)
+            qt_collide_rects = kwargs.get('quadtree_collide_rects', True)
+            qt_collide_entities = kwargs.get('quadtree_collide_entities', False)
             State.world = model.WorldQuadTree(
                 State.map.rect, qt_min_size, qt_worst_case,
                 qt_collide_rects, qt_collide_entities)
