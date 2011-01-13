@@ -257,15 +257,16 @@ class App(Engine):
 
         def get_worst_case():
             count = len(State.world.entities)
-            if count > 15:
+            if count == 30:
                 if count > self.worst_case_count or self.worst_case_cooldown == 0:
                     self.worst_case_cooldown = 30
                     return '!! %d in level 1' % count
-            elif self.worst_case_cooldown == 0:
+            if self.worst_case_cooldown == 0:
                 self.worst_case_count = 0
                 return 'OK'
             if self.worst_case_cooldown > 0:
                 self.worst_case_cooldown -= 1
+            return 'OK'
         self.worst_case_count = 0
         self.worst_case_cooldown = 30
         State.hud.add('Worst case', Statf(next_pos(),

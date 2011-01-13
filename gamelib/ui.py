@@ -111,7 +111,9 @@ class Stat(pygame.sprite.Sprite):
         if self.callback:
             now = pygame.time.get_ticks()
             if self.next_time <= now:
-                self.set_value(self.callback())
+                value = self.callback()
+                if value is not None:
+                    self.set_value(value)
                 self.next_time = now + self.interval
     
     def set_value(self, text):
@@ -143,7 +145,9 @@ class Statf(pygame.sprite.Sprite):
         if self.callback:
             now = pygame.time.get_ticks()
             if self.next_time <= now:
-                self.set_value(self.callback())
+                value = self.callback()
+                if value is not None:
+                    self.set_value(value)
                 self.next_time = now + self.interval
     
     def set_value(self, value):

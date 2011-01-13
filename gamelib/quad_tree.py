@@ -167,6 +167,16 @@ class QuadTreeNode(object):
             self._keep(entity)
             for b in self.branches:
                 b.test_collisions(entity)
+            ## experimental bug fix
+            if not self.is_root:
+                branches = self.parent.branches
+                my_idx = branches.index(self)
+                entity_rect = entity.rect
+                for i,b in enumerate(branches):
+                    if i == my_idx:
+                        continue
+                    if b.rect.colliderect(entity_rect):
+                        b.test_collisions(entity)
     
     def _keep(self, entity):
         self.root.entity_branch[entity] = self
@@ -309,13 +319,13 @@ class QuadTree(QuadTreeNode):
     
     def _collided_full(self, left, right):
         return self._collided_rects(left, right) and \
-            self._collided_entities(left, right)
+            self._collided_entities(left, right, True)
     
     def _collided_rects(self, left, right):
         return left.rect.colliderect(right.rect)
     
-    def _collided_entities(self, left, right):
-        return left.collided(left, right)
+    def _collided_entities(self, left, right, rect_tested=False):
+        return left.collided(left, right, rect_tested)
     
     def __zero__(self):
         return len(self) == 0

@@ -332,7 +332,7 @@ def rect_collided_other(self, other, rect_pre_tested=None):
         if rect_pre_tested is not None:
             return rect_pre_tested
         else:
-            return rect.colliderect(other.rect)==True
+            return rect.colliderect(other.rect)==1
     elif other_collided is poly_collided_other:
         points = other.points
         if len(lines_intersect_lines(
