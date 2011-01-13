@@ -24,40 +24,38 @@ __doc__ = """quad_tree_stress_test.py - Stress test of quad_tree.py.
 
 THE TECHNOBABBLE
 
-This is a worst-case usage of the quad tree. Worst case is something involving
-a large number of entities, all of which need to be updated every tick, and all
-drawn in every frame. The quad tree is not very efficient for this, so it forms
-a good stress test.
+See the 12_quad_tree_stress_test.py doc for the basic quad tree explanation.
 
-The whole intent of the quad tree is to optimize storing entities in a way that
-adding or moving entities, retrieving entities within a bounding rect, and
-collision detection maintains reasonably good scalable performance. It does so
-by dividing and subdividing a map into sections, such that the number of
-collision checks is minimized when activity is confined to a relatively small
-area of the map.
+This is another worst-case usage of the quad tree. It differs from
+12_quad_tree_stress_test.py in that it adds collision detection of geometry. It
+is not a rect-vs-rect approximation; it is fairly precise circle-vs-triangle,
+circle-vs-rect, etc. This level of testing is quite a bit more work for the
+computer, so typically one would want the quad tree to perform a rect-vs-rect
+test to detect proximity (because it is a comparatively fast test), and then
+perform a shape-vs-shape test if the entities are in proximity.
 
-In order to accomplish this, the quad tree prefers to store entities at the
-lowest level branch in which it can be entirely contained. It dislikes storing
-entities in level 1. In fact, storing anything in level 1 is very expensive as
-every operation involves all the sprites in level 1.
+One needs to direct the quad tree to do this more elaborate testing. Whether
+using the Engine class or QuadTree classes, pass the constructor these
+arguments:
+    
+    collide_rects=True, collide_entities=True
 
-Contributing to the worst case are sporadic situations like a number of entities
-parking on level 2 grid lines or crossing them simultaneously. This boosts the
-number of entities forced into level 1, and increases the number of collision
-checks required during entity placement (add, aka move).
+This turns on rect-vs-rect testing and shape-vs-shape testing, respectively.
 
-In addition, there is the situation where entities roam outside the world
-bounds. This should not happen in a well written game, but if it does the
-entities will be forced into level 1.
+In order to use shape-vs-shape testing, one's entities also need to have the
+required attributes:
+    
+    *   Shape essentials, e.g. a circle requires the origin and radius
+        attributes.
+    *   A collided attribute, which is one of the *_collided_other static-
+        method functions from the geometry module.
 
-These situations can be handled by an extension of the quad tree, which is
-enabled by telling the constructor worst_case=SOME_INT. This triggers the
-creation of a 9x9 group of auxilliary branches that cover the entire world map,
-and are considered before placing entities in level 1. SOME_INT represents the
-number of pixels to inflate the 9x9 grid beyond the world bounds. There is
-no penalty to making this value very large. However, if these grids are not
-needed they do add some overhead to collision detection, and operations that
-walk the entire quad tree.
+See the documentation for circle_collided_other() for details regarding the
+shape attributes and collided method.
+
+It is probably best to implement the shape attributes as properties, as they
+hold the shape and the rect holds the position. See TriangleGeom.points in this
+demo for an example.
 
 
 THE DEMO
@@ -67,8 +65,8 @@ The higher the alpha, the lower the level. Level 1 is the top level--the worst
 level to be in--and displays the brightest. Sprites that have recently collided
 will be colored red, and eventually turn green after a short time.
 
-In order to demonstrate the worst of the worst, the demo begins with 100 sprites
-and the quad tree's worst-case handling turned off.
+In order to demonstrate the worst of the worst, the demo begins with a number of
+sprites and the quad tree's worst-case handling turned off.
 
 Try increasing the number of entities ('+' or '=' key) until frame rate drops
 below 50 or 60. Older computers may need to reduce the number of entities with
@@ -91,7 +89,7 @@ Controls:
 
     Press W to toggle worst-case handling. Worst case is the 9x9 level.
 
-    Press '+' or '=' to add 20 things to the quad tree, press '-' to remove 20
+    Press '+' or '=' to add 10 things to the quad tree, press '-' to remove 10
     things.
 """
 
@@ -107,12 +105,12 @@ import paths
 from gamelib import *
 
 
-class Thing(model.Object):
+class RectGeom(model.Object):
     
     def __init__(self, position):
-        super(Thing, self).__init__()
+        super(RectGeom, self).__init__()
         
-        self.rect = pygame.Rect(0,0,20,20)
+        self.rect = pygame.Rect(0,0,25,25)
         
         self.image_green = pygame.surface.Surface(self.rect.size)
         self.image_green.fill(Color('green'))
@@ -124,6 +122,9 @@ class Thing(model.Object):
         choices = [-0.5,-0.3,-0.1,0.1,0.3,0.5]
         self.step = Vec2d(choice(choices), choice(choices))
         self.hit = 0
+    
+    ## entity's collided, static method used by QuadTree callback
+    collided = staticmethod(geometry.rect_collided_other)
     
     @property
     def position(self):
@@ -164,6 +165,68 @@ class Thing(model.Object):
         camera.surface.blit(self.image, pos)
 
 
+class CircleGeom(RectGeom):
+    def __init__(self, position):
+        super(CircleGeom, self).__init__(position)
+        
+        self.rect = self.image.get_rect(topleft=(0,0))
+        self.image_green.fill(Color('black'))
+        self.image_green.set_colorkey(Color('black'))
+        pygame.draw.circle(self.image_green, Color('green'), self.origin, self.radius)
+        
+        self.image_red.fill(Color('black'))
+        self.image_red.set_colorkey(Color('black'))
+        pygame.draw.circle(self.image_red, Color('red'), self.origin, self.radius)
+        
+        self.position = position
+    
+    ## entity's collided, static method used by QuadTree callback
+    collided = staticmethod(geometry.circle_collided_other)
+    
+    ## properties for circle, required by circle_collided_other
+    @property
+    def origin(self):
+        return self.rect.center
+    @origin.setter
+    def origin(self, val):
+        self.position = val
+    @property
+    def radius(self):
+        return self.rect.width // 2
+
+
+class TriangleGeom(RectGeom):
+    def __init__(self, position):
+        super(TriangleGeom, self).__init__(position)
+        
+        self.rect = self.image.get_rect(topleft=(0,0))
+        r = self.rect
+        self._points = [
+            (r.centerx,r.top),
+            r.bottomright,
+            r.bottomleft,
+        ]
+        
+        self.image_green.fill(Color('black'))
+        self.image_green.set_colorkey(Color('black'))
+        pygame.draw.polygon(self.image_green, Color('green'), self.points)
+        
+        self.image_red.fill(Color('black'))
+        self.image_red.set_colorkey(Color('black'))
+        pygame.draw.polygon(self.image_red, Color('red'), self.points)
+        
+        self.position = position
+    
+    ## entity's collided, static method used by QuadTree callback
+    collided = staticmethod(geometry.poly_collided_other)
+    
+    ## properties for circle, required by circle_collided_other
+    @property
+    def points(self):
+        l,t = self.rect.topleft
+        return [(x+l,y+t) for x,y in self._points]
+
+
 class App(Engine):
     
     def __init__(self):
@@ -181,26 +244,26 @@ class App(Engine):
         self.map_size = 10,10
         self.min_size = 128,128
         self.worst_case = 0
-        self.num_sprites = 100
+        self.num_sprites = 90
 
         super(App, self).__init__(
             resolution=(600,600),
             tile_size=self.tile_size, map_size=self.map_size,
             update_speed=30, frame_speed=0,
-            world_type=QUADTREE_WORLD,
         )
         State.camera.position = 300,300
-        
+
         # Make starting set of things.
         self.things = []
         world_rect = State.world.rect
-        sprites_per_axis = self.num_sprites ** 0.5
-        x_step = int(round(world_rect.width / sprites_per_axis))
-        y_step = int(round(world_rect.height / sprites_per_axis))
-        for x in xrange(0, world_rect.width, x_step):
-            for y in xrange(0, world_rect.height, y_step):
-                self.things.append(Thing((x,y)))
-        self.mouse_thing = Thing((300,300))
+        for i in xrange(self.num_sprites):
+            x = randrange(world_rect.width)
+            y = randrange(world_rect.height)
+            ## make a variety of things
+            thing = self.make_thing((x,y))
+            self.things.append(thing)
+        self.mouse_thing = CircleGeom((300,300))
+        self.mouse_thing.step = (0,0)
         self.make_space()
         
         self.show_grid = True
@@ -210,10 +273,21 @@ class App(Engine):
         self.make_hud()
         State.show_hud = True
     
+    def make_thing(self, pos):
+        GeomClass = choice([
+            RectGeom,
+            CircleGeom,
+            TriangleGeom,
+        ])
+        return GeomClass(pos)
+    
     def make_space(self):
         world_rect = State.world.rect
         State.world = model.WorldQuadTree(
-            world_rect, min_size=self.min_size, worst_case=self.worst_case)
+            world_rect, min_size=self.min_size, worst_case=self.worst_case,
+            ## turn on both rect.colliderect and entity.collided tests
+            collide_rects=True,
+            collide_entities=True)
         State.world.add(*self.things)
     
     def make_hud(self):
@@ -341,16 +415,16 @@ class App(Engine):
             # Add some things.
             new_entities = []
             world_rect = State.world.rect
-            for i in range(20):
+            for i in range(10):
                 x = randrange(world_rect.width)
                 y = randrange(world_rect.height)
-                new_entities.append(Thing((x,y)))
+                new_entities.append(self.make_thing((x,y)))
             self.things.extend(new_entities)
             State.world.add(*new_entities)
         elif key == K_MINUS:
             # Remove some things.
-            del_things = self.things[0:20]
-            del self.things[0:20]
+            del_things = self.things[0:10]
+            del self.things[0:10]
             State.world.remove(*del_things)
 
     def on_quit(self):

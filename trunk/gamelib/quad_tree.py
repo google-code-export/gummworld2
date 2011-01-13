@@ -214,7 +214,8 @@ class QuadTreeNode(object):
 
 class QuadTree(QuadTreeNode):
     
-    def __init__(self, rect, min_size=(128,128), worst_case=0, *entities):
+    def __init__(self, rect, min_size=(128,128), worst_case=0,
+        collide_rects=True, collide_entities=False, *entities):
         self.root = self
         self.min_size = min_size
         self.worst_case = worst_case
@@ -226,8 +227,36 @@ class QuadTree(QuadTreeNode):
         self.coll_tests = 0
         self.branch_visits_add = 0
         
+        self._collide_rects = collide_rects
+        self._collide_entities = collide_entities
+        self._set_collided()
+        
         super(QuadTree, self).__init__(self, rect)
         self.add(*entities)
+    
+    @property
+    def collide_rects(self):
+        return self._collide_rects
+    @collide_rects.setter
+    def collide_rects(self, val):
+        self._collide_rects = val
+        self._set_collided()
+    
+    @property
+    def collide_entities(self):
+        return self._collide_entities
+    @collide_entities.setter
+    def collide_entities(self, val):
+        self._collide_entities = val
+        self._set_collided()
+    
+    def _set_collided(self):
+        if self._collide_rects and self._collide_entities:
+            self._collided = self._collided_full
+        elif self._collide_entities:
+            self._collided = self._collided_entities
+        else:
+            self._collided = self._collided_rects
     
     def reset_counters(self):
         self.coll_tests = 0
@@ -276,8 +305,17 @@ class QuadTree(QuadTreeNode):
         self.coll_tests += 1
         if left is right:
             return False
-        else:
-            return left.rect.colliderect(right.rect)
+        return self._collided(left, right)
+    
+    def _collided_full(self, left, right):
+        return self._collided_rects(left, right) and \
+            self._collided_entities(left, right)
+    
+    def _collided_rects(self, left, right):
+        return left.rect.colliderect(right.rect)
+    
+    def _collided_entities(self, left, right):
+        return left.collided(left, right)
     
     def __zero__(self):
         return len(self) == 0
