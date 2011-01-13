@@ -95,3 +95,17 @@ SVN rev 115:
 SVN rev 118:
   * Fixes: containment tests in geometry.py.
   * Fixes: tweaks in examples/14_collision_sandbox.py.
+
+SVN rev 120:
+  * New: QuadTree can now do collision test combinations: rect-vs-rect, shape-vs-shape, or rect first followed by shape. This takes advantage of the new callbacks in the geometry module.
+  * Changed: Engine accepts arguments for QuadTree constructor.
+  * New: examples/15_quad_tree_geometry_test.py demos shape-vs-shape collisions.
+  * Fixed: examples/12_quad_tree_stress_test.py, Thing.update() code rearranged to correct mistakes in coloring and alpha per game tick.
+
+SVN rev 122:
+  * Fixed: quadtree_* kwargs mistake in Engine constructor.
+  * Fixed: small but critical mistakes in geometry.rect_collided_other, in the rect case.
+  * Fixed: forgotten rect_pre_tested=True in QuadTree._collided_full.
+  * Fixed: collision detection scope anomally involving objects placed in catch-all branches.
+  * Fixed: examples/12_quad_tree_stress_test.py and 15_quad_tree_geometry_test.py timing issue in make_hud() which resulted in intermittent "Statf.image not found".
+  * New: code in Stat.update() and Statf.update() to gracefully handle callbacks returning None value.
