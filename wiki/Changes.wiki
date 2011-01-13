@@ -103,7 +103,7 @@ SVN rev 120:
   * Fixed: examples/12_quad_tree_stress_test.py, Thing.update() code rearranged to correct mistakes in coloring and alpha per game tick.
 
 SVN rev 122:
-  * Fixed: quadtree_* kwargs mistake in Engine constructor.
+  * Fixed: `quadtree_*` kwargs mistake in Engine constructor.
   * Fixed: small but critical mistakes in geometry.rect_collided_other, in the rect case.
   * Fixed: forgotten rect_pre_tested=True in QuadTree._collided_full.
   * Fixed: collision detection scope anomally involving objects placed in catch-all branches.
