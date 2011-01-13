@@ -213,7 +213,10 @@ def distance(a, b):
 
 
 def point_in_poly(point, poly):
-    """Poly is assumed to be a sequence of points, length >= 3.
+    """Point vs polygon collision test.
+    
+    Poly is assumed to be a sequence of points, length >= 3, with no duplicate
+    points. Winding is not a factor.
     """
     x,y = point
     inside = False
@@ -235,26 +238,49 @@ def point_in_poly(point, poly):
     return inside
 
 
-def circle_collided_other(self, other):
-    """
-    self is a circle, it must have attr origin and radius.
+def circle_collided_other(self, other, rect_pre_tested=None):
+    """Return results of collision test between a circle and other geometry.
+    
+    The *_collided_other() functions provide a convenient means to test
+    disparate geometries for collision. The logic considers containment to be
+    a collision. The tests do not check for the "self is other" condition.
+    
+    self is a circle, it must have origin and radius attrs.
     
     If other does not have a collided attr, then a circle-vs-rect result is
     returned.
-
+    
     Otherwise...
     
-    other must have attr collided, which may be a *_collided_other function or
-    a custom function in that form.
+    other must have attr collided. collided must be a staticmethod
+    *_collided_other function or a custom function in that form. If collided is
+    not one of the *_collided_other functions, other's collided function will
+    be called passing arguments other and self in that order.
     
-    other's collided attr dictates the kind of self-vs-other collision test.
+    other's collided attr dictates the kind of self-vs-other collision test. The
+    builtin collision tests are:
     
-    If other is a circle it must have attrs origin and radius.
-    If other is a rect it must have attr rect.
-    If other is a poly it must have attr points.
-    If other is a line it must have attr end_points.
+        1.  If other.collided is circle_collided_other, other is assumed to be a
+            circle with origin and radius attrs.
+        2.  If other.collided is rect_collided_other, other is assumed to be a
+            rect with a rect attr.
+        3.  If other.collided is poly_collided_other, other is assumed to be a
+            poly with a points attr.
+        4.  If other.collided is line_collided_other, other is assumed to be a
+            line with an end_points attr.
     
-    The fall-through action is to call other.collided(self).
+    The fall-through action is to call other.collided(other, self), which is
+    assumed to be a custom staticmethod function.
+    
+    Here is an example minimal class and usage:
+        
+        class CircleGeom(object):
+            def __init__(self, **kwargs):
+                self.__dict__.update(kwargs)
+            collided = staticmethod(circle_collided_other)
+        
+        circle = CircleGeom(origin=(300,300), radius=25)
+        circle.collide(circle, other_poly)
     """
     origin = self.origin
     radius = self.radius
@@ -278,10 +304,16 @@ def circle_collided_other(self, other):
     elif other_collided is line_collided_other:
         return circle_intersects_line(origin, radius, other.end_points)
     
-    return other_collided(self)
+    return other_collided(other, self)
 
 
 def rect_collided_other(self, other, rect_pre_tested=None):
+    """Return results of collision test between a rect and other geometry.
+    
+    self is a rect, it must have a rect attr.
+    
+    See circle_collided_other description for other details.
+    """
     rect = self.rect
     if not hasattr(other, 'collided'):
         if rect_pre_tested is not None:
@@ -306,21 +338,27 @@ def rect_collided_other(self, other, rect_pre_tested=None):
         if len(lines_intersect_lines(
             rect_to_lines(rect), points_to_lines(points))):
             return True
-        else:
-            for p in points:
-                if rect.collidepoint(p):
-                    return True
-            return False
+        if rect.collidepoint(points[0]):
+            return True
+        if point_in_poly(rect.center, points):
+            return True
+        return False
     elif other_collided is line_collided_other:
         end_points = other.end_points
         p1,p2 = end_points
         return len(line_intersects_rect(end_points, rect)) > 0 or \
             rect.collidepoint(p1)==True or rect.collidepoint(p2)==True
     
-    return other_collided(self)
+    return other_collided(other, self)
 
 
-def line_collided_other(self, other):
+def line_collided_other(self, other, rect_pre_tested=None):
+    """Return results of collision test between a line and other geometry.
+    
+    self is a line, it must have an end_points attr.
+    
+    See circle_collided_other description for other details.
+    """
     if not hasattr(other, 'collided'):
         return circle_intersects_rect(
             self.origin, self.radius, rect_to_lines(other.rect))
@@ -339,18 +377,22 @@ def line_collided_other(self, other):
         points = other.points
         if len(line_intersects_poly(end_points, points)) > 0:
             return True
-        else:
-            for p in end_points:
-                if point_in_poly(p, points):
-                    return True
-            return False
+        if point_in_poly(end_points[0], points):
+            return True
+        return False
     elif other_collided is line_collided_other:
         return len(line_intersects_line(self.end_points, other.end_points))>0
     
-    return other_collided(self)
+    return other_collided(other, self)
 
 
-def poly_collided_other(self, other):
+def poly_collided_other(self, other, rect_pre_tested=None):
+    """Return results of collision test between a poly and other geometry.
+    
+    self is a poly, it must have a points attr.
+    
+    See circle_collided_other description for other details.
+    """
     if not hasattr(other, 'collided'):
         return circle_intersects_rect(
             self.origin, self.radius, rect_to_lines(other.rect))
@@ -369,30 +411,19 @@ def poly_collided_other(self, other):
         if len(lines_intersect_lines(
             points_to_lines(points), rect_to_lines(rect))) > 0:
             return True
-        else:
-            for p in points:
-                if rect.collidepoint(p):
-                    return True
-            for p in (rect.topleft,rect.topright,rect.bottomright,rect.bottomleft):
-                if point_in_poly(p, points):
-                    return True
-            return False
+        if rect.collidepoint(points[0]):
+            return True
+        if point_in_poly(rect.center, points):
+            return True
+        return False
     elif other.collided is poly_collided_other:
         self_points = self.points
         other_points = other.points
-# Shouldn't need to test every point. If they overlap, the lines will collide.
-# If one is inside the other, then any point is in the other poly.
-#        for p in self_points:
-#            if point_in_poly(p, other_points):
-#                return True
-#        for p in other_points:
-#            if point_in_poly(p, self_points):
-#                return True
+        if poly_intersects_poly(self_points, other_points):
+            return True
         if point_in_poly(self_points[0], other_points):
             return True
         if point_in_poly(other_points[0], self_points):
-            return True
-        if poly_intersects_poly(self_points, other_points):
             return True
         return False
     elif other.collided is line_collided_other:
@@ -400,16 +431,18 @@ def poly_collided_other(self, other):
         end_points = other.end_points
         if len(line_intersects_poly(end_points, points)) > 0:
             return True
-        else:
-            for p in end_points:
-                if point_in_poly(p, points):
-                    return True
-            return False
+        if point_in_poly(end_points[0], points):
+            return True
+        return False
     
-    return other.collided(self)
+    return other.collided(other, self)
 
 
 def circle_intersects_circle(origin1, radius1, origin2, radius2):
+    """Circle vs circle collision test.
+    
+    Return True if circles intersect, else return False.
+    """
     x = origin1[0] - origin2[0]
     y = origin1[1] - origin2[1]
     dist = sqrt(x*x + y*y)
@@ -417,12 +450,10 @@ def circle_intersects_circle(origin1, radius1, origin2, radius2):
 
 
 def circle_intersects_line(origin, radius, line_segment):
-    """Return True if line_segment intersects the circle defined by origin and radius.
-    Return False if they do not intersect.
+    """Circle vs line collision test.
     
-    origin: circle origin
-    radius: circle radius
-    line_segment: two end points
+    Return True if line_segment intersects the circle defined by origin and
+    radius. Return False if they do not intersect.
     """
     A,B = Vec2d(line_segment[0]),Vec2d(line_segment[1])
     C = Vec2d(origin)
@@ -447,7 +478,10 @@ def circle_intersects_line(origin, radius, line_segment):
 
 
 def circle_intersects_rect(origin, radius, rect):
-    """Assumes a pygame.Rect().
+    """Circle vs rect collision test.
+    
+    Return True if the shapes intersect, else return False. rect must be a
+    pygame.Rect().
     """
     for line in rect_to_lines(rect):
         if circle_intersects_line(origin, radius, line):
@@ -456,7 +490,10 @@ def circle_intersects_rect(origin, radius, rect):
 
 
 def circle_intersects_poly(origin, radius, points):
-    """Assumes a "closed" polygon with no redundant points.
+    """Circle vs polygon collision test.
+    
+    Points must describe a "closed" polygon with no redundant points. Winding is
+    a factor.
     """
     for line in points_to_lines(points):
         if circle_intersects_line(origin, radius, line):
@@ -465,8 +502,13 @@ def circle_intersects_poly(origin, radius, points):
 
 
 def line_intersects_line(line_1, line_2):
-    """Returns [x,y] if the lines intersect, otherwise []. [x,y] is the point
+    """Line vs line collision test.
+    
+    Returns [x,y] if the lines intersect, otherwise []. [x,y] is the point
     of intersection.
+    
+    The return values are suitable for "if collided: ... else: ..." usage.
+    Accessing the (x,y) values is optional.
     """
     a,b = (x1,y1),(x2,y2) = line_1
     c,d = (x3,y3),(x4,y4) = line_2
@@ -498,6 +540,14 @@ def line_intersects_line(line_1, line_2):
 
 
 def lines_intersect_lines(lines1, lines2, fast=True):
+    """Line lists intersection test.
+    
+    Tests one list of lines against another. Returns a list of intersecting
+    (x,y) pairs, or an emtpy list if there are no collisions.
+    
+    This does not detect containment. point_in_poly() can be used to test for
+    containment.
+    """
     crosses = []
     for line1 in lines1:
         for line2 in lines2:
@@ -510,29 +560,64 @@ def lines_intersect_lines(lines1, lines2, fast=True):
 
 
 def line_intersects_rect(line, rect, fast=True):
+    """Line vs rect intersection test.
+    
+    rect must be a pygame.Rect().
+    
+    Tests a line against the edges of a rect. Returns a list of intersecting
+    (x,y) pairs, or an emtpy list if there are no collisions.
+    
+    This does not detect containment. point_in_poly() can be used to test for
+    containment.
+    """
     rect_lines = rect_to_lines(rect)
     return lines_intersect_lines([line], rect_lines, fast)
 
 
 def line_intersects_poly(line, points, fast=True):
+    """Line vs poly test.
+    
+    Tests a line against a polygon. Returns a list of intersecting
+    (x,y) pairs, or an emtpy list if there are no collisions.
+    
+    This does not detect containment. point_in_poly() can be used to test for
+    containment.
+    """
     poly_lines = points_to_lines(points)
     return lines_intersect_lines([line], poly_lines, fast)
 
 
 def poly_intersects_rect(points, rect, fast=True):
+    """Poly vs rect intersection test.
+    
+    Tests a polygon against a rect. rect must be a pygame.Rect(). Returns a
+    list of intersecting (x,y) pairs, or an emtpy list if there are no
+    collisions.
+    
+    This does not detect containment. point_in_poly() can be used to test for
+    containment.
+    """
     poly_lines = points_to_lines(points)
     rect_lines = rect_to_lines(rect)
     return lines_intersect_lines(poly_lines, rect_lines, fast)
 
 
 def poly_intersects_poly(points1, points2, fast=True):
+    """Poly vs poly intersection test.
+    
+    Tests a polygon against another polygon. Returns a list of intersecting
+    (x,y) pairs, or an emtpy list if there are no collisions.
+    
+    This does not detect containment. point_in_poly() can be used to test for
+    containment.
+    """
     lines1 = points_to_lines(points1)
     lines2 = points_to_lines(points2)
     return lines_intersect_lines(lines1, lines2, fast)
 
 
 def points_to_lines(points):
-    """Return a list of end point pairs assembled from a "closed" polygon's
+    """Return a list of end-point pairs assembled from a "closed" polygon's
     points.
     """
     lines = []
@@ -545,7 +630,7 @@ def points_to_lines(points):
 
 
 def rect_to_lines(rect):
-    """Return a list of end point pairs assembled from a pygame Rect.
+    """Return a list of end-point pairs assembled from a pygame.Rect's corners.
     """
     tl,tr,br,bl = rect.topleft,rect.topright,rect.bottomright,rect.bottomleft
     return [(tl,tr),(tr,br),(br,bl),(bl,tl)]

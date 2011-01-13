@@ -22,6 +22,23 @@ __author__ = 'Gummbum, (c) 2011'
 
 __doc__ = """14_collision_sandbox.py - A sandbox / unit test for the geometry
 module's collision routines in Gummworld2.
+
+This test uses the eyeballs to validate. Do the following:
+    
+    1.  Ignore the lines for now.
+    2.  Drag one small rect, poly, and circle completely into the other large
+        2D shapes--one each. No sides should be touching
+    3.  Observe that the shapes turn red as their edges cross.
+    4.  Observe that the shapes stay red when one is completely inside another.
+    5.  Press a key to swith between forward and reverse order collision tests.
+    6.  Repeat steps 2-5 two times, rotating shape combinations.
+    7.  Cross the lines and observe they turn red.
+    8.  Drag a line completely into one of the 2D shapes. No sides should be
+        touching.
+    9.  Observe that the shapes turn red as their edges cross.
+    10. Observe that the shapes stay red when one is completely inside another.
+    11. Press a key to swith between forward and reverse order collision tests.
+    12. Repeat steps 8-11 two times, rotating shape combinations.
 """
 
 
@@ -115,20 +132,22 @@ def draw_sprites(sprites):
 
 
 screen = pygame.display.set_mode((400,400))
+pygame.display.set_caption('Sprites forward')
 screen_rect = screen.get_rect()
-pygame.display.set_caption('Blue: collidable - Yellow: grab - Red: collision')
 clock = pygame.time.Clock()
 
 rect1 = RectGeom(rect=Rect(0,0,40,40))
 rect2 = RectGeom(rect=Rect(40,40,80,80))
-line1 = LineGeom(end_points=[(10,90),(10,130)])
+line1 = LineGeom(end_points=[(40,170),(90,210)])
 line2 = LineGeom(end_points=[(20,200),(80,250)])
 poly1 = PolyGeom(points=[(202,2),(202,82),(242,42)])
-poly2 = PolyGeom(points=[(202,100),(240,150),(235,200),(207,150)])
-circle1 = CircleGeom(origin=(300,300), radius=20)
-circle2 = CircleGeom(origin=(350,350), radius=20)
+poly2 = PolyGeom(points=[(202,100),(240,150),(235,200),(150,250)])
+circle1 = CircleGeom(origin=(225,300), radius=20)
+circle2 = CircleGeom(origin=(300,300), radius=50)
 
-sprites = (rect1, line1, poly1, circle1, circle2, poly2, line2, rect2)
+sprites_fwd = (rect1, line1, poly1, circle1, circle2, poly2, line2, rect2)
+sprites_rev = list(reversed(sprites_fwd))
+sprites = sprites_fwd
 
 draw_circle = pygame.draw.circle
 draw_line = pygame.draw.line
@@ -155,6 +174,13 @@ while 1:
                         break
         elif e.type == MOUSEBUTTONUP:
             selected = None
+        elif e.type == KEYDOWN:
+            if sprites is sprites_fwd:
+                sprites = sprites_rev
+                pygame.display.set_caption('Sprites reversed')
+            else:
+                sprites = sprites_fwd
+                pygame.display.set_caption('Sprites forward')
     
     check_collisions(sprites)
     update_sprites(sprites)
