@@ -91,3 +91,7 @@ SVN rev 108:
 SVN rev 115:
   * New: many collision routines added to geometry.py.
   * New: 14_collision_sandbox.py unit test.
+
+SVN rev 118:
+  * Fixes: containment tests in geometry.py.
+  * Fixes: tweaks in examples/14_collision_sandbox.py.
