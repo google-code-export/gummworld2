@@ -1,4 +1,3 @@
-#labels Featured
 Welcome to aversion therapy. =)
 
 {{{
