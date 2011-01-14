@@ -97,11 +97,11 @@ class App(Engine):
         
         # The rect that defines the screen subsurface. It will also be used to
         # draw a border around the subsurface.
-        self.view_rect = pygame.Rect(30,20,*State.screen.size*2//3)
+        view_rect = pygame.Rect(30,20,*State.screen.size*2//3)
         
         # Set up the subsurface as the camera's drawing surface.
-        subsurface = State.screen.surface.subsurface(self.view_rect)
-        State.camera = Camera(State.camera.target, subsurface)
+        self.view = Surface(State.screen.surface, view_rect)
+        State.camera = Camera(State.camera.target, self.view.surface)
         State.name = 'small'
         State.save(State.name, ['camera'])
         State.restore('main', ['camera'])
@@ -132,7 +132,7 @@ class App(Engine):
         # Create a speed box for converting mouse position to destination
         # and scroll speed.
         self.speed_box = geometry.Diamond(0,0,4,2)
-        self.speed_box.center = self.view_rect.center
+        self.speed_box.center = State.camera.abs_screen_center
         self.max_speed_box = float(self.speed_box.width) / 2.0
         
         # Mouse and movement state. move_to is in world coordinates.
@@ -149,25 +149,6 @@ class App(Engine):
         State.camera.update()
         State.hud.update()
         
-    def draw(self):
-        """overrides Engine.draw"""
-        # Draw stuff.
-        State.camera.interpolate()
-        State.screen.clear()
-        toolkit.draw_tiles()
-        toolkit.draw_grid()
-        toolkit.draw_labels()
-        State.hud.draw()
-        self.draw_avatar()
-        if State.name == 'small':
-            pygame.draw.rect(State.screen.surface, (99,99,99), self.view_rect, 1)
-        State.screen.flip()
-        
-    def draw_avatar(self):
-        camera = State.camera
-        avatar = camera.target
-        camera.surface.blit(avatar.image, avatar.screen_position)
-        
     def update_mouse_movement(self, pos):
         # Angle of movement.
         angle = geometry.angle_of(self.speed_box.center, pos)
@@ -177,9 +158,8 @@ class App(Engine):
             # line_intersects_line() returns False or (True,(x,y)).
             cross = geometry.line_intersects_line(edge, (self.speed_box.center, pos))
             if cross:
-                x,y = cross[1]
+                x,y = cross[0]
                 self.move_to = State.camera.screen_to_world(pos)
-                ## BUG IN SPEED
                 self.speed = geometry.distance(
                     self.speed_box.center, (x,y)) / self.max_speed_box
                 break
@@ -207,6 +187,25 @@ class App(Engine):
             wy = max(min(wy,rect.bottom), rect.top)
             camera.position = wx,wy
         
+    def draw(self):
+        """overrides Engine.draw"""
+        # Draw stuff.
+        State.camera.interpolate()
+        State.screen.clear()
+        toolkit.draw_tiles()
+        toolkit.draw_grid()
+        toolkit.draw_labels()
+        State.hud.draw()
+        self.draw_avatar()
+        if State.name == 'small':
+            pygame.draw.rect(State.screen.surface, (99,99,99), self.view.super_rect, 1)
+        State.screen.flip()
+        
+    def draw_avatar(self):
+        camera = State.camera
+        avatar = camera.target
+        camera.surface.blit(avatar.image, camera.screen_center)
+        
     def on_mouse_button_down(self, pos, button):
         self.mouse_down = True
         
@@ -219,9 +218,9 @@ class App(Engine):
             # Select the next state name and and restore it.
             State.restore(self.next_state[State.name], ['camera'])
             if State.name == 'small':
-                self.speed_box.center = self.view_rect.center
+                self.speed_box.center = State.camera.abs_screen_center
             else:
-                self.speed_box.center = State.screen.rect.center
+                self.speed_box.center = State.camera.abs_screen_center
         elif key == K_g:
             State.show_grid = not State.show_grid
         elif key == K_l:

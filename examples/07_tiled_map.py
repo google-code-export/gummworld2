@@ -110,7 +110,7 @@ class App(Engine):
             # line_intersects_line() returns False or (True,(x,y)).
             cross = geometry.line_intersects_line(edge, (self.speed_box.center, pos))
             if cross:
-                x,y = cross[1]
+                x,y = cross[0]
                 self.move_to = State.camera.screen_to_world(pos)
                 self.speed = geometry.distance(
                     self.speed_box.center, (x,y)) / self.max_speed_box
