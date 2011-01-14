@@ -23,37 +23,37 @@ These are the core classes.
 
   State: A storage container for run-time objects, settings, and values. Because it's easy to access globally, this minimizes the need to pass around core objects in arguments. States can also be saved and restored by name, if desired. The mechanism is straightforward, thus easy to use and extend.
 
-  Engine: A superclass providing the framework for initialization, run loop, update and draw methods, and pygame event handlers. If you decide to write your own engine, look in here to see how the core objects are created. Don't be afraid, no voodoo in here. Note that if you want the Engine to initialize the World for pymunk, you need to turn it on with use_pymunk=True. Otherwise the World will be initialized for pygame.
+  Engine: A superclass providing the framework for initialization, run loop, update and draw methods, and pygame event handlers. If you decide to write your own engine, look in here to see how the core objects are created. Don't be afraid, no voodoo in here.
 
   Screen and Surface: Basic display and subsurface wrappers.
 
-  Camera: Follows a target object around the map. Calculates 2D range of visible tiles. Constructs map layer lists of visible tiles. Converts 2D coordinates between world and screen space. Provides interpolated scrolling (takes advantage of faster frame rates).
+  Camera: Follows a target object around the map. Calculates 2D range of visible tiles. Constructs map-layer lists of visible tiles. Converts 2D coordinates between world and screen space. Provides interpolated scrolling, taking advantage of faster frame rates to smooth scrolling.
 
   Map: Serves map tiles in layers. Also serves labels and grid lines.
 
-  World and WorldPymunk: Container for objects that define the game physics. WorldPymunk creates pymunk.Space. World is for pygame, and provides a list. You are free to build your own world container, or ignore it entirely.
+  World*: Containers for objects that define the game model. Choices are NoWorld, World, WorldQuadTree, and WorldPymunk which provide some "canned" options for implementing a world. You are free to use these, build your own, or ignore it entirely.
 
   GameClock: Keeps constant game time. Supports variable frame rate. Calculates interpolated fraction of a game tick, which can be used for prediction, sub-pixel motion, and precision timing.
 
-  BucketSprite and BucketGroup: Classes that manage sprites in buckets for optimized updating and rendering. BucketGroup also has a tweaked draw() method needed to render sprites whose rects are expressed in world coordinates (versus pygame's which expect sprite rects to be expressed in screen coordinates).
+  BucketSprite and BucketGroup: pygame-like classes that manage sprites in buckets for optimized updating and rendering. BucketGroup also has a tweaked draw() method needed to render sprites whose rects are expressed in world coordinates; versus pygame's which expect sprite rects to be expressed in screen coordinates. These are for game makers who prefer to use the sprite for both view and model.
 
 The data module provides resource loaders for various data in the data subdirectories, a la skellington. It should be very easy to figure out and customize as needed.
 
-There are a few utilities to simplify laborious tasks and ease experimentation with concepts: a HUD, map grid, tile labels, popup menu, map generators, Tiled map loader, tile renders, tile collapsing, pygame utilities module. The examples and map_editor.py rely upon those modules. However, they are not required for games, with the exception that toolkit.py and pygame_utils.py required by BucketSprite and Engine classes, respectively. One can certainly use Gummworld2 for map scrolling and easily ignore the extras. Of special interest, the toolkit module provides a number of "quickie" functions for both practical use and demonstrations of how to manipulate the library.
+The geometry module provides numerous collision routines to augment pygame's, geometric calculations, and some shapes.
 
-Some examples use Tiled maps. While this is one of the easiest ways to make and import tile maps, it is not required. Any map source can be used as long as its data can be converted to the Map class's meager requirements. See the toolkit module for a few functions that load maps, the bunny game for an alternate data-driven map, and the Map class documentation.
+There are a few utilities to simplify laborious tasks and ease experimentation with concepts: a HUD, map grid, tile labels, popup menu, map generators, Tiled map loader, tile renders, tile collapsing, pygame utilities module. The examples and map_editor.py rely upon those modules. However, they are not required by the library, with the exception that toolkit.py and pygame_utils.py. One can certainly use Gummworld2 for map scrolling and easily ignore the extras. Of special interest, the toolkit module provides a number of "quickie" functions for both practical use and demonstrations of how to manipulate library objects, most notably Map and Camera.
 
-Note that if you want to use pymunk via the Engine class, you need to turn it on with use_pymunk=True. This explicitly tells the Engine constructor initialize the world for pymunk instead of pygame. The ability to disable pymunk avoids any problems that might arise if pymunk is installed but the game does not want to use the pymunk package. This is only of special note for the Engine constructor. The rest of the library doesn't assume anything: If pymunk can be imported, then it is available and pymunk subclasses are created in the `model` module; your game code can choose to use them, or ignore them.
+Some examples use Tiled maps. While this is one of the easiest ways to make and import tile maps, it is not required. Any map source can be used as long as its data can be converted to the Map class's meager requirements. See the toolkit module for a few functions that load maps, the bunny game for an ASCII map, and the Map class documentation.
 
-The default pymunk physics scale is intended to be based on pixels (see `model.CircleBody`). While units are tidy, all attempts will be made to support sub-pixel math with floating point numbers. Sub-pixel math allows fractional speeds, mass, dimensions, smoother-appearing motion, etc. Thus, the display code must round and convert physics values to integers for pygame where appropriate.
+Note that although pymunk and Tiled are supported, they are not required. There is no need to consider them if you prefer not to use them.
 
-Also, a general caution. The instance variables representing 2D coordinates are typically implemented as `Vec2d`. Attempts will be made to protect them from direct assignment, as clobbering them with a sequence or other object will break some library routines. Keep this in mind when overriding in subclasses or choosing to directly access the underlying private `_attributes`.
+Lastly, a general caution. The instance variables representing 2D coordinates are typically implemented as `Vec2d`. Attempts will be made to protect them from direct assignment, as clobbering them with a sequence or other object will break some library routines. Keep this in mind when overriding in subclasses or choosing to directly access the underlying private `_attributes`.
 
 ==Status Summary==
 
-In recent commits the API has seen few changes. The feature set is complete enough to turn attention back to the editor.
+Initial efforts focused on the map, its visual presentation, and interface. Recently attention is wandering more towards the model. Thus, the API is still seeing a few changes, some of which break existing code. This was to be expected. Nevertheless, apologies for any inconvenience.
 
-A mini game was finished in 0.0.2 as a proof-of-concept, which drove a flurry of changes to the API. The game and all but one example do not use a physics library; I would consider them pygame-only. A few examples use a Tiled map.
+A mini game was finished in 0.0.2 as a proof-of-concept, and kept functional as the library evolved. The game and all but one example do not use an external physics library; I would describe them as pygame-only. A few examples use a Tiled map.
 
 The editor concept has changed. It will not do map editing. Tiled already does that well. Gummworld2's editor will supplement Tiled's static maps by visually overlaying tagged generic geometry for physics--e.g. rects and circles for pygame; lines, circles, and polys for pymunk or others--and placement of interactive game content like baddies, doors, traps, anything you can think of. The geometry would typically be invisible in the game, and used for game events like:
 
