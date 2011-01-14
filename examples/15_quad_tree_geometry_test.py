@@ -105,35 +105,15 @@ import paths
 from gamelib import *
 
 
-class RectGeom(model.Object):
-    
-    def __init__(self, position):
-        super(RectGeom, self).__init__()
-        
-        self.rect = pygame.Rect(0,0,25,25)
-        
-        self.image_green = pygame.surface.Surface(self.rect.size)
-        self.image_green.fill(Color('green'))
-        self.image_red = pygame.surface.Surface(self.rect.size)
-        self.image_red.fill(Color('red'))
-        self.image = self.image_green
-        
-        self.position = position
+class Geom(object):
+    """Superclass providing movement, behavior, and drawing common to all
+    entities.
+    """
+
+    def __init__(self):
         choices = [-0.5,-0.3,-0.1,0.1,0.3,0.5]
         self.step = Vec2d(choice(choices), choice(choices))
         self.hit = 0
-    
-    ## entity's collided, static method used by QuadTree callback
-    collided = staticmethod(geometry.rect_collided_other)
-    
-    @property
-    def position(self):
-        return self._position
-    @position.setter
-    def position(self, val):
-        p = self._position
-        p.x,p.y = val
-        self.rect.center = round(p.x),round(p.y)
     
     def update(self, *args):
         self.move()
@@ -165,81 +145,72 @@ class RectGeom(model.Object):
         camera.surface.blit(self.image, pos)
 
 
-class CircleGeom(RectGeom):
+class RectGeom(geometry.RectGeometry, Geom):
+    """A rect with graphics, movement, collision detection, and behavior.
+    """
     def __init__(self, position):
-        super(CircleGeom, self).__init__(position)
+        geometry.RectGeometry.__init__(self, 0,0,25,25)
+        Geom.__init__(self)
         
-        self.rect = self.image.get_rect(topleft=(0,0))
+        self.image_green = pygame.surface.Surface(self.rect.size)
+        self.image_green.fill(Color('green'))
+    
+        self.image_red = pygame.surface.Surface(self.rect.size)
+        self.image_red.fill(Color('red'))
+        
+        self.image = self.image_green
+        
+        self.position = position
+
+
+class CircleGeom(geometry.CircleGeometry, Geom):
+    """A circle with graphics, movement, collision detection, and behavior.
+    """
+    def __init__(self, position):
+        geometry.CircleGeometry.__init__(self, (0,0), 12)
+        Geom.__init__(self)
+        
+        self.image_green = pygame.surface.Surface(self.rect.size)
+        rect = self.image_green.get_rect()
         self.image_green.fill(Color('black'))
         self.image_green.set_colorkey(Color('black'))
-        pygame.draw.circle(self.image_green, Color('green'), self.origin, self.radius)
+        pygame.draw.circle(self.image_green, Color('green'), rect.center, self.radius)
         
+        self.image_red = pygame.surface.Surface(self.rect.size)
         self.image_red.fill(Color('black'))
         self.image_red.set_colorkey(Color('black'))
-        pygame.draw.circle(self.image_red, Color('red'), self.origin, self.radius)
+        pygame.draw.circle(self.image_red, Color('red'), rect.center, self.radius)
+        
+        self.image = self.image_green
         
         self.position = position
     
-    ## entity's collided, static method used by QuadTree callback
-    collided = staticmethod(geometry.circle_collided_other)
+
+class TriangleGeom(geometry.PolyGeometry, Geom):
+    """A triangle with graphics, movement, collision detection, and behavior.
+    """
+    shape = (12,0),(24,24),(0,24)
     
-    ## properties for circle, required by circle_collided_other
-    @property
-    def origin(self):
-        return self.rect.center
-    @origin.setter
-    def origin(self, val):
-        self.position = val
-    @property
-    def radius(self):
-        return self.rect.width // 2
-
-
-class TriangleGeom(RectGeom):
     def __init__(self, position):
-        super(TriangleGeom, self).__init__(position)
+        Geom.__init__(self)
+        geometry.PolyGeometry.__init__(self, self.shape, position)
         
-        self.rect = self.image.get_rect(topleft=(0,0))
-        r = self.rect
-        self._points = [
-            (r.centerx,r.top),
-            r.bottomright,
-            r.bottomleft,
-        ]
-        
+        self.image_green = pygame.surface.Surface(self.rect.size)
         self.image_green.fill(Color('black'))
         self.image_green.set_colorkey(Color('black'))
-        pygame.draw.polygon(self.image_green, Color('green'), self.points)
+        pygame.draw.polygon(self.image_green, Color('green'), self.shape)
         
+        self.image_red = pygame.surface.Surface(self.rect.size)
         self.image_red.fill(Color('black'))
         self.image_red.set_colorkey(Color('black'))
-        pygame.draw.polygon(self.image_red, Color('red'), self.points)
+        pygame.draw.polygon(self.image_red, Color('red'), self.shape)
         
-        self.position = position
-    
-    ## entity's collided, static method used by QuadTree callback
-    collided = staticmethod(geometry.poly_collided_other)
-    
-    ## properties for circle, required by circle_collided_other
-    @property
-    def points(self):
-        l,t = self.rect.topleft
-        return [(x+l,y+t) for x,y in self._points]
+        self.image = self.image_green
 
 
 class App(Engine):
     
     def __init__(self):
-
-        # world: 2560x2560, 256 entities
-        #   (128,128), (20,20), (256,256)
-        #   (128,128), (20,20), (256,256)
-        # world: 1280x1280, 256 entities
-        #   (128,128), (10,10), (256,256)
-        #   (128,128), (10,10), (256,256)
-        # world: 600x600, 256 entities
-        #   (60,60),   (10,10), (128,128)
-        #   (60,60),   (10,10), (128,128)
         self.tile_size = 60,60
         self.map_size = 10,10
         self.min_size = 128,128
