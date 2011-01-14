@@ -109,3 +109,10 @@ SVN rev 122:
   * Fixed: collision detection scope anomally involving objects placed in catch-all branches.
   * Fixed: examples/12_quad_tree_stress_test.py and 15_quad_tree_geometry_test.py timing issue in make_hud() which resulted in intermittent "Statf.image not found".
   * New: code in Stat.update() and Statf.update() to gracefully handle callbacks returning None value.
+
+SVN rev 126:
+  * Change: Camera.screen_position property obsolesced. Renamed to screen_center. This is overdue. The name makes more sense for its intended usage.
+  * New: Camera.abs_screen_center property added.
+Changed: some examples modified for compatibility with camera changes.
+  * Fixed: some examples were broken by geometry.line_intersects_line() change. These are fixed.
+  * Fixed: speed box calculations were broken in 09_collapse_map.py. These are now working.
