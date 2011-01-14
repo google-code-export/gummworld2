@@ -212,6 +212,24 @@ def distance(a, b):
     return (diffx*diffx) ** 0.5 + (diffy*diffy) ** 0.5
 
 
+def point_on_circumference(center, radius, degrees_):
+    """Calculate the point on the circumference of a circle defined by center and
+    radius along the given angle. Returns a tuple (x,y).
+    
+    The center argument is a representing the origin of the circle.
+    
+    The radius argument is a number representing the length of the radius.
+    
+    The degrees_ argument is a number representing the angle of radius from
+    origin. The angles 0 and 360 are at the top of the screen, with values
+    increasing clockwise.
+    """
+    radians_ = radians(degrees_ - 90)
+    x = center[0] + radius * cos(radians_)
+    y = center[1] + radius * sin(radians_)
+    return x,y
+
+
 def point_in_poly(point, poly):
     """Point vs polygon collision test.
     
@@ -438,6 +456,104 @@ def poly_collided_other(self, other, rect_pre_tested=None):
     return other.collided(other, self)
 
 
+class RectGeometry(object):
+    
+    def __init__(self, x, y, width, height, position=None):
+        super(RectGeometry, self).__init__()
+        self.rect = pygame.Rect(x, y, width, height)
+        self._position = Vec2d(0.0,0.0)
+        if position is None:
+            self.position = self.rect.center
+        else:
+            self.position = position
+
+    ## entity's collided, static method used by QuadTree callback
+    collided = staticmethod(rect_collided_other)
+    
+    @property
+    def points(self):
+        r = self.rect
+        return (r.topleft, r.topright, r.bottomright, r.bottomleft)
+    
+    @property
+    def position(self):
+        return self._position
+    @position.setter
+    def position(self, val):
+        p = self._position
+        p.x,p.y = val
+        self.rect.center = round(p.x),round(p.y)
+
+
+class CircleGeometry(object):
+    
+    def __init__(self, origin, radius):
+        super(CircleGeometry, self).__init__()
+        self.rect = pygame.Rect(0, 0, radius*2, radius*2)
+        self._position = Vec2d(0.0,0.0)
+        self.position = origin
+
+    ## entity's collided, static method used by QuadTree callback
+    collided = staticmethod(circle_collided_other)
+    
+    @property
+    def origin(self):
+        return Vec2d(self._position)
+    
+    @property
+    def radius(self):
+        return self.rect.width // 2
+    @radius.setter
+    def radius(self, val):
+        self.rect.size = Vec2d(val) * 2
+        self.position = self.position
+    
+    @property
+    def position(self):
+        return self._position
+    @position.setter
+    def position(self, val):
+        p = self._position
+        p.x,p.y = val
+        self.rect.center = round(p.x),round(p.y)
+
+
+class PolyGeometry(object):
+    
+    def __init__(self, points, position=None):
+        super(PolyGeometry, self).__init__()
+        self._points = points
+        
+        x = reduce(min, [x for x,y in points])
+        width = x + reduce(max, [x for x,y in points])
+        y = reduce(min, [y for x,y in points])
+        height = y + reduce(max, [y for x,y in points])
+        self.rect = pygame.Rect(x, y, width, height)
+        
+        self._position = Vec2d(0.0,0.0)
+        if position is None:
+            self.position = self.rect.center
+        else:
+            self.position = position
+
+    ## entity's collided, static method used by QuadTree callback
+    collided = staticmethod(poly_collided_other)
+    
+    @property
+    def points(self):
+        left,top = self.rect.topleft
+        return [(left+x,top+y) for x,y in self._points]
+    
+    @property
+    def position(self):
+        return self._position
+    @position.setter
+    def position(self, val):
+        p = self._position
+        p.x,p.y = val
+        self.rect.center = round(p.x),round(p.y)
+
+
 def circle_intersects_circle(origin1, radius1, origin2, radius2):
     """Circle vs circle collision test.
     
@@ -634,21 +750,3 @@ def rect_to_lines(rect):
     """
     tl,tr,br,bl = rect.topleft,rect.topright,rect.bottomright,rect.bottomleft
     return [(tl,tr),(tr,br),(br,bl),(bl,tl)]
-
-
-def point_on_circumference(center, radius, degrees_):
-    """Calculate the point on the circumference of a circle defined by center and
-    radius along the given angle. Returns a tuple (x,y).
-    
-    The center argument is a representing the origin of the circle.
-    
-    The radius argument is a number representing the length of the radius.
-    
-    The degrees_ argument is a number representing the angle of radius from
-    origin. The angles 0 and 360 are at the top of the screen, with values
-    increasing clockwise.
-    """
-    radians_ = radians(degrees_ - 90)
-    x = center[0] + radius * cos(radians_)
-    y = center[1] + radius * sin(radians_)
-    return x,y
