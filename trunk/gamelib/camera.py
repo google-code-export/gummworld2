@@ -121,8 +121,9 @@ class Camera(object):
         self.rect = self.surface.get_rect()
         
         # Offsets used in conversions
-        self.abs_offset = Vec2d(self.surface.get_abs_offset())
-        self.screen_offset = Vec2d(self.rect.center) - self.rect.topleft + self.abs_offset
+        self._abs_offset = Vec2d(self.surface.get_abs_offset())
+        self._screen_center = self.rect.center
+        self._abs_screen_center = Vec2d(self.rect.center) + self.abs_offset
         
         self._interp = 0.0
         self.map = None
@@ -206,23 +207,57 @@ class Camera(object):
         target.position = val
         self._target_was_moved = 1
         
+#    @property
+#    def screen_position(self):
+#        """The camera's (target's) position in screen coordinates.
+#        
+#        Obsolete: use Camera.screen_center instead.
+#        """
+#        return Vec2d(self._screen_center)
+    
     @property
-    def screen_position(self):
-        """The camera's (target's) position in screen coordinates.
-        """
-        return self.world_to_screen(self.world_position)
+    def screen_center(self):
+        """The coordinates of the camera surface's center.
         
+        In general, this is typically useful in screen-map calculations.
+        
+        This is equivalent to camera.surface.get_rect().center. The value is
+        cached whenever the camera.surface attribute is set.
+        """
+        return Vec2d(self._screen_center)
+    
+    @property
+    def abs_screen_center(self):
+        """The absolute coordinates of the camera surface's center.
+    
+        In general, this is typically useful in mouse-map calculations.
+    
+        This is equivalent to camera.surface.get_rect().center +
+        camera.surface.abs_offset(). The value is cached whenever the
+        camera.surface attribute is set.
+        """
+        return Vec2d(self._abs_screen_center)
+    
+    @property
+    def abs_offset(self):
+        """Offset position camera.subsurface inside its top level parent surface.
+        
+        This is equivalent to camera.surface.get_abs_offset(). The value is
+        cached whenever the camera.surface attribute is set.
+        """
+        return Vec2d(self._abs_offset)
+    
     def world_to_screen(self, xy):
         """Convert coordinates from world space to screen space.
         """
         world = self.target.position - xy
-        return self.screen_offset - world
+        return self.abs_screen_center - world
         
     def screen_to_world(self, xy):
         """Convert coordinates from screen space to world space.
         """
         camera = self.target.position
-        return xy + camera - self.screen_offset
+        return xy + camera - self.abs_screen_center
         
     @property
     def visible_tile_range(self):
