@@ -31,7 +31,7 @@ These are the core classes.
 
   Map: Serves map tiles in layers. Also serves labels and grid lines.
 
-  World*: Containers for objects that define the game model. Choices are NoWorld, World, WorldQuadTree, and WorldPymunk which provide some "canned" options for implementing a world. You are free to use these, build your own, or ignore it entirely.
+  World`*`: Containers for objects that define the game model. Choices are NoWorld, World, WorldQuadTree, and WorldPymunk which provide some "canned" options for implementing a world. You are free to use these, build your own, or ignore it entirely.
 
   GameClock: Keeps constant game time. Supports variable frame rate. Calculates interpolated fraction of a game tick, which can be used for prediction, sub-pixel motion, and precision timing.
 
