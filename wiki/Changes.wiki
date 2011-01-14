@@ -116,3 +116,7 @@ SVN rev 126:
 Changed: some examples modified for compatibility with camera changes.
   * Fixed: some examples were broken by geometry.line_intersects_line() change. These are fixed.
   * Fixed: speed box calculations were broken in 09_collapse_map.py. These are now working.
+
+SVN rev 131:
+  * New: classes RectGeometry, CircleGeometry, PolyGeometry added to geometry module.
+  * Changed: examples/15_quad_tree_geometry_test.py updated to use new geometry module classes. Looks a lot nicer.
