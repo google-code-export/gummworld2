@@ -55,7 +55,7 @@ Initial efforts focused on the map, its visual presentation, and interface. Rece
 
 A mini game was finished in 0.0.2 as a proof-of-concept, and kept functional as the library evolved. The game and all but one example do not use an external physics library; I would describe them as pygame-only. A few examples use a Tiled map.
 
-The editor concept has changed. It will not do map editing. Tiled already does that well. Gummworld2's editor will supplement Tiled's static maps by visually overlaying tagged generic geometry for physics--e.g. rects and circles for pygame; lines, circles, and polys for pymunk or others--and placement of interactive game content like baddies, doors, traps, anything you can think of. The geometry would typically be invisible in the game, and used for game events like:
+The editor concept has changed. It will not do map editing. Tiled already does that well. Gummworld2's editor will supplement Tiled's static maps by visually overlaying tagged geometry for physics--e.g. rects and circles for pygame; lines, circles, and polys for pymunk or others--and placement of interactive game content like baddies, doors, traps, anything you can think of. The geometry would typically be invisible in the game, and used for game events like:
 
   * Did these two space ships collide.
   * Did my truck venture into this sand pit.
@@ -73,10 +73,16 @@ Library:
   * Application framework, aka "engine" (DONE)
   * Camera: world-to-screen, screen-to-world, tile picking, interpolated scrolling (DONE)
   * Map: layered tile serving (DONE)
+  * World:
+    * NoWorld is the default, for game makers that do not want a canned model (DONE)
+    * World is a dumb model with a list for entities (DONE)
+    * WorldQuadTree is an advanced model that provides optimal collision checking in large maps with many elements (DONE)
+    * WorldPymunk is a model that leverages pymunk (bare bones)
   * Procedural object makers, e.g. random groups of baddies
   * Menu (DONE)
   * Grid (DONE)
   * HUD (DONE)
+  * Geometry for more collision detection choices without external library requirements (DONE)
   * Toolkit: hud and tile generators; map loader; render routines; map optimizer (DONE)
 
 Editor:
