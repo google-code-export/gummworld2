@@ -120,3 +120,12 @@ Changed: some examples modified for compatibility with camera changes.
 SVN rev 131:
   * New: classes RectGeometry, CircleGeometry, PolyGeometry added to geometry module.
   * Changed: examples/15_quad_tree_geometry_test.py updated to use new geometry module classes. Looks a lot nicer.
+
+== Changes in 0.0.7 ==
+
+SVN rev __:
+  * Change: Surface class renamed to View. Should have done this sooner.
+  * Change: Screen constructor takes an additional argument, surface, that used as the display. This change supports scenarios that have already initialized the display.
+  * Change: Camera now takes a View argument instead of a pygame.surface.Surface. This has bugged me whenever a camera use subsurfaces.
+  * Change: Engine constructor takes new args: screen_surface, camera_view, and camera_view_rect to support different scenarios such as multiple Engines in a game, programs that pre-initialize the display, programs that want the camera to start with a specific view.
+  * Changes: examples cleaned up and made compatible with the Engine constructor and View class changes.
