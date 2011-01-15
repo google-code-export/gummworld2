@@ -129,3 +129,4 @@ SVN rev __:
   * Change: Camera now takes a View argument instead of a pygame.surface.Surface. This has bugged me whenever a camera use subsurfaces.
   * Change: Engine constructor takes new args: screen_surface, camera_view, and camera_view_rect to support different scenarios such as multiple Engines in a game, programs that pre-initialize the display, programs that want the camera to start with a specific view.
   * Changes: examples cleaned up and made compatible with the Engine constructor and View class changes.
+  * Fix: toolkit.make_tiles() and toolkit.make_tiles2() created a map.Level with no grid lines. This caused some examples to blow up when grid lines where enabled.
