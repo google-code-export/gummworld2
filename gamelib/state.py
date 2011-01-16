@@ -20,16 +20,33 @@ __version__ = '$Id$'
 __author__ = 'Gummbum, (c) 2011'
 
 
-__doc__ = """state.py - A class for convenient global access to Gummworld2 run-time objects.
+__doc__ = """state.py - A class for convenient global access to Gummworld2
+run-time objects.
+
+The State class has class variables to hold the core library objects. It also
+has save() and restore() static methods to manage context switching.
+
+Programmers may place ad hoc attributes in this class, and leverage the save()
+and restore() methods for their own use.
 """
 
 
-# You may add to default_attrs if you add your own attributes to State and want
-# them saved and restored by default via the static methods.
-default_attrs = [
+## The default attributes that are saved and restored.
+_default_attrs = [
     'camera',
     'world',
+    'world_type',
     'map',
+]
+
+## The default attributes that are saved and restored when the name argument is
+## 'init'.
+_init_attrs = [
+    'screen', 'world', 'world_type',
+    'camera', 'map',
+    'clock', 'menu',
+    'running', 'speed', 'dt',
+    'show_grid', 'show_labels', 'show_hud',
 ]
 
 # The states dict stores lists of saved objects, keyed by a name. Any valid dict
@@ -39,37 +56,69 @@ states = {}
 
 
 class State(object):
+    """state.State
+    
+    The State class stores runtime objects and settings for easy global access.
+    It is not intended to be instantiated.
+    
+    Descriptions of class attributes:
+        name: The name of the current state context. This can be any immutable
+            value. Initial value is 'init', and the state is saved so that State
+            can be reset via State.restore('init').
+        screen: A screen.Screen object, which is a wrapper for the top level
+            pygame surface.
+        world: A model.World* object used to store game model entities.
+        world_type: One of engine.NO_WORLD, engine.SIMPLE_WORLD,
+            engine.QUADTREE_WORLD, or engine.PYMUNK_WORLD if State was
+            initialized via the Engine class. Else it is None.
+        camera: A camera.Camera object.
+        map: A map.Map object.
+    
+    Class variable State.default_attrs holds the list of attributes that are
+    saved and restored by default when the static methods State.save() and
+    State.restore() are called. Modify default_attrs as desired.
+
+    """
     
     name = 'init'               # name of initial saved state
     
-    # objects
-    screen = None               # gamelib.view.Screen
+    ## objects
+    
+    screen = None               # gamelib.screen.Screen
     world = None                # gamelib.model.World
+    world_type = None           # gamelib.engine.*_WORLD
     
     camera = None               # gamelib.Camera
     map = None                  # gamelib.Map
     
-    graphics = None             # gamelib.Graphics
-    
     clock = None                # gamelib.GameClock
     menu = None                 # gamelib.PopupMenu
     
-    # game settings
+    ## game settings
+    
     running = False             # Engine.run() terminator
     speed = 4                   # an arbitrary speed constant
     dt = 0                      # milliseconds elapsed in previous game tick
     
-    # map editor settings
+    ## map editor settings
+    
     show_grid = False
     show_labels = False
     show_hud = False
     
+    ## static save/restore methods
+    
+    # These are initialized to sane values for the bare library. You may modify
+    # these for your own purposes.
+    default_attrs = _default_attrs
+    init_attrs = _init_attrs
+    
     @staticmethod
-    def save(name, attrs=default_attrs):
-        """save a state by name
+    def save(name, attrs=_default_attrs):
+        """state.save() - save a state context by name
         
         The attrs argument is a sequence of strings naming the State attributes
-        to save. If attrs is not specified then state.default_attrs is used.
+        to save. If attrs is not specified then State.default_attrs is used.
         """
         state_dict = {}
         for attr in attrs:
@@ -78,18 +127,20 @@ class State(object):
         states[name] = state_dict
 
     @staticmethod
-    def restore(name, attrs=default_attrs):
-        """restore a state context by name
+    def restore(name, attrs=_default_attrs):
+        """state.restore() - restore a state context by name
         
         State.name is set to the value of the name argument.
         
         The attrs argument is a sequence of strings naming the State attributes
-        to restore. If attrs is not specified then state.default_attrs is used.
+        to restore. If attrs is not specified then State.default_attrs is used.
         
         If an object that is being restored has state_restored() method it will
         be called. The method is intended to sync the object with other parts of
         the game that may have updated while it was swapped out.
         """
+        if name == 'init' and attrs is _default_attrs:
+            attrs = _init_attrs
         for attr in attrs:
             setattr(State, attr, states[name][attr])
         for attr in attrs:
@@ -99,4 +150,4 @@ class State(object):
         State.name = name
 
 
-State.save(State.name)
+State.save('init', _init_attrs)

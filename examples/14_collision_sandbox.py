@@ -132,7 +132,7 @@ def draw_sprites(sprites):
 
 
 screen = pygame.display.set_mode((400,400))
-pygame.display.set_caption('Sprites forward')
+pygame.display.set_caption('Space: Test sprites reversed')
 screen_rect = screen.get_rect()
 clock = pygame.time.Clock()
 
@@ -145,7 +145,7 @@ poly2 = PolyGeom(points=[(202,100),(240,150),(235,200),(150,250)])
 circle1 = CircleGeom(origin=(225,300), radius=20)
 circle2 = CircleGeom(origin=(300,300), radius=50)
 
-sprites_fwd = (rect1, line1, poly1, circle1, circle2, poly2, line2, rect2)
+sprites_fwd = (rect1, rect2, line1, line2, poly1, poly2, circle1, circle2)
 sprites_rev = list(reversed(sprites_fwd))
 sprites = sprites_fwd
 
@@ -175,13 +175,18 @@ while 1:
         elif e.type == MOUSEBUTTONUP:
             selected = None
         elif e.type == KEYDOWN:
-            if sprites is sprites_fwd:
-                sprites = sprites_rev
-                pygame.display.set_caption('Sprites reversed')
+            if e.key == K_ESCAPE:
+                quit()
             else:
-                sprites = sprites_fwd
-                pygame.display.set_caption('Sprites forward')
-    
+                if sprites is sprites_fwd:
+                    sprites = sprites_rev
+                    pygame.display.set_caption('Space: Test sprites forward')
+                else:
+                    sprites = sprites_fwd
+                    pygame.display.set_caption('Space: Test sprites reversed')
+        elif e.type == QUIT:
+            quit()
+
     check_collisions(sprites)
     update_sprites(sprites)
     

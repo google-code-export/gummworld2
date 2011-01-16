@@ -76,7 +76,7 @@ def make_tiles():
     tw,th = State.map.tile_size
     mw,mh = State.map.map_size
     State.map.layers.append(MapLayer(
-        State.map.tile_size, State.map.map_size, True, True))
+        State.map.tile_size, State.map.map_size, True, True, True))
     for x in range(mw):
         for y in range(mh):
             s = pygame.sprite.Sprite()
@@ -102,7 +102,7 @@ def make_tiles2():
     tw,th = State.map.tile_size
     mw,mh = State.map.map_size
     State.map.layers.append(MapLayer(
-        State.map.tile_size, State.map.map_size, True, True))
+        State.map.tile_size, State.map.map_size, True, True, True))
     for x in range(mw):
         for y in range(mh):
             s = pygame.sprite.Sprite()

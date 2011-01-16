@@ -36,7 +36,7 @@ about fashioning an object to be sensitive to its state being restored.
 
 
 import pygame
-from pygame.locals import K_TAB, K_UP, K_DOWN, K_LEFT, K_RIGHT
+from pygame.locals import K_ESCAPE, K_TAB, K_UP, K_DOWN, K_LEFT, K_RIGHT
 
 import paths
 from gamelib import *
@@ -49,20 +49,16 @@ class App(Engine):
             caption='03 Switch View - Press TAB to cycle views',
             frame_speed=0)
         
+        ## Create two cameras so we can switch between them...
+        
         ## Save the main state.
         State.save('main')
         
-        ## Make a significant change to the state, then save it under a
-        ## different name.
+        ## Create a view as the alternate camera's drawing surface, then save
+        ## the state under a different name.
         
-        # The rect that defines the screen subsurface. It will also be used to
-        # draw a border around the subsurface.
-        self.view_rect = pygame.Rect(33,33,500,500)
-        
-        # Create a new camera using the subsurface as the camera's drawing
-        # surface and the same target.
-        subsurface = State.screen.surface.subsurface(self.view_rect)
-        State.camera = Camera(State.camera.target, subsurface)
+        State.camera = Camera(State.camera.target,
+            View(State.screen.surface, pygame.Rect(33,33,500,500)))
         State.name = 'small'
         State.save(State.name)
         
@@ -90,7 +86,8 @@ class App(Engine):
         State.screen.clear()
         toolkit.draw_tiles()
         if State.name == 'small':
-            pygame.draw.rect(State.screen.surface, (99,99,99), self.view_rect, 1)
+            pygame.draw.rect(State.screen.surface, (99,99,99),
+                State.camera.view.parent_rect, 1)
         State.screen.flip()
         
     def update_camera_position(self):
@@ -116,12 +113,14 @@ class App(Engine):
             self.move_x = -1 * State.speed
         elif key == K_TAB:
             ## Select the next state name and and restore it.
-            # Note that Camera class has a state_restored() method which is
-            # called by State.restore(). If it did not, you would see strange
-            # video behavior when swapping in a camera with stale innards. You
-            # may need to do this for your own classes if you integrate them
-            # with State.save() and State.restore().
+            ## Note that Camera class has a state_restored() method which is
+            ## called by State.restore(). If it did not, you would see strange
+            ## video behavior when swapping in a camera with stale innards. You
+            ## may need to do this for your own classes if you integrate them
+            ## with State.save() and State.restore().
             State.restore(self.next_state[State.name])
+        elif key == K_ESCAPE:
+            quit()
         
     def on_key_up(self, key, mod):
         # Turn off key-presses.

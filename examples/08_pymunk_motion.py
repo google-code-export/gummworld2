@@ -82,9 +82,9 @@ class App(Engine):
         toolkit.make_hud()
         State.show_hud = True
         
-        # Warp avatar to location on map.
+        # Warp avatar to location on map, and add it to the pymunk space.
         State.camera.target.position = 325,420
-        State.camera.update()
+        State.world.add(State.camera.target)
         
         # Create a speed box for converting mouse position to destination
         # and scroll speed.

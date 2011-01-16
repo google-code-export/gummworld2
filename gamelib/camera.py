@@ -71,17 +71,21 @@ class Camera(object):
     Property visible_tiles returns a list of MapLayer objects that are visible.
     """
     
-    def __init__(self, target, surface):
+    def __init__(self, target, view=None):
         """Construct an instance of Camera.
         
         The target argument is the object that camera should track. target must
         have a position attribute which is its location in world coordinates.
         
-        The surface argument is the pygame surface or subsurface upon which to
-        base conversions between world and screen space.
+        The view argument is the screen.View object upon which to base
+        conversions between world and screen space. The view.surface attribute
+        is exposed view the Camera.surface property.
         """
+        if view is None:
+            view = State.screen
         self._target = target
-        self._surface = surface
+        self._view = view
+        self._surface = view.surface
         self._visible_tile_range = []
         self._visible_tiles = []
         self.target_moved = Vec2d(0,0)
@@ -106,14 +110,21 @@ class Camera(object):
         self._interp = 0.0
         
     @property
+    def view(self):
+        """The view from which to derive the surface and viewing dimensions and,
+        for subsurfaces, the rect for the subsurface in the parent surface.
+        """
+        return self._view
+    @view.setter
+    def view(self, val):
+        self._view = val
+        self._init()
+        
+    @property
     def surface(self):
         """The surface from which to derive the viewing dimensions.
         """
         return self._surface
-    @surface.setter
-    def surface(self, val):
-        self._surface = val
-        self._init()
         
     def _init(self):
         """must be called after setting surface

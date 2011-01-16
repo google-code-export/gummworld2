@@ -34,9 +34,10 @@ The subclass should override update() and draw() for its own purposes. If the
 subclass wants to get events for a particular type, all it needs to do is
 override the event handler for that type.
 
-If you want to write your own engine instead of using this one, then in general
-you will still want to initialize yours in the same order as this class. See
-__init__() and run() for the details.
+If you want to write your own framework instead of using this one, then in
+general you will still want to initialize yours in the same order as this class,
+though not everything created in the constructor is required. See
+Engine.__init__(), Engine.run(), and examples/00_minimum.py for helpful clues.
 """
 
 
@@ -63,8 +64,11 @@ try:
 except:
     pymunk = None
 
+if __name__ == '__main__':
+    import paths
+
 from gamelib import (
-    State, Screen, model, Map, Camera, Graphics, GameClock,
+    State, Screen, View, model, Map, Camera, GameClock,
     pygame_utils,
 )
 
@@ -77,59 +81,116 @@ PYMUNK_WORLD = 3
 
 class Engine(object):
     
-    def __init__(self, camera_target=None,
-        resolution=(600,600), display_flags=0, caption=None,
+    def __init__(self,
+        screen_surface=None, resolution=(600,600), display_flags=0, caption=None,
+        camera_target=None, camera_view=None, camera_view_rect=None,
         tile_size=(128,128), map_size=(10,10),
         update_speed=30, frame_speed=30,
-        world_type=NO_WORLD,
-        **kwargs):
+        world_type=NO_WORLD, world_args={}):
         """Construct an instance of Engine.
         
-        The camera_target argument is the target that the camera will track. If
-        camera_target is None Engine will create a default target depending on
-        whether pymunk is used (see following notes).
+        This constructor does the following:
+            
+            The pygame display is initialized with an optional caption, and the
+            resulting screen.Screen object is placed in State.screen.
+            
+            An empty map.Map object is created and placed in State.map.
+            
+            An empty model.World* object is created and placed in State.world.
+            
+            State.world_type is set to one of the engine.*_WORLD values
+            corresponding to the world object in State.world.
+            
+            A camera.Camera object is created and placed in State.camera. The
+            camera target is either taken from the camera_target argument, or an
+            appropriate target for world type is created. The target is *NOT*
+            added to the world, as the target does not need to be an object
+            subject to game rules. If target happens to be an avatar-type object
+            then add it manually to world with the rest of the world entities.
+            
+            A game_clock.GameClock object is created and placed in State.clock.
+            
+            Joystick objects are created for connected controllers.
         
-        The resolution argument specifies the width and height of the display.
+        The following arguments are used to initialize a Screen object:
+            
+            The screen_surface argument specifies the pygame top level surface
+            to use for creating the State.screen object. The presence of this
+            argument overrides initialization of the pygame display, and
+            resolution and display_flags arguments are ignored. Use this if
+            the pygame display has already been initialized in the calling
+            program.
+            
+            The resolution argument specifies the width and height of the
+            display.
+            
+            The display_flags argument specifies the pygame display flags to
+            pass to the display initializer.
+            
+            The caption argument is a string to use as the window caption.
         
-        The display_flags argument specifies the pygame display flags to pass
-        to the display initializer.
+        The following arguments are used to initialize a Camera object:
+            
+            The camera_target argument is the target that the camera will track.
+            If camera_target is None, Engine will create a default target
+            appropriate for the world type.
+            
+            The camera_view argument is a screen.View object to use as the
+            camera's view.
+            
+            The camera_view_rect argument specifies the pygame Rect from which
+            to create a screen.View object for the camera's view.
+            State.screen.surface is used as the source surface. This argument is
+            ignored if camera_view is not None.
         
-        The caption argument is a string to use as the window caption.
+        The following arguments are used to initialize a Map object:
+            
+            The tile_size and map_size arguments specify the width and height of
+            a map tile, and width and height of a map in tiles, respectively.
         
-        The tile_size and map_size arguments specify the width and height of
-        a map tile, and width and height of a map in tiles, respectively.
+        The following arguments are used to initialize a model.World* object:
+            
+            The world_type argument specifies which of the world classes to
+            create. It must be one of engine.NO_WORLD, engine.SIMPLE_WORLD,
+            engine.QUADTREE_WORLD, engine.PYMUNK_WORLD.
+            
+            The world_args argument is a dict that can be passed verbatim to
+            the world constructor (see the World* classes in the model module)
+            like so: World(**world_args).
         
-        The update_speed and frame_speed arguments control the game clock.
-        update_speed specifies the maximum updates that can occur per second.
-        frame_speed specifies the maximum frames that can occur per second. The
-        clock sacrifices frames per second in order to achieve the desired
+        The following arguments are used to initialize a Clock object:
+            
+            update_speed specifies the maximum updates that can occur per
+            second.
+            
+            frame_speed specifies the maximum frames that can occur per second.
+        
+        The clock sacrifices frames per second in order to achieve the desired
         updates per second. If frame_speed is 0 the frame rate is uncapped.
-        
-        The use_pymunk argument specifies whether to use pymunk for the model
-        (world and camera.target). If use_pymunk is True and a camera_target is
-        specified, the camera_target must be similarly constructed to a
-        model.CircleBody object. Which is to say it must be an instance of
-        pymunk.Body, and have a shape attribute that is an instance of
-        pymunk.Shape. If use_pymunk is False then camera_target can be any class
-        that has a position attribute that is an instance of Vec2d.
         """
         
-        ## If you don't use this engine, then in general you will still
-        ## want to initialize yours in the same order you see here.
+        ## If you don't use this engine, then in general you will still want
+        ## to initialize your State objects in the same order you see here.
         
         State.world_type = world_type
         
-        State.screen = Screen(resolution, display_flags)
+        if screen_surface:
+            State.screen = Screen(surface=screen_surface)
+        elif State.screen is None:
+            if screen_surface is None:
+                State.screen = Screen(resolution, display_flags)
+            else:
+                State.screen = Screen(surface=screen_surface)
+            
         if caption is not None:
             pygame.display.set_caption(caption)
         
         State.map = Map(tile_size, map_size)
         
-        ## This is the only convoluted thing in here. If you want to use pymunk
-        ## you have to use the right object type for a camera target. Type
-        ## checking and exception handling is purposely not done so that the
-        ## code is easier to read. If it blows up you should be able to figure
-        ## it out from the default stack trace.
+        ## This is the only complicated thing in here. If you want to use the
+        ## camera target as a world entity, you have to use the right object
+        ## type. Type checking and exception handling is purposely not done so
+        ## that the code is easier to read.
         if world_type == NO_WORLD:
             State.world = model.NoWorld(State.map.rect)
             if camera_target is None:
@@ -138,29 +199,23 @@ class Engine(object):
             State.world = model.World(State.map.rect)
             if camera_target is None:
                 camera_target = model.Object()
-            State.world.add(camera_target)
         elif world_type == PYMUNK_WORLD:
             State.world = model.WorldPymunk(State.map.rect)
             if camera_target is None:
                 camera_target = model.CircleBody()
-            State.world.add(camera_target, camera_target.shape)
         elif world_type == QUADTREE_WORLD:
-            qt_min_size = kwargs.get('quadtree_min_size', (128,128))
-            qt_worst_case = kwargs.get('quadtree_worst_case', 0)
-            qt_collide_rects = kwargs.get('quadtree_collide_rects', True)
-            qt_collide_entities = kwargs.get('quadtree_collide_entities', False)
             State.world = model.WorldQuadTree(
-                State.map.rect, qt_min_size, qt_worst_case,
-                qt_collide_rects, qt_collide_entities)
+                State.map.rect, **world_args)
             if camera_target is None:
-                qt_position = kwargs.get('quadtree_object_position', (0,0))
-                qt_rect = kwargs.get(
-                    'quadtree_object_rect', pygame.Rect(0,0,20,20))
-                camera_target = model.QuadTreeObject(qt_rect, qt_position)
+                camera_target = model.QuadTreeObject(pygame.Rect(0,0,20,20))
         
-        State.camera = Camera(camera_target, State.screen.surface)
+        if camera_view is None:
+            if camera_view_rect:
+                camera_view = View(State.screen.surface, camera_view_rect)
+            else:
+                camera_view = State.screen
+        State.camera = Camera(camera_target, camera_view)
         
-        State.graphics = Graphics()
         State.clock = GameClock(update_speed, frame_speed)
         
         self._joysticks = pygame_utils.init_joystick()
@@ -263,3 +318,93 @@ class Engine(object):
     def on_user_event(self, e): pass
     def on_video_expose(self): pass
     def on_video_resize(self, size, w, h): pass
+
+
+if __name__ == '__main__':
+    ## Multiple "apps", (aka engines, aka levels) and other settings
+    from pygame.locals import *
+    from gamelib import Vec2d, View, toolkit
+    
+    class App(Engine):
+        def __init__(self, **kwargs):
+            super(App, self).__init__(**kwargs)
+            toolkit.make_tiles2()
+            self.speed = 3
+            self.movex = 0
+            self.movey = 0
+        def update(self):
+            if self.movex or self.movey:
+                State.camera.position += self.movex,self.movey
+            State.camera.update()
+        def draw(self):
+            State.camera.interpolate()
+            State.screen.surface.fill(Color('black'))
+            toolkit.draw_tiles()
+            if State.camera.view is not State.screen:
+                pygame.draw.rect(State.screen.surface, (99,99,99),
+                    State.camera.view.parent_rect, 1)
+            pygame.display.flip()
+        def on_key_down(self, unicode, key, mod):
+            if key == K_DOWN: self.movey += self.speed
+            elif key == K_UP: self.movey += -self.speed
+            elif key == K_RIGHT: self.movex += self.speed
+            elif key == K_LEFT: self.movex += -self.speed
+            elif key == K_SPACE: State.running = False
+            elif key == K_ESCAPE: quit()
+        def on_key_up(self, key, mod):
+            if key == K_DOWN: self.movey -= self.speed
+            elif key == K_UP: self.movey -= -self.speed
+            elif key == K_RIGHT: self.movex -= self.speed
+            elif key == K_LEFT: self.movex -= -self.speed
+    
+    def make_app(num, **kwargs):
+        name = 'app' + str(num)
+        if name in state.states:
+            State.restore(name)
+            pygame.display.set_caption(State.caption+' (restored)')
+        else:
+            State.app = App(**kwargs)
+            if num % 2:
+                toolkit.make_tiles()
+            else:
+                toolkit.make_tiles2()
+            State.camera.position = State.camera.screen_center
+            State.caption = kwargs['caption']
+            State.save(name)
+    
+    def make_app1():
+        screen = pygame.display.set_mode(resolution)
+        make_app(1,
+            screen_surface=screen,
+            tile_size=tile_size, map_size=map_size,
+            caption='1:Screen')
+    
+    def make_app2():
+        tile_size = Vec2d(32,32)
+        view = View(State.screen.surface, Rect(16,16,*(tile_size*6)) )
+        make_app(3,
+            tile_size=tile_size, map_size=map_size,
+            camera_view=view, caption='3:View+Tilesize')
+    
+    def make_app3():
+        make_app(4,
+            tile_size=tile_size, map_size=map_size,
+            camera_view_rect=Rect(16,16,*(tile_size*3)),
+            caption='4:Viewrect')
+    
+    tile_size = Vec2d(64,64)
+    map_size = Vec2d(10,10)
+    resolution = tile_size * 4
+    
+    State.default_attrs.extend(('app','caption'))
+    app_num = 0
+    
+    while 1:
+        app_num += 1
+        if app_num > 3:
+            app_num = 1
+        if app_num == 1:   make_app1()
+        elif app_num == 2: make_app2()
+        elif app_num == 3: make_app3()
+        elif app_num == 4: make_app4()
+        State.app.run()

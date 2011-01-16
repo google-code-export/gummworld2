@@ -30,7 +30,10 @@ This uses the dumb model.World class to store model objects.
 from random import randrange, choice
 
 import pygame
-from pygame.locals import Color, K_SPACE, K_UP, K_DOWN, K_LEFT, K_RIGHT
+from pygame.locals import (
+    Color,
+    K_ESCAPE, K_SPACE, K_UP, K_DOWN, K_LEFT, K_RIGHT,
+)
 
 import paths
 from gamelib import *
@@ -45,6 +48,9 @@ def make_image(color, size):
 
 
 class Thing(model.Object):
+    """The visual representation of the "thing" whose physical attributes are
+    stored in the world container.
+    """
     
     def __init__(self, color_name, size):
         super(Thing, self).__init__()
@@ -90,7 +96,7 @@ class App(Engine):
     def __init__(self):
         
         super(App, self).__init__(
-            caption='01 Full Window',
+            caption='13 Simple World - Space: show images',
             frame_speed=0,
             world_type=SIMPLE_WORLD)
         
@@ -149,6 +155,7 @@ class App(Engine):
         surf = State.camera.surface
         images = self.images
         interp = State.camera.interp
+        ## Display the "thing" as a wireframe or an image.
         if self.wireframe:
             for frame in [f for f in State.world.objects() if isinstance(f, Thing)]:
                 rect = frame.rect.copy()
@@ -176,6 +183,12 @@ class App(Engine):
             self.move_x -= State.speed
         elif key == K_SPACE:
             self.wireframe = not self.wireframe
+            if self.wireframe:
+                pygame.display.set_caption('13 Simple World - Space: show images')
+            else:
+                pygame.display.set_caption('13 Simple World - Space: show wireframe')
+        elif key == K_ESCAPE:
+            quit()
         
     def on_key_up(self, key, mod):
         # Turn off key-presses.

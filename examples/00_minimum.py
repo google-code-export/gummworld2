@@ -29,7 +29,7 @@ import pygame
 from pygame.locals import *
 
 import paths
-from gamelib import State, Camera, GameClock, Map, Vec2d, toolkit
+from gamelib import State, Screen, Camera, GameClock, Map, Vec2d, toolkit
 
 
 class CameraTarget(object):
@@ -53,19 +53,16 @@ class App(object):
         tile_size = 128,128
         map_size = 10,10
         
-        self.screen = pygame.display.set_mode((800,600))
-        self.screen_rect = self.screen.get_rect()
-        
         self.speed = 5
         self.movex = 0
         self.movey = 0
         
         ## Set up the State variables and load some map content.
         
-        camera_target = CameraTarget(self.screen_rect.center)
-        
+        State.screen = Screen((800,600))
         State.map = Map(tile_size, map_size)
-        State.camera = Camera(camera_target, self.screen)
+        camera_target = CameraTarget(State.screen.center)
+        State.camera = Camera(camera_target)
         State.clock = GameClock(30, 0)
         
         toolkit.make_tiles()
@@ -106,11 +103,14 @@ class App(object):
                 elif e.key == K_UP: self.movey += -self.speed
                 elif e.key == K_RIGHT: self.movex += self.speed
                 elif e.key == K_LEFT: self.movex += -self.speed
+                elif e.key == K_ESCAPE: quit()
             elif e.type == KEYUP:
                 if e.key == K_DOWN: self.movey -= self.speed
                 elif e.key == K_UP: self.movey -= -self.speed
                 elif e.key == K_RIGHT: self.movex -= self.speed
                 elif e.key == K_LEFT: self.movex -= -self.speed
+            elif e.type == QUIT:
+                quit()
 
 
 if __name__ == '__main__':

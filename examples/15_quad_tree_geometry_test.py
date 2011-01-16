@@ -105,7 +105,7 @@ import paths
 from gamelib import *
 
 
-class Geom(object):
+class GeomBehavior(object):
     """Superclass providing movement, behavior, and drawing common to all
     entities.
     """
@@ -145,12 +145,12 @@ class Geom(object):
         camera.surface.blit(self.image, pos)
 
 
-class RectGeom(geometry.RectGeometry, Geom):
+class RectGeom(geometry.RectGeometry, GeomBehavior):
     """A rect with graphics, movement, collision detection, and behavior.
     """
     def __init__(self, position):
         geometry.RectGeometry.__init__(self, 0,0,25,25)
-        Geom.__init__(self)
+        GeomBehavior.__init__(self)
         
         self.image_green = pygame.surface.Surface(self.rect.size)
         self.image_green.fill(Color('green'))
@@ -163,12 +163,12 @@ class RectGeom(geometry.RectGeometry, Geom):
         self.position = position
 
 
-class CircleGeom(geometry.CircleGeometry, Geom):
+class CircleGeom(geometry.CircleGeometry, GeomBehavior):
     """A circle with graphics, movement, collision detection, and behavior.
     """
     def __init__(self, position):
         geometry.CircleGeometry.__init__(self, (0,0), 12)
-        Geom.__init__(self)
+        GeomBehavior.__init__(self)
         
         self.image_green = pygame.surface.Surface(self.rect.size)
         rect = self.image_green.get_rect()
@@ -186,13 +186,13 @@ class CircleGeom(geometry.CircleGeometry, Geom):
         self.position = position
     
 
-class TriangleGeom(geometry.PolyGeometry, Geom):
+class TriangleGeom(geometry.PolyGeometry, GeomBehavior):
     """A triangle with graphics, movement, collision detection, and behavior.
     """
     shape = (12,0),(24,24),(0,24)
     
     def __init__(self, position):
-        Geom.__init__(self)
+        GeomBehavior.__init__(self)
         geometry.PolyGeometry.__init__(self, self.shape, position)
         
         self.image_green = pygame.surface.Surface(self.rect.size)
@@ -375,8 +375,6 @@ class App(Engine):
         elif key in range(K_0,K_9+1):
             # Set level of grid to show.
             self.draw_level = key - K_0
-        elif key == K_ESCAPE:
-            sys.exit()
         elif key == K_w:
             # Toggle worst-case handling.
             if self.worst_case == 0:
@@ -399,6 +397,8 @@ class App(Engine):
             del_things = self.things[0:10]
             del self.things[0:10]
             State.world.remove(*del_things)
+        elif key == K_ESCAPE:
+            sys.exit()
 
     def on_quit(self):
         sys.exit()
