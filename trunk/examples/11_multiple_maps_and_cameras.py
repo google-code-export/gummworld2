@@ -29,10 +29,11 @@ scrolling maps.
 
 
 import pygame
-from pygame.locals import K_TAB, K_UP, K_DOWN, K_LEFT, K_RIGHT
+from pygame.locals import Rect, K_ESCAPE, K_TAB, K_UP, K_DOWN, K_LEFT, K_RIGHT
 
 import paths
 from gamelib import *
+from gamelib import state
 
 
 class App(Engine):
@@ -40,29 +41,29 @@ class App(Engine):
     def __init__(self):
         self.caption = '11 Multiple Maps and Cameras'
         
+        resolution = Vec2d(600,600)
+        half_width = resolution.x // 2
+        full_height = resolution.y
+        
         super(App, self).__init__(
-            caption=self.caption,
+            resolution=resolution, caption=self.caption,
+            camera_view_rect=Rect(0,0, half_width,full_height),
             frame_speed=0)
-
+        
+        ## The two views will each have their own camera and map.
         State.default_attrs = ['camera','map']
-
-        # Set up the first view. Save the state.
-        half_width = State.screen.width // 2
-        full_height = State.screen.height
-        self.view1 = Surface(
-            State.screen.surface, pygame.Rect(0,0, half_width,full_height))
-        State.camera = Camera(State.camera.target, self.view1.surface)
+        
+        ## Set up the first view. Save the state.
         State.camera.position = State.world.rect.center
-        # We do not have to make a map. Just populate the default one. We do
-        # make a new map for view2, though.
         toolkit.make_tiles()
+        self.view1 = State.camera.view
         State.save(self.view1)
         
-        # Set up the second view. Save the state.
-        self.view2 = Surface(
-            State.screen.surface, pygame.Rect(
-                half_width,0, half_width,full_height))
-        State.camera = Camera(model.Object(), self.view2.surface)
+        ## Set up the second view. We can get tile_size and map_size from the
+        ## first map. Save the state.
+        self.view2 = View(State.screen.surface,
+            Rect(half_width,0, half_width,full_height))
+        State.camera = Camera(model.Object(), self.view2)
         State.camera.position = State.world.rect.center
         State.map = Map(State.map.tile_size, State.map.map_size)
         toolkit.make_tiles2()
@@ -78,6 +79,7 @@ class App(Engine):
         
     def update(self):
         """overrides Engine.update"""
+        ## Restore each view and update its camera.
         for view in (self.view1, self.view2):
             State.restore(view)
             self.update_camera_position(view)
@@ -86,16 +88,6 @@ class App(Engine):
             pygame.display.set_caption(
                 self.caption + ' - %d fps' % State.clock.get_fps())
 
-    def draw(self):
-        """overrides Engine.draw"""
-        # Draw stuff.
-        for view in (self.view1, self.view2):
-            State.restore(view)
-            State.camera.interpolate()
-            view.clear()
-            toolkit.draw_tiles()
-        State.screen.flip()
-        
     def update_camera_position(self, view):
         """move the camera's position
         """
@@ -107,7 +99,21 @@ class App(Engine):
         State.camera.position = geometry.point_on_circumference(
             origin, radius, angle)
         view.angle = angle
+    
+    def draw(self):
+        """overrides Engine.draw"""
+        ## Restore each view and draw its map.
+        for view in (self.view1, self.view2):
+            State.restore(view)
+            State.camera.interpolate()
+            view.clear()
+            toolkit.draw_tiles()
+        State.screen.flip()
         
+    def on_key_down(self, unicode, key, mod):
+        if key == K_ESCAPE:
+            quit()
+    
     def on_quit(self):
         quit()
 

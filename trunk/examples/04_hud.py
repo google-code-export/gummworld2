@@ -38,16 +38,11 @@ class App(Engine):
             caption='04 HUD - TAB: view | H: HUD',
             frame_speed=0)
         
-        # Save the main state.
+        # Create two cameras. This will let us switch the view and observe what
+        # the HUD reports.
         State.save('main')
-        
-        # The rect that defines the screen subsurface. It will also be used to
-        # draw a border around the subsurface.
-        self.view_rect = pygame.Rect(30,20,500,500)
-        
-        # Set up the subsurface as the alternate camera's drawing surface.
-        subsurface = State.screen.surface.subsurface(self.view_rect)
-        State.camera = Camera(State.camera.target, subsurface)
+        State.camera = Camera(State.camera.target,
+            View(State.screen.surface, pygame.Rect(30,20,500,500)))
         State.name = 'small'
         State.save(State.name)
         
@@ -83,7 +78,8 @@ class App(Engine):
         ## Draw the hud.
         State.hud.draw()
         if State.name == 'small':
-            pygame.draw.rect(State.screen.surface, (99,99,99), self.view_rect, 1)
+            pygame.draw.rect(State.screen.surface, (99,99,99),
+                State.camera.view.parent_rect, 1)
         State.screen.flip()
         
     def update_camera_position(self):

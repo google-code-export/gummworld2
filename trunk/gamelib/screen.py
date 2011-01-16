@@ -32,16 +32,17 @@ if __name__ == '__main__':
 from gamelib import State, Vec2d
 
 
-class Surface(object):
-    """Convenience class for creating and using subsurfaces.
+class View(object):
+    """Views are used to access areas of a pygame surface. They are analogous
+    to surfaces and subsurfaces.
     
-    The surface can be accessed via the surface attribute.
+    Access the pygame surface via the surface attribute.
     
-    The surface's rect can be accessed via the rect attribute.
+    Access the surface's rect via the rect attribute.
     
-    For subsurfaces the parent rect that was used to create the subsurface can
-    be access via the super_rect attribute. If this instance does not represent
-    a subsurface then rect and super_rect will be equivalent.
+    For subsurfaces, the rect for the subsurface in the parent surface can be
+    accessed via the parent_rect attribute. If this instance does not represent
+    a subsurface then rect and parent_rect will be equivalent.
     """
     
     def __init__(self, surface, subsurface_rect=None):
@@ -58,10 +59,10 @@ class Surface(object):
         """
         if subsurface_rect:
             self.surface = surface.subsurface(subsurface_rect)
-            self.super_rect = subsurface_rect
+            self.parent_rect = subsurface_rect
         else:
             self.surface = surface
-            self.super_rect = self.surface.get_rect()
+            self.parent_rect = self.surface.get_rect()
         self._eraser = self.surface.copy()
         self.rect = self.surface.get_rect()
     
@@ -102,16 +103,24 @@ class Surface(object):
         self.surface.blit(surf, pos, rect)
 
 
-class Screen(Surface):
+class Screen(View):
     """The pygame display.
     
-    Create one of these to open a window
+    Assign one of these to State.screen in order to make the library aware of
+    the main display surface.
     """
     
-    def __init__(self, size, flags=0):
+    def __init__(self, size=0, flags=0, surface=None):
         """Initialize the pygame display.
+        
+        If surface is specified, it is used as the screen's surface and pygame
+        display initialization is not performed.
+        
+        Otherwise, size and flags are used to initialize the pygame display.
         """
-        super(Screen, self).__init__(pygame.display.set_mode(size, flags))
+        if surface is None:
+            surface = pygame.display.set_mode(size, flags)
+        super(Screen, self).__init__(surface)
     
     def flip(self):
         """Flip the pygame display.
@@ -123,16 +132,16 @@ if __name__ == '__main__':
     main_screen = Screen((300,300))
     main_screen.surface.fill(pygame.Color('yellow'))
     
-    mini_screen = Surface(main_screen.surface, (10,10,200,200))
+    mini_screen = View(main_screen.surface, (10,10,200,200))
     mini_screen.surface.fill(pygame.Color('green'))
     
-    tiny_screen = Surface(mini_screen.surface, (10,10,100,100))
+    tiny_screen = View(mini_screen.surface, (10,10,100,100))
     tiny_screen.surface.fill(pygame.Color('blue'))
     
-    nano_screen = Surface(tiny_screen.surface, (10,10,50,50))
+    nano_screen = View(tiny_screen.surface, (10,10,50,50))
     nano_screen.surface.fill(pygame.Color('darkblue'))
     
-    last_screen = Surface(nano_screen.surface, (10,10,20,20))
+    last_screen = View(nano_screen.surface, (10,10,20,20))
     last_screen.surface.fill(pygame.Color('black'))
     
     main_screen.flip()

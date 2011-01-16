@@ -25,7 +25,7 @@ __author__ = 'Gummbum, (c) 2011'
 
 
 import pygame
-from pygame.locals import K_UP, K_DOWN, K_LEFT, K_RIGHT
+from pygame.locals import K_ESCAPE, K_UP, K_DOWN, K_LEFT, K_RIGHT
 
 import paths
 from gamelib import *
@@ -35,15 +35,9 @@ class App(Engine):
     
     def __init__(self):
         super(App, self).__init__(
+            camera_view_rect=pygame.Rect(33,33,500,500),
             caption='02 Sub-window',
             frame_speed=0)
-        
-        # The rect that defines the screen subsurface. It will also be used to
-        # draw a border around the subsurface.
-        self.view_rect = pygame.Rect(33,33,500,500)
-        
-        # Set up the subsurface as the camera's drawing surface.
-        State.camera.surface = State.screen.surface.subsurface(self.view_rect)
         
         # Make some default content.
         toolkit.make_tiles()
@@ -62,7 +56,8 @@ class App(Engine):
         State.camera.interpolate()
         State.screen.clear()
         toolkit.draw_tiles()
-        pygame.draw.rect(State.screen.surface, (99,99,99), self.view_rect, 1)
+        pygame.draw.rect(State.screen.surface, (99,99,99),
+            State.camera.view.parent_rect, 1)
         State.screen.flip()
         
     def update_camera_position(self):
@@ -86,6 +81,8 @@ class App(Engine):
             self.move_x = 1 * State.speed
         elif key == K_LEFT:
             self.move_x = -1 * State.speed
+        elif key == K_ESCAPE:
+            quit()
         
     def on_key_up(self, key, mod):
         # Turn off key-presses.

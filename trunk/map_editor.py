@@ -26,10 +26,14 @@ __author__ = 'Gummbum, (c) 2011'
 
 import pygame
 from pygame.locals import K_UP, K_DOWN, K_LEFT, K_RIGHT
-import pymunk
+try:
+    import pymunk
+except:
+    pymunk = None
 
 import paths
 from gamelib import *
+from gamelib import albow
 
 
 menu_data = (
@@ -67,15 +71,17 @@ menu_data = (
 )
 
 
-class MapEditor(Engine):
+class MapEditor(Engine, albow.Shell):
     
     def __init__(self, screen_size):
-        super(MapEditor, self).__init__(resolution=screen_size, frame_speed=0)
+        super(MapEditor, self).__init__(
+            resolution=screen_size,
+            frame_speed=0)
         
         # dict to look up movement keys and their corresponding direction on the
         # axis.
-        self._Y_KEYS = {K_UP:-1,K_DOWN:1}
-        self._X_KEYS = {K_LEFT:-1,K_RIGHT:1}
+        self._Y_KEYS = {K_UP:-1.0,K_DOWN:1.0}
+        self._X_KEYS = {K_LEFT:-1.0,K_RIGHT:1.0}
         
         # These dicts allow robust accumulation of key-presses, and remember the
         # direction*speed. The original step size is preserved so that a KEYUP
@@ -90,7 +96,8 @@ class MapEditor(Engine):
         
     def update(self):
         """Overrides Engine.update."""
-        self.update_avatar_position()
+        self.update_camera_position()
+        State.camera.update()
         if State.show_hud:
             State.hud.update()
         
@@ -106,22 +113,18 @@ class MapEditor(Engine):
             State.hud.draw()
         State.screen.flip()
         
-    def update_avatar_position(self):
-        # This method updates the avatar's position if any movement keys are
+    def update_camera_position(self):
+        # This method updates the camera's position if any movement keys are
         # currently held down.
         if self.move_y or self.move_x:
-            avatar = State.world.avatar
-            wx,wy = avatar.position
-            wx = reduce(float.__add__, self.move_x.values(), wx)
-            wy = reduce(float.__add__, self.move_y.values(), wy)
-            # Keep avatar inside world bounds. Note: pymunk.BB.clamp_vect
-            # doesn't work because top is less than bottom.
-            #avatar.position = State.world.bounding_box.clamp_vect((wx,wy))
-            # Instead we'll do this...
+            target = State.camera.target
+            wx,wy = target.position
+            wx = reduce(float.__add__, self.move_x.values(), float(wx))
+            wy = reduce(float.__add__, self.move_y.values(), float(wy))
             rect = State.world.rect
             wx = max(min(wx,rect.right), rect.left)
             wy = max(min(wy,rect.bottom), rect.top)
-            avatar.position = wx,wy
+            target.position = wx,wy
         
     def on_key_down(self, unicode, key, mod):
         # Turn on key-presses.
@@ -152,6 +155,12 @@ class MapEditor(Engine):
                 quit()
 
 
-if __name__ == '__main__':
+def main():
+    pygame.display.set_mode((1024,768))
+    
     map_editor = MapEditor((600,600))
     map_editor.run()
+
+
+if __name__ == '__main__':
+    main()

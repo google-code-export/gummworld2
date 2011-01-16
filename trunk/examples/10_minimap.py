@@ -38,7 +38,7 @@ objects, but without it the balls' movement is unpleasantly jerky because of the
 from random import randrange, choice
 
 import pygame
-from pygame.locals import Color, K_UP, K_DOWN, K_LEFT, K_RIGHT
+from pygame.locals import Color, K_ESCAPE, K_UP, K_DOWN, K_LEFT, K_RIGHT
 
 import paths
 from gamelib import *
@@ -73,7 +73,7 @@ class Minimap(object):
     def __init__(self):
         
         # The minimap is a subsurface upon which the whole world is projected.
-        self.mini_screen = Surface(
+        self.mini_screen = View(
             State.screen.surface, pygame.Rect(475,25,100,100))
         
         # tiny_rect will be drawn on the minimap to indicate the visible area of
@@ -123,7 +123,7 @@ class Minimap(object):
         
         # Draw a border.
         pygame.draw.rect(State.screen.surface, (99,99,99),
-            mini_screen.super_rect.inflate(2,2), 1)
+            mini_screen.parent_rect.inflate(2,2), 1)
 
 
 class App(Engine):
@@ -144,8 +144,6 @@ class App(Engine):
         self.sprite_group = BucketGroup(map.tile_size, map.map_size)
         for i in range(50):
             self.sprite_group.add(Sprite())
-        
-        State.camera.position = 300,300
         
         self.move_x = 0
         self.move_y = 0
@@ -202,6 +200,8 @@ class App(Engine):
             self.move_x = 1 * State.speed
         elif key == K_LEFT:
             self.move_x = -1 * State.speed
+        elif key == K_ESCAPE:
+            quit()
         
     def on_key_up(self, key, mod):
         # Turn off key-presses.

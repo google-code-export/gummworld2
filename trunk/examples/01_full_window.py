@@ -25,7 +25,7 @@ __author__ = 'Gummbum, (c) 2011'
 
 
 import pygame
-from pygame.locals import K_UP, K_DOWN, K_LEFT, K_RIGHT
+from pygame.locals import K_ESCAPE, K_UP, K_DOWN, K_LEFT, K_RIGHT
 
 import paths
 from gamelib import *
@@ -80,6 +80,8 @@ class App(Engine):
             self.move_x = 1 * State.speed
         elif key == K_LEFT:
             self.move_x = -1 * State.speed
+        elif key == K_ESCAPE:
+            quit()
         
     def on_key_up(self, key, mod):
         # Turn off key-presses.

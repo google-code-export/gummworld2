@@ -92,27 +92,21 @@ class App(Engine):
         # The collapse stat for the hud.
         self.collapse = 1
         
-        # Save the main state.
+        # Make two cameras.
         State.save('main', ['camera'])
-        
-        # The rect that defines the screen subsurface. It will also be used to
-        # draw a border around the subsurface.
-        view_rect = pygame.Rect(30,20,*State.screen.size*2//3)
-        
-        # Set up the subsurface as the camera's drawing surface.
-        self.view = Surface(State.screen.surface, view_rect)
-        State.camera = Camera(State.camera.target, self.view.surface)
+        State.camera = Camera(State.camera.target,
+            View(State.screen.surface, pygame.Rect(30,20,*State.screen.size*2//3)))
         State.name = 'small'
         State.save(State.name, ['camera'])
-        State.restore('main', ['camera'])
-        
+
+
         # Easy way to select the "next" state name.
         self.next_state = {
             'main' : 'small',
             'small' : 'main',
         }
         
-        # I like huds.
+        # I like huds. Add more stuff to the canned hud.
         toolkit.make_hud(caption)
         State.hud.add('Collapse', Statf(State.hud.next_pos(),
             'Collapse %d', callback=lambda:self.collapse,
@@ -198,7 +192,8 @@ class App(Engine):
         State.hud.draw()
         self.draw_avatar()
         if State.name == 'small':
-            pygame.draw.rect(State.screen.surface, (99,99,99), self.view.super_rect, 1)
+            pygame.draw.rect(State.screen.surface, (99,99,99),
+            State.camera.view.parent_rect, 1)
         State.screen.flip()
         
     def draw_avatar(self):

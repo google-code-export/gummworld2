@@ -81,12 +81,12 @@ class App(Engine):
         State.show_hud = True
         
         # Warp avatar to center map.
-        State.camera.target.position = State.world.rect.center
-        State.camera.update()
+#        State.camera.position = State.world.rect.center
         
         ## Mouse movement is going to use a diamond geometry to calculate a
         ## speed factor that's derived from the distance from center to the
-        ## edge. Max speed will be horizontal; min speed will be vertical.
+        ## edge of the diamond at the angle to the mouse. Max speed will be
+        ## horizontal; min speed will be vertical.
         self.speed_box = geometry.Diamond(0,0,4,2)
         self.speed_box.center = Vec2d(State.camera.rect.size) // 2
         self.max_speed_box = float(self.speed_box.width) / 2.0
