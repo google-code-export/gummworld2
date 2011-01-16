@@ -123,6 +123,8 @@ SVN rev 131:
 
 == Changes in 0.0.7 ==
 
+Most of these changes were made to open up the library to be used in the map editor with Albow.
+
 SVN rev 143:
   * Change: Surface class renamed to View. Should have done this sooner.
   * Change: Screen constructor takes an additional argument, surface, that is used as the display. This change supports scenarios that have already initialized the display.
