@@ -135,3 +135,9 @@ SVN rev 143:
   * Fix: toolkit.make_tiles() and toolkit.make_tiles2() created a map.Level with no grid lines. This caused some examples to blow up when grid lines where enabled.
   * Changes: numerous documentation updates.
   * Removed: graphics module removed. After so long it simply remained as clutter.
+
+== Changes in 0.0.8 ==
+
+SVN rev 148:
+  * Fixed: View.__init__ did not create subsurfaces when rect was passed.
+  * Fixed: Camera.view=view did not set the _surface attribute.
