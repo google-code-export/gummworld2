@@ -84,13 +84,11 @@ class Camera(object):
         if view is None:
             view = State.screen
         self._target = target
-        self._view = view
-        self._surface = view.surface
         self._visible_tile_range = []
         self._visible_tiles = []
         self.target_moved = Vec2d(0,0)
         self._target_was_moved = False
-        self._init()
+        self.view = view
         
     @property
     def interp(self):
@@ -129,6 +127,7 @@ class Camera(object):
     def _init(self):
         """must be called after setting surface
         """
+        self._surface = self.view.surface
         self.rect = self.surface.get_rect()
         
         # Offsets used in conversions

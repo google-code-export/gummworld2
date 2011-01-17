@@ -57,7 +57,7 @@ class View(object):
         The subsurface_rect argument is the area of a subsurface to get from
         the surface argument.
         """
-        if subsurface_rect:
+        if subsurface_rect is not None:
             self.surface = surface.subsurface(subsurface_rect)
             self.parent_rect = subsurface_rect
         else:
