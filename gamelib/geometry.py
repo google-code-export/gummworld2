@@ -209,7 +209,7 @@ def distance(a, b):
     x2,y2 = b
     diffx = x1 - x2
     diffy = y1 - y2
-    return (diffx*diffx) ** 0.5 + (diffy*diffy) ** 0.5
+    return (diffx*diffx + diffy*diffy) ** 0.5
 
 
 def point_on_circumference(center, radius, degrees_):
@@ -505,7 +505,7 @@ class CircleGeometry(object):
         return self.rect.width // 2
     @radius.setter
     def radius(self, val):
-        self.rect.size = Vec2d(val) * 2
+        self.rect.size = Vec2d(val,val) * 2
         self.position = self.position
     
     @property
