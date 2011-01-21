@@ -248,7 +248,7 @@ class App(Engine):
 
         def get_worst_case():
             count = len(State.world.entities)
-            if count == 30:
+            if count >= 15:
                 if count > self.worst_case_count or self.worst_case_cooldown == 0:
                     self.worst_case_cooldown = 30
                     return '!! %d in level 1' % count
