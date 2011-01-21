@@ -61,6 +61,20 @@ def ccw_corners(r):
     return r.topleft,r.bottomleft,r.bottomright,r.topright
 
 
+def distance(a, b):
+    """Calculate the distance between points a and b. Returns distance as a float.
+    
+    The a argument is a sequence representing one end point (x1,y1).
+    
+    The b argument is a sequence representing the other end point (x2,y2).
+    """
+    x1,y1 = a
+    x2,y2 = b
+    diffx = x1 - x2
+    diffy = y1 - y2
+    return (diffx*diffx + diffy*diffy) ** 0.5
+
+
 def fill_gradient(surface, color, gradient, rect=None, vertical=True, forward=True):
     """fill a surface with a gradient pattern
     Parameters:
