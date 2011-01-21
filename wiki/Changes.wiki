@@ -139,3 +139,6 @@ SVN rev 143:
 SVN rev 148:
   * Fixed: View.__init__ did not create subsurfaces when rect was passed.
   * Fixed: Camera.view=view did not set the _surface attribute.
+
+SVN rev 152:
+  * Fixed: bad expression grouping in distance() produced wrong answer.
