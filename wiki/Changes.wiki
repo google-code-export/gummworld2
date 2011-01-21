@@ -136,9 +136,14 @@ SVN rev 143:
 
 == Changes in 0.0.8 ==
 
+This release contains a small number of rather significant fixes.
+
 SVN rev 148:
   * Fixed: View.__init__ did not create subsurfaces when rect was passed.
   * Fixed: Camera.view=view did not set the _surface attribute.
 
 SVN rev 152:
   * Fixed: bad expression grouping in distance() produced wrong answer.
+
+SVN rev 154:
+  * Fixed: Er... I guess I broke the worst-case idiot light while playing around in 12_quad_tree_stress_test.py. It's working again.
