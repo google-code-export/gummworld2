@@ -147,3 +147,26 @@ SVN rev 152:
 
 SVN rev 154:
   * Fixed: Er... I guess I broke the worst-case idiot light while playing around in 12_quad_tree_stress_test.py. It's working again.
+
+== Changes in 0.0.9 ==
+
+This release contains a sneak peek at the world editor.
+
+SVN rev 156:
+  * Fixed: clash in PolyGeometry.__init__ between list comprehension and outer variables x and y, resulting in errors.
+
+SVN rev 157:
+  * Fixed: PolyGeometry.__init__ calculated a containing rect where width and height were one pixel smaller than they should have been.
+  * New: map_editor.py renamed to world_editor.py.
+  * New: gamelib/pgu/gui added to SVN repo.
+  * Changed: paths.py includes gamelib/pgu/gui.
+  * New: world_editor.py features:
+    * PGU menus; the easy stuff works, grid, labels, hud, quit; the rest are stubs for now
+    * Scroll bars for map
+    * Buttons for selecting shape to create
+    * Right-click places a shape
+    * Left-click selects a shape and activates control points
+    * Left-click on control points move and reshape
+    * Left-click on stacked shapes selects next shape
+  * New: docs/ added to SVN.
+  * New: third-party licenses added to distro.
