@@ -525,9 +525,9 @@ class PolyGeometry(object):
         self._points = points
         
         minx = reduce(min, [x for x,y in points])
-        width = minx + reduce(max, [x for x,y in points])
+        width = minx + reduce(max, [x for x,y in points]) + 1
         miny = reduce(min, [y for x,y in points])
-        height = miny + reduce(max, [y for x,y in points])
+        height = miny + reduce(max, [y for x,y in points]) + 1
         self.rect = pygame.Rect(minx, miny, width, height)
         
         self._position = Vec2d(0.0,0.0)
