@@ -174,3 +174,6 @@ SVN rev 157:
 SVN rev 159:
   * Changed: rearranged documentation directories.
   * Deleted: Ontario.jpg, Ontario.png.
+
+SVN rev 162:
+  * Fixed: Some shape classes' draw() method in world_editor.py did not convert their coordinates to screen space, which caused them to not scroll properly.
