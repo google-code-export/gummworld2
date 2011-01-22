@@ -21,6 +21,44 @@ __author__ = 'Gummbum, (c) 2011'
 
 
 """world_editor.py - A world editor for Gummworld2.
+
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+NOTE: There is no saving, loading, or other editor features yet. These will be
+added over time. Please *DO NOT* do a lot of work and expect to save it. I hope
+you have read this. :)
+
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+Controls:
+    * Menus do what you'd expect.
+    * Scrollbars do what you'd expect.
+    * Toolbar selects a shape to insert into the map.
+    * Right-click: inserts a shape into the map.
+    * Left-click:
+        * Clicking inside a shape selects that shape for further manipulation.
+        * Clicking outside a shape deselects the selected shape.
+        * Clicking inside stacked shapes selects the next shape.
+        * Clicking and dragging the center control point moves the shape.
+        * Clicking and dragging a corner control point reshapes a shape.
+
+Design:
+    There will likely be a form in the space on the right. Selecting a shape
+    will allow some data to be attached to it. The world file loader can then
+    use that data for any robust purpose.
+    
+    Below the form in the space on the right will be a tile palette. This is
+    for decorating the map so that one can see the graphics for spawned and/or
+    collidable objects while sizing their shapes in the world.
+    
+    It is undecided at this time if the shape-graphics association will be
+    saved with the world map format. On the one hand it can ease map creation.
+    On the other hand it may greatly complicate parsing world maps. Maybe an
+    editor extension in secondary files is the answer: then game map loaders can
+    choose to use or ignore the association data in secondary files.
+    
+    Beyond the essentials, there is also an unwritten wish list of features
+    which may get added as demand dictates and time permits.
 """
 
 
@@ -257,7 +295,9 @@ class PolyGeom(geometry.PolyGeometry):
             color = Color('white')
         else:
             color = Color('grey')
-        self.draw_rect(surface, Color('grey'), self.rect, 1)
+        r = self.rect.copy()
+        r.center = world_to_screen(self.rect.center)
+        self.draw_rect(surface, Color('grey'), r, 1)
         pos = world_to_screen(self.rect.topleft)
         points = [p+pos for p in self._points]
         self.draw_poly(surface, color, points, 1)
@@ -323,8 +363,11 @@ class CircleGeom(geometry.CircleGeometry):
             color = Color('white')
         else:
             color = Color('grey')
-        self.draw_rect(surface, Color('grey'), self.rect, 1)
-        self.draw_circle(surface, color, self.origin, self.radius, 1)
+        r = self.rect.copy()
+        r.center = world_to_screen(self.rect.center)
+        self.draw_rect(surface, Color('grey'), r, 1)
+        self.draw_circle(surface, color,
+            world_to_screen(self.origin), self.radius, 1)
         if self is app.selected:
             for cp in self.control_points:
                 surface.blit(cp.image, world_to_screen(cp.topleft))
