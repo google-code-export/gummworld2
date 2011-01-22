@@ -21,7 +21,7 @@ License along with Gummworld2.  If not, see <http://www.gnu.org/licenses/>.
 Gummworld2 may contain content copyrighted and licensed by third parties.
 The authors of Gummworld2 do not assume ownership or responsibility for
 such content. The original licenses and other helpful documents that came
-with such content can be found in the data/third_party sub-directories of
+with such content can be found in the docs/third_party sub-directories of
 the Gummworld2 distribution, where ZZ would be the name of the product and
 hopefully should be recognizable.
 
