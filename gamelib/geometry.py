@@ -524,11 +524,11 @@ class PolyGeometry(object):
         super(PolyGeometry, self).__init__()
         self._points = points
         
-        x = reduce(min, [x for x,y in points])
-        width = x + reduce(max, [x for x,y in points])
-        y = reduce(min, [y for x,y in points])
-        height = y + reduce(max, [y for x,y in points])
-        self.rect = pygame.Rect(x, y, width, height)
+        minx = reduce(min, [x for x,y in points])
+        width = minx + reduce(max, [x for x,y in points])
+        miny = reduce(min, [y for x,y in points])
+        height = miny + reduce(max, [y for x,y in points])
+        self.rect = pygame.Rect(minx, miny, width, height)
         
         self._position = Vec2d(0.0,0.0)
         if position is None:
