@@ -1,6 +1,10 @@
 #summary Design and implementation overview.
 #labels Featured
 
+Starting with Gummworld2 version 0.0.9 the editor is advancing, thanks in large part to PGU's GUI package. The concept has changed from "map editor" to "world editor". There have been numerous changes to the library to support development of the world editor and fix some issues, but no API changes since version 0.0.7. Some of the world editor basic design is implemented, just enough for a sneak peek.
+
+_IMPORTANT: Please read the comments in world_editor.py. Specifically, the editor cannot yet save any work._
+
 = Introduction =
 
 This is Gummworld2. It's designed as a light [http://www.pygame.org pygame] framework for a scrolling game, where the map is larger than the display. It emphasizes simplicity, freedom, and performance.
@@ -114,21 +118,19 @@ Editor:
 
 pymunk is barely more than a concept thus far. It is fundamentally proven in examples/08_pymunk_motion.py. The pygame portion of the library is about ready for use in map_editor.py.
 
-===Map Editor===
+===World Editor===
 
-(Temporarily on hold as the proof-of-concept bunny game is driving redefinition of the pygame library.)
+The plan is for game makers to be able to load a map in the editor, draw shapes on it to define obstacles, then save a "physics map". Games will then be able to load the graphics map and physics map, and rely on pymunk or other implementations for run-time physics.
 
-The plan is for game makers to be able to load a map in the editor, draw pymunk shapes on it to define obstacles, then save a "physics map". Games will then be able to load the graphics map and physics map, and rely on pymunk or other implementations for run-time physics.
+I am liking the combination of [http://www.mapeditor.org/ Tiled Map Editor] and [http://www.pygame.org/project-map+loader+for+%27tiled%27-1158-2951.html pytmxloader]. Initially the world editor will simply load the tile map, and let one add pygame or pymunk geometry.
 
-I am liking the combination of [http://www.mapeditor.org/ Tiled Map Editor] and [http://www.pygame.org/project-map+loader+for+%27tiled%27-1158-2951.html pytmxloader]. Initially the map editor will simply load the tile map, and let one add pygame or pymunk geometry.
+Since the Map class is already source agnostic, it may be easy enough to support multiple map editor formats just by adding a `toolkit.load_*` function or perhaps extension scripts.
 
-Since the Map class is already source agnostic, it may be easy enough to support multiple map editor formats just by adding a `toolkit.load_*` function.
+Thought... Map layers--Tiled or other--can be used to classify terrain objects, for example "trees go on layer 5". Game makers (i.e., me) may want to do special things with these, like let mobile objects pass under or behind them and temporarily lower the image alpha so the mobile object is not entirely obscured. (This aspect weakens the case for map decorating and tiling in map_editor.py.)
 
-Map layers--Tiled or other--can be used to classify terrain objects, for example "trees go on layer 5". Game makers (i.e., me) may want to do special things with these, like let mobile objects pass under or behind them and temporarily lower the image alpha so the mobile object is not entirely obscured. (This aspect weakens the case for map decorating and tiling in map_editor.py.)
+Defining cordons on a static map is admittedly nice. However, the world editor must also handle placement of "spawned" game objects, i.e. objects that are not in static map layers. For example, groups of orcs, gates, siege weapons, random rubble. The world editor will likely have to load tilesets to aid visualizing world content design. It's essential to at least be able to insert a physical "device" into the world map, size its geometry accurately, and provide a handle and some descriptive data for a few reasons:
 
-The map editor must also handle placement of dynamic game objects, for example, groups of orcs, gates, siege weapons. It is undecided yet if this will include loading tilesets for visual cues or content design; but it's essential to at least be able to insert a physical "device" into the map, and provide a handle and some data for a few reasons:
-
-  # Shapes are needed for dimensions; and potentially more, in the case of pymunk.
-  # Obviously, if objects in the physics dimension are interacting those interactions need to correlate with the display, or whatever is representing the colliding objects to the player.
-  # Map loaders can detect "Ah, here is a Mark IV Gizmo. I'll load the graphics and game intelligence for it". Or the related non-physics game elements can spring into life as their physics are activated by game progression.
-  # Using a map editor for placement would be highly preferable to eyeballing map coordinates in the map editor and hand entering code or data sets to place many gizmos on a map.
+  # Shapes are needed for dimensions; and potentially other physics-related purposes in the case of pymunk.
+  # Obviously, if objects in the physics dimension are interacting those interactions need to correlate with the presentation layer.
+  # Map loaders could detect "Ah, here is a Mark IV Gizmo. I'll load the graphics and game intelligence for it". Or run-time game logic can load presentation content on the fly when the physics are activated by game progression.
+  # Using a world editor for placement would be highly preferable to eyeballing map coordinates in the world editor and hand entering code or data sets to place many gizmos on a map.
