@@ -1,4 +1,4 @@
-#summary Design and implementation progress.
+#summary Design and implementation overview.
 #labels Featured
 
 = Introduction =
