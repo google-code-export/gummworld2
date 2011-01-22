@@ -170,3 +170,7 @@ SVN rev 157:
     * Left-click on stacked shapes selects next shape
   * New: docs/ added to SVN.
   * New: third-party licenses added to distro.
+
+SVN rev 159:
+  * Changed: rearranged documentation directories.
+  * Deleted: Ontario.jpg, Ontario.png.
