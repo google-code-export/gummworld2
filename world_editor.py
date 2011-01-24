@@ -659,22 +659,26 @@ class MapEditor(object):
     
     def action_map_open(self, *args):
         if len(args) == 0:
-            return
-        if args[0] == None:
+            pass
+        elif args[0] is None:
             ######################################
             ## To do: If changed, confirm discard.
             ######################################
             # Get input file name.
             d = gui.FileDialog(title_txt="Open Map", path=data.path['map'])
-            d.connect(gui.CHANGE, self.action_map_open, d)
+#            d.connect(gui.CHANGE, self.action_map_open, d)
+            d.connect(gui.CLOSE, self.action_map_open, d)
             d.open()
         elif isinstance(args[0], gui.FileDialog):
-            State.file_map = args[0].value
-            # Import map.
-            if State.file_map.endswith('.tmx'):
-                State.map = toolkit.load_tiled_tmx_map(State.file_map)
-            self.remake_scrollbars()
-            State.screen.clear()
+            d = args[0]
+            if d.value is not None:
+                print 'change value',d.value
+                State.file_map = d.value
+                # Import map.
+                if State.file_map.endswith('.tmx'):
+                    State.map = toolkit.load_tiled_tmx_map(State.file_map)
+                self.remake_scrollbars()
+        State.screen.clear()
         
     # MapEditor.action_map_open
     
@@ -786,6 +790,9 @@ class MapEditor(object):
     def action_view_hud(self, *args):
         State.show_hud = not State.show_hud
     
+    def warning_save_world(self):
+        d = gui.Dialog()
+    
     def get_events(self):
         # This event check is a little more work per game loop, but much nicer
         # when idling.
@@ -818,6 +825,8 @@ class MapEditor(object):
                 self.on_mouse_button_down(e, e.pos, e.button)
             elif typ == VIDEORESIZE:
                 self.on_resize(e, e.size, e.w, e.h)
+            elif typ == USEREVENT:
+                self.on_user_event(e)
             elif typ == QUIT:
                     self.on_quit()
         
@@ -877,20 +886,21 @@ class MapEditor(object):
         self.gui.widget.resize(width=w, height=h)
         self.remake_scrollbars(reset=False)
     
+    def on_user_event(self, e):
+#        print 'USEREVENT',e.dict()
+        pass
+    
     def on_quit(self):
         quit()
 
 
-def make_hud(caption=None):
+def make_hud():
     """Create a HUD with dynamic items.
     """
     State.hud = HUD()
     State.hud.x += 20
     State.hud.i += 3
     next_pos = State.hud.next_pos
-    
-    if caption:
-        State.hud.add('Caption', Stat(next_pos(), caption))
     
     rect = State.world.rect
     l,t,r,b = rect.left,rect.top,rect.right,rect.bottom

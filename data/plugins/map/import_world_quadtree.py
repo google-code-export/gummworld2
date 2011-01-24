@@ -20,7 +20,7 @@ __version__ = '$Id$'
 __author__ = 'Gummbum, (c) 2011'
 
 
-__doc__ = """export_world_quadtree.py - A world entity importer.
+__doc__ = """import_world_quadtree.py - A world entity importer.
 
 This plugin is required by world_editor.py, and possibly other scripts, to
 import world entities from a text file.
