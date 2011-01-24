@@ -177,3 +177,11 @@ SVN rev 159:
 
 SVN rev 162:
   * Fixed: Some shape classes' draw() method in world_editor.py did not convert their coordinates to screen space, which caused them to not scroll properly.
+
+=== Changes in 0.0.10 ===
+
+SVN rev 165:
+  * New: Plugins in data/plugins, starting with quadtree exporter and importer.
+  * New: Warning-danger files in plugins directories.
+  * Changed: Added 'plugins' data lookup in gamelib/data.py.
+  * Changes: Many in world_editor.py: menu reorg; new and open map; new, open, and save world entities; "nicer" event loop; fixed scrollbar problem.
