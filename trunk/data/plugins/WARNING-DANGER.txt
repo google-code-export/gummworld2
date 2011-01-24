@@ -1,0 +1,13 @@
+"""
+========================[  WARNING  ]========================
+
+Files in the plugins directory are intended to be run as Python scripts.
+
+world_editor.py does this for its importers and exporters. Games and
+various toolkits may also do this.
+
+DO NOT place any files in here that you have not vetted for safety. At
+the very least, do not place files in here from untrusted sources.
+
+========================[  WARNING  ]========================
+"""

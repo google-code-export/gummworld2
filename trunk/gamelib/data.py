@@ -37,11 +37,12 @@ from os.path import join as join_path
 data_py = os.path.abspath(os.path.dirname(__file__))
 data_dir = os.path.normpath(join_path(data_py, '..', 'data'))
 path = dict(
-    font  = join_path(data_dir, 'font'),
-    image = join_path(data_dir, 'image'),
-    map   = join_path(data_dir, 'map'),
-    sound = join_path(data_dir, 'sound'),
-    text  = join_path(data_dir, 'text'),
+    font    = join_path(data_dir, 'font'),
+    image   = join_path(data_dir, 'image'),
+    map     = join_path(data_dir, 'map'),
+    plugins = join_path(data_dir, 'plugins'),
+    sound   = join_path(data_dir, 'sound'),
+    text    = join_path(data_dir, 'text'),
 )
 
 
