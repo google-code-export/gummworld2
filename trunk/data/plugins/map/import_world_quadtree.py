@@ -20,13 +20,15 @@ __version__ = '$Id$'
 __author__ = 'Gummbum, (c) 2011'
 
 
-__doc__ = """export_world_quadtree.py - A quadtree-to-text exporter.
+__doc__ = """export_world_quadtree.py - A world entity importer.
 
 This plugin is required by world_editor.py, and possibly other scripts, to
-import quadtree entities from a text file.
+import world entities from a text file.
 
-Shapes supported by this plugin are: RectGeometry, CircleGeometry, and
-PolyGeometry.
+Shapes supported by this plugin are specified by passing in dict entries in the
+locals() argument to execfile. The keys are 'rect_cls', 'poly_cls', and
+'circle_cls' with corresponding class values. The constructor parameters must
+have the same form as geometry.RectGeometry, et al.
 
 The values imported are those needed for each shape-class's constructor, plus a
 block of arbitrary user data which will be placed in the shape instance's
