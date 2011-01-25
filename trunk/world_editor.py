@@ -24,9 +24,9 @@ __author__ = 'Gummbum, (c) 2011'
 
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-NOTE: There is no saving, loading, or other editor features yet. These will be
-added over time. Please *DO NOT* do a lot of work and expect to save it. I hope
-you have read this. :)
+NOTE: Limited saving and loading now exist. This is very basic and *will* change
+over time as features are added to the world file format. However, it is all
+ASCII so it should be pretty easy to script a quick-n-dirty converter.
 
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -44,8 +44,9 @@ Controls:
 
 Design:
     There will likely be a form in the space on the right. Selecting a shape
-    will allow some data to be attached to it. The world file loader can then
-    use that data for any robust purpose.
+    will allow data from the form to be attached to it, and data already
+    attached will be displayed in the form. The world file loader can then use
+    that data for any robust purpose.
     
     Below the form in the space on the right will be a tile palette. This is
     for decorating the map so that one can see the graphics for spawned and/or
@@ -418,7 +419,7 @@ class MapEditor(object):
         )
         State.world = model.WorldQuadTree(
             State.map.rect, worst_case=99, collide_entities=True)
-        State.clock = GameClock(30, 0)
+        State.clock = GameClock(30, 30)
         State.camera.position = State.camera.view.center
         pygame.display.set_caption('Gummworld2 World Editor')
         
@@ -436,8 +437,9 @@ class MapEditor(object):
         # responsive when in use.
         self.idle = 0
         
-        # Make a gooey.
+        # Gooey stuff.
         self.make_gui()
+        self.modal = None
         
         # Make some default content and HUD.
         toolkit.make_tiles2()
@@ -445,7 +447,7 @@ class MapEditor(object):
         State.show_hud = True
         State.show_grid = True
         State.show_labels = True
-        State.show_rects = True
+        State.show_rects = False
         
         # Files.
         State.file_entities = None
@@ -538,12 +540,13 @@ class MapEditor(object):
         State.running = True
         while State.running:
             State.clock.tick()
-            self.get_events()
-            self.update()
-            self.draw()
+            if State.clock.update_ready():
+                self.get_events()
+                self.update()
+                self.draw()
     
     def update(self):
-        """Overrides Engine.update."""
+        # Update stuff.
         self.update_gui()
         State.camera.update()
         self.update_shapes()
@@ -564,7 +567,6 @@ class MapEditor(object):
         ]
     
     def draw(self):
-        """Overrides Engine.draw."""
         # Draw stuff.
         State.camera.interpolate()
         State.camera.view.clear()
@@ -590,7 +592,9 @@ class MapEditor(object):
             self.selected = None
     
     def action_mouse_click(self, e):
-        if self.mouse_down == 3:
+        if self.modal is not None:
+            return
+        elif self.mouse_down == 3:
             # Put a shape.
             pos = State.camera.screen_to_world(e.pos)
             shape = self.toolbar.value
@@ -646,6 +650,7 @@ class MapEditor(object):
             self.selected.release()
     
     def action_map_new(self, *args):
+        print 'action_map_new'
         ######################################
         ## To do: If changed, confirm discard.
         ######################################
@@ -658,31 +663,31 @@ class MapEditor(object):
     # MapEditor.action_map_new
     
     def action_map_open(self, *args):
-        if len(args) == 0:
-            pass
-        elif args[0] is None:
+        print 'action_map_open'
+        if self.modal is None:
             ######################################
             ## To do: If changed, confirm discard.
             ######################################
             # Get input file name.
             d = gui.FileDialog(title_txt="Open Map", path=data.path['map'])
-#            d.connect(gui.CHANGE, self.action_map_open, d)
             d.connect(gui.CLOSE, self.action_map_open, d)
             d.open()
-        elif isinstance(args[0], gui.FileDialog):
-            d = args[0]
+            self.modal = d
+        else:
+            d = self.modal
+            self.modal = None
             if d.value is not None:
-                print 'change value',d.value
                 State.file_map = d.value
                 # Import map.
                 if State.file_map.endswith('.tmx'):
                     State.map = toolkit.load_tiled_tmx_map(State.file_map)
                 self.remake_scrollbars()
-        State.screen.clear()
+            State.screen.clear()
         
     # MapEditor.action_map_open
     
     def action_entities_new(self, *args):
+        print 'action_entities_new'
         ######################################
         ## To do: If changed, confirm discard.
         ######################################
@@ -693,43 +698,51 @@ class MapEditor(object):
     # MapEditor.action_entities_new
     
     def action_entities_open(self, *args):
-        ######################################
-        ## To do: If changed, confirm discard.
-        ######################################
-        # Get input file name.
-        if State.file_entities is None:
-            State.file_entities = 'entities.txt'
-        ####################################
-        ## To do: choose exporter somewhere.
-        ####################################
-        # Specify the importer plugin to use.
-        import_script = data.filepath(
-            'plugins', joinpath('map','import_world_quadtree.py'))
-        # Clear out the world.
-        State.world.remove(*State.world.entity_branch.keys())
-        # Run the importer plugin.
-        try:
-            file_handle = open(State.file_entities, 'rb')
-            locals_dict = {
-                'fh'         : file_handle,
-                'rect_cls'   : RectGeom,
-                'poly_cls'   : PolyGeom,
-                'circle_cls' : CircleGeom,
-            }
-            execfile(import_script, {}, locals_dict)
-        except:
-            traceback.print_exc()
+        print 'action_entities_open'
+        if self.modal is None:
+            ######################################
+            ## To do: If changed, confirm discard.
+            ######################################
+            # Get input file name.
+            d = gui.FileDialog(title_txt="Import Entities", path=data.path['map'])
+            d.connect(gui.CLOSE, self.action_entities_open, d)
+            d.open()
+            self.modal = d
         else:
-            file_handle.close()
-            # Add the entities to the world.
-            entities = locals_dict['entities']
-            State.world.add(*entities)
-        # Put the mouse shape back.
-        State.world.add(self.mouse_shape)
+            d = self.modal
+            self.modal = None
+            if d.value is not None:
+                State.file_entities = d.value
+                # Specify the importer plugin to use.
+                import_script = data.filepath(
+                    'plugins', joinpath('map','import_world_quadtree.py'))
+                # Clear out the world.
+                State.world.remove(*State.world.entity_branch.keys())
+                # Run the importer plugin.
+                try:
+                    file_handle = open(State.file_entities, 'rb')
+                    locals_dict = {
+                        'fh'         : file_handle,
+                        'rect_cls'   : RectGeom,
+                        'poly_cls'   : PolyGeom,
+                        'circle_cls' : CircleGeom,
+                    }
+                    execfile(import_script, {}, locals_dict)
+                except:
+                    traceback.print_exc()
+                else:
+                    file_handle.close()
+                    # Add the entities to the world.
+                    entities = locals_dict['entities']
+                    State.world.add(*entities)
+                # Put the mouse shape back.
+                State.world.add(self.mouse_shape)
+            State.screen.clear()
         
     # MapEditor.action_entities_open
     
     def action_entities_save(self, *args):
+        print 'action_entities_save'
         # Make sure a save file has been named.
         if State.file_entities is None:
             self.action_entities_save_as()
@@ -766,6 +779,7 @@ class MapEditor(object):
     # MapEditor.action_entities_save
     
     def action_entities_save_as(self, *args):
+        print 'action_entities_save_as'
         ######################################
         ## To do: If changed, confirm discard.
         ######################################
@@ -796,21 +810,8 @@ class MapEditor(object):
     def get_events(self):
         # This event check is a little more work per game loop, but much nicer
         # when idling.
-        mm = None
-        events = []
-        if self.idle >= 100:
-            # Nothing to do for 100 ticks. Go to sleep until an event arrives.
-            events.append(pygame.event.wait())
-            events.extend(pygame.event.get())
-            self.idle = 0
-        else:
-            # Increasing idle if no recent events.
-            pygame.time.wait(int(round(self.idle)))
-            if self.idle < 100:
-                self.idle += 1
+        events = [pygame.event.wait()]
         events.extend(pygame.event.get())
-        if len(events):
-            self.idle = 0
         for e in events:
             typ = e.type
             if typ == KEYDOWN:
@@ -853,18 +854,11 @@ class MapEditor(object):
             self.action_mouse_click(e)
     
     def on_mouse_motion(self, e, pos, rel, buttons):
-#        if not self.mouse_down:
-#            self.gui.event(e)
-#        self.mouse_shape.position = State.camera.screen_to_world(pos)
-#        State.world.add(self.mouse_shape)
-#        if self.mouse_down:
-#            # Crossing GUI widgets does not interfere with dragging.
-#            self.action_mouse_drag(e)
+        self.mouse_shape.position = State.camera.screen_to_world(pos)
+        State.world.add(self.mouse_shape)
         if not self.mouse_down:
             self.gui.event(e)
         else:
-            self.mouse_shape.position = State.camera.screen_to_world(pos)
-            State.world.add(self.mouse_shape)
             # Crossing GUI widgets does not interfere with dragging.
             self.action_mouse_drag(e)
     
