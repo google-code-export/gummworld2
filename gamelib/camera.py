@@ -156,9 +156,13 @@ class Camera(object):
         speed.
         """
         target_moved = self.target_moved
-        interp = State.clock.interpolate()
-        interpolated_step = target_moved - target_moved * interp
-        x,y = self.target.position - interpolated_step
+        if State.clock.ticks_per_second == State.clock.max_fps:
+            interp = 1.0
+            x,y = self.target.position
+        else:
+            interp = State.clock.interpolate()
+            interpolated_step = target_moved - target_moved * interp
+            x,y = self.target.position - interpolated_step
         self.rect.center = round(x), round(y)
         self._interp = interp
         
