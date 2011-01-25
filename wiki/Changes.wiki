@@ -185,3 +185,7 @@ SVN rev 165:
   * New: Warning-danger files in plugins directories.
   * Changed: Added 'plugins' data lookup in gamelib/data.py.
   * Changes: Many in world_editor.py: menu reorg; new and open map; new, open, and save world entities; "nicer" event loop; fixed scrollbar problem.
+
+SVN rev 170:
+  * New: Special case added to Camera.interpolate. When State.clock.ticks_per_second == State.clock.max_fps interpolation is disabled. Effectively, interpolate() returns 1.0 and there are no interpolated frames. This condition was causing video frames to be misplaced when frame rate gets too low and a scroll step is significantly large. (This probably should be worked into GameClock as a self-tuning behavior.)
+  * Changes: Numerous in world_editor.py. A less busy run loop; some tweaks to solve scrolling video glitches; tweaks to opening maps and entities.
