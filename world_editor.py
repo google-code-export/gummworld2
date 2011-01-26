@@ -125,6 +125,18 @@ menu_data = (
 )
 
 
+class TimeThing(object):
+    
+    strftime = time.strftime
+    
+    def __init__(self, fmt):
+        self.fmt = fmt
+    
+    def __str__(self):
+        ms = time.time() % 1
+        return self.strftime(self.fmt) + ('%.3f' % ms).lstrip('0')
+
+
 class ControlPoint(Rect):
     """Control point that can be used to manipulate a geometric object.
     """
@@ -408,6 +420,7 @@ class MapEditor(object):
         ## I hate this kludge...
 #        screen_size = Vec2d(pygame.display.list_modes()[0]) - (20,70)
         screen_size = Vec2d(1024,768)
+        screen_size = Vec2d(800,600)
         os.environ['SDL_VIDEO_WINDOW_POS'] = '7,30'
         
         # Set up the Gummworld2 state.
@@ -436,10 +449,12 @@ class MapEditor(object):
         # Event loop idle control. Makes app play nicer when not in use, more
         # responsive when in use.
         self.idle = 0
+        self.time = TimeThing('%M%S')
         
         # Gooey stuff.
         self.make_gui()
         self.modal = None
+        self.changes_unsaved = False
         
         # Make some default content and HUD.
         toolkit.make_tiles2()
@@ -455,21 +470,78 @@ class MapEditor(object):
         
     # MapEditor.__init__
     
-    def gui_hover(self):
-        if self.menus.is_hovering():          return self.menus
-        elif self.tool_table.is_hovering():   return self.toolbar
-        elif self.h_map_slider.is_hovering(): return self.h_map_slider
-        elif self.v_map_slider.is_hovering(): return self.v_map_slider
-        else:
-            for m in self.menus.widgets:
-                if m.options.is_open():
-                    return m.options
-                    break
-        return None
-        
-    # MapEditor.gui_hover
+    def run(self):
+        """The run loop.
+        """
+        State.running = True
+        while State.running:
+            # Ticks and frame rate are not independent here.
+            State.clock.tick()
+            self.get_events()
+            self.update()
+            self.draw()
+    
+    def update(self):
+        """Update all.
+        """
+        # Update stuff.
+        self.update_gui()
+        State.camera.update()
+        self.update_shapes()
+        if State.show_hud:
+            State.hud.update()
+    
+    def update_gui(self):
+        """Update the GUI, then update the app from the GUI.
+        """
+        # Plucked from gui.App.loop().
+        gui = self.gui
+        gui.set_global_app()
+        gui.update()
+        State.camera.position = self.h_map_slider.value,self.v_map_slider.value
+    
+    def update_shapes(self):
+        """Update the mouseover_shapes list.
+        """
+        mouse_shape = self.mouse_shape
+        self.mouseover_shapes = [shape for ent,shape in State.world.collisions
+            if ent is mouse_shape
+        ]
+    
+    def draw(self):
+        """Draw all.
+        """
+        # Draw stuff.
+        State.camera.interpolate()
+        State.camera.view.clear()
+        toolkit.draw_tiles()
+        toolkit.draw_labels()
+        toolkit.draw_grid()
+        self.draw_world()
+        if State.show_hud:
+            State.hud.draw()
+        self.gui.paint()
+        State.screen.flip()
+    
+    def draw_world(self):
+        """Draw the on-screen shapes in the world.
+        """
+        mouse_shape = self.mouse_shape
+        things = State.world.entities_in(State.camera.rect)
+        for thing in things:
+            if thing is not mouse_shape:
+                thing.draw()
+    
+    def deselect(self):
+        """Deselect a shape and release its "grabbed" control point.
+        """
+        if self.selected:
+            self.selected.release()
+            self.selected = None
     
     def make_gui(self):
+        """Make the entire GUI.
+        """
         # Make the GUI.
         self.gui = gui.App(theme=gui.Theme(dirs=['data/themes/default']))
         width,height = State.screen.size
@@ -494,7 +566,7 @@ class MapEditor(object):
     # MapEditor.make_gui
     
     def make_scrollbars(self, c, reset=True):
-        """Make (or remake after resize event) map scrollbars to fit the window.
+        """Make map scrollbars to fit the window.
         """
         view_rect = State.camera.view.parent_rect
         w,h = view_rect.size
@@ -531,67 +603,87 @@ class MapEditor(object):
     # MapEditor.make_sliders
     
     def remake_scrollbars(self, reset=True):
+        """Remake the map scrollbars after video-resize event or a map load.
+        """
         c = self.gui.widget
         c.remove(self.h_map_slider)
         c.remove(self.v_map_slider)
         self.make_scrollbars(c, reset)
     
-    def run(self):
-        State.running = True
-        while State.running:
-            State.clock.tick()
-            if State.clock.update_ready():
-                self.get_events()
-                self.update()
-                self.draw()
+    def gui_hover(self):
+        """Return True if the mouse is hovering over a GUI widget.
+        """
+        if self.menus.is_hovering():          return self.menus
+        elif self.tool_table.is_hovering():   return self.toolbar
+        elif self.h_map_slider.is_hovering(): return self.h_map_slider
+        elif self.v_map_slider.is_hovering(): return self.v_map_slider
+        else:
+            for m in self.menus.widgets:
+                if m.options.is_open():
+                    return m.options
+                    break
+        return None
+        
+    # MapEditor.gui_hover
     
-    def update(self):
-        # Update stuff.
-        self.update_gui()
-        State.camera.update()
-        self.update_shapes()
-        if State.show_hud:
-            State.hud.update()
+    def gui_confirm_discard(self, callback, ok=True, cancel=False):
+        """Confirm discard dialog: Ok or Cancel.
+        """
+        def set_value(dialog, value):
+            dialog.value = value
+            dialog.close()
+        def modal_off(*args):
+            State.app.modal = None
+        
+        content = gui.Table()
+        d = gui.Dialog(gui.Label('Gummworld2 World Editor'), content)
+        d.value = cancel
+        
+        button_ok = gui.Button('Ok')
+        button_ok.connect(gui.CLICK, set_value, d, ok)
+        button_cancel = gui.Button('Cancel')
+        button_cancel.connect(gui.CLICK, set_value, d, cancel)
+        
+        content.tr()
+        content.td(gui.Label('Changes will be lost.'), colspan=2)
+        content.tr()
+        content.td(button_ok, align=0)
+        content.td(button_cancel, align=0)
+        
+        d.connect(gui.CLOSE, modal_off, None)
+        d.connect(gui.CLOSE, callback, 'check_discard', d)
+        d.open()
+        self.modal = d
+        
+    # MapEditor.gui_confirm_discard
     
-    def update_gui(self):
-        # Plucked from gui.App.loop().
-        gui = self.gui
-        gui.set_global_app()
-        gui.update()
-        State.camera.position = self.h_map_slider.value,self.v_map_slider.value
+    def gui_alert(self, message):
+        """Simple popup message dialog.
+        """
+        def modal_off(*args):
+            State.app.modal = None
+        button = gui.Button('Ok')
+        d = gui.Dialog(gui.Label(message), button)
+        button.connect(gui.CLICK, d.close, None)
+        d.connect(gui.CLOSE, modal_off, None)
+        d.open()
+        self.modal = d
     
-    def update_shapes(self):
-        mouse_shape = self.mouse_shape
-        self.mouseover_shapes = [shape for ent,shape in State.world.collisions
-            if ent is mouse_shape
-        ]
-    
-    def draw(self):
-        # Draw stuff.
-        State.camera.interpolate()
-        State.camera.view.clear()
-        toolkit.draw_tiles()
-        toolkit.draw_labels()
-        toolkit.draw_grid()
-        self.draw_world()
-        if State.show_hud:
-            State.hud.draw()
-        self.gui.paint()
-        State.screen.flip()
-    
-    def draw_world(self):
-        mouse_shape = self.mouse_shape
-        things = State.world.entities_in(State.camera.rect)
-        for thing in things:
-            if thing is not mouse_shape:
-                thing.draw()
-    
-    def deselect(self):
-        if self.selected:
-            self.selected.release()
-            self.selected = None
+    def gui_browse_file(self, title, path, callback):
+        """Dialog to browse for a file.
+        """
+        def modal_off(*args):
+            State.app.modal = None
+        d = gui.FileDialog(title_txt="Import Entities", path=data.path['map'])
+        d.connect(gui.CLOSE, modal_off, None)
+        d.connect(gui.CLOSE, callback, 'file_picked', d)
+        d.open()
+        self.modal = d
     
     def action_mouse_click(self, e):
+        """Mouse click action: button 3 inserts a shape; button 1 selects,
+        deselects or sizes a shape.
+        """
         if self.modal is not None:
             return
         elif self.mouse_down == 3:
@@ -610,6 +702,7 @@ class MapEditor(object):
                 geom = CircleGeom(pos, 20)
             self.selected = geom
             State.world.add(geom)
+            self.changes_unsaved = True
         elif self.mouse_down == 1:
             mouseover_shapes = self.mouseover_shapes
             if self.selected not in mouseover_shapes:
@@ -631,30 +724,38 @@ class MapEditor(object):
     # MapEditor.action_mouse_click
 
     def action_mouse_drag(self, e):
+        """Mouse drag event (mouse is held down): button 3 moves a shape if the
+        button is still held down after insert; button 1 moves or sizes a shape.
+        """
         if self.selected:
             if self.mouse_down == 3:
                 # Move the selected shape.
                 self.selected.position = State.camera.screen_to_world(e.pos)
                 State.world.add(self.selected)
+                self.changes_unsaved = True
             elif self.mouse_down == 1:
                 # Resize the selected shape.
                 grabbed = self.selected.grabbed
                 if grabbed is not None:
                     grabbed.position = State.camera.screen_to_world(e.pos)
                     State.world.add(grabbed.parent)
+                    self.changes_unsaved = True
         
     # MapEditor.action_mouse_drag
 
     def action_mouse_release(self, e):
+        """Mouse release action: release the selected shape's control point.
+        """
         if self.selected:
             self.selected.release()
     
     def action_map_new(self, *args):
-        print 'action_map_new'
-        ######################################
-        ## To do: If changed, confirm discard.
-        ######################################
+        """New map action: create a new map with default content.
+        """
         # Get map dimensions.
+        ######################################
+        ## Needs a form to get map dimensions.
+        ######################################
         State.map.clear()
         toolkit.make_tiles2()
         self.remake_scrollbars()
@@ -662,55 +763,62 @@ class MapEditor(object):
         
     # MapEditor.action_map_new
     
-    def action_map_open(self, *args):
-        print 'action_map_open'
-        if self.modal is None:
-            ######################################
-            ## To do: If changed, confirm discard.
-            ######################################
+    def action_map_open(self, sub_action=None, widget=None):
+        """Import map action: loads a map from file (currently Tiled TMX only).
+        """
+        if sub_action is None:
             # Get input file name.
-            d = gui.FileDialog(title_txt="Open Map", path=data.path['map'])
-            d.connect(gui.CLOSE, self.action_map_open, d)
-            d.open()
-            self.modal = d
-        else:
-            d = self.modal
-            self.modal = None
+            self.gui_browse_file("Import Map",
+                data.path['map'], self.action_map_open)
+        elif sub_action == 'file_picked':
+            d = widget
             if d.value is not None:
                 State.file_map = d.value
                 # Import map.
                 if State.file_map.endswith('.tmx'):
-                    State.map = toolkit.load_tiled_tmx_map(State.file_map)
+                    try:
+                        State.map = toolkit.load_tiled_tmx_map(State.file_map)
+                    except:
+                        self.gui_alert('Failed to import map')
+                        traceback.print_exc()
                 self.remake_scrollbars()
             State.screen.clear()
         
     # MapEditor.action_map_open
     
-    def action_entities_new(self, *args):
-        print 'action_entities_new'
-        ######################################
-        ## To do: If changed, confirm discard.
-        ######################################
-        # Clear out the world.
-        State.world.remove(*State.world.entity_branch.keys())
-        State.file_entities = None
+    def action_entities_new(self, sub_action=None, widget=None):
+        """New entities action: clear all entities from editor.
+        """
+        if sub_action is None:
+            # If changed, confirm discard.
+            if self.changes_unsaved:
+                self.gui_confirm_discard(self.action_entities_new)
+            else:
+                self.action_entities_new('check_discard')
+        elif sub_action == 'check_discard':
+            if widget is None or widget.value is True:
+                # Clear out the world.
+                State.world.remove(*State.world.entity_branch.keys())
+                State.file_entities = None
         
     # MapEditor.action_entities_new
     
-    def action_entities_open(self, *args):
-        print 'action_entities_open'
-        if self.modal is None:
-            ######################################
-            ## To do: If changed, confirm discard.
-            ######################################
-            # Get input file name.
-            d = gui.FileDialog(title_txt="Import Entities", path=data.path['map'])
-            d.connect(gui.CLOSE, self.action_entities_open, d)
-            d.open()
-            self.modal = d
-        else:
-            d = self.modal
-            self.modal = None
+    def action_entities_open(self, sub_action=None, widget=None):
+        """Import entities action: load entities from a file.
+        """
+        if sub_action is None:
+            # If changed, confirm discard.
+            if self.changes_unsaved:
+                self.gui_confirm_discard(self.action_entities_open)
+            else:
+                self.action_entities_open('check_discard')
+        elif sub_action == 'check_discard':
+            if widget is None or widget.value is True:
+                # Get input file name.
+                self.gui_browse_file("Import Entities",
+                    data.path['map'], self.action_entities_open)
+        elif sub_action == 'file_picked':
+            d = widget
             if d.value is not None:
                 State.file_entities = d.value
                 # Specify the importer plugin to use.
@@ -728,7 +836,9 @@ class MapEditor(object):
                         'circle_cls' : CircleGeom,
                     }
                     execfile(import_script, {}, locals_dict)
+                    self.changes_unsaved = False
                 except:
+                    self.gui_alert('Failed to import world')
                     traceback.print_exc()
                 else:
                     file_handle.close()
@@ -737,25 +847,18 @@ class MapEditor(object):
                     State.world.add(*entities)
                 # Put the mouse shape back.
                 State.world.add(self.mouse_shape)
-            State.screen.clear()
+        State.screen.clear()
         
     # MapEditor.action_entities_open
     
     def action_entities_save(self, *args):
-        print 'action_entities_save'
+        """Save entities action: save entities to a file.
+        """
         # Make sure a save file has been named.
         if State.file_entities is None:
             self.action_entities_save_as()
             if State.file_entities is None:
                 return
-        else:
-            ######################################
-            ## To do: If changed, confirm discard.
-            ######################################
-            pass
-        ####################################
-        ## To do: Choose exporter somewhere.
-        ####################################
         # Specify the exporter plugin to use.
         export_script = data.filepath(
             'plugins', joinpath('map','export_world_quadtree.py'))
@@ -769,6 +872,7 @@ class MapEditor(object):
                 'fh' : file_handle,
             }
             execfile(export_script, {}, locals_dict)
+            self.changes_unsaved = True
         except:
             traceback.print_exc()
         else:
@@ -778,38 +882,57 @@ class MapEditor(object):
         
     # MapEditor.action_entities_save
     
-    def action_entities_save_as(self, *args):
-        print 'action_entities_save_as'
-        ######################################
-        ## To do: If changed, confirm discard.
-        ######################################
-        # Get output file name.
-        State.file_entities = 'entities.txt'
+    def action_entities_save_as(self, sub_action=None, widget=None):
+        """Save-as entities action: save entities to a file, selecting a new
+        file name.
+        """
+        if sub_action is None:
+            # Get input file name.
+            self.gui_browse_file("Save Entities",
+                data.path['map'], self.action_entities_save_as)
+        elif sub_action == 'file_picked':
+            d = widget
+            if d.value is not None:
+                State.file_entities = d.value
+                self.action_entities_save()
+        State.screen.clear()
     
-    def action_quit_app(self, *args):
-        ###################################
-        ## To do: If changed, confirm exit.
-        ###################################
-        quit()
+    def action_quit_app(self, sub_action=None, widget=None):
+        """Quit app action.
+        """
+        if sub_action is None:
+            # If changed, confirm discard.
+            if self.changes_unsaved:
+                self.gui_confirm_discard(self.action_quit_app)
+            else:
+                self.action_quit_app('check_discard')
+        elif sub_action == 'check_discard':
+            if widget is None or widget.value is True:
+                quit()
     
     def action_view_grid(self, *args):
+        """View grid action: toggle.
+        """
         State.show_grid = not State.show_grid
     
     def action_view_labels(self, *args):
+        """View labels action: toggle labels.
+        """
         State.show_labels = not State.show_labels
     
     def action_view_rects(self, *args):
+        """View rects action: toggle rects.
+        """
         State.show_rects = not State.show_rects
     
     def action_view_hud(self, *args):
+        """View HUD action: toggle HUD.
+        """
         State.show_hud = not State.show_hud
     
-    def warning_save_world(self):
-        d = gui.Dialog()
-    
     def get_events(self):
-        # This event check is a little more work per game loop, but much nicer
-        # when idling.
+        """Get and dispatch events with nicest idle-wait.
+        """
         events = [pygame.event.wait()]
         events.extend(pygame.event.get())
         for e in events:
@@ -834,14 +957,31 @@ class MapEditor(object):
     # MapEditor.get_events
     
     def on_key_down(self, e, unicode, key, mod):
+        """Handler for KEYDOWN events.
+        """
         # Maybe some accelerator keys or something.
         self.gui.event(e)
+        ## Customization: beware of key conflicts with pgu.gui.
+        if not self.modal:
+            if key in (K_DELETE,K_KP_PERIOD):
+                if self.selected is not None:
+                    shape = self.selected 
+                    self.deselect()
+                    State.world.remove(shape)
+            elif key == K_ESCAPE:
+                self.action_quit_app()
+#            else:
+#                print 'Key down', pygame.key.name(key)
     
     def on_key_up(self, e, key, mod):
+        """Handler for KEYUP events.
+        """
         # Maybe some accelerator keys or something.
         self.gui.event(e)
     
     def on_mouse_button_down(self, e, pos, button):
+        """Handler for MOUSEBUTTONDOWN events.
+        """
         if self.mouse_down:
             # Multi-button does nothing.
             return
@@ -854,6 +994,8 @@ class MapEditor(object):
             self.action_mouse_click(e)
     
     def on_mouse_motion(self, e, pos, rel, buttons):
+        """Handler for MOUSEMOTION events.
+        """
         self.mouse_shape.position = State.camera.screen_to_world(pos)
         State.world.add(self.mouse_shape)
         if not self.mouse_down:
@@ -863,6 +1005,8 @@ class MapEditor(object):
             self.action_mouse_drag(e)
     
     def on_mouse_button_up(self, e, pos, button):
+        """Handler for MOUSEBUTTONUP events.
+        """
         self.gui.event(e)
         if self.mouse_down:
             # Crossing GUI widgets does not interfere with drag-and-release.
@@ -871,6 +1015,8 @@ class MapEditor(object):
                 self.mouse_down = 0
     
     def on_resize(self, e, screen_size, w, h):
+        """Handler for VIDEORESIZE events.
+        """
         # Update the pygame display mode and Gummworld2 camera view.
         width,height = w,h
         State.screen = Screen(screen_size, RESIZABLE)
@@ -881,11 +1027,15 @@ class MapEditor(object):
         self.remake_scrollbars(reset=False)
     
     def on_user_event(self, e):
+        """Handler for USEREVENT events.
+        """
 #        print 'USEREVENT',e.dict()
         pass
     
     def on_quit(self):
-        quit()
+        """Handler for QUIT events.
+        """
+        self.action_quit_app()
 
 
 def make_hud():
@@ -895,6 +1045,9 @@ def make_hud():
     State.hud.x += 20
     State.hud.i += 3
     next_pos = State.hud.next_pos
+    
+#    State.hud.add('FPS',
+#        Statf(next_pos(), 'FPS %d', callback=State.clock.get_fps))
     
     rect = State.world.rect
     l,t,r,b = rect.left,rect.top,rect.right,rect.bottom
@@ -932,6 +1085,8 @@ def make_hud():
 
 
 def make_menus(app):
+    """Make GUI menus for content control.
+    """
     menus = gui.Menus([
         ('File/Quit',        app.action_quit_app, None),
         ('Entities/New',     app.action_entities_new, None),
@@ -951,6 +1106,8 @@ def make_menus(app):
 
 
 def make_toolbar(app):
+    """Make GUI toolbar with shape tools in it.
+    """
     g = gui.Group(name='toolbar', value='rect_tool')
     h = app.menus.rect.height
     t = gui.Table()
@@ -966,6 +1123,8 @@ def make_toolbar(app):
 
 
 def main():
+    """Da main... uh... thing.
+    """
     map_editor = MapEditor()
     map_editor.run()
 

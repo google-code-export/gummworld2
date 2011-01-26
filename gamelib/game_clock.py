@@ -190,9 +190,14 @@ class GameClock(object):
             self._loops = 0
             self._frame_ready = True
         elif self._use_wait and self.max_fps > 0:
-            ms = self._tps / self.max_fps
-            if round(ms) >= 2:
-                self._wait(ms/1000)
+# This code produced glitches, especially as FPS approaches TPS.
+#            ms = self._tps / self.max_fps
+#            if round(ms) >= 2:
+#                self._wait(ms/1000)
+# The following is more straightforward and introduces only one fairly accurate
+# wait for each frame.
+            wait_ms = float(self._next_frame) - self._get_ticks()
+            self._wait(wait_ms/1000.0)
         return self._ticks
 
     def interpolate(self):
