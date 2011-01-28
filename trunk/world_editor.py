@@ -31,16 +31,16 @@ ASCII so it should be pretty easy to script a quick-n-dirty converter.
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 Controls:
-    * Menus do what you'd expect.
-    * Scrollbars do what you'd expect.
-    * Toolbar selects a shape to insert into the map.
-    * Right-click: inserts a shape into the map.
-    * Left-click:
-        * Clicking inside a shape selects that shape for further manipulation.
-        * Clicking outside a shape deselects the selected shape.
-        * Clicking inside stacked shapes selects the next shape.
-        * Clicking and dragging the center control point moves the shape.
-        * Clicking and dragging a corner control point reshapes a shape.
+    *   Menus do what you'd expect.
+    *   Scrollbars do what you'd expect.
+    *   Toolbar selects a shape to insert into the map.
+    *   Right-click: inserts a shape into the map.
+    *   Left-click:
+        *   Clicking inside a shape selects that shape for further manipulation.
+        *   Clicking outside a shape deselects the selected shape.
+        *   Clicking inside stacked shapes selects the next shape.
+        *   Clicking and dragging the center control point moves the shape.
+        *   Clicking and dragging a corner control point reshapes a shape.
 
 Design:
     There will likely be a form in the space on the right. Selecting a shape
@@ -60,6 +60,31 @@ Design:
     
     Beyond the essentials, there is also an unwritten wish list of features
     which may get added as demand dictates and time permits.
+
+Basic to do (complete for 1.0 release):
+    *   Problem: When shape is inserted or dragged outside of map in some spots
+        it is no longer selectable. QuadTree issue?
+    *   Form for picking images.
+    *   Images attached to world shapes.
+    *   [DONE] Form for user_data.
+        *   Option to add image path to user_data.
+    *   Single operations: Cut, copy, paste?
+    *   Undo, redo.
+    *   Contrast aid: Cycle through color schemes for world shapes.
+    *   Chooser: Importer and exporter (e.g., ASCII, pickle, custom).
+    *   Help viewer? PGU makes it easy.
+
+Advanced to do:
+    *   Productivity:
+        *   Shape templates: Make a shape, add to template list. Choose from
+            list to insert "cookie cut" shapes.
+        *   User_data templates: a la Shape templates.
+        *   Group operations: Delete, move; cut, copy, paste?
+    *   Proof-reading:
+        *   List unique user_data and count. Click list item to go to shapes.
+    *   Clicking on map while dragging scrollbar inserts a shape. Probably
+        should sense when GUI is clicked/dragged and not do editor actions. Not
+        important, but it is kind of sloppy.
 """
 
 
@@ -166,6 +191,7 @@ class ControlPoint(Rect):
 
 class RectGeom(geometry.RectGeometry):
     
+    typ = 'Rect'
     draw_rect = pygame.draw.rect
     
     def __init__(self, *args, **kw):
@@ -173,6 +199,7 @@ class RectGeom(geometry.RectGeometry):
         self._attrs = 'topleft','topright','bottomright','bottomleft','center'
         self._cp = [ControlPoint(self, self._attrs[i]) for i in range(5)]
         self.grabbed = None
+        self.user_data = ''
         
     # RectGeom.__init__
     
@@ -239,6 +266,7 @@ class RectGeom(geometry.RectGeometry):
 
 class PolyGeom(geometry.PolyGeometry):
     
+    typ = 'Poly'
     draw_poly = pygame.draw.polygon
     draw_rect = pygame.draw.rect
     
@@ -251,6 +279,7 @@ class PolyGeom(geometry.PolyGeometry):
         self._cp = [ControlPoint(self, i) for i in range(len(self._points)+1)]
         self._cp = self.control_points
         self.grabbed = None
+        self.user_data = ''
         
     # PolyGeom.__init__
     
@@ -335,6 +364,7 @@ class PolyGeom(geometry.PolyGeometry):
 
 class CircleGeom(geometry.CircleGeometry):
     
+    typ = 'Circle'
     draw_circle = pygame.draw.circle
     draw_rect = pygame.draw.rect
     
@@ -343,6 +373,7 @@ class CircleGeom(geometry.CircleGeometry):
         self._attrs = 'origin','radius'
         self._cp = [ControlPoint(self, self._attrs[i]) for i in range(2)]
         self.grabbed = None
+        self.user_data = ''
         
     # CircleGeom.__init__
     
@@ -435,6 +466,10 @@ class MapEditor(object):
         State.clock = GameClock(30, 30)
         State.camera.position = State.camera.view.center
         pygame.display.set_caption('Gummworld2 World Editor')
+        x,y = State.camera.view.rect.topleft
+        w,h = Vec2d(screen_size) - (State.camera.view.rect.right,0)
+        State.gui_panel = View(State.screen.surface, Rect(x,y,w,h))
+        State.screen.eraser.fill(Color('grey'))
         
         # Mouse details.
         #   mouse_shape: world entity for mouse interaction.
@@ -513,7 +548,7 @@ class MapEditor(object):
         """
         # Draw stuff.
         State.camera.interpolate()
-        State.camera.view.clear()
+        State.screen.clear()
         toolkit.draw_tiles()
         toolkit.draw_labels()
         toolkit.draw_grid()
@@ -532,18 +567,29 @@ class MapEditor(object):
             if thing is not mouse_shape:
                 thing.draw()
     
+    def select(self, shape):
+        self.selected = shape
+        # Update shape info form.
+        self.gui_form['shape_type'].set_text(self.selected.typ)
+        self.gui_form['shape_pos'].set_text(str(tuple(self.selected.position)))
+        self.gui_form['user_data'].value = self.selected.user_data
+    
     def deselect(self):
         """Deselect a shape and release its "grabbed" control point.
         """
         if self.selected:
             self.selected.release()
             self.selected = None
+            self.gui_form['shape_type'].set_text('')
+            self.gui_form['shape_pos'].set_text('')
+            self.gui_form['user_data'].value = ''
     
     def make_gui(self):
         """Make the entire GUI.
         """
-        # Make the GUI.
+        # Make the GUI, a form, and a container.
         self.gui = gui.App(theme=gui.Theme(dirs=['data/themes/default']))
+        self.gui_form = gui.Form()
         width,height = State.screen.size
         c = gui.Container(width=width,height=height)
         
@@ -556,12 +602,17 @@ class MapEditor(object):
         self.toolbar,self.tool_table = make_toolbar(self)
         x = self.menus.rect.right + 2
         c.add(self.tool_table, x, 0)
-        
         # Scrollbars for scrolling map.
         self.make_scrollbars(c)
         
+        # Shape-info form.
+        make_side_panel(c)
+        
         # Gogogo GUI.
         self.gui.init(widget=c, screen=State.screen.surface)
+        
+        # This forces the gui.Form to update its internals.
+        self.gui_form['toolbar']
         
     # MapEditor.make_gui
     
@@ -613,15 +664,12 @@ class MapEditor(object):
     def gui_hover(self):
         """Return True if the mouse is hovering over a GUI widget.
         """
-        if self.menus.is_hovering():          return self.menus
-        elif self.tool_table.is_hovering():   return self.toolbar
-        elif self.h_map_slider.is_hovering(): return self.h_map_slider
-        elif self.v_map_slider.is_hovering(): return self.v_map_slider
-        else:
-            for m in self.menus.widgets:
-                if m.options.is_open():
-                    return m.options
-                    break
+        for name,widget in self.gui_form._emap.items():
+            if widget.is_hovering():
+                return widget
+        for menu in self.gui_form['menus'].widgets:
+            if menu.options.is_open():
+                return menu.options
         return None
         
     # MapEditor.gui_hover
@@ -680,14 +728,24 @@ class MapEditor(object):
         d.open()
         self.modal = d
     
+    def action_set_userdata(self, user_data):
+        """GUI input field changed, set the selected shape's user_data.
+        """
+        if self.selected is not None:
+            self.selected.user_data = user_data.value
+    
     def action_mouse_click(self, e):
         """Mouse click action: button 3 inserts a shape; button 1 selects,
         deselects or sizes a shape.
         """
-        if self.modal is not None:
+        if not self.mouse_shape.rect.colliderect(State.camera.view.rect):
+            # Don't change the map if clicking outside the map area.
+            return
+        elif self.modal is not None:
+            # Don't change the map if a modal dialog is open.
             return
         elif self.mouse_down == 3:
-            # Put a shape.
+            # Right-click: Put a shape.
             pos = State.camera.screen_to_world(e.pos)
             shape = self.toolbar.value
             if shape == 'rect_tool':
@@ -700,15 +758,16 @@ class MapEditor(object):
                 geom = PolyGeom([(14,0),(29,12),(23,29),(7,29),(0,12)], pos)
             elif shape == 'circle_tool':
                 geom = CircleGeom(pos, 20)
-            self.selected = geom
+            self.select(geom)
             State.world.add(geom)
             self.changes_unsaved = True
         elif self.mouse_down == 1:
+            # Left-click: Select, deselect, or grab.
             mouseover_shapes = self.mouseover_shapes
             if self.selected not in mouseover_shapes:
                 self.deselect()
                 if len(mouseover_shapes):
-                    self.selected = mouseover_shapes[0]
+                    self.select(mouseover_shapes[0])
             elif self.selected is not None:
                 if self.selected.grab(self.mouse_shape):
                     # Grabbed control point.
@@ -719,7 +778,7 @@ class MapEditor(object):
                     i += 1
                     if i >= len(mouseover_shapes):
                         i = 0
-                    self.selected = mouseover_shapes[i]
+                    self.select(mouseover_shapes[i])
         
     # MapEditor.action_mouse_click
 
@@ -782,7 +841,6 @@ class MapEditor(object):
                         self.gui_alert('Failed to import map')
                         traceback.print_exc()
                 self.remake_scrollbars()
-            State.screen.clear()
         
     # MapEditor.action_map_open
     
@@ -847,7 +905,6 @@ class MapEditor(object):
                     State.world.add(*entities)
                 # Put the mouse shape back.
                 State.world.add(self.mouse_shape)
-        State.screen.clear()
         
     # MapEditor.action_entities_open
     
@@ -895,7 +952,6 @@ class MapEditor(object):
             if d.value is not None:
                 State.file_entities = d.value
                 self.action_entities_save()
-        State.screen.clear()
     
     def action_quit_app(self, sub_action=None, widget=None):
         """Quit app action.
@@ -959,8 +1015,19 @@ class MapEditor(object):
     def on_key_down(self, e, unicode, key, mod):
         """Handler for KEYDOWN events.
         """
-        # Maybe some accelerator keys or something.
-        self.gui.event(e)
+        # Intercept ESCAPE and RETURN for convenient switch between map-editing
+        # key control and user_data input.
+        user_data = self.gui_form['user_data']
+        if user_data.container.myfocus is user_data:
+            if key in (K_ESCAPE,K_RETURN):
+                user_data.blur()
+                return
+        elif key == K_RETURN and self.selected is not None:
+            self.gui_form['user_data'].focus()
+            return
+        # Filter out keystrokes that are "ugly" in GUI.
+        if key not in (K_DELETE,):
+            self.gui.event(e)
         ## Customization: beware of key conflicts with pgu.gui.
         if not self.modal:
             if key in (K_DELETE,K_KP_PERIOD):
@@ -1021,10 +1088,16 @@ class MapEditor(object):
         width,height = w,h
         State.screen = Screen(screen_size, RESIZABLE)
         State.camera.view = View(State.screen.surface, Rect(0,0,w*2/3,h))
+        State.screen.eraser.fill(Color('grey'))
         
         # Resize the widgets.
-        self.gui.widget.resize(width=w, height=h)
+        self.gui.screen = State.screen.surface
+        self.gui.resize()
         self.remake_scrollbars(reset=False)
+        c = self.gui.widget
+        side_panel = self.gui_form['side_panel']
+        c.remove(side_panel)
+        make_side_panel(c)
     
     def on_user_event(self, e):
         """Handler for USEREVENT events.
@@ -1108,9 +1181,9 @@ def make_menus(app):
 def make_toolbar(app):
     """Make GUI toolbar with shape tools in it.
     """
-    g = gui.Group(name='toolbar', value='rect_tool')
+    g = gui.Group(value='rect_tool')
     h = app.menus.rect.height
-    t = gui.Table()
+    t = gui.Table(name='toolbar')
     t.tr()
     t.td(gui.Tool(g, gui.Label('Rect'), 'rect_tool', height=h))
     t.td(gui.Tool(g, gui.Label('Triangle'), 'triangle_tool', height=h))
@@ -1120,6 +1193,44 @@ def make_toolbar(app):
     return g,t
     
 # make_toolbar
+
+
+def make_side_panel(container):
+    """GUI Table with shape info and other editing tools.
+    """
+    t = gui.Table(name='side_panel', align=1, valign=-1)
+    t.tr()
+    t.td(gui.Label('Type:'))
+    t.td(gui.Label('', name='shape_type'), align=-1)
+    t.tr()
+    t.td(gui.Label('Pos:'))
+    t.td(gui.Label('', name='shape_pos'), align=-1)
+    t.tr()
+    label = gui.Label('Data:')
+    t.td(label)
+    smaller_font = pygame.font.Font(data.filepath('font', 'Vera.ttf'), 10)
+#    user_data = gui.Input('', name='userdata_value', font=smaller_font, size=29)
+    w = (State.screen.width - State.camera.view.width - label.resize()[0] - 20)
+## Not sure why the extra 10 pixels (-20) are needed. There is some padding
+## going on, but I can't find out where in the GUI to read it.
+#    what = t
+#    print what.style.margin_left
+#    print what.style.margin_right
+#    print what.style.border_left
+#    print what.style.border_right
+#    print what.style.padding_left
+#    print what.style.padding_right
+#    quit()
+    user_data = gui.TextArea(
+        value='', name='user_data', font=smaller_font, width=w)
+    t.td(user_data)
+    t.tr()
+    t.td(gui.Button('Add image to user_data'), colspan=2)
+    x,y = State.camera.view.width,0
+    container.add(t, x, y)
+    user_data.connect(gui.CHANGE, State.app.action_set_userdata, user_data)
+
+# make_form_shape_info
 
 
 def main():

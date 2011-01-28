@@ -43,6 +43,7 @@ path = dict(
     plugins = join_path(data_dir, 'plugins'),
     sound   = join_path(data_dir, 'sound'),
     text    = join_path(data_dir, 'text'),
+    theme   = join_path(data_dir, 'themes'),
 )
 
 
