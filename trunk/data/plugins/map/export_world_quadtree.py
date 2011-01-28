@@ -43,6 +43,8 @@ Example usage:
 """
 
 
+from urllib import quote
+
 import pygame
 
 from gamelib.geometry import RectGeometry, CircleGeometry, PolyGeometry
@@ -67,7 +69,7 @@ for entity in entities:
         w,h = entity.rect.size
         user_data = ''
         if hasattr(entity, 'user_data'):
-            user_data = entity.user_data
+            user_data = quote(entity.user_data)
         
         fh.write('rect %d %d %d %d\n' % (x, y, w, h))
         fh.write('user_data ' + user_data + '\n')
@@ -80,7 +82,7 @@ for entity in entities:
         radius = entity.radius
         user_data = ''
         if hasattr(entity, 'user_data'):
-            user_data = entity.user_data
+            user_data = quote(entity.user_data)
         
         fh.write('circle %d %d %d\n' % (x,y,radius))
         fh.write('user_data ' + user_data + '\n')
@@ -96,7 +98,7 @@ for entity in entities:
         w,h = entity.rect.size
         user_data = ''
         if hasattr(entity, 'user_data'):
-            user_data = entity.user_data
+            user_data = quote(entity.user_data)
         
         fh.write('poly')
         fh.write(' %d %d' % center)

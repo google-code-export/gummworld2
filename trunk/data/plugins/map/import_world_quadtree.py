@@ -49,6 +49,8 @@ Example usage:
 """
 
 
+from urllib import unquote
+
 import pygame
 
 from gamelib.geometry import RectGeometry, CircleGeometry, PolyGeometry
@@ -86,7 +88,7 @@ for line in fh:
     what = parts[0]
     if what == 'user_data':
         # User data.
-        entity.user_data = ' '.join(parts[1:])
+        entity.user_data = unquote(' '.join(parts[1:]))
     
     elif what == 'rect':
         # format:
@@ -115,7 +117,6 @@ for line in fh:
         points = []
         for i in range(3, len(parts), 2):
             points.append(( int(parts[i]), int(parts[i+1]) ))
-        print len(points)
         entity = poly_cls(points, center)
         entities.append(entity)
         
