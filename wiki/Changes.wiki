@@ -194,3 +194,10 @@ SVN rev 172:
   * Experimental: GameClock's use_wait calculation changed. Need to validate it on a slow machine.
   * Changes: Many additions to world_editor.py: confirmation dialogs, file dialogs, alert dialogs tightened.
   * Fixed: Think the "nice" event loop is finally working the way I want it.
+
+SVN rev 174:
+  * Changed: Added themes to gamelib.data.path.
+  * Fixed: pgu.gui.textarea.TextArea.doLines() no longer blows up when value is ''.
+  * Fixed: pgu.gui.textarea.TextArea.setCursorByHVPos() now positions cursor at end of text rather than end-1.
+  * Changed: Exposed View._eraser as View.eraser.
+  * New: world_editor.py has a new shape-info panel for viewing and editing shape user_data.
