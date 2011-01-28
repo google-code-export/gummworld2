@@ -205,3 +205,8 @@ SVN rev 174:
 SVN rev 176:
   * Fixed: gui.TextArea.resize() miscalculated, causing gui.Table._Table_td.resize() to grow the textfield each time. Removing gui.TextArea.resize() fixed this--possibly with style side-effects, but nothing obvious! gui.Input uses the superclass's resize(), so assuming this should also be fine for TextArea. Gah... this was hard to debug. :)
   * Fixed: In world_editor.py, DELETE key no longer removes a shape from the map when the TextArea widget has focus.
+
+SVN rev 178:
+  * Changed: map importer and exporter now use URL quote/unquote to handle multi-line user_data.
+  * Changed: removed extraneous debug prints from textarea.py.
+  * Fixed: action_entities_save() was not resetting the "changed" state after a save.
