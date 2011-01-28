@@ -61,6 +61,9 @@ Design:
     Beyond the essentials, there is also an unwritten wish list of features
     which may get added as demand dictates and time permits.
 
+Bug:
+    *   Exporter and save() need a gui_alert for unsupported shapes.
+
 Basic to do (complete for 1.0 release):
     *   Problem: When shape is inserted or dragged outside of map in some spots
         it is no longer selectable. QuadTree issue?
@@ -853,6 +856,7 @@ class MapEditor(object):
                 # Clear out the world.
                 State.world.remove(*State.world.entity_branch.keys())
                 State.file_entities = None
+                self.changes_unsaved = False
         
     # MapEditor.action_entities_new
     
@@ -924,7 +928,7 @@ class MapEditor(object):
                 'fh' : file_handle,
             }
             execfile(export_script, {}, locals_dict)
-            self.changes_unsaved = True
+            self.changes_unsaved = False
         except:
             traceback.print_exc()
         else:

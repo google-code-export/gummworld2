@@ -280,10 +280,7 @@ class TextArea(widget.Widget):
         self.__dict__[k]=v
         if k == 'value' and _v != NOATTR and _v != v: 
             self.send(CHANGE)
-            print '---'
-            print self.rect
             self.repaint()
-            print self.rect
             
 # The first version of this code was done by Clint Herron, and is a modified version of input.py (by Phil Hassey).
 # It is under the same license as the rest of the PGU library.
