@@ -30,10 +30,13 @@ class TextArea(widget.Widget):
         if not self.style.height: self.style.height = h
         if not self.style.width: self.style.width = w
     
-    def resize(self,width=None,height=None):
-        if (width != None) and (height != None):
-            self.rect = pygame.Rect(self.rect.x, self.rect.y, width, height)
-        return self.rect.w, self.rect.h
+## BUG: This causes textarea to grow every time table._Table_td calculates its
+## size.
+##    def resize(self,width=None,height=None):
+##        if (width != None) and (height != None):
+##            print 'TextArea RESIZE'
+##            self.rect = pygame.Rect(self.rect.x, self.rect.y, width, height)
+##        return self.rect.w, self.rect.h
         
     def paint(self,s):
         
@@ -202,6 +205,7 @@ class TextArea(widget.Widget):
     def event(self,e):
         used = None
         if e.type == KEYDOWN:	
+            used = True
             if e.key == K_BACKSPACE:
                 if self.pos:
                     self._setvalue(self.value[:self.pos-1] + self.value[self.pos:])
@@ -221,10 +225,10 @@ class TextArea(widget.Widget):
                     self.pos = newPos
             elif e.key == K_LEFT:
                 if self.pos > 0: self.pos -= 1
-                used = True
+#                used = True
             elif e.key == K_RIGHT:
                 if self.pos < len(self.value): self.pos += 1
-                used = True
+#                used = True
             elif e.key == K_UP:
                 self.vpos -= 1
                 self.setCursorByHVPos()
@@ -238,6 +242,7 @@ class TextArea(widget.Widget):
 #				pass				
             else:
                 #c = str(e.unicode)
+                used = None
                 try:
                     if (e.key == K_RETURN):
                         c = "\n"
@@ -246,6 +251,7 @@ class TextArea(widget.Widget):
                     else:
                         c = (e.unicode).encode('latin-1')
                     if c:
+                        used = True
                         self._setvalue(self.value[:self.pos] + c + self.value[self.pos:])
                         self.pos += len(c)
                 except: #ignore weird characters
@@ -274,7 +280,10 @@ class TextArea(widget.Widget):
         self.__dict__[k]=v
         if k == 'value' and _v != NOATTR and _v != v: 
             self.send(CHANGE)
+            print '---'
+            print self.rect
             self.repaint()
+            print self.rect
             
 # The first version of this code was done by Clint Herron, and is a modified version of input.py (by Phil Hassey).
 # It is under the same license as the rest of the PGU library.

@@ -594,17 +594,11 @@ class MapEditor(object):
         c = gui.Container(width=width,height=height)
         
         # Menus.
-        self.menus = make_menus(self)
-        c.add(self.menus, 1, 1)
-        self.menus.rect.w,self.menus.rect.h = self.menus.resize()
-        
+        make_menus(c)
         # Toolbar.
-        self.toolbar,self.tool_table = make_toolbar(self)
-        x = self.menus.rect.right + 2
-        c.add(self.tool_table, x, 0)
+        make_toolbar(c)
         # Scrollbars for scrolling map.
         self.make_scrollbars(c)
-        
         # Shape-info form.
         make_side_panel(c)
         
@@ -638,7 +632,7 @@ class MapEditor(object):
         c.add(self.h_map_slider, *self.h_map_slider.rect.topleft)
         
         #   V-slider.
-        minv = view_rect.centery - self.menus.rect.bottom - 3
+        minv = view_rect.centery - self.gui_form['menus'].rect.bottom - 3
         maxv = State.map.tile_size.y * State.map.map_size.y - minv + thick
         size = max(round(float(h) / State.map.rect.h * h), 25)
         if reset:
@@ -664,6 +658,7 @@ class MapEditor(object):
     def gui_hover(self):
         """Return True if the mouse is hovering over a GUI widget.
         """
+        # I know accessing _attrs frowned upon, but gui.Form doesn't work right.
         for name,widget in self.gui_form._emap.items():
             if widget.is_hovering():
                 return widget
@@ -747,7 +742,7 @@ class MapEditor(object):
         elif self.mouse_down == 3:
             # Right-click: Put a shape.
             pos = State.camera.screen_to_world(e.pos)
-            shape = self.toolbar.value
+            shape = self.gui_form['toolbar_group'].value
             if shape == 'rect_tool':
                 geom = RectGeom(0,0,30,30, pos)
             elif shape == 'triangle_tool':
@@ -1015,11 +1010,11 @@ class MapEditor(object):
     def on_key_down(self, e, unicode, key, mod):
         """Handler for KEYDOWN events.
         """
-        # Intercept ESCAPE and RETURN for convenient switch between map-editing
+        # Intercept RETURN and ESCAPE for convenient switch between map-editing
         # key control and user_data input.
         user_data = self.gui_form['user_data']
         if user_data.container.myfocus is user_data:
-            if key in (K_ESCAPE,K_RETURN):
+            if key in (K_ESCAPE,):
                 user_data.blur()
                 return
         elif key == K_RETURN and self.selected is not None:
@@ -1031,7 +1026,7 @@ class MapEditor(object):
         ## Customization: beware of key conflicts with pgu.gui.
         if not self.modal:
             if key in (K_DELETE,K_KP_PERIOD):
-                if self.selected is not None:
+                if self.selected and not user_data.container.myfocus is user_data:
                     shape = self.selected 
                     self.deselect()
                     State.world.remove(shape)
@@ -1157,9 +1152,10 @@ def make_hud():
 # make_hud
 
 
-def make_menus(app):
+def make_menus(container):
     """Make GUI menus for content control.
     """
+    app = State.app
     menus = gui.Menus([
         ('File/Quit',        app.action_quit_app, None),
         ('Entities/New',     app.action_entities_new, None),
@@ -1173,16 +1169,18 @@ def make_menus(app):
         ('View/Rects',       app.action_view_rects, None),
         ('View/HUD',         app.action_view_hud, None),
     ], name='menus')
-    return menus
+    container.add(menus, 1, 1)
+    menus.rect.w,menus.rect.h = menus.resize()
     
 # make_menus
 
 
-def make_toolbar(app):
+def make_toolbar(container):
     """Make GUI toolbar with shape tools in it.
     """
-    g = gui.Group(value='rect_tool')
-    h = app.menus.rect.height
+    app = State.app
+    g = gui.Group(name='toolbar_group', value='rect_tool')
+    h = app.gui_form['menus'].rect.height
     t = gui.Table(name='toolbar')
     t.tr()
     t.td(gui.Tool(g, gui.Label('Rect'), 'rect_tool', height=h))
@@ -1190,6 +1188,8 @@ def make_toolbar(app):
     t.td(gui.Tool(g, gui.Label('Quad'), 'quad_tool', height=h))
     t.td(gui.Tool(g, gui.Label('Poly'), 'poly_tool', height=h))
     t.td(gui.Tool(g, gui.Label('Circle'), 'circle_tool', height=h))
+    x = app.gui_form['menus'].rect.right + 2
+    container.add(t, x, 0)
     return g,t
     
 # make_toolbar
@@ -1209,18 +1209,8 @@ def make_side_panel(container):
     label = gui.Label('Data:')
     t.td(label)
     smaller_font = pygame.font.Font(data.filepath('font', 'Vera.ttf'), 10)
-#    user_data = gui.Input('', name='userdata_value', font=smaller_font, size=29)
+#    user_data = gui.Input('', name='user_data', font=smaller_font, size=29)
     w = (State.screen.width - State.camera.view.width - label.resize()[0] - 20)
-## Not sure why the extra 10 pixels (-20) are needed. There is some padding
-## going on, but I can't find out where in the GUI to read it.
-#    what = t
-#    print what.style.margin_left
-#    print what.style.margin_right
-#    print what.style.border_left
-#    print what.style.border_right
-#    print what.style.padding_left
-#    print what.style.padding_right
-#    quit()
     user_data = gui.TextArea(
         value='', name='user_data', font=smaller_font, width=w)
     t.td(user_data)
