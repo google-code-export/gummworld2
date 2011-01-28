@@ -201,3 +201,7 @@ SVN rev 174:
   * Fixed: pgu.gui.textarea.TextArea.setCursorByHVPos() now positions cursor at end of text rather than end-1.
   * Changed: Exposed View._eraser as View.eraser.
   * New: world_editor.py has a new shape-info panel for viewing and editing shape user_data.
+
+SVN rev 176:
+  * Fixed: gui.TextArea.resize() miscalculated, causing gui.Table._Table_td.resize() to grow the textfield each time. Removing gui.TextArea.resize() fixed this--possibly with style side-effects, but nothing obvious! gui.Input uses the superclass's resize(), so assuming this should also be fine for TextArea. Gah... this was hard to debug. :)
+  * Fixed: In world_editor.py, DELETE key no longer removes a shape from the map when the TextArea widget has focus.
