@@ -63,7 +63,7 @@ class View(object):
         else:
             self.surface = surface
             self.parent_rect = self.surface.get_rect()
-        self._eraser = self.surface.copy()
+        self.eraser = self.surface.copy()
         self.rect = self.surface.get_rect()
     
     @property
@@ -93,9 +93,9 @@ class View(object):
         return self.surface.abs_offset()
 
     def clear(self):
-        """Clear the surface by blitting the surface in _eraser attribute.
+        """Clear the surface by blitting the surface in eraser attribute.
         """
-        self.surface.blit(self._eraser, (0,0))
+        self.surface.blit(self.eraser, (0,0))
     
     def blit(self, surf, pos, rect=None):
         """Blit a surface to this surface.
