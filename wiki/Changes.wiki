@@ -211,6 +211,6 @@ SVN rev 178:
   * Changed: removed extraneous debug prints from textarea.py.
   * Fixed: action_entities_save() was not resetting the "changed" state after a save.
 
-SVN rev 180:
+SVN rev 182:
   * Fixed: GameClock.tick() sometimes computes a negative wait_ms, which causes time.sleep() to raise IOError. This is now detected and the call to time.sleep() is skipped.
   * Changes: world_editor.py: minimum window size fixed at 800x600 (to prevent GUI exceptions); some menus and actions renamed; doc and text viewers for displaying import/expect exceptions, help text, etc.; mouse behavior modified to support ScrollArea. A few bug fixes.
