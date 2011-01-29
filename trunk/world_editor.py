@@ -884,7 +884,7 @@ class MapEditor(object):
         if sub_action is None:
             # Get input file name.
             self.gui_browse_file("Import Map",
-                data.path['map'], self.action_map_open)
+                data.path['map'], self.action_map_load)
         elif sub_action == 'file_picked':
             d = widget
             if d.value is not None:
@@ -910,9 +910,9 @@ class MapEditor(object):
         if sub_action is None:
             # If changed, confirm discard.
             if self.changes_unsaved:
-                self.gui_confirm_discard(self.action_entities_new)
+                self.gui_confirm_discard(self.action_entities_clear)
             else:
-                self.action_entities_new('check_discard')
+                self.action_entities_clear('check_discard')
         elif sub_action == 'check_discard':
             if widget is None or widget.value is True:
                 # Clear out the world.
@@ -928,14 +928,14 @@ class MapEditor(object):
         if sub_action is None:
             # If changed, confirm discard.
             if self.changes_unsaved:
-                self.gui_confirm_discard(self.action_entities_open)
+                self.gui_confirm_discard(self.action_entities_import)
             else:
-                self.action_entities_open('check_discard')
+                self.action_entities_import('check_discard')
         elif sub_action == 'check_discard':
             if widget is None or widget.value is True:
                 # Get input file name.
                 self.gui_browse_file("Import Entities",
-                    data.path['map'], self.action_entities_open)
+                    data.path['map'], self.action_entities_import)
         elif sub_action == 'file_picked':
             d = widget
             if d.value is not None:
