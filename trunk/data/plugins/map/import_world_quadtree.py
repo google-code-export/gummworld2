@@ -81,6 +81,7 @@ line_num = 0
 
 for line in fh:
     line_num += 1
+    line = line.rstrip('\r\n')
     
     parts = line.split(' ')
     if len(parts) < 1:
