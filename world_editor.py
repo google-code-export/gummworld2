@@ -61,10 +61,12 @@ Design:
     Beyond the essentials, there is also an unwritten wish list of features
     which may get added as demand dictates and time permits.
 
-Bug:
+Bugs:
     *   Exporter and save() need a gui_alert for unsupported shapes.
+    *   Focusing textarea should not be possible if there no shape is selected.
 
 Basic to do (complete for 1.0 release):
+    *   action_map_new() needs a Size Form.
     *   Problem: When shape is inserted or dragged outside of map in some spots
         it is no longer selectable. QuadTree issue?
     *   Form for picking images.
@@ -715,6 +717,61 @@ class MapEditor(object):
         d.open()
         self.modal = d
     
+    def gui_text_viewer(self, title, lines, width=400, height=200):
+        """A text viewer suitable for viewing plain text verbatim. lines is a
+        list of strings. Strings are split on '\n', and '\r' is stripped. Text
+        is left-justified. No paragraph spacing is inserted.
+        """
+        
+        def modal_off(*args):
+            State.app.modal = None
+        
+        title = gui.Label(title)
+        doc = gui.Document(width=width)
+        
+        space = title.style.font.size(" ")
+        
+        for line in lines:
+            line = line.strip('\r')
+            line = line.rstrip('\n')
+            doc.block(align=-1)
+            for line in line.split('\n'):
+                for word in line.split(' '):
+                    if len(word):
+                        doc.add(gui.Label(word))
+                    doc.space(space)
+                doc.br(space[1])
+        
+        self.modal = gui.Dialog(title, gui.ScrollArea(doc,width+20,height))
+        self.modal.connect(gui.CLOSE, modal_off, None)
+        self.modal.open()
+    
+    def gui_doc_viewer(self, title, lines, width=400, height=200):
+        """A text viewer suitable for viewing prose. lines is a list of strings.
+        Each string is a paragraph. Text is centered. Paragraph spacing is
+        inserted between lines.
+        """
+        
+        def modal_off(*args):
+            State.app.modal = None
+        
+        title = gui.Label(title)
+        doc = gui.Document(width=width)
+        
+        space = title.style.font.size(" ")
+        
+        for line in lines:
+            line = line.rstrip('\r\n')
+            doc.block(align=0)
+            for word in line.split(' '):
+                doc.add(gui.Label(word))
+                doc.space(space)
+            doc.br(space[1])
+        
+        self.modal = gui.Dialog(title, gui.ScrollArea(doc,width+20,height))
+        self.modal.connect(gui.CLOSE, modal_off, None)
+        self.modal.open()
+    
     def gui_browse_file(self, title, path, callback):
         """Dialog to browse for a file.
         """
@@ -731,6 +788,7 @@ class MapEditor(object):
         """
         if self.selected is not None:
             self.selected.user_data = user_data.value
+            self.changes_unsaved = True
     
     def action_mouse_click(self, e):
         """Mouse click action: button 3 inserts a shape; button 1 selects,
@@ -820,8 +878,8 @@ class MapEditor(object):
         
     # MapEditor.action_map_new
     
-    def action_map_open(self, sub_action=None, widget=None):
-        """Import map action: loads a map from file (currently Tiled TMX only).
+    def action_map_load(self, sub_action=None, widget=None):
+        """Load map action: loads a map from file (currently Tiled TMX only).
         """
         if sub_action is None:
             # Get input file name.
@@ -836,14 +894,18 @@ class MapEditor(object):
                     try:
                         State.map = toolkit.load_tiled_tmx_map(State.file_map)
                     except:
-                        self.gui_alert('Failed to import map')
+                        exc_type,exc_value,exc_traceback = sys.exc_info()
+                        self.gui_text_viewer('Load map failed',
+                            traceback.format_exception(
+                                exc_type, exc_value, exc_traceback),
+                            width=640, height=480)
                         traceback.print_exc()
                 self.remake_scrollbars()
         
-    # MapEditor.action_map_open
+    # MapEditor.action_map_load
     
-    def action_entities_new(self, sub_action=None, widget=None):
-        """New entities action: clear all entities from editor.
+    def action_entities_clear(self, sub_action=None, widget=None):
+        """Clear entities action: clear all entities from editor.
         """
         if sub_action is None:
             # If changed, confirm discard.
@@ -858,9 +920,9 @@ class MapEditor(object):
                 State.file_entities = None
                 self.changes_unsaved = False
         
-    # MapEditor.action_entities_new
+    # MapEditor.action_entities_clear
     
-    def action_entities_open(self, sub_action=None, widget=None):
+    def action_entities_import(self, sub_action=None, widget=None):
         """Import entities action: load entities from a file.
         """
         if sub_action is None:
@@ -895,7 +957,11 @@ class MapEditor(object):
                     execfile(import_script, {}, locals_dict)
                     self.changes_unsaved = False
                 except:
-                    self.gui_alert('Failed to import world')
+                    exc_type,exc_value,exc_traceback = sys.exc_info()
+                    self.gui_text_viewer('Import Entities failed',
+                        traceback.format_exception(
+                            exc_type, exc_value, exc_traceback),
+                            width=640, height=480)
                     traceback.print_exc()
                 else:
                     file_handle.close()
@@ -905,7 +971,7 @@ class MapEditor(object):
                 # Put the mouse shape back.
                 State.world.add(self.mouse_shape)
         
-    # MapEditor.action_entities_open
+    # MapEditor.action_entities_import
     
     def action_entities_save(self, *args):
         """Save entities action: save entities to a file.
@@ -930,6 +996,10 @@ class MapEditor(object):
             execfile(export_script, {}, locals_dict)
             self.changes_unsaved = False
         except:
+            exc_type,exc_value,exc_traceback = sys.exc_info()
+            self.gui_text_viewer('Save Entities failed',
+                traceback.format_exception(exc_type, exc_value, exc_traceback),
+                width=640, height=480)
             traceback.print_exc()
         else:
             file_handle.close()
@@ -944,7 +1014,7 @@ class MapEditor(object):
         """
         if sub_action is None:
             # Get input file name.
-            self.gui_browse_file("Save Entities",
+            self.gui_browse_file("Save Entities As",
                 data.path['map'], self.action_entities_save_as)
         elif sub_action == 'file_picked':
             d = widget
@@ -1064,27 +1134,31 @@ class MapEditor(object):
         """
         self.mouse_shape.position = State.camera.screen_to_world(pos)
         State.world.add(self.mouse_shape)
-        if not self.mouse_down:
-            self.gui.event(e)
-        else:
-            # Crossing GUI widgets does not interfere with dragging.
-            self.action_mouse_drag(e)
+#        if not self.mouse_down:
+#            self.gui.event(e)
+#        else:
+#            # Crossing GUI widgets does not interfere with dragging.
+#            self.action_mouse_drag(e)
+        self.gui.event(e)
+        # Crossing GUI widgets does not interfere with dragging.
+        self.action_mouse_drag(e)
     
     def on_mouse_button_up(self, e, pos, button):
         """Handler for MOUSEBUTTONUP events.
         """
         self.gui.event(e)
-        if self.mouse_down:
+        if self.mouse_down == button:
             # Crossing GUI widgets does not interfere with drag-and-release.
-            if self.mouse_down == button:
-                self.action_mouse_release(e)
-                self.mouse_down = 0
+            self.action_mouse_release(e)
+            self.mouse_down = 0
     
     def on_resize(self, e, screen_size, w, h):
         """Handler for VIDEORESIZE events.
         """
         # Update the pygame display mode and Gummworld2 camera view.
-        width,height = w,h
+        if w < 800: w = 800
+        if h < 600: h = 600
+        screen_size = w,h
         State.screen = Screen(screen_size, RESIZABLE)
         State.camera.view = View(State.screen.surface, Rect(0,0,w*2/3,h))
         State.screen.eraser.fill(Color('grey'))
@@ -1162,12 +1236,12 @@ def make_menus(container):
     app = State.app
     menus = gui.Menus([
         ('File/Quit',        app.action_quit_app, None),
-        ('Entities/New',     app.action_entities_new, None),
-        ('Entities/Open',    app.action_entities_open, None),
+        ('Entities/Import',  app.action_entities_import, None),
         ('Entities/Save',    app.action_entities_save, None),
         ('Entities/Save As', app.action_entities_save_as, None),
+        ('Entities/Clear',   app.action_entities_clear, None),
         ('Map/New',          app.action_map_new, None),
-        ('Map/Open',         app.action_map_open, None),
+        ('Map/Load',         app.action_map_load, None),
         ('View/Grid',        app.action_view_grid, None),
         ('View/Labels',      app.action_view_labels, None),
         ('View/Rects',       app.action_view_rects, None),

@@ -197,7 +197,8 @@ class GameClock(object):
 # The following is more straightforward and introduces only one fairly accurate
 # wait for each frame.
             wait_ms = float(self._next_frame) - self._get_ticks()
-            self._wait(wait_ms/1000.0)
+            if wait_ms > 0:
+                self._wait(wait_ms/1000.0)
         return self._ticks
 
     def interpolate(self):
