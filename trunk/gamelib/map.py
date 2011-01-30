@@ -152,18 +152,22 @@ class Map(object):
 class MapLayer(dict):
     
     def __init__(self, tile_size, map_size, visible=True,
-        make_labels=False, make_grid=False):
+        make_labels=False, make_grid=False, name=''):
         """Construct an instance of MapLayer.
         
         Instances of this class can be accessed as dicts to retrieve tiles.
         
         If the visible attribute is True, then this layer is visible. If False,
         it is not visible.
+        
+        The name attribute is reserved for programmer convenience. It is not
+        used by the Gummworld2 library.
         """
         super(MapLayer, self).__init__()
         self.tile_size = tile_size
         self.map_size = map_size
         self.visible = visible
+        self.name = name
 
         tw,th = tile_size
         mw,mh = map_size

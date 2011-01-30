@@ -65,6 +65,8 @@ def make_hud(caption=None):
     State.hud.add('Camera',
         Statf(next_pos(), 'Camera %s', callback=get_world_pos, interval=100))
 
+# make_hud
+
 
 def make_tiles():
     """Create tiles to fill the current map. This is a utility for easily making
@@ -91,6 +93,8 @@ def make_tiles():
             s.rect = s.image.get_rect(topleft=(x*tw,y*th))
             State.map.add(s)
 
+# make_tiles
+
 
 def make_tiles2():
     """Create tiles to fill the current map. This is a utility for easily making
@@ -116,6 +120,8 @@ def make_tiles2():
             pygame.draw.line(s.image, (R+9,G+9,B+9), (0,0), (0,th))
             s.rect = s.image.get_rect(topleft=(x*tw,y*th))
             State.map.add(s)
+
+# make_tiles2
 
 
 def collapse_map(map, num_tiles=(2,2)):
@@ -146,6 +152,8 @@ def collapse_map(map, num_tiles=(2,2)):
         new_map.tiled_map = map.tiled_map
     return new_map
 
+# collapse_map
+
 
 def collapse_map_layer(map, layeri, num_tiles=(2,2)):
     """Collapse a single layer in a map by combining num_tiles into one tile.
@@ -166,7 +174,8 @@ def collapse_map_layer(map, layeri, num_tiles=(2,2)):
     if mh * num_tiles.y != map.map_size.y:
         mh += 1
     layer = map.layers[layeri]
-    new_layer = MapLayer((tw,th), (mw,mh), layer.visible, True, True)
+    new_layer = MapLayer((tw,th), (mw,mh), visible=layer.visible,
+        make_grid=True, make_labels=True, name=layer.name)
     # walk the old map, stepping by the number of the tiles argument...
     for x in range(0, map.map_size.x, num_tiles.x):
         for y in range(0, map.map_size.y, num_tiles.y):
@@ -186,8 +195,12 @@ def collapse_map_layer(map, layeri, num_tiles=(2,2)):
                     if c is not None:
                         colorkey = c
                 # Fill dest image if there is a colorkey.
-                if colorkey is not None:
+                if colorkey is None and len(tiles) < num_tiles.x*num_tiles.y:
+                    print 'force colorkey', len(tiles)
+                    colorkey = (0,0,0)
                     s.image.fill(colorkey)
+                else:
+                    print 'skip colorkey', len(tiles)
                 # Blit the images (first turning off source colorkey).
                 for tile in tiles:
                     nx,ny = Vec2d(tile.name) - (x,y)
@@ -204,8 +217,92 @@ def collapse_map_layer(map, layeri, num_tiles=(2,2)):
     
     return new_layer
 
+# collapse_map_layer
 
-def load_tiled_tmx_map(map_file_name):
+
+def reduce_map_layers(map, layersi):
+    """Reduce the number of layers in a map by blitting two or more layers into
+    a single layer. A new instance of Map is returned.
+    
+    The map argument is the source map. It must be an instance of Map.
+    
+    The layersi argument is a sequence of int of length two or more. The
+    layers are blitted in the order specified. Layers not specified and layers
+    that are not visible (i.e. layer.visible==False) will be copied as a layer
+    instead of being blitted.
+    
+    Tiles in the blitted layers typically need to have some transparent pixels
+    (e.g. a surface colorkey), otherwise their pixels would completely erase the
+    tiles underneath.
+    
+    Alphas and blending are not supported by this routine.
+    
+    The tile and map sizes in the map layers should be of the same size.
+    Otherwise the desired results will likely not be produced. If using
+    collapse_map_layer and reduce_map_layers on subsets of map layers, one
+    would usually want to call reduce_map_layers first. See the Combo example
+    below, in which only two of three layers are transformed.
+    
+    Yes, this could be a challenge to manage for maps with special-purpose
+    layers. One needs to know one's maps and layers before and after the
+    transformations. Annotating map layers with a name or ID attribute might
+    help. If the base layer has a name attribute it will be copied to the new
+    map layer.
+    
+    Basic example:
+        new_map = reduce_map_layers(orig_map, range(len(orig_map.layers)))
+    
+    Combo example:
+        # Reduce 3-layer map to two layers.
+        map = reduce_map_layers(map, (0,1))
+        # Collapse layer 0, two tiles into one tile.
+        map = collapse_map_layer(map, 0, (2,2))
+        # The resulting map has two layers numbered 0 and 1.
+    """
+    # Prepare a new map.
+    tw,th = map.tile_size
+    mw,mh = map.map_size
+    new_map = Map((tw,th), (mw,mh))
+    # Prepare a base layer.
+    i = layersi[0]
+    layer = map.layers[i]
+    new_layer = MapLayer(layer.tile_size, layer.map_size, visible=layer.visible,
+        make_grid=True, make_labels=True, name=layer.name)
+    new_map.layers.append(new_layer)
+    # Blit the tiles in the specified layers.
+    for layeri in layersi:
+        layer = map.layers[layeri]
+        if not layer.visible:
+            # Skip invisible layers.
+            continue
+        for xy,src_tile in layer.items():
+            s = map.get_tile_at(xy, layeri)
+            if s is None:
+                s = pygame.sprite.Sprite()
+                s.name = xy
+                s.image = src_tile.image.copy()
+                s.rect = src_tile.rect.copy()
+                new_layer[xy] = s
+            else:
+                s.image.blit(src_tile.image, (0,0))
+    # Copy layers that were not specified and layers that are not invisible.
+    for i,layer in enumerate(map.layers):
+        if i in layersi and layer.visible:
+            # Already been copied.
+            continue
+        new_layer = MapLayer(layer.tile_size, layer.map_size,
+            visible=layer.visible, make_grid=True, make_labels=True,
+            name=layer.name)
+        new_map.append(new_layer)
+        for xy,src_tile in layer.items():
+            new_layer[xy] = src_tile
+    
+    return new_map
+
+# combine_map_layers
+
+
+def load_tiled_tmx_map(map_file_name, load_invisible=False):
     """Load an orthogonal TMX map file that was created by the Tiled Map Editor.
     
     Thanks to dr0id for his nice tiledtmxloader module:
@@ -228,14 +325,16 @@ def load_tiled_tmx_map(map_file_name):
     gummworld_map.tiled_map = world_map
     for layeri,layer in enumerate(world_map.layers):
         gummworld_map.layers.append(MapLayer(
-            tile_size, map_size, layer.visible, True, True))
-        if not layer.visible:
+            tile_size, map_size, layer.visible, True, True, name=str(layeri)))
+        if not layer.visible and not load_invisible:
             continue
         for ypos in xrange(0, layer.height):
             for xpos in xrange(0, layer.width):
                 x = (xpos + layer.x) * world_map.tilewidth
                 y = (ypos + layer.y) * world_map.tileheight
                 img_idx = layer.content2D[xpos][ypos]
+                if img_idx == 0:
+                    continue
                 offx, offy, screen_img = world_map.indexed_tiles[img_idx]
                 sprite = Sprite()
                 if screen_img.get_alpha():
@@ -252,6 +351,8 @@ def load_tiled_tmx_map(map_file_name):
                 gummworld_map.add(sprite, layer=layeri)
     return gummworld_map
 
+# load_tiled_tmx_map
+
 
 def draw_sprite(s, blit_flags=0):
     """Draw a sprite on the camera's surface using world-to-screen conversion.
@@ -260,6 +361,8 @@ def draw_sprite(s, blit_flags=0):
     cx,cy = camera.rect.topleft
     sx,sy = s.rect.topleft
     camera.surface.blit(s.image, (sx-cx, sy-cy), special_flags=blit_flags)
+
+# draw_sprite
 
 
 def interpolated_step(pos, step, interp):
@@ -289,6 +392,8 @@ def interpolated_step(pos, step, interp):
     pos = float(x),float(y)
     return pos - step + interp_step
 
+# interpolated_step
+
 
 def draw_tiles():
     """Draw visible tiles.
@@ -299,6 +404,8 @@ def draw_tiles():
         # the list comprehension filters out sprites that are None
         for s in layer.values():
             draw_sprite(s)
+
+# draw_tiles
 
 
 def draw_labels(layer=0):
@@ -315,6 +422,8 @@ def draw_labels(layer=0):
         get = map_layer.get_labels
         for s in get(x1,y1,x2,y2):
             draw_sprite(s)
+
+# draw_labels
 
 
 def draw_grid(layer=0):
@@ -339,3 +448,5 @@ def draw_grid(layer=0):
             draw_sprite(hline)
             vrect.topleft = srect.topright
             draw_sprite(vline)
+
+# draw_grid
