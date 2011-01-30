@@ -214,3 +214,13 @@ SVN rev 178:
 SVN rev 182:
   * Fixed: GameClock.tick() sometimes computes a negative wait_ms, which causes time.sleep() to raise IOError. This is now detected and the call to time.sleep() is skipped.
   * Changes: world_editor.py: minimum window size fixed at 800x600 (to prevent GUI exceptions); some menus and actions renamed; doc and text viewers for displaying import/expect exceptions, help text, etc.; mouse behavior modified to support ScrollArea. A few bug fixes.
+
+=== Changes in 0.0.11 ===
+
+SVN rev 185:
+  * Fixed: QuadTreeNode._add_internal() skipped some collision tests when keeping an entity.
+  * Fixed: QuadTreeNode.test_collisions() did not short circuit if its rect did not intersect the argument entity.
+  * Fixed: In GameClock.reset() increased _reset_threshold to 1.5 to reduce calls to reset(); changed some constants to float so Python does not have convert them.
+  * Fixed: World editor allowed interaction with user_data field when no shape was selected.
+  * Fixed: export_world_quadtree.py now raises pygame.error instead of printing to stdout when encountering an unsupported shape type.
+  * Changed: In 12_quad_tree_stress_test.py and 15_quad_tree_geometry_test.py changed HUD FPS interval to 200 for more frequent updates.
