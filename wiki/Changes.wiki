@@ -199,11 +199,11 @@ SVN rev 174:
   * Changed: Added themes to gamelib.data.path.
   * Fixed: pgu.gui.textarea.TextArea.doLines() no longer blows up when value is ''.
   * Fixed: pgu.gui.textarea.TextArea.setCursorByHVPos() now positions cursor at end of text rather than end-1.
-  * Changed: Exposed View._eraser as View.eraser.
+  * Changed: Exposed View.`_`eraser as View.eraser.
   * New: world_editor.py has a new shape-info panel for viewing and editing shape user_data.
 
 SVN rev 176:
-  * Fixed: gui.TextArea.resize() miscalculated, causing gui.Table._Table_td.resize() to grow the textfield each time. Removing gui.TextArea.resize() fixed this--possibly with style side-effects, but nothing obvious! gui.Input uses the superclass's resize(), so assuming this should also be fine for TextArea. Gah... this was hard to debug. :)
+  * Fixed: gui.TextArea.resize() miscalculated, causing gui.Table.`_`Table_td.resize() to grow the textfield each time. Removing gui.TextArea.resize() fixed this--possibly with style side-effects, but nothing obvious! gui.Input uses the superclass's resize(), so assuming this should also be fine for TextArea. Gah... this was hard to debug. :)
   * Fixed: In world_editor.py, DELETE key no longer removes a shape from the map when the TextArea widget has focus.
 
 SVN rev 178:
@@ -218,9 +218,9 @@ SVN rev 182:
 === Changes in 0.0.11 ===
 
 SVN rev 185:
-  * Fixed: QuadTreeNode._add_internal() skipped some collision tests when keeping an entity.
+  * Fixed: QuadTreeNode.`_`add_internal() skipped some collision tests when keeping an entity.
   * Fixed: QuadTreeNode.test_collisions() did not short circuit if its rect did not intersect the argument entity.
-  * Fixed: In GameClock.reset() increased _reset_threshold to 1.5 to reduce calls to reset(); changed some constants to float so Python does not have convert them.
+  * Fixed: In GameClock.reset() increased `_`reset_threshold to 1.5 to reduce calls to reset(); changed some constants to float so Python does not have convert them.
   * Fixed: World editor allowed interaction with user_data field when no shape was selected.
   * Fixed: export_world_quadtree.py now raises pygame.error instead of printing to stdout when encountering an unsupported shape type.
   * Changed: In 12_quad_tree_stress_test.py and 15_quad_tree_geometry_test.py changed HUD FPS interval to 200 for more frequent updates.
