@@ -62,13 +62,10 @@ Design:
     which may get added as demand dictates and time permits.
 
 Bugs:
-    *   Exporter and save() need a gui_alert for unsupported shapes.
-    *   Focusing textarea should not be possible if there no shape is selected.
+    *   
 
 Basic to do (complete for 1.0 release):
     *   action_map_new() needs a Size Form.
-    *   Problem: When shape is inserted or dragged outside of map in some spots
-        it is no longer selectable. QuadTree issue?
     *   Form for picking images.
     *   Images attached to world shapes.
     *   [DONE] Form for user_data.
@@ -244,6 +241,9 @@ class RectGeom(geometry.RectGeometry):
                 diff.y = -diff.y
             self.rect.inflate_ip(diff)
         setattr(self.rect, attr, cp.center)
+        # Update shape's position.
+        p = self._position
+        p.x,p.y = self.rect.center
         
     # RectGeom.adjust
     
@@ -463,7 +463,7 @@ class MapEditor(object):
         State.screen = Screen(screen_size, RESIZABLE)
         State.map = Map(tile_size, map_size)
         State.camera = Camera(
-            model.QuadTreeObject(Rect(0,0,5,5), ),
+            model.QuadTreeObject(Rect(0,0,5,5)),
             View(State.screen.surface, Rect(0,0,screen_size.x*2/3,screen_size.y))
         )
         State.world = model.WorldQuadTree(
@@ -486,10 +486,9 @@ class MapEditor(object):
         self.selected = None
         self.mouseover_shapes = []
         
-        # Event loop idle control. Makes app play nicer when not in use, more
-        # responsive when in use.
-        self.idle = 0
+        # Some things to aid debugging.
         self.time = TimeThing('%M%S')
+        self.verbose = False
         
         # Gooey stuff.
         self.make_gui()
@@ -547,6 +546,8 @@ class MapEditor(object):
         self.mouseover_shapes = [shape for ent,shape in State.world.collisions
             if ent is mouse_shape
         ]
+        if self.verbose:
+            print self.time,State.world.collisions
     
     def draw(self):
         """Draw all.
@@ -585,9 +586,10 @@ class MapEditor(object):
         if self.selected:
             self.selected.release()
             self.selected = None
-            self.gui_form['shape_type'].set_text('')
+            self.gui_form['shape_type'].set_text('no selection')
             self.gui_form['shape_pos'].set_text('')
             self.gui_form['user_data'].value = ''
+            self.gui_form['user_data'].blur()
     
     def make_gui(self):
         """Make the entire GUI.
@@ -684,7 +686,7 @@ class MapEditor(object):
             State.app.modal = None
         
         content = gui.Table()
-        d = gui.Dialog(gui.Label('Gummworld2 World Editor'), content)
+        d = gui.Dialog(gui.Label('Gummworld2 World Editor'), content, name='modal')
         d.value = cancel
         
         button_ok = gui.Button('Ok')
@@ -717,7 +719,7 @@ class MapEditor(object):
         d.open()
         self.modal = d
     
-    def gui_text_viewer(self, title, lines, width=400, height=200):
+    def gui_view_text(self, title, lines, width=400, height=200):
         """A text viewer suitable for viewing plain text verbatim. lines is a
         list of strings. Strings are split on '\n', and '\r' is stripped. Text
         is left-justified. No paragraph spacing is inserted.
@@ -729,7 +731,7 @@ class MapEditor(object):
         title = gui.Label(title)
         doc = gui.Document(width=width)
         
-        space = title.style.font.size(" ")
+        space = title.style.font.size(' ')
         
         for line in lines:
             line = line.strip('\r')
@@ -740,13 +742,13 @@ class MapEditor(object):
                     if len(word):
                         doc.add(gui.Label(word))
                     doc.space(space)
-                doc.br(space[1])
+                doc.br(1)
         
         self.modal = gui.Dialog(title, gui.ScrollArea(doc,width+20,height))
         self.modal.connect(gui.CLOSE, modal_off, None)
         self.modal.open()
     
-    def gui_doc_viewer(self, title, lines, width=400, height=200):
+    def gui_view_doc(self, title, lines, width=400, height=200):
         """A text viewer suitable for viewing prose. lines is a list of strings.
         Each string is a paragraph. Text is centered. Paragraph spacing is
         inserted between lines.
@@ -758,7 +760,7 @@ class MapEditor(object):
         title = gui.Label(title)
         doc = gui.Document(width=width)
         
-        space = title.style.font.size(" ")
+        space = title.style.font.size(' ')
         
         for line in lines:
             line = line.rstrip('\r\n')
@@ -777,7 +779,7 @@ class MapEditor(object):
         """
         def modal_off(*args):
             State.app.modal = None
-        d = gui.FileDialog(title_txt="Import Entities", path=data.path['map'])
+        d = gui.FileDialog(title_txt='Import Entities', path=data.path['map'])
         d.connect(gui.CLOSE, modal_off, None)
         d.connect(gui.CLOSE, callback, 'file_picked', d)
         d.open()
@@ -842,19 +844,21 @@ class MapEditor(object):
         """Mouse drag event (mouse is held down): button 3 moves a shape if the
         button is still held down after insert; button 1 moves or sizes a shape.
         """
-        if self.selected:
+        selected = self.selected
+        if selected:
             if self.mouse_down == 3:
                 # Move the selected shape.
-                self.selected.position = State.camera.screen_to_world(e.pos)
-                State.world.add(self.selected)
+                selected.position = State.camera.screen_to_world(e.pos)
+                State.world.add(selected)
                 self.changes_unsaved = True
             elif self.mouse_down == 1:
                 # Resize the selected shape.
-                grabbed = self.selected.grabbed
+                grabbed = selected.grabbed
                 if grabbed is not None:
                     grabbed.position = State.camera.screen_to_world(e.pos)
-                    State.world.add(grabbed.parent)
+                    State.world.add(selected)
                     self.changes_unsaved = True
+            self.gui_form['shape_pos'].set_text(str(tuple(selected.position)))
         
     # MapEditor.action_mouse_drag
 
@@ -895,7 +899,7 @@ class MapEditor(object):
                         State.map = toolkit.load_tiled_tmx_map(State.file_map)
                     except:
                         exc_type,exc_value,exc_traceback = sys.exc_info()
-                        self.gui_text_viewer('Load map failed',
+                        self.gui_view_text('Load map failed',
                             traceback.format_exception(
                                 exc_type, exc_value, exc_traceback),
                             width=640, height=480)
@@ -958,7 +962,7 @@ class MapEditor(object):
                     self.changes_unsaved = False
                 except:
                     exc_type,exc_value,exc_traceback = sys.exc_info()
-                    self.gui_text_viewer('Import Entities failed',
+                    self.gui_view_text('Import Entities failed',
                         traceback.format_exception(
                             exc_type, exc_value, exc_traceback),
                             width=640, height=480)
@@ -997,7 +1001,7 @@ class MapEditor(object):
             self.changes_unsaved = False
         except:
             exc_type,exc_value,exc_traceback = sys.exc_info()
-            self.gui_text_viewer('Save Entities failed',
+            self.gui_view_text('Save Entities failed',
                 traceback.format_exception(exc_type, exc_value, exc_traceback),
                 width=640, height=480)
             traceback.print_exc()
@@ -1092,7 +1096,7 @@ class MapEditor(object):
                 user_data.blur()
                 return
         elif key == K_RETURN and self.selected is not None:
-            self.gui_form['user_data'].focus()
+            user_data.focus()
             return
         # Filter out keystrokes that are "ugly" in GUI.
         if key not in (K_DELETE,):
@@ -1106,6 +1110,8 @@ class MapEditor(object):
                     State.world.remove(shape)
             elif key == K_ESCAPE:
                 self.action_quit_app()
+            elif key == K_v and mod & KMOD_CTRL:
+                self.verbose = not self.verbose
 #            else:
 #                print 'Key down', pygame.key.name(key)
     
@@ -1121,11 +1127,22 @@ class MapEditor(object):
         if self.mouse_down:
             # Multi-button does nothing.
             return
-        self.gui.event(e)
-        if self.gui_hover():
-            # GUI connection would have dispatched it.
+        elif self.modal:
+            # Modal dialog hogs mouse clicks.
+            self.gui.event(e)
             return
+        
+        # If click on widget, pass event to GUI. Else it is an editor action.
+        widget = self.gui_hover()
+        user_data = self.gui_form['user_data']
+        if widget is not None:
+            if widget is user_data:
+                if self.selected is None:
+                    return
+            self.gui.event(e)
         else:
+            if self.gui.widget.myfocus is self.gui_form['side_panel']:
+                user_data.blur()
             self.mouse_down = button
             self.action_mouse_click(e)
     
@@ -1134,14 +1151,10 @@ class MapEditor(object):
         """
         self.mouse_shape.position = State.camera.screen_to_world(pos)
         State.world.add(self.mouse_shape)
-#        if not self.mouse_down:
-#            self.gui.event(e)
-#        else:
-#            # Crossing GUI widgets does not interfere with dragging.
-#            self.action_mouse_drag(e)
-        self.gui.event(e)
-        # Crossing GUI widgets does not interfere with dragging.
-        self.action_mouse_drag(e)
+        if self.mouse_down:
+            self.action_mouse_drag(e)
+        else:
+            self.gui.event(e)
     
     def on_mouse_button_up(self, e, pos, button):
         """Handler for MOUSEBUTTONUP events.
@@ -1203,7 +1216,9 @@ def make_hud():
     def get_mouse():
         s = pygame.mouse.get_pos()
         w = State.camera.screen_to_world(s)
-        return 'S'+str(s) + ' W'+str((int(w.x),int(w.y),))
+#        return 'S'+str(s) + ' W'+str((int(w.x),int(w.y),))
+        return 'S%s W%s@%s' % (str(s), str((int(w.x),int(w.y),)),
+            State.world.level_of(State.app.mouse_shape))
     State.hud.add('Mouse',
         Statf(next_pos(), 'Mouse %s', callback=get_mouse, interval=100))
     
@@ -1222,8 +1237,8 @@ def make_hud():
     
     def get_selected():
         shape = State.app.selected
-        return 'None' if shape is None else '%s@%s'%(
-            shape.rect.center, State.world.level_of(shape))
+        return 'None' if shape is None else '%s@%d/%d'%(
+            shape.rect.center, State.world.level_of(shape), State.world.num_levels)
     State.hud.add('Selected',
         Statf(next_pos(), 'Selected %s', callback=get_selected, interval=100))
     
@@ -1279,7 +1294,7 @@ def make_side_panel(container):
     t = gui.Table(name='side_panel', align=1, valign=-1)
     t.tr()
     t.td(gui.Label('Type:'))
-    t.td(gui.Label('', name='shape_type'), align=-1)
+    t.td(gui.Label('no selection', name='shape_type'), align=-1)
     t.tr()
     t.td(gui.Label('Pos:'))
     t.td(gui.Label('', name='shape_pos'), align=-1)

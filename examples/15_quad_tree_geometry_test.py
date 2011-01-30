@@ -267,7 +267,7 @@ class App(Engine):
         
         # Frames per second
         State.hud.add('FPS', Statf(next_pos(),
-            'FPS %d', callback=State.clock.get_fps))
+            'FPS %d', callback=State.clock.get_fps, interval=200))
         
         # Which level's grid is drawn / Number of levels there are
         def get_levels():

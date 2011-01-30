@@ -108,4 +108,4 @@ for entity in entities:
         fh.write('user_data ' + user_data + '\n')
 
     else:
-        print 'unsupported type:', entity.__class__.__name__
+        raise pygame.error, 'unsupported type: ' + entity.__class__.__name__
