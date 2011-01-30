@@ -224,3 +224,11 @@ SVN rev 185:
   * Fixed: World editor allowed interaction with user_data field when no shape was selected.
   * Fixed: export_world_quadtree.py now raises pygame.error instead of printing to stdout when encountering an unsupported shape type.
   * Changed: In 12_quad_tree_stress_test.py and 15_quad_tree_geometry_test.py changed HUD FPS interval to 200 for more frequent updates.
+
+SVN rev 188:
+  * Fixed: Tiled maps do not insure every tile position has a tile. Such "sparse" maps caused toolkit.load_tiled_tmx_map() to blow up. This is now fixed.
+  * Changed: MapLayer constructor takes a name argument which is stored in the MapLayer.name. It is reserved for programmer convenience. It is not needed by the library.
+  * Changed: toolkit.collapse_map_layer() preserves MapLayer.name.
+  * Changed: Added intelligence to toolkit.collapse_map_layer() to use a default colorkey if the full number of tiles aren't present in the map (happens in sparse maps). When this occurred, the resulting squares would be black an opaque, covering up lower layers.
+  * New: toolkit.reduce_map_layers() reduces the specified layers to one layer.
+  * New: 16_reduce_map.py to demo the new toolkit.reduce_map_layers().
