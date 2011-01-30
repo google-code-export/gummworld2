@@ -17,7 +17,7 @@ One should not have to worry about juggling game speed and frame rates. Gummworl
 
 Since this is Gummworld2, one may wonder about the original [http://www.pygame.org/project-Gummworld-1107-.html Gummworld]. While it was a great learning experience and a lot of fun, it became obvious it was more ambitious than it should have been. It turned out overly complex and restrictive, with a higher learning curve than intended. Consequently it became hard to do anything outside the box.
 
-= Details =
+= API Overview =
 
 Gummworld2 is currently developed with Windows 7, Python 2.6, pygame 1.9.1, pymunk 1.0.0, and Tiled Map Editor 0.7.2 (the Java version). Most of the testing is on the development platform. Light testing for demo performance and operation has been done with Windows XP SP 2 and Ubuntu 10. Almost assuredly Gummworld2 will not work with pygame 1.8.1 and earlier, since various classes may not have provided the copy() method (most notably Rect).
 
@@ -55,11 +55,11 @@ Lastly, a general caution. The instance variables representing 2D coordinates ar
 
 ==Status Summary==
 
-Initial efforts focused on the map, its visual presentation, and interface. Recently attention is wandering more towards the model. Thus, the API is still seeing a few changes, some of which break existing code. This was to be expected. Nevertheless, apologies for any inconvenience.
+Initial efforts focused on the map, its visual presentation, and interface. Recently attention has turned to the world (model) editor. The API has not had any code-breaking changes since version 0.0.7.
 
 A mini game was finished in 0.0.2 as a proof-of-concept, and kept functional as the library evolved. The game and all but one example do not use an external physics library; I would describe them as pygame-only. A few examples use a Tiled map.
 
-The editor concept has changed. It will not do map editing. Tiled already does that well. Gummworld2's editor will supplement Tiled's static maps by visually overlaying tagged geometry for physics--e.g. rects and circles for pygame; lines, circles, and polys for pymunk or others--and placement of interactive game content like baddies, doors, traps, anything you can think of. The geometry would typically be invisible in the game, and used for game events like:
+The editor concept has narrowed. It will not do map editing. Tiled already does that well. Gummworld2's editor will supplement Tiled's static maps by visually overlaying tagged geometry for physics--e.g. rects and circles for pygame; lines, circles, and polys for pymunk or others--and placement of interactive game content like baddies, doors, traps, anything you can think of. The geometry would typically be invisible in the game, and used for game events like:
 
   * Did these two space ships collide.
   * Did my truck venture into this sand pit.
@@ -68,6 +68,8 @@ The editor concept has changed. It will not do map editing. Tiled already does t
   * Is this defense tower visible in the camera view.
 
 Performance is extremely good on my Intel Core i3 laptop. Not so great on my older AMD Athlon X2 desktop, but still much better than the original Gummworld; it screams at Diablo-like resolution (800x600), presumably leaving plenty of capacity for dynamic content. The proof-of-concept bunny game seems to support this expectation, with a two-layer 2056x2056-pixel map, 400 autonomous sprites, collision handling, and a split screen rendering at nearly 250 FPS on the Intel Core i3.
+
+An aged Intel single-core 1.8 GHz with cheap on-board video and SDRAM pulled off 40-60 FPS on examples. However, the scrolling experience was sluggish and really jerky since the platform was not fast enough to drive smooth interpolation and still work in garbage collection. The quadtree examples did not run acceptibly at all, except with low sprite counts.
 
 ===Features===
 
@@ -81,7 +83,7 @@ Library:
     * NoWorld is the default, for game makers that do not want a canned model (DONE)
     * World is a dumb model with a list for entities (DONE)
     * WorldQuadTree is an advanced model that provides optimal collision checking in large maps with many elements (DONE)
-    * WorldPymunk is a model that leverages pymunk (bare bones)
+    * WorldPymunk is a model that leverages pymunk; needs more shape classes and pymunk-ish things (incomplete)
   * Procedural object makers, e.g. random groups of baddies
   * Menu (DONE)
   * Grid (DONE)
@@ -92,13 +94,14 @@ Library:
 Editor:
   * pymunk editing primitives
     * Line
-    * Circle
-    * Poly
-    * Select
+    * Rect (DONE)
+    * Circle (DONE)
+    * Poly (DONE)
+    * Select (DONE)
     * Multi-select
-    * Move
-    * Resize
-    * Delete
+    * Move (DONE)
+    * Resize (DONE)
+    * Delete (DONE)
     * Undo/Redo
   * ~~Map decorating and tiling~~
     * ~~Tileset loading~~
@@ -116,19 +119,19 @@ Editor:
 
 ===pymunk===
 
-pymunk is barely more than a concept thus far. It is fundamentally proven in examples/08_pymunk_motion.py. The pygame portion of the library is about ready for use in map_editor.py.
+pymunk is barely more than a concept thus far. It is fundamentally proven in examples/08_pymunk_motion.py. The pygame portion of the library is about ready for use in map_editor.py. There will be a world-editor file importer for pymunk.
 
 ===World Editor===
 
-The plan is for game makers to be able to load a map in the editor, draw shapes on it to define obstacles, then save a "physics map". Games will then be able to load the graphics map and physics map, and rely on pymunk or other implementations for run-time physics.
+The plan is for game makers to be able to load a map in the editor, draw shapes on it to define game objects, then save a "physics map". Games will then be able to load the graphics map and physics map, and rely on pymunk or other implementations for run-time physics.
 
-I am liking the combination of [http://www.mapeditor.org/ Tiled Map Editor] and [http://www.pygame.org/project-map+loader+for+%27tiled%27-1158-2951.html pytmxloader]. Initially the world editor will simply load the tile map, and let one add pygame or pymunk geometry.
+I am liking the combination of [http://www.mapeditor.org/ Tiled Map Editor] and [http://www.pygame.org/project-map+loader+for+%27tiled%27-1158-2951.html pytmxloader]. Initially the world editor will simply load the tile map, and let one add geometry and tag it with arbitrary info. The exported file will contain all the info needed to recreate shapes in game, and get their info tags.
 
 Since the Map class is already source agnostic, it may be easy enough to support multiple map editor formats just by adding a `toolkit.load_*` function or perhaps extension scripts.
 
 Thought... Map layers--Tiled or other--can be used to classify terrain objects, for example "trees go on layer 5". Game makers (i.e., me) may want to do special things with these, like let mobile objects pass under or behind them and temporarily lower the image alpha so the mobile object is not entirely obscured. (This aspect weakens the case for map decorating and tiling in map_editor.py.)
 
-Defining cordons on a static map is admittedly nice. However, the world editor must also handle placement of "spawned" game objects, i.e. objects that are not in static map layers. For example, groups of orcs, gates, siege weapons, random rubble. The world editor will likely have to load tilesets to aid visualizing world content design. It's essential to at least be able to insert a physical "device" into the world map, size its geometry accurately, and provide a handle and some descriptive data for a few reasons:
+Drawing boundaries on a static map is admittedly nice. However, the world editor must also handle placement of "spawned" game objects, i.e. objects that are not in static map layers. For example, groups of orcs, gates, siege weapons, random rubble. The world editor will likely have to load tilesets to aid visualizing world content design. It's essential to at least be able to insert a physical "device" into the world map, size its geometry accurately, and provide a handle or descriptive data for a few reasons:
 
   # Shapes are needed for dimensions; and potentially other physics-related purposes in the case of pymunk.
   # Obviously, if objects in the physics dimension are interacting those interactions need to correlate with the presentation layer.
