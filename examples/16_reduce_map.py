@@ -20,25 +20,39 @@ __version__ = '$Id$'
 __author__ = 'Gummbum, (c) 2011'
 
 
-"""09_collapse_map.py - An example of using toolkit.collapse_map in Gummworld2.
+"""16_reduce_map.py - An example of using toolkit.reduce_map_layers in
+Gummworld2.
 
 This demo does not use pymunk.
 
 The results of this demo can be impressive on computers with fast CPUs.
+
+The demo allows one to see the efficiency of different combinations of layer
+reduction and collapse.
 
 Maps with many small tiles are great for designing maps with interesting detail.
 But they take a lot longer for Python to process than larger tiles because there
 are more objects in the working lists. toolkit.collapse_map() can help with
 this.
 
-The function takes a map with many small tiles and converts it to a map with
-fewer, larger tiles for more efficient processing.
+Maps with many layers are great for layer control, map organization, layered
+effects, and other possibilities. But it is costly to blit multiple images for
+the same map square. If one does the blitting up front and caches the resulting
+image, then there is only one image to blit instead of one from several layers.
+If layers are not needed for effects, then toolkit.reduce_map_layers() can help
+in this way.
 
-While running this demo use keys 0-9 to set the collapse level. 1 presents the
-original map of 32x32 size tiles, 2 is double the tile size, and so on. 0
-presents a map collapsed 10 times, or 320x320 pixel per tile.
+When the demo is run, watch the FPS and Layer/Tiles metrics in the HUD while
+pressing O for Original map, R for Reduced map, C for Collapsed map, and B for
+Both collapsed-and-reduced map.
 
-Watch what happens to the frame rate as tile size increases.
+On a geek note, this demo loads a map that has sparse layers. Which is to say
+not every square of every layer has a tile defined for it. This is efficient
+map design courtesy of Tiled Map Editor, and has real savings. In our case a
+fully populated map would have 2400 tiles to render per frame whereas our map
+has only 728 tiles to render. If a program had a fully populated map, then there
+would be great efficiency in reducing all layers down to one, or 2400 tiles down
+to 400 tiles.
 """
 
 
@@ -47,7 +61,7 @@ from pygame.sprite import Sprite
 from pygame.locals import (
     FULLSCREEN,
     Color,
-    K_TAB, K_ESCAPE, K_g, K_l, K_0, K_1, K_2, K_9,
+    K_ESCAPE, K_b, K_c, K_g, K_l, K_o, K_r,
 )
 
 import paths
@@ -68,49 +82,38 @@ class Avatar(CameraTargetSprite):
 
 class App(Engine):
     
-    def __init__(self, resolution=(800,600)):
+    def __init__(self, resolution=(640,640)):
         
         # Caption for window, and HUD in full-screen mode
         caption = (
-            '09 Collapse Map - TAB: view | G: grid | ' +
-            'L: labels | Collapse: 1-10 (0 is 10)'
+            '16 Reduce Map Layers - G: grid | ' +
+            'L: labels | R: reduced | C: collapsed | B: both | O: original'
         )
         
         resolution = Vec2d(resolution)
         
         super(App, self).__init__(
             caption=caption,
-            camera_target=Avatar((325,420), resolution//2),
+            camera_target=Avatar(resolution//2, resolution//2),
             resolution=resolution,
-            display_flags=FULLSCREEN,
             frame_speed=0)
         
         # Load Tiled TMX map, then update the world and camera.
-        self.map = toolkit.load_tiled_tmx_map('Gumm no swamps.tmx')
-        State.map = self.map
+        self.original_map = toolkit.load_tiled_tmx_map('Gumm multi layer.tmx')
+        State.map = self.original_map
         State.world.rect = State.map.rect.copy()
-        # The collapse stat for the hud.
-        self.collapse = 1
+        # The map reduced.
+        self.reduced_map = toolkit.reduce_map_layers(
+            self.original_map, range(len(self.original_map.layers)))
+        # The map collapsed.
+        self.collapsed_map = toolkit.collapse_map(self.original_map, (8,8))
+        # The map reduced and collapsed.
+        self.collapsed_reduced_map = toolkit.collapse_map(self.reduced_map, (8,8))
         
-        # Make two cameras.
-        State.save('main', ['camera'])
-        State.camera = Camera(State.camera.target,
-            View(State.screen.surface, pygame.Rect(30,20,*State.screen.size*2//3)))
-        State.name = 'small'
-        State.save(State.name, ['camera'])
-
-
-        # Easy way to select the "next" state name.
-        self.next_state = {
-            'main' : 'small',
-            'small' : 'main',
-        }
+        State.show_grid = True
         
         # I like huds. Add more stuff to the canned hud.
         toolkit.make_hud(caption)
-        State.hud.add('Collapse', Statf(State.hud.next_pos(),
-            'Collapse %d', callback=lambda:self.collapse,
-            interval=2000))
         State.hud.add('Tile size', Statf(State.hud.next_pos(),
             'Tile size %s', callback=lambda:str(tuple(State.map.tile_size)),
             interval=2000))
@@ -121,6 +124,14 @@ class App(Engine):
             return 'Screen %dx%d / Visible tiles %dx%d' % (res.x,res.y,tiles.x,tiles.y,)
         State.hud.add('Screen', Stat(State.hud.next_pos(),
             '', callback=screen_info, interval=2000))
+        def map_info():
+            layern = len(State.map.layers)
+            tilen = 0
+            for layer in State.map.layers:
+                tilen += len(layer)
+            return '%d/%d' % (layern,tilen)
+        State.hud.add('Layers/Tiles', Statf(State.hud.next_pos(),
+            'Layers/Tiles: %s', callback=map_info, interval=2000))
         State.show_hud = True
         
         # Create a speed box for converting mouse position to destination
@@ -191,9 +202,6 @@ class App(Engine):
         toolkit.draw_labels()
         State.hud.draw()
         self.draw_avatar()
-        if State.name == 'small':
-            pygame.draw.rect(State.screen.surface, (99,99,99),
-            State.camera.view.parent_rect, 1)
         State.screen.flip()
         
     def draw_avatar(self):
@@ -209,27 +217,18 @@ class App(Engine):
         
     def on_key_down(self, unicode, key, mod):
         # Turn on key-presses.
-        if key == K_TAB:
-            # Select the next state name and and restore it.
-            State.restore(self.next_state[State.name], ['camera'])
-            if State.name == 'small':
-                self.speed_box.center = State.camera.abs_screen_center
-            else:
-                self.speed_box.center = State.camera.abs_screen_center
-        elif key == K_g:
+        if key == K_g:
             State.show_grid = not State.show_grid
         elif key == K_l:
             State.show_labels = not State.show_labels
-        elif key == K_1:
-            State.map = self.map
-        elif key in [K_0]+range(K_2,K_9+1):
-            if key == K_0:
-                n = 10
-            else:
-                n = key - K_0
-            State.map = toolkit.collapse_map(self.map, (n,n))
-            State.world.rect = State.map.rect.copy()
-            self.collapse = n
+        elif key == K_r:
+            State.map = self.reduced_map
+        elif key == K_c:
+            State.map = self.collapsed_map
+        elif key == K_b:
+            State.map = self.collapsed_reduced_map
+        elif key == K_o:
+            State.map = self.original_map
         elif key == K_ESCAPE:
             quit()
         
