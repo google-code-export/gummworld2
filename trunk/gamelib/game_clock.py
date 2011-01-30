@@ -69,6 +69,7 @@ class GameClock(object):
     def __init__(self, ticks_per_second=25, max_fps=0, use_wait=True, max_frame_skip=5):
         self._wait = time.sleep
         self._get_ticks = time.clock
+        self._elapsed = 0.0
         self.ticks_per_second = ticks_per_second
         self.max_fps = max_fps
         self.use_wait = use_wait
@@ -78,7 +79,7 @@ class GameClock(object):
     def reset(self):
         """Reset clock counters."""
         self._tick_size = 1.0 / self.ticks_per_second
-        self._reset_threshold = 1.0 + self._tick_size
+        self._reset_threshold = 1.5
         self._ticks = 0
         self._next_game_tick = self._get_ticks()
         self._next_frame = self._get_ticks()
@@ -87,7 +88,7 @@ class GameClock(object):
         self._frame_ready = False
         #
         self._time = self._get_ticks()
-        self._elapsed = 0
+        self._elapsed %= 1.0
         self._tps = 0.0
         self._frame_count = 0
         self._fps = 0
@@ -157,12 +158,12 @@ class GameClock(object):
         self._elapsed += self._ticks
         self._time = time
         # Once per second...
-        if self._elapsed < 1:
+        if self._elapsed < 1.0:
             return
         elif self._elapsed >= self._reset_threshold:
             self.reset()
         else:
-            self._elapsed %= 1
+            self._elapsed %= 1.0
         # Save stats and clear counters.
         self._tps = 0.0
         self._fps = self._frame_count
@@ -177,13 +178,13 @@ class GameClock(object):
         self._tps += 1
         self._flip()
         self._update_ready = self._frame_ready = False
-        if self._get_ticks() > self._next_game_tick and \
+        if self._get_ticks() >= self._next_game_tick and \
             self._loops < self.max_frame_skip:
             self._update_count += 1
             self._next_game_tick += self._skip_ticks
             self._loops += 1
             self._update_ready = True
-        if self._get_ticks() > self._next_frame or \
+        if self._get_ticks() >= self._next_frame or \
             self._loops >= self.max_frame_skip:
             self._frame_count += 1
             self._next_frame += self._skip_frames

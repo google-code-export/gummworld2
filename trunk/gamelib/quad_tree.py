@@ -63,12 +63,15 @@ class QuadTreeNode(object):
         self.level = parent.level + 1
         self.rect = pygame.Rect(rect)
         self.branch_id = branch_id
+##        print self.path
         self.branches = []
         self.entities = {}
         self.root.num_levels = max(self.level, self.root.num_levels)
         self._split()
     
     def _split(self):
+        if self.branch_id > 4:
+            return
         rect = self.rect
         min_width,min_height = self.root.min_size
         half_width,half_height = rect.width//2, rect.height//2
@@ -106,7 +109,8 @@ class QuadTreeNode(object):
         branches.append(QuadTreeNode(self, r3, 3))
         branches.append(QuadTreeNode(self, r4, 4))
         
-        if self.level == 1 and self.root.worst_case > 0:
+#        if self.level == 1 and self.root.worst_case > 0:
+        if self.is_root and self.root.worst_case > 0:
             ## 9x9 catch-all for worst performance cases that would tend to load
             ## level 1 with entities. For example: entities that are a little
             ## outside of world bounds; entities that concurrently align on
@@ -147,9 +151,10 @@ class QuadTreeNode(object):
             branches.append(QuadTreeNode(self, r3, 13))
     
     def _add_internal(self, entity):
-        self.root.branch_visits_add += 1
-        collided = self.root.collided
-        collisions = self.root.collisions
+        root = self.root
+        root.branch_visits_add += 1
+        collided = root.collided
+        collisions = root.collisions
         for other in self.entities:
             if collided(other, entity):
                 collisions[other,entity] = 1
@@ -167,22 +172,23 @@ class QuadTreeNode(object):
             self._keep(entity)
             for b in self.branches:
                 b.test_collisions(entity)
-            ## experimental bug fix
-            if not self.is_root:
-                branches = self.parent.branches
-                my_idx = branches.index(self)
+            if self.branch_id > 4:
+                for b in root.branches[:4]:
+                    b.test_collisions(entity)
+            elif not self.is_root:
                 entity_rect = entity.rect
-                for i,b in enumerate(branches):
-                    if i == my_idx:
+                for b in root.branches[4:]:
+                    if self is b:
                         continue
-                    if b.rect.colliderect(entity_rect):
-                        b.test_collisions(entity)
+                    b.test_collisions(entity)
     
     def _keep(self, entity):
         self.root.entity_branch[entity] = self
         self.entities[entity] = 1
     
     def test_collisions(self, entity):
+        if not self.rect.colliderect(entity.rect):
+            return
         collided = self.root.collided
         collisions = self.root.collisions
         for other in self.entities:
