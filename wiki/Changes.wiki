@@ -9,7 +9,7 @@ This page contains a change log, working notes on issues, items to-do, and items
 
 == In Progress ==
 
-  * Starting work on map editor. It will use PGU's GUI, which does what I need and was easy enough to figure out how to integrate with my app in just one sitting. Got working menus, soon more.
+  * World editor is well underway. It uses PGU's GUI, which does what I need and was easy enough to figure out how to integrate with my app in just one sitting. Done: map scroller, menus, toolbar, shape editor, importer/exporter. In progress: scrolling tile palette.
 
 == Issues ==
 
