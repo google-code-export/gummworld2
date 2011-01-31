@@ -779,7 +779,7 @@ class MapEditor(object):
         """
         def modal_off(*args):
             State.app.modal = None
-        d = gui.FileDialog(title_txt='Import Entities', path=data.path['map'])
+        d = gui.FileDialog(title_txt=title, path=path)
         d.connect(gui.CLOSE, modal_off, None)
         d.connect(gui.CLOSE, callback, 'file_picked', d)
         d.open()
@@ -907,6 +907,17 @@ class MapEditor(object):
                 self.remake_scrollbars()
         
     # MapEditor.action_map_load
+    
+    def action_tiles_load(self, sub_action=None, widget=None):
+        if sub_action is None:
+            # Get input file name.
+            self.gui_browse_file("Import Tiles",
+                data.path['image'], self.action_tiles_load)
+        elif sub_action == 'file_picked':
+            ## Do something with the file.
+            pass
+
+    # MapEditor.action_tiles_load
     
     def action_entities_clear(self, sub_action=None, widget=None):
         """Clear entities action: clear all entities from editor.
@@ -1255,8 +1266,9 @@ def make_menus(container):
         ('Entities/Save',    app.action_entities_save, None),
         ('Entities/Save As', app.action_entities_save_as, None),
         ('Entities/Clear',   app.action_entities_clear, None),
-        ('Map/New',          app.action_map_new, None),
-        ('Map/Load',         app.action_map_load, None),
+        ('Images/New Map',   app.action_map_new, None),
+        ('Images/Load Map',  app.action_map_load, None),
+        ('Images/Load Tiles',app.action_tiles_load, None),
         ('View/Grid',        app.action_view_grid, None),
         ('View/Labels',      app.action_view_labels, None),
         ('View/Rects',       app.action_view_rects, None),
@@ -1292,26 +1304,45 @@ def make_side_panel(container):
     """GUI Table with shape info and other editing tools.
     """
     t = gui.Table(name='side_panel', align=1, valign=-1)
+    
+    # Shape type.
     t.tr()
     t.td(gui.Label('Type:'))
     t.td(gui.Label('no selection', name='shape_type'), align=-1)
+    
+    # Shape position.
     t.tr()
     t.td(gui.Label('Pos:'))
     t.td(gui.Label('', name='shape_pos'), align=-1)
+    
+    # Shape user_data.
     t.tr()
     label = gui.Label('Data:')
     t.td(label)
     smaller_font = pygame.font.Font(data.filepath('font', 'Vera.ttf'), 10)
-#    user_data = gui.Input('', name='user_data', font=smaller_font, size=29)
     w = (State.screen.width - State.camera.view.width - label.resize()[0] - 20)
     user_data = gui.TextArea(
         value='', name='user_data', font=smaller_font, width=w)
+    user_data.connect(gui.CHANGE, State.app.action_set_userdata, user_data)
     t.td(user_data)
+#    # Add image to user_data button.
+#    t.tr()
+#    t.td(gui.Button('Add image to user_data'), colspan=2)
+    
+    # Image palette: table in a scroll area.
     t.tr()
-    t.td(gui.Button('Add image to user_data'), colspan=2)
+    t.td(gui.Spacer(1,6), colspan=2)
+    t.tr()
+    t.td(gui.Label('Images:'), colspan=2, align=-1)
+    t.tr()
+    w = (State.screen.width - State.camera.view.width - 13)
+    h = (State.screen.height - t.resize()[1] - 3)
+    tile_palette = gui.Table(name='tile_palette')
+    tile_scroller = gui.ScrollArea(tile_palette, width=w, height=h)
+    t.td(tile_scroller, colspan=2, align=1)
+
     x,y = State.camera.view.width,0
     container.add(t, x, y)
-    user_data.connect(gui.CHANGE, State.app.action_set_userdata, user_data)
 
 # make_form_shape_info
 
