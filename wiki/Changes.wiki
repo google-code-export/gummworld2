@@ -232,3 +232,7 @@ SVN rev 188:
   * Changed: Added intelligence to toolkit.collapse_map_layer() to use a default colorkey if the full number of tiles aren't present in the map (happens in sparse maps). When this occurred, the resulting squares would be black an opaque, covering up lower layers.
   * New: toolkit.reduce_map_layers() reduces the specified layers to one layer.
   * New: 16_reduce_map.py to demo the new toolkit.reduce_map_layers().
+
+SVN rev 191:
+  * Changes: world_editor.py; Map menu became Images menu; added menu item to load tiles; added action_tiles_load(); added scrollable table to hold image palette.
+  * Fixed: world_editor.py; action_browse_file() had hard-coded title and path, ignoring its arguments.
