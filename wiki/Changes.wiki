@@ -236,3 +236,7 @@ SVN rev 188:
 SVN rev 191:
   * Changes: world_editor.py; Map menu became Images menu; added menu item to load tiles; added action_tiles_load(); added scrollable table to hold image palette.
   * Fixed: world_editor.py; action_browse_file() had hard-coded title and path, ignoring its arguments.
+
+SVN rev 194:
+  * Changed: pygame_utils.load_image() raise SystemExit if it failed. Now raises pygame.error.
+  * Checkpoint: Working on world_editor.py's tile sheet loader and sizer. The loader is halfway implemented: loads a tile sheet into the sizer. The sizer is just an unconnected GUI at present.
