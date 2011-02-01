@@ -381,7 +381,7 @@ def load_image(name, colorkey=None, alpha=False):
             _IMAGE_CACHE[name] = image
         except pygame.error, message:
             print 'Cannot load image:', name
-            raise SystemExit, message
+            raise pygame.error, message
     if alpha:
         image = image.convert_alpha()
     else:

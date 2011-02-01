@@ -43,12 +43,12 @@ Controls:
         *   Clicking and dragging a corner control point reshapes a shape.
 
 Design:
-    There will likely be a form in the space on the right. Selecting a shape
+    There is a form in the space on the right. Selecting a shape
     will allow data from the form to be attached to it, and data already
     attached will be displayed in the form. The world file loader can then use
     that data for any robust purpose.
     
-    Below the form in the space on the right will be a tile palette. This is
+    Below the form in the space on the right is a tile palette. This is
     for decorating the map so that one can see the graphics for spawned and/or
     collidable objects while sizing their shapes in the world.
     
@@ -106,13 +106,19 @@ from pygame.locals import *
 ## Gummworld2
 import paths
 from gamelib import (
-    model, data, geometry, toolkit,
+    model, data, geometry, toolkit, pygame_utils,
     State, Camera, Map, Screen, View,
     HUD, Stat, Statf,
     GameClock, Vec2d,
 )
 import gui
 
+
+# Filename-matching extensions for image formats that pygame can load.
+IMAGE_FILE_EXTENSIONS = (
+    'gif','png','jpg','jpeg','bmp','pcx', 'tga', 'tif',
+    'lbm', 'pbm', 'pgm', 'xpm',
+)
 
 #os.environ['SDL_VIDEO_CENTERED'] = '1'
 
@@ -153,6 +159,12 @@ menu_data = (
 
 
 class TimeThing(object):
+    """Calling str() on instances of this class return a formatted time string
+    with thousanths of a second appended (e.g. 10:15:59.999).
+    
+    Pass a strftime() format string to the constructor, or assign such a format
+    string to the fmt instance variable.
+    """
     
     strftime = time.strftime
     
@@ -662,6 +674,9 @@ class MapEditor(object):
         c.remove(self.v_map_slider)
         self.make_scrollbars(c, reset)
     
+    def gui_modal_off(self, *args):
+        State.app.modal = None
+    
     def gui_hover(self):
         """Return True if the mouse is hovering over a GUI widget.
         """
@@ -682,8 +697,6 @@ class MapEditor(object):
         def set_value(dialog, value):
             dialog.value = value
             dialog.close()
-        def modal_off(*args):
-            State.app.modal = None
         
         content = gui.Table()
         d = gui.Dialog(gui.Label('Gummworld2 World Editor'), content, name='modal')
@@ -700,7 +713,7 @@ class MapEditor(object):
         content.td(button_ok, align=0)
         content.td(button_cancel, align=0)
         
-        d.connect(gui.CLOSE, modal_off, None)
+        d.connect(gui.CLOSE, self.gui_modal_off, None)
         d.connect(gui.CLOSE, callback, 'check_discard', d)
         d.open()
         self.modal = d
@@ -710,12 +723,10 @@ class MapEditor(object):
     def gui_alert(self, message):
         """Simple popup message dialog.
         """
-        def modal_off(*args):
-            State.app.modal = None
         button = gui.Button('Ok')
         d = gui.Dialog(gui.Label(message), button)
         button.connect(gui.CLICK, d.close, None)
-        d.connect(gui.CLOSE, modal_off, None)
+        d.connect(gui.CLOSE, self.gui_modal_off, None)
         d.open()
         self.modal = d
     
@@ -724,9 +735,6 @@ class MapEditor(object):
         list of strings. Strings are split on '\n', and '\r' is stripped. Text
         is left-justified. No paragraph spacing is inserted.
         """
-        
-        def modal_off(*args):
-            State.app.modal = None
         
         title = gui.Label(title)
         doc = gui.Document(width=width)
@@ -745,7 +753,7 @@ class MapEditor(object):
                 doc.br(1)
         
         self.modal = gui.Dialog(title, gui.ScrollArea(doc,width+20,height))
-        self.modal.connect(gui.CLOSE, modal_off, None)
+        self.modal.connect(gui.CLOSE, self.gui_modal_off, None)
         self.modal.open()
     
     def gui_view_doc(self, title, lines, width=400, height=200):
@@ -753,10 +761,6 @@ class MapEditor(object):
         Each string is a paragraph. Text is centered. Paragraph spacing is
         inserted between lines.
         """
-        
-        def modal_off(*args):
-            State.app.modal = None
-        
         title = gui.Label(title)
         doc = gui.Document(width=width)
         
@@ -771,19 +775,61 @@ class MapEditor(object):
             doc.br(space[1])
         
         self.modal = gui.Dialog(title, gui.ScrollArea(doc,width+20,height))
-        self.modal.connect(gui.CLOSE, modal_off, None)
+        self.modal.connect(gui.CLOSE, self.gui_modal_off, None)
         self.modal.open()
     
     def gui_browse_file(self, title, path, callback):
         """Dialog to browse for a file.
         """
-        def modal_off(*args):
-            State.app.modal = None
         d = gui.FileDialog(title_txt=title, path=path)
-        d.connect(gui.CLOSE, modal_off, None)
+        d.connect(gui.CLOSE, self.gui_modal_off, None)
         d.connect(gui.CLOSE, callback, 'file_picked', d)
         d.open()
         self.modal = d
+    
+    def gui_tile_sheet_sizer(self, file_path, callback):
+#        try:
+#            image,rect = pygame_utils.load_image(file_path)
+#        except:
+#            exc_type,exc_value,exc_traceback = sys.exc_info()
+#            self.gui_view_text('Load tile sheet failed',
+#                traceback.format_exception(exc_type, exc_value, exc_traceback),
+#                width=640, height=480)
+#            traceback.print_exc()
+#            return
+        def do_click(*args):
+            print 'CLICK args:',args
+            pass
+        # Tile sheet dimensions.
+        t = gui.Table()
+        t.tr()
+        t.td(gui.Label('Width:'))
+        t.td(gui.Label('0', name='tile_width'), align=-1)
+        t.tr()
+        t.td(gui.Label('Height:'))
+        t.td(gui.Label('0', name='tile_height'), align=-1)
+        t.tr()
+        t.td(gui.Label('Margin:'))
+        t.td(gui.Label('0', name='tile_margin'), align=-1)
+        t.tr()
+        t.td(gui.Label('Spacing:'))
+        t.td(gui.Label('0', name='tile_spacing'), align=-1)
+        
+        # Sizer gadgets.
+        t.tr()
+        image = gui.Image(file_path)
+        s = gui.ScrollArea(image, 320, 200)
+        t.td(s, colspan=2)
+        d = gui.Dialog(gui.Label('Tile Sheet Sizer'), t)
+        d.value = None
+        d.connect(gui.CLOSE, self.gui_modal_off, None)
+        d.connect(gui.CLOSE, callback, 'file_picked', d)
+        d.connect(gui.CLICK, do_click, d)
+        # Buttons: Ok, Cancel
+        d.open()
+        self.modal = d
+    
+    # MapEditor.gui_tile_sheet_sizer
     
     def action_set_userdata(self, user_data):
         """GUI input field changed, set the selected shape's user_data.
@@ -911,10 +957,28 @@ class MapEditor(object):
     def action_tiles_load(self, sub_action=None, widget=None):
         if sub_action is None:
             # Get input file name.
-            self.gui_browse_file("Import Tiles",
+            self.gui_browse_file('Import Tiles',
                 data.path['image'], self.action_tiles_load)
         elif sub_action == 'file_picked':
             ## Do something with the file.
+            d = widget
+            if d.value is not None:
+                file_path = d.value
+                # Make sure we have a file.
+                if not os.path.isfile(file_path):
+                    self.gui_alert('Not a file: '+file_path)
+                    return
+                ext = os.path.splitext(file_path)[1][1:]
+                # Make sure we have an image file type (check extension).
+                if ext.lower() not in IMAGE_FILE_EXTENSIONS:
+                    self.gui_alert('Unsupported image file type: '+ext)
+                    return
+                # Hand off to the sizer dialog.
+                try:
+                    self.gui_tile_sheet_sizer(file_path, self.action_tiles_load)
+                except:
+                    pass
+        elif sub_action == 'tile_sheet_sized':
             pass
 
     # MapEditor.action_tiles_load
