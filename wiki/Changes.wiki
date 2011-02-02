@@ -240,3 +240,6 @@ SVN rev 191:
 SVN rev 194:
   * Changed: pygame_utils.load_image() raise SystemExit if it failed. Now raises pygame.error.
   * Checkpoint: Working on world_editor.py's tile sheet loader and sizer. The loader is halfway implemented: loads a tile sheet into the sizer. The sizer is just an unconnected GUI at present.
+
+SVN rev 196:
+  * New: world_editor.py tilesets: Load, size, display in palette.
