@@ -43,14 +43,14 @@ Controls:
         *   Clicking and dragging a corner control point reshapes a shape.
 
 Design:
-    There is a form in the space on the right. Selecting a shape
-    will allow data from the form to be attached to it, and data already
-    attached will be displayed in the form. The world file loader can then use
-    that data for any robust purpose.
+    There is a form in the space on the right. Selecting a shape will allow data
+    entered into the form to be attached to the shape, and data already attached
+    will be displayed in the form. World loader routines can then use that data
+    for any robust purpose.
     
-    Below the form in the space on the right is a tile palette. This is
-    for decorating the map so that one can see the graphics for spawned and/or
-    collidable objects while sizing their shapes in the world.
+    Below the form in the space on the right is a tile palette. This is for
+    decorating the map so that one can see the graphics for spawned and/or
+    collidable objects while sizing their shapes for the world.
     
     It is undecided at this time if the shape-graphics association will be
     saved with the world map format. On the one hand it can ease map creation.
@@ -58,15 +58,23 @@ Design:
     editor extension in secondary files is the answer: then game map loaders can
     choose to use or ignore the association data in secondary files.
     
-    Beyond the essentials, there is also an unwritten wish list of features
-    which may get added as demand dictates and time permits.
+    Beyond the essentials, there is a fluid wish list of features which may get
+    added as demand dictates and time permits.
 
 Bugs:
     *   
 
 Basic to do (complete for 1.0 release):
+    *   When hovering over the map, mouse cursor becomes the tool image for the
+        current edit mode.
     *   action_map_new() needs a Size Form.
     *   Form for picking images.
+        *   [DONE] Loader/sizer.
+        *   [DONE] Palette.
+        *   Picking from palette.
+        *   Stamp, move, delete in map.
+        *   Autosave/load tileset info so I don't have to reenter it every time
+            I load a tileset. Metadata saved in image dir or map dir?
     *   Images attached to world shapes.
     *   [DONE] Form for user_data.
         *   Option to add image path to user_data.
@@ -156,6 +164,15 @@ menu_data = (
     ),
     'Quit',
 )
+
+
+class Struct(object):
+    """A class with arbitrary members. Construct it like a dict, then access the
+    keys as instance values.
+    """
+    
+    def __init__(self, **kwargs):
+        self.__dict__.update(**kwargs)
 
 
 class TimeThing(object):
@@ -503,9 +520,10 @@ class MapEditor(object):
         self.verbose = False
         
         # Gooey stuff.
-        self.make_gui()
+        self.tilesets = []
         self.modal = None
         self.changes_unsaved = False
+        self.make_gui()
         
         # Make some default content and HUD.
         toolkit.make_tiles2()
@@ -518,6 +536,9 @@ class MapEditor(object):
         # Files.
         State.file_entities = None
         State.file_map = None
+        
+##        self.gui_tile_sheet_sizer(
+##            data.filepath('image','test.png'), self.action_tiles_load)
         
     # MapEditor.__init__
     
@@ -602,6 +623,9 @@ class MapEditor(object):
             self.gui_form['shape_pos'].set_text('')
             self.gui_form['user_data'].value = ''
             self.gui_form['user_data'].blur()
+    
+    def set_stamp(self, value):
+        self.stamp = value
     
     def make_gui(self):
         """Make the entire GUI.
@@ -788,44 +812,95 @@ class MapEditor(object):
         self.modal = d
     
     def gui_tile_sheet_sizer(self, file_path, callback):
-#        try:
-#            image,rect = pygame_utils.load_image(file_path)
-#        except:
-#            exc_type,exc_value,exc_traceback = sys.exc_info()
-#            self.gui_view_text('Load tile sheet failed',
-#                traceback.format_exception(exc_type, exc_value, exc_traceback),
-#                width=640, height=480)
-#            traceback.print_exc()
-#            return
-        def do_click(*args):
-            print 'CLICK args:',args
-            pass
+        d = self.modal
+        def mk_inputs(*args):
+            c = gui.Document()
+            for name,value in args:
+                w = gui.Input(value=value, name=name, size=3)
+                c.add(w)
+            return c
+        def draw_grid(form):
+            # Overlay the tile sheet image with a grid to show results of dialog
+            # input values.
+            def get(name):
+                # Convert widget's string value to int.
+                try:
+                    return int(form[name].value)
+                except ValueError:
+                    return 0
+            # Get the Input widgets' values.
+            mx,my = get('tile_mx'),get('tile_my')
+            tx,ty = get('tile_tx'),get('tile_ty')
+            sx,sy = get('tile_sx'),get('tile_sy')
+            # Get the Image widget.
+            image = form['tile_sheet']
+            # Attach to dialog "d" a rects list that can be used to carve up the
+            # tiles, and a values list that holds the form input values used to
+            # produce the rects.
+            del d.rects[:]
+            d.values[:] = mx,my,tx,ty,sx,sy
+            # Copy the image so we can mark it up for GUI display.
+            surf = image.value = image._value_orig.copy()
+            surf_rect = surf.get_rect()
+            # Make an alpha mask the size of a single tile.
+            mask = pygame.surface.Surface((tx,ty))
+            mask.fill(Color('blue'))
+            pygame.draw.rect(mask, Color('cornflowerblue'), mask.get_rect(), 1)
+            mask.set_alpha(99)
+            # Carve up the tile sheet, working in margin and spacing offsets.
+            # Blit the alpha mask over each tile as a visual aid in choosing
+            # the form values.
+            w,h = surf_rect.size
+            nx,ny = w//tx, h//ty
+            for y in range(ny):
+                for x in range(nx):
+                    rx = mx + x * (tx + sx)
+                    ry = my + y * (ty + sy)
+                    rect = Rect(rx,ry,tx,ty)
+                    surf.blit(mask, rect)
+                    d.rects.append(rect)
         # Tile sheet dimensions.
         t = gui.Table()
         t.tr()
-        t.td(gui.Label('Width:'))
-        t.td(gui.Label('0', name='tile_width'), align=-1)
+        t.td(gui.Label('Margin (w,h):'))
+        t.td(mk_inputs(('tile_mx','0'), ('tile_my','0')), align=-1)
         t.tr()
-        t.td(gui.Label('Height:'))
-        t.td(gui.Label('0', name='tile_height'), align=-1)
+        t.td(gui.Label('Tile (w,h):'))
+        t.td(mk_inputs(('tile_tx','32'), ('tile_ty','32')), align=-1)
         t.tr()
-        t.td(gui.Label('Margin:'))
-        t.td(gui.Label('0', name='tile_margin'), align=-1)
-        t.tr()
-        t.td(gui.Label('Spacing:'))
-        t.td(gui.Label('0', name='tile_spacing'), align=-1)
+        t.td(gui.Label('Spacing (w,h):'))
+        t.td(mk_inputs(('tile_sx','0'), ('tile_sy','0')), align=-1)
         
         # Sizer gadgets.
         t.tr()
-        image = gui.Image(file_path)
+        image = gui.Image(file_path, name='tile_sheet')
+        image._value_orig = image.value.copy()  ## NOTE: copy of image
         s = gui.ScrollArea(image, 320, 200)
         t.td(s, colspan=2)
+        
+        # Ok, Cancel buttons.
+        t.tr()
+        c = gui.Document()
+        c.add(gui.Button(gui.Label('Ok'), name='dialog_ok'))
+        c.add(gui.Button(gui.Label('Cancel'), name='dialog_cancel'))
+        t.td(c, colspan=2)
+        
+        # Set the dialog and its widget connections...
         d = gui.Dialog(gui.Label('Tile Sheet Sizer'), t)
-        d.value = None
+        ## Values that the caller will need.
+        d.file_path = file_path
+        d.image = image.value.copy()
+        d.values = []
+        d.rects = []
+        # Connections.
         d.connect(gui.CLOSE, self.gui_modal_off, None)
-        d.connect(gui.CLOSE, callback, 'file_picked', d)
-        d.connect(gui.CLICK, do_click, d)
-        # Buttons: Ok, Cancel
+        form = self.gui_form
+        for suffix in ('mx','my','tx','ty','sx','sy'):
+            form['tile_'+suffix].connect(gui.CHANGE, draw_grid, form)
+        draw_grid(form)
+        form['dialog_ok'].connect(gui.CLICK, callback, 'tile_sheet_sized', d)
+        form['dialog_ok'].connect(gui.CLICK, d.close, None)
+        form['dialog_cancel'].connect(gui.CLICK, d.close, None)
         d.open()
         self.modal = d
     
@@ -979,7 +1054,19 @@ class MapEditor(object):
                 except:
                     pass
         elif sub_action == 'tile_sheet_sized':
-            pass
+            d = widget
+            v = d.values
+            tileset = Struct(
+                file_path=d.file_path,
+                image=d.image,
+                margin=Vec2d(v[0:2]),
+                size=Vec2d(v[2:4]),
+                spacing=Vec2d(v[4:6]),
+                rects=d.rects,
+            )
+            self.tilesets.insert(0, tileset)
+            self.gui.widget.remove(self.gui_form['side_panel'])
+            make_side_panel(self.gui.widget)
 
     # MapEditor.action_tiles_load
     
@@ -1393,7 +1480,7 @@ def make_side_panel(container):
 #    t.tr()
 #    t.td(gui.Button('Add image to user_data'), colspan=2)
     
-    # Image palette: table in a scroll area.
+    # Tile palette: table in a scroll area.
     t.tr()
     t.td(gui.Spacer(1,6), colspan=2)
     t.tr()
@@ -1401,7 +1488,24 @@ def make_side_panel(container):
     t.tr()
     w = (State.screen.width - State.camera.view.width - 13)
     h = (State.screen.height - t.resize()[1] - 3)
-    tile_palette = gui.Table(name='tile_palette')
+    tile_palette = gui.Document(name='tile_palette')
+    
+    # Tile palette contents (Document).
+    tile_palette.block(-1)
+    for tileset in State.app.tilesets:
+        prevy = tileset.rects[0].y
+        for rect in tileset.rects:
+            if rect.y is not prevy:
+                tile_palette.br(1)
+                tile_palette.block(-1)
+                prevy = rect.y
+            image = gui.Image(tileset.image.subsurface(rect))
+            image.connect(gui.CLICK, State.app.set_stamp, image.value)
+            tile_palette.add(image)
+            tile_palette.space((1,0))
+        tile_palette.br(2)
+    
+    # Add tile palette to a scroll area, then the panel's table.
     tile_scroller = gui.ScrollArea(tile_palette, width=w, height=h)
     t.td(tile_scroller, colspan=2, align=1)
 
