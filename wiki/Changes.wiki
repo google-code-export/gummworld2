@@ -243,3 +243,6 @@ SVN rev 194:
 
 SVN rev 196:
   * New: world_editor.py tilesets: Load, size, display in palette.
+
+SVN rev 198:
+  * New: world_editor.py; tile palette integrated into the tool group. Mouse pointer picks up tile image.
