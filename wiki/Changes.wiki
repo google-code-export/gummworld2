@@ -246,3 +246,6 @@ SVN rev 196:
 
 SVN rev 198:
   * New: world_editor.py; tile palette integrated into the tool group. Mouse pointer picks up tile image.
+
+SVN rev 200:
+  * Changes: all paths.py files modified to use sys.path.insert() instead of sys.path.append(). This should avoid breakages on systems that have pgu installed as a Python site package.
