@@ -175,6 +175,72 @@ class Struct(object):
         self.__dict__.update(**kwargs)
 
 
+class Tile(gui.Image):
+    """This is an Image that has just enough event handling to participate in a
+    Group of Tools.
+    """
+    
+    def __init__(self, value, file_path, rect, group, **params):
+        gui.Image.__init__(self, value.copy(), **params)
+        self.tile_file_path = file_path
+        self.tile_rect = rect
+        self.group = group
+        group.add(self)
+        # Copy of source image.
+        self.tile_image = pygame.surface.Surface(rect.size)
+        self.tile_image.blit(self.value, (0,0))
+        # An alpha image used as a hover mask.
+        self.tile_hovering = pygame.surface.Surface(rect.size)
+        self.tile_hovering.fill(Color('steelblue'))
+        pygame.draw.rect(self.tile_hovering, Color('blue'), self.tile_hovering.get_rect(), 1)
+        self.tile_hovering.set_alpha(99)
+        # An alpha image used as a selected mask.
+        self.tile_selected = pygame.surface.Surface(rect.size)
+        self.tile_selected.fill(Color('purple'))
+        pygame.draw.rect(self.tile_selected, Color('darkblue'), self.tile_selected.get_rect(), 1)
+        self.tile_selected.set_alpha(99)
+        # State indicators.
+        self.tile_is_selected = False
+        self.tile_is_hovering = False
+    
+    def tile_deselect(self):
+        self.value.blit(self.tile_image, (0,0))
+        self.tile_is_selected = False
+        State.app.gui_form['toolbar_group'].value = None
+    
+    def event(self, e):
+        if e.type == gui.CLICK:
+            if e.button == 1:
+                toolbar_group = State.app.gui_form['toolbar_group']
+                for w in toolbar_group.widgets:
+                    w.pcls = ''
+                selected = toolbar_group.value
+                if isinstance(selected, Tile):
+                    if selected is not self:
+                        selected.tile_deselect()
+                        self.group.focus()
+                    else:
+                        self.tile_deselect()
+                        return
+                self.value.blit(self.tile_image, (0,0))
+                self.value.blit(self.tile_selected, (0,0))
+                self.tile_is_selected = True
+                self.tile_is_hovering = False
+                self.group.value = self
+        elif e.type == gui.ENTER:
+            if not self.tile_is_selected:
+                self.value.blit(self.tile_image, (0,0))
+                self.value.blit(self.tile_hovering, (0,0))
+                self.tile_is_hovering = True
+        elif e.type == gui.EXIT:
+            if not self.tile_is_selected:
+                self.value.blit(self.tile_image, (0,0))
+                self.tile_is_hovering = False
+        elif e.type == gui.BLUR:
+            if self.tile_is_selected:
+                self.tile_deselect()
+
+
 class TimeThing(object):
     """Calling str() on instances of this class return a formatted time string
     with thousanths of a second appended (e.g. 10:15:59.999).
@@ -520,6 +586,8 @@ class MapEditor(object):
         self.verbose = False
         
         # Gooey stuff.
+        self.gui = None
+        self.gui_form = None
         self.tilesets = []
         self.modal = None
         self.changes_unsaved = False
@@ -537,8 +605,8 @@ class MapEditor(object):
         State.file_entities = None
         State.file_map = None
         
-##        self.gui_tile_sheet_sizer(
-##            data.filepath('image','test.png'), self.action_tiles_load)
+        self.gui_tile_sheet_sizer(
+            data.filepath('image','test.png'), self.action_tiles_load)
         
     # MapEditor.__init__
     
@@ -567,9 +635,8 @@ class MapEditor(object):
         """Update the GUI, then update the app from the GUI.
         """
         # Plucked from gui.App.loop().
-        gui = self.gui
-        gui.set_global_app()
-        gui.update()
+        self.gui.set_global_app()
+        self.gui.update()
         State.camera.position = self.h_map_slider.value,self.v_map_slider.value
     
     def update_shapes(self):
@@ -594,6 +661,7 @@ class MapEditor(object):
         self.draw_world()
         if State.show_hud:
             State.hud.draw()
+        self.draw_mouse()
         self.gui.paint()
         State.screen.flip()
     
@@ -605,6 +673,15 @@ class MapEditor(object):
         for thing in things:
             if thing is not mouse_shape:
                 thing.draw()
+    
+    def draw_mouse(self):
+        toolbar_group = self.gui_form['toolbar_group']
+        if isinstance(toolbar_group.value, Tile):
+            image = toolbar_group.value.tile_image
+            if not self.gui_hover():
+                rect = image.get_rect()
+                rect.center = State.camera.world_to_screen(self.mouse_shape.position)
+                State.screen.blit(image, rect)
     
     def select(self, shape):
         self.selected = shape
@@ -624,8 +701,8 @@ class MapEditor(object):
             self.gui_form['user_data'].value = ''
             self.gui_form['user_data'].blur()
     
-    def set_stamp(self, value):
-        self.stamp = value
+    def set_stamp(self, tileset, rect, surf):
+        self.stamp = [surf, rect, tileset]
     
     def make_gui(self):
         """Make the entire GUI.
@@ -917,7 +994,9 @@ class MapEditor(object):
         """Mouse click action: button 3 inserts a shape; button 1 selects,
         deselects or sizes a shape.
         """
-        if not self.mouse_shape.rect.colliderect(State.camera.view.rect):
+        mouse_shape = self.mouse_shape
+        mouseover_shapes = self.mouseover_shapes
+        if not mouse_shape.rect.colliderect(State.camera.view.rect):
             # Don't change the map if clicking outside the map area.
             return
         elif self.modal is not None:
@@ -925,6 +1004,8 @@ class MapEditor(object):
             return
         elif self.mouse_down == 3:
             # Right-click: Put a shape.
+            if self.selected not in mouseover_shapes:
+                self.deselect()
             pos = State.camera.screen_to_world(e.pos)
             shape = self.gui_form['toolbar_group'].value
             if shape == 'rect_tool':
@@ -937,18 +1018,19 @@ class MapEditor(object):
                 geom = PolyGeom([(14,0),(29,12),(23,29),(7,29),(0,12)], pos)
             elif shape == 'circle_tool':
                 geom = CircleGeom(pos, 20)
+            else:
+                return
             self.select(geom)
             State.world.add(geom)
             self.changes_unsaved = True
         elif self.mouse_down == 1:
             # Left-click: Select, deselect, or grab.
-            mouseover_shapes = self.mouseover_shapes
             if self.selected not in mouseover_shapes:
                 self.deselect()
                 if len(mouseover_shapes):
                     self.select(mouseover_shapes[0])
             elif self.selected is not None:
-                if self.selected.grab(self.mouse_shape):
+                if self.selected.grab(mouse_shape):
                     # Grabbed control point.
                     pass
                 elif len(mouseover_shapes):
@@ -1403,7 +1485,7 @@ def make_hud():
             shape.rect.center, State.world.level_of(shape), State.world.num_levels)
     State.hud.add('Selected',
         Statf(next_pos(), 'Selected %s', callback=get_selected, interval=100))
-    
+
 # make_hud
 
 
@@ -1427,7 +1509,7 @@ def make_menus(container):
     ], name='menus')
     container.add(menus, 1, 1)
     menus.rect.w,menus.rect.h = menus.resize()
-    
+
 # make_menus
 
 
@@ -1447,7 +1529,7 @@ def make_toolbar(container):
     x = app.gui_form['menus'].rect.right + 2
     container.add(t, x, 0)
     return g,t
-    
+
 # make_toolbar
 
 
@@ -1476,9 +1558,6 @@ def make_side_panel(container):
         value='', name='user_data', font=smaller_font, width=w)
     user_data.connect(gui.CHANGE, State.app.action_set_userdata, user_data)
     t.td(user_data)
-#    # Add image to user_data button.
-#    t.tr()
-#    t.td(gui.Button('Add image to user_data'), colspan=2)
     
     # Tile palette: table in a scroll area.
     t.tr()
@@ -1491,6 +1570,7 @@ def make_side_panel(container):
     tile_palette = gui.Document(name='tile_palette')
     
     # Tile palette contents (Document).
+    toolbar_group = State.app.gui_form['toolbar_group']
     tile_palette.block(-1)
     for tileset in State.app.tilesets:
         prevy = tileset.rects[0].y
@@ -1499,16 +1579,18 @@ def make_side_panel(container):
                 tile_palette.br(1)
                 tile_palette.block(-1)
                 prevy = rect.y
-            image = gui.Image(tileset.image.subsurface(rect))
-            image.connect(gui.CLICK, State.app.set_stamp, image.value)
-            tile_palette.add(image)
+            tile = Tile(tileset.image.subsurface(rect),
+                tileset.file_path, rect, toolbar_group)
+            tile.connect(gui.CLICK, State.app.set_stamp,
+                tileset, rect, tile.value)
+            tile_palette.add(tile)
             tile_palette.space((1,0))
         tile_palette.br(2)
     
     # Add tile palette to a scroll area, then the panel's table.
     tile_scroller = gui.ScrollArea(tile_palette, width=w, height=h)
     t.td(tile_scroller, colspan=2, align=1)
-
+    
     x,y = State.camera.view.width,0
     container.add(t, x, y)
 
