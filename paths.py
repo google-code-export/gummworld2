@@ -31,6 +31,6 @@ import sys
 
 progname = sys.argv[0]
 progdir = os.path.dirname(progname)
-sys.path.append(progdir)
-sys.path.append(os.path.join(progdir,'gamelib'))
-sys.path.append(os.path.join(progdir,'gamelib','pgu'))
+sys.path.insert(0, os.path.join(progdir,'gamelib','pgu'))
+sys.path.insert(0, os.path.join(progdir,'gamelib'))
+sys.path.insert(0, progdir)

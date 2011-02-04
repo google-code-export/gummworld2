@@ -44,9 +44,9 @@ import sys
 
 progname = sys.argv[0]
 progdir = os.path.dirname(progname)
-sys.path.append(progdir)
-sys.path.append(
+sys.path.insert(0,
     os.path.normpath(
         os.path.join(progdir,'..')
     )
 )
+sys.path.insert(0, progdir)
