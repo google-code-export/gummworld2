@@ -65,22 +65,25 @@ Bugs:
     *   
 
 Basic to do (complete for 1.0 release):
-    *   When hovering over the map, mouse cursor becomes the tool image for the
-        current edit mode.
-    *   action_map_new() needs a Size Form.
+    *   [DONE] Geometry classes auto-size their points to fit selected tiles.
     *   Form for picking images.
         *   [DONE] Loader/sizer.
         *   [DONE] Palette.
-        *   Picking from palette.
-        *   Stamp, move, delete in map.
+        *   [DONE] Picking from palette.
+        *   [DONE] Stamp, move, delete in map.
         *   Autosave/load tileset info so I don't have to reenter it every time
-            I load a tileset. Metadata saved in image dir or map dir?
-    *   Images attached to world shapes.
+            I load a tileset. Metadata saved in image dir or map dir? This could
+            also be a very nice addition for games.
+    *   [DONE] Selected tiles attached to world shapes.
+    *   [DONE] Selected tiles attached to mouse pointer for placement.
     *   [DONE] Form for user_data.
-        *   Option to add image path to user_data.
+        *   Auto-add tileset/tile info to user_data (tileset name, tile rect).
     *   Single operations: Cut, copy, paste?
     *   Undo, redo.
     *   Contrast aid: Cycle through color schemes for world shapes.
+    *   action_map_new() needs a Size Form.
+    *   Put more thought into working with shapes. e.g. PITA to size a shape
+        after every insert. Maybe a list for history?
     *   Chooser: Importer and exporter (e.g., ASCII, pickle, custom).
     *   Help viewer? PGU makes it easy.
 
@@ -180,12 +183,11 @@ class Tile(gui.Image):
     Group of Tools.
     """
     
-    def __init__(self, value, file_path, rect, group, **params):
+    def __init__(self, value, file_path, rect, tileset, **params):
         gui.Image.__init__(self, value.copy(), **params)
         self.tile_file_path = file_path
         self.tile_rect = rect
-        self.group = group
-        group.add(self)
+        self.tile_tileset = tileset
         # Copy of source image.
         self.tile_image = pygame.surface.Surface(rect.size)
         self.tile_image.blit(self.value, (0,0))
@@ -199,6 +201,9 @@ class Tile(gui.Image):
         self.tile_selected.fill(Color('purple'))
         pygame.draw.rect(self.tile_selected, Color('darkblue'), self.tile_selected.get_rect(), 1)
         self.tile_selected.set_alpha(99)
+        # Translucent mouse image.
+        self.mouse_image = self.tile_image.copy()
+        self.mouse_image.set_alpha(75)
         # State indicators.
         self.tile_is_selected = False
         self.tile_is_hovering = False
@@ -206,27 +211,33 @@ class Tile(gui.Image):
     def tile_deselect(self):
         self.value.blit(self.tile_image, (0,0))
         self.tile_is_selected = False
-        State.app.gui_form['toolbar_group'].value = None
+        try:
+            State.app.selected_tiles.remove(self)
+        except:
+            pass
+    
+    def tile_select(self):
+        self.value.blit(self.tile_image, (0,0))
+        self.value.blit(self.tile_selected, (0,0))
+        self.tile_is_selected = True
+        self.tile_is_hovering = False
+        State.app.selected_tiles.append(self)
     
     def event(self, e):
         if e.type == gui.CLICK:
             if e.button == 1:
-                toolbar_group = State.app.gui_form['toolbar_group']
-                for w in toolbar_group.widgets:
-                    w.pcls = ''
-                selected = toolbar_group.value
-                if isinstance(selected, Tile):
-                    if selected is not self:
-                        selected.tile_deselect()
-                        self.group.focus()
-                    else:
-                        self.tile_deselect()
-                        return
-                self.value.blit(self.tile_image, (0,0))
-                self.value.blit(self.tile_selected, (0,0))
-                self.tile_is_selected = True
-                self.tile_is_hovering = False
-                self.group.value = self
+                selected = State.app.selected_tiles
+                self_selected = self.tile_is_selected
+                for tile in selected[:]:
+                    tile.tile_deselect()
+                if not self_selected:
+                    self.tile_select()
+            elif e.button == 3:
+                selected = State.app.selected_tiles
+                if self in selected:
+                    self.tile_deselect()
+                else:
+                    self.tile_select()
         elif e.type == gui.ENTER:
             if not self.tile_is_selected:
                 self.value.blit(self.tile_image, (0,0))
@@ -236,9 +247,8 @@ class Tile(gui.Image):
             if not self.tile_is_selected:
                 self.value.blit(self.tile_image, (0,0))
                 self.tile_is_hovering = False
-        elif e.type == gui.BLUR:
-            if self.tile_is_selected:
-                self.tile_deselect()
+#        else:
+#            print e.type, self.tile_rect
 
 
 class TimeThing(object):
@@ -287,16 +297,26 @@ class ControlPoint(Rect):
     # ControlPoint.position
 
 class RectGeom(geometry.RectGeometry):
+    """RectGeom(x, y, w, h, pos) : RectGeom
+    RectGeom(tiles, pos) : RectGeom
+    """
     
     typ = 'Rect'
     draw_rect = pygame.draw.rect
     
-    def __init__(self, *args, **kw):
-        super(RectGeom, self).__init__(*args, **kw)
+    def __init__(self, *args):
+        if len(args) > 2:
+            tiles = []
+            super(RectGeom, self).__init__(*args)
+        else:
+            tiles,pos = args
+            x,y,w,h = tiles_bounding_rect(tiles)
+            super(RectGeom, self).__init__(x, y, w, h, pos)
         self._attrs = 'topleft','topright','bottomright','bottomleft','center'
         self._cp = [ControlPoint(self, self._attrs[i]) for i in range(5)]
         self.grabbed = None
         self.user_data = ''
+        self.tiles = tiles[:]
         
     # RectGeom.__init__
     
@@ -347,6 +367,8 @@ class RectGeom(geometry.RectGeometry):
         camera = State.camera
         surface = camera.surface
         world_to_screen = camera.world_to_screen
+        # Tile image.
+        draw_tiles(self.position, self.tiles)
         # Indicate mouse-over.
         if self in app.mouseover_shapes:
             color = Color('white')
@@ -370,8 +392,8 @@ class PolyGeom(geometry.PolyGeometry):
     draw_poly = pygame.draw.polygon
     draw_rect = pygame.draw.rect
     
-    def __init__(self, *args, **kw):
-        super(PolyGeom, self).__init__(*args, **kw)
+    def __init__(self, points, pos, tiles=[]):
+        super(PolyGeom, self).__init__(points, pos)
         
         self._points = [Vec2d(p) for p in self._points]
         
@@ -380,6 +402,63 @@ class PolyGeom(geometry.PolyGeometry):
         self._cp = self.control_points
         self.grabbed = None
         self.user_data = ''
+        self.tiles = tiles[:]
+        
+        # If tiles are given, get the tile rect and grow points to edge of rect.
+        # Ya know, this is a whole lotta work. There's gotta be a less laborious
+        # method. But polygons are created at the very low rate of one per mouse
+        # click, so it'll do for now.
+        if len(tiles):
+            # Get the tile bounding rect.
+            tile_rect = tiles_bounding_rect(tiles)
+            tile_rect.center = pos
+            # Translate points in local rect space.
+            for p in self._points:
+                p += Vec2d(self.rect.topleft) - tile_rect.topleft
+            # Replace self.rect with the tile bounding rect.
+            self.rect = tile_rect
+            self.position = pos
+            # Copy self.rect and translate it to topleft=0,0. This will make
+            # adjusting self._points easier as they are offest from 0,0.
+            angle_of = geometry.angle_of
+            distance = geometry.distance
+            point_on_circumference = geometry.point_on_circumference
+            rect_at_zero = self.rect.copy()
+            rect_at_zero.topleft = 0,0
+            # Create some controls to loop through. They store: a position
+            # projected along a radius; the Vec2d object from self._points;
+            # the angle from center of zeroed rect to point; the radius which
+            # will be extended each loop.
+            center = rect_at_zero.center
+            controls = [
+                Struct(position=p,
+                    point=p,
+                    angle=angle_of(center, p),
+                    radius=distance(center, p))
+                for p in self._points
+            ]
+            # Loop until one of the projected positions is outside the zeroed
+            # rect...
+            done = False
+            while not done:
+                # Project the point's new position. If it falls outside the
+                # zeroed rect then terminate the loop.
+                for control in controls:
+                    control.radius += 1
+                    control.position = point_on_circumference(
+                        center, control.radius, control.angle)
+                    if not rect_at_zero.collidepoint(control.position):
+                        done = True
+                        break
+                if done:
+                    break
+                # If the loop wasn't terminated, the each control holds an
+                # updated position. Save it (rounded) back to the shape's point
+                # object.
+                for control in controls:
+                    newx,newy = control.position
+                    point = control.point
+                    point.x,point.y = round(newx),round(newy)
         
     # PolyGeom.__init__
     
@@ -427,6 +506,8 @@ class PolyGeom(geometry.PolyGeometry):
             height = reduce(max, yvals) - ymin + 1
             self.rect.topleft = xmin,ymin
             self.rect.size = width,height
+            p = self._position
+            p.x,p.y = self.rect.center
             
             # Recalculate points in local space relative to rect.
             topleft = Vec2d(xmin,ymin)
@@ -441,6 +522,8 @@ class PolyGeom(geometry.PolyGeometry):
         camera = State.camera
         surface = camera.surface
         world_to_screen = camera.world_to_screen
+        # Tile image.
+        draw_tiles(self.position, self.tiles)
         # Indicate mouse-over.
         if self in app.mouseover_shapes:
             color = Color('white')
@@ -463,17 +546,29 @@ class PolyGeom(geometry.PolyGeometry):
     # PolyGeom.draw
 
 class CircleGeom(geometry.CircleGeometry):
+    """CircleGeom(origin, radius) : CircleGeom
+    CircleGeom(origin, tiles) : CircleGeom
+    """
     
     typ = 'Circle'
     draw_circle = pygame.draw.circle
     draw_rect = pygame.draw.rect
     
-    def __init__(self, *args, **kw):
-        super(CircleGeom, self).__init__(*args, **kw)
+    def __init__(self, origin, radius_or_tiles):
+        if isinstance(radius_or_tiles, int):
+            tiles = []
+            radius = radius_or_tiles
+        else:
+            tiles = radius_or_tiles
+            rect = tiles_bounding_rect(tiles)
+            radius = max(rect.w,rect.h) // 2
+        super(CircleGeom, self).__init__(origin, radius)
+        
         self._attrs = 'origin','radius'
         self._cp = [ControlPoint(self, self._attrs[i]) for i in range(2)]
         self.grabbed = None
         self.user_data = ''
+        self.tiles = tiles[:]
         
     # CircleGeom.__init__
     
@@ -516,6 +611,8 @@ class CircleGeom(geometry.CircleGeometry):
         camera = State.camera
         surface = camera.surface
         world_to_screen = camera.world_to_screen
+        # Tile image.
+        draw_tiles(self.position, self.tiles)
         # Indicate mouse-over.
         if self in app.mouseover_shapes:
             color = Color('white')
@@ -579,6 +676,7 @@ class MapEditor(object):
         self.mouse_shape = RectGeom(0,0,5,5)
         self.mouse_down = 0
         self.selected = None
+        self.selected_tiles = []
         self.mouseover_shapes = []
         
         # Some things to aid debugging.
@@ -669,19 +767,19 @@ class MapEditor(object):
         """Draw the on-screen shapes in the world.
         """
         mouse_shape = self.mouse_shape
+        selected = self.selected
         things = State.world.entities_in(State.camera.rect)
         for thing in things:
-            if thing is not mouse_shape:
+            if thing not in (mouse_shape,selected):
                 thing.draw()
+        if selected:
+            selected.draw()
     
     def draw_mouse(self):
-        toolbar_group = self.gui_form['toolbar_group']
-        if isinstance(toolbar_group.value, Tile):
-            image = toolbar_group.value.tile_image
+        selected = self.selected_tiles
+        if len(selected):
             if not self.gui_hover():
-                rect = image.get_rect()
-                rect.center = State.camera.world_to_screen(self.mouse_shape.position)
-                State.screen.blit(image, rect)
+                draw_tiles(self.mouse_shape.position, selected, alpha=75)
     
     def select(self, shape):
         self.selected = shape
@@ -1008,16 +1106,31 @@ class MapEditor(object):
                 self.deselect()
             pos = State.camera.screen_to_world(e.pos)
             shape = self.gui_form['toolbar_group'].value
+            tiles = self.selected_tiles
             if shape == 'rect_tool':
-                geom = RectGeom(0,0,30,30, pos)
-            elif shape == 'triangle_tool':
-                geom = PolyGeom([(14,0),(29,29),(0,29)], pos)
-            elif shape == 'quad_tool':
-                geom = PolyGeom([(0,0),(25,0),(29,29),(0,29)], pos)
-            elif shape == 'poly_tool':
-                geom = PolyGeom([(14,0),(29,12),(23,29),(7,29),(0,12)], pos)
+                if len(tiles):
+                    geom = RectGeom(tiles, pos)
+                else:
+                    geom = RectGeom(0,0,30,30, pos)
+#            elif shape == 'triangle_tool':
+#                geom = PolyGeom([(14,0),(29,29),(0,29)], pos, tiles=tiles)
+#            elif shape == 'quad_tool':
+#                geom = PolyGeom([(0,0),(25,0),(29,29),(0,29)], pos, tiles=tiles)
+#            elif shape == 'poly_tool':
+#                geom = PolyGeom([(14,0),(29,12),(23,29),(7,29),(0,12)], pos, tiles=tiles)
+            elif shape in ('triangle_tool','quad_tool','poly_tool'):
+                point_sets = dict(
+                    triangle_tool=[(14,0),(29,29),(0,29)],
+                    quad_tool=[(0,0),(25,0),(29,29),(0,29)],
+                    poly_tool=[(14,0),(29,12),(23,29),(7,29),(0,12)],
+                )
+                points = point_sets[shape]
+                geom = PolyGeom(points, pos, tiles)
             elif shape == 'circle_tool':
-                geom = CircleGeom(pos, 20)
+                if len(tiles):
+                    geom = CircleGeom(pos, tiles)
+                else:
+                    geom = CircleGeom(pos, 20)
             else:
                 return
             self.select(geom)
@@ -1441,6 +1554,51 @@ class MapEditor(object):
         self.action_quit_app()
 
 
+def tiles_bounding_rect(tiles):
+    """Derive the bounding rect for a sequence of tiles.
+    """
+    if len(tiles):
+        rect = tiles[0].tile_rect.copy()
+        tw,th = rect.size
+        if len(tiles) > 1:
+            rect.unionall_ip([t.tile_rect for t in tiles[1:]])
+            # Grid-align position.
+            nx = rect.x // tw
+            ny = rect.y // th
+            rect.x = nx * tw
+            rect.y = ny * th
+        return rect
+    else:
+        return Rect(0,0,1,1)
+
+
+def draw_tiles(position, tiles, alpha=255):
+    """Draw a sequence of tiles centered on position.
+    """
+    if len(tiles) == 0:
+        return
+    # Get bounding rect for the sequence of tiles.
+    rect = tiles_bounding_rect(tiles)
+    # Calculate offset to argument position.
+    move_center = State.camera.world_to_screen(position)
+    diff = Vec2d(move_center) - rect.center
+    # Place individual tiles...
+    tw,th = tiles[0].tile_rect.size
+    blit = State.screen.blit
+    for tile in tiles:
+        image = tile.tile_image.copy()
+        image.set_alpha(alpha)
+        rect = tile.tile_rect.copy()
+        # Grid-align position.
+        nx = rect.x // tw
+        ny = rect.y // th
+        rect.x = nx * tw
+        rect.y = ny * th
+        # Translate to argument position.
+        rect.center += diff
+        blit(image, rect)
+
+
 def make_hud():
     """Create a HUD with dynamic items.
     """
@@ -1580,12 +1738,13 @@ def make_side_panel(container):
                 tile_palette.block(-1)
                 prevy = rect.y
             tile = Tile(tileset.image.subsurface(rect),
-                tileset.file_path, rect, toolbar_group)
+                tileset.file_path, rect, tileset)
             tile.connect(gui.CLICK, State.app.set_stamp,
                 tileset, rect, tile.value)
             tile_palette.add(tile)
             tile_palette.space((1,0))
         tile_palette.br(2)
+        tile_palette.block(-1)
     
     # Add tile palette to a scroll area, then the panel's table.
     tile_scroller = gui.ScrollArea(tile_palette, width=w, height=h)
