@@ -24,9 +24,18 @@ __author__ = 'Gummbum, (c) 2011'
 
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-NOTE: Limited saving and loading now exist. This is very basic and *will* change
-over time as features are added to the world file format. However, it is all
-ASCII so it should be pretty easy to script a quick-n-dirty converter.
+Limited saving and loading now exist. This is very basic and *will* change over
+time as features are added to the world file format. However, it is URL-quoted
+ASCII so it should be easy to script a quick-n-dirty converter.
+
+The recent editor revisions open the tile loading dialog immediately when the
+program starts. The call is at the end of MapEditor.__init__ if you want to
+comment it out. It occurred to me that the terrain tile sheet that is
+currently used may make the world editor look like a map editor, which is not
+intended. It is simply a convenient sheet for my testing at this time. For
+Margin and Spacing, enter 1 in all the input fields to get the proper tile
+dimensions, and just for now imagine they are amazons, zombies, BFG shops,
+whatever blows your hair back.
 
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -34,13 +43,25 @@ Controls:
     *   Menus do what you'd expect.
     *   Scrollbars do what you'd expect.
     *   Toolbar selects a shape to insert into the map.
-    *   Right-click: inserts a shape into the map.
-    *   Left-click:
+    *   Right-click in the map:
+        *   Inserts a shape into the map. If tiles are attached to the mouse,
+            they are attached to the shape when it is inserted.
+    *   Left-click in the map:
         *   Clicking inside a shape selects that shape for further manipulation.
         *   Clicking outside a shape deselects the selected shape.
         *   Clicking inside stacked shapes selects the next shape.
         *   Clicking and dragging the center control point moves the shape.
         *   Clicking and dragging a corner control point reshapes a shape.
+    *   Left-click in the tile palette:
+        *   Clicking on an unselected tile selects that tile. All other tiles
+            are deselected.
+        *   Clicking on a selected tile deselects all tiles.
+    *   Right-click in the tile palette:
+        *   Adds or removes a tile from multiple selection.
+    *   Keys:
+        *   Delete: deletes a shape and its attached tiles from the map.
+        *   Escape: exits program. (Convenient for testing. This behavior will
+            be removed later.)
 
 Design:
     There is a form in the space on the right. Selecting a shape will allow data
@@ -66,14 +87,16 @@ Bugs:
 
 Basic to do (complete for 1.0 release):
     *   [DONE] Geometry classes auto-size their points to fit selected tiles.
-    *   Form for picking images.
+    *   [DONE] Form for picking images.
         *   [DONE] Loader/sizer.
         *   [DONE] Palette.
         *   [DONE] Picking from palette.
         *   [DONE] Stamp, move, delete in map.
-        *   Autosave/load tileset info so I don't have to reenter it every time
-            I load a tileset. Metadata saved in image dir or map dir? This could
-            also be a very nice addition for games.
+        *   [DONE] Autosave/load tilesheet meta data so it doesn't have to be
+            input every time a tilesheet is loaded. Meta data saved in the same
+            directory as the source image file, named "basename.tilesheet". The
+            format is one line, space-delimited ASCII:
+                marginx marginy tilewidth tileheight spacingx spacingy
     *   [DONE] Selected tiles attached to world shapes.
     *   [DONE] Selected tiles attached to mouse pointer for placement.
     *   [DONE] Form for user_data.
@@ -703,8 +726,10 @@ class MapEditor(object):
         State.file_entities = None
         State.file_map = None
         
-        self.gui_tile_sheet_sizer(
-            data.filepath('image','test.png'), self.action_tiles_load)
+        ## Test code to launch tilesheet sizer at startup.
+        if False:
+            self.gui_tile_sheet_sizer(
+                data.filepath('image','test.png'), self.action_tiles_load)
         
     # MapEditor.__init__
     
@@ -1034,22 +1059,24 @@ class MapEditor(object):
                     rect = Rect(rx,ry,tx,ty)
                     surf.blit(mask, rect)
                     d.rects.append(rect)
+        # Check for and load tilesheet definition.
+        defaults = get_tilesheet_info(file_path)
         # Tile sheet dimensions.
         t = gui.Table()
         t.tr()
         t.td(gui.Label('Margin (w,h):'))
-        t.td(mk_inputs(('tile_mx','0'), ('tile_my','0')), align=-1)
+        t.td(mk_inputs(('tile_mx',defaults[0]), ('tile_my',defaults[1])), align=-1)
         t.tr()
         t.td(gui.Label('Tile (w,h):'))
-        t.td(mk_inputs(('tile_tx','32'), ('tile_ty','32')), align=-1)
+        t.td(mk_inputs(('tile_tx',defaults[2]), ('tile_ty',defaults[3])), align=-1)
         t.tr()
         t.td(gui.Label('Spacing (w,h):'))
-        t.td(mk_inputs(('tile_sx','0'), ('tile_sy','0')), align=-1)
+        t.td(mk_inputs(('tile_sx',defaults[4]), ('tile_sy',defaults[5])), align=-1)
         
         # Sizer gadgets.
         t.tr()
         image = gui.Image(file_path, name='tile_sheet')
-        image._value_orig = image.value.copy()  ## NOTE: copy of image
+        image._value_orig = image.value.copy()
         s = gui.ScrollArea(image, 320, 200)
         t.td(s, colspan=2)
         
@@ -1225,12 +1252,19 @@ class MapEditor(object):
     # MapEditor.action_map_load
     
     def action_tiles_load(self, sub_action=None, widget=None):
+        """Load tile-sheet action: load a tile sheet from a supported image file
+        and add the images to the tile palette.
+        
+        Also: import BASENAME.tileset, if found, to initialize the defaults in
+        the tile sizer; save the tile sizer inputs to BASENAME.tileset.
+        """
         if sub_action is None:
             # Get input file name.
             self.gui_browse_file('Import Tiles',
                 data.path['image'], self.action_tiles_load)
         elif sub_action == 'file_picked':
-            ## Do something with the file.
+            # Verify the file extension is a supported image type, then open the
+            # tile-sheet sizer.
             d = widget
             if d.value is not None:
                 file_path = d.value
@@ -1250,18 +1284,20 @@ class MapEditor(object):
                     pass
         elif sub_action == 'tile_sheet_sized':
             d = widget
-            v = d.values
+            values = d.values
             tileset = Struct(
                 file_path=d.file_path,
                 image=d.image,
-                margin=Vec2d(v[0:2]),
-                size=Vec2d(v[2:4]),
-                spacing=Vec2d(v[4:6]),
+                margin=Vec2d(values[0:2]),
+                size=Vec2d(values[2:4]),
+                spacing=Vec2d(values[4:6]),
                 rects=d.rects,
             )
             self.tilesets.insert(0, tileset)
             self.gui.widget.remove(self.gui_form['side_panel'])
             make_side_panel(self.gui.widget)
+            # Save the tilesheet meta data to PATH.tilesheet.
+            put_tilesheet_info(tileset.file_path, values)
 
     # MapEditor.action_tiles_load
     
@@ -1552,6 +1588,38 @@ class MapEditor(object):
         """Handler for QUIT events.
         """
         self.action_quit_app()
+        
+    # MapEditor.on_quit
+
+
+def get_tilesheet_info(tilesheet_path):
+    path_part = os.path.splitext(tilesheet_path)[0]
+    meta_file = path_part + '.tilesheet'
+    values = ['0','0','32','32','0','0']
+    try:
+        f = open(meta_file)
+        line = f.read().strip('\r\n')
+        parts = line.split(' ')
+        if len(parts) == 6:
+            values[:] = parts
+    except:
+        pass
+    else:
+        f.close()
+    return values
+
+
+def put_tilesheet_info(tilesheet_path, tilesheet_values):
+    path_part = os.path.splitext(tilesheet_path)[0]
+    meta_file = path_part + '.tilesheet'
+    try:
+        f = open(meta_file, 'wb')
+        f.write(' '.join([str(v) for v in tilesheet_values]) + '\n')
+    except:
+        pass
+    else:
+        f.close()
+    return values
 
 
 def tiles_bounding_rect(tiles):
