@@ -250,3 +250,8 @@ SVN rev 198:
 
 SVN rev 200:
   * Changes: all paths.py files modified to use sys.path.insert() instead of sys.path.append(). This should avoid breakages on systems that have pgu installed as a Python site package.
+
+SVN rev 203:
+  * Changed: Tile palette taken out of tool group. This frees one to insert shapes with/without tiles attached.
+  * New: Tile features: loader/sizer form; selecting one or more tiles from palette with left- and right-click ergonomics; selected tiles attach to mouse pointer for placement; selected tiles attach to world shapes; stamp, move, delete in map.
+  * New: Geometry classes auto-extend their points to the edge of the selected tiles' bounding rect.
