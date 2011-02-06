@@ -9,8 +9,31 @@ This page contains a change log, working notes on issues, items to-do, and items
 
 == In Progress ==
 
-  * World editor is well underway. It uses PGU's GUI, which does what I need and was easy enough to figure out how to integrate with my app in just one sitting. Done: map scroller, menus, toolbar, shape editor, importer/exporter, scrolling tile palette with tile picking.
-  * In progress: placing tiles in the map and manipulating them.
+  * World editor is well underway. It uses PGU's GUI, which does what I need and was easy enough to figure out how to integrate with my app in just one sitting. Done: map scroller, menus, toolbar, shape editor, importer/exporter, scrolling tile palette with tile picking; tiles joined with geometry for manipulation in the map.
+  * In progress: sleep. Next, something else from the version 1.0.0 feature list.
+
+The recent editor revisions open the tile loading dialog immediately when the program starts. The call is at the end of MapEditor.__init__ if you want to comment it out. It occurred to me that the terrain tile sheet that is currently used may make the world editor look like a map editor, which is not intended. It is simply a convenient sheet for my testing at this time. For Margin and Spacing, enter 1 in all the input fields to get the proper tile dimensions, and just for now imagine they are amazons, zombies, BFG shops, whatever blows your hair back.
+
+Controls:
+  * Menus do what you'd expect.
+  * Scrollbars do what you'd expect.
+  * Toolbar selects a shape to insert into the map.
+  * Right-click in the map:
+    * Inserts a shape into the map. If tiles are attached to the mouse, they are attached to the shape when it is inserted.
+  * Left-click in the map:
+    * Clicking inside a shape selects that shape for further manipulation.
+    * Clicking outside a shape deselects the selected shape.
+    * Clicking inside stacked shapes selects the next shape.
+    * Clicking and dragging the center control point moves the shape.
+    * Clicking and dragging a corner control point reshapes a shape.
+  * Left-click in the tile palette:
+    * Clicking on an unselected tile selects that tile. All other tiles are deselected.
+    * Clicking on a selected tile deselects all tiles.
+  * Right-click in the tile palette:
+    * Adds or removes a tile from multiple selection.
+  * Keys:
+    * Delete: deletes a shape and its attached tiles from the map.
+    * Escape: exits program. (Convenient for testing. This behavior will be removed later.)
 
 == Issues ==
 
