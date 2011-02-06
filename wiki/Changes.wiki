@@ -9,10 +9,7 @@ This page contains a change log, working notes on issues, items to-do, and items
 
 == In Progress ==
 
-  * World editor is well underway. It uses PGU's GUI, which does what I need and was easy enough to figure out how to integrate with my app in just one sitting. Done: map scroller, menus, toolbar, shape editor, importer/exporter, scrolling tile palette with tile picking; tiles joined with geometry for manipulation in the map.
-  * In progress: sleep. Next, something else from the version 1.0.0 feature list.
-
-The recent editor revisions open the tile loading dialog immediately when the program starts. The call is at the end of MapEditor.__init__ if you want to comment it out. It occurred to me that the terrain tile sheet that is currently used may make the world editor look like a map editor, which is not intended. It is simply a convenient sheet for my testing at this time. For Margin and Spacing, enter 1 in all the input fields to get the proper tile dimensions, and just for now imagine they are amazons, zombies, BFG shops, whatever blows your hair back.
+  * World editor is well underway. It uses PGU's GUI, which does what I need and was easy enough to figure out how to integrate with my app in just one sitting. Done: map scroller, menus, toolbar, shape editor, importer/exporter, scrolling tile palette with tile picking; tiles joined with geometry for manipulation in the map; auto-saving/loading of tilesheet sizer inputs.
 
 Controls:
   * Menus do what you'd expect.
@@ -278,3 +275,6 @@ SVN rev 203:
   * Changed: Tile palette taken out of tool group. This frees one to insert shapes with/without tiles attached.
   * New: Tile features: loader/sizer form; selecting one or more tiles from palette with left- and right-click ergonomics; selected tiles attach to mouse pointer for placement; selected tiles attach to world shapes; stamp, move, delete in map.
   * New: Geometry classes auto-extend their points to the edge of the selected tiles' bounding rect.
+
+SVN rev 206:
+  * New: world_editor.py; Autosave/load tilesheet meta data so it doesn't have to be input every time a tilesheet is loaded. Meta data saved in the same directory as the source image file, named "basename.tilesheet". The format is one line, space-delimited ASCII: marginx marginy tilewidth tileheight spacingx spacingy.
