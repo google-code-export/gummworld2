@@ -278,3 +278,6 @@ SVN rev 203:
 
 SVN rev 206:
   * New: world_editor.py; Autosave/load tilesheet meta data so it doesn't have to be input every time a tilesheet is loaded. Meta data saved in the same directory as the source image file, named "basename.tilesheet". The format is one line, space-delimited ASCII: marginx marginy tilewidth tileheight spacingx spacingy.
+
+SVN rev 208:
+  * Fixed: world_editor.py; auto-sizing polygons using vectors from coordinates was not working well. A functional method based on the bounding rect is now used instead, which gives more reliable results.
