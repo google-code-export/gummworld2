@@ -154,42 +154,28 @@ IMAGE_FILE_EXTENSIONS = (
     'lbm', 'pbm', 'pgm', 'xpm',
 )
 
-#os.environ['SDL_VIDEO_CENTERED'] = '1'
-
-
-menu_data = (
-    'Main',
-    'Grid',
-    'Labels',
-    'HUD',
-    (
-        'Geometry',
-        'Line',
-        'Triangle',
-        'Quad',
-        'Poly',
-        'Select Region',
-        'Resize',
-        'Delete',
-    ),
-    (
-        'Tiling',
-        'Load Tileset',
-        'Pick from Palette',
-        'Pick from Screen',
-        'Paint',
-        'Erase',
-        'Select Region',
-        'Fill',
-    ),
-    (
-        'Map',
-        'New',
-        'Load',
-        'Save',
-    ),
-    'Quit',
+POLY_POINT_SETS = dict(
+    triangle_tool=lambda r: [
+        Vec2d(r.centerx,0),
+        Vec2d(r.bottomright),
+        Vec2d(r.bottomleft),
+    ],
+    quad_tool=lambda r: [
+        Vec2d(r.topleft),
+        Vec2d(r.topright),
+        Vec2d(r.bottomright),
+        Vec2d(r.bottomleft),
+    ],
+    pent_tool=lambda r: [
+        Vec2d(r.centerx,0),
+        Vec2d(r.w,round(r.h*2.0/5)),
+        Vec2d(round(r.w*4.0/5),r.h),
+        Vec2d(round(r.w*1.0/5),r.h),
+        Vec2d(0,round(r.h*2.0/5)),
+    ],
 )
+
+#os.environ['SDL_VIDEO_CENTERED'] = '1'
 
 
 class Struct(object):
@@ -415,10 +401,17 @@ class PolyGeom(geometry.PolyGeometry):
     draw_poly = pygame.draw.polygon
     draw_rect = pygame.draw.rect
     
-    def __init__(self, points, pos, tiles=[]):
-        super(PolyGeom, self).__init__(points, pos)
+    def __init__(self, pos, points=None, tiles=[], auto=False):
         
-        self._points = [Vec2d(p) for p in self._points]
+        if auto:
+            if len(tiles):
+                rect = tiles_bounding_rect(tiles)
+                rect.topleft = 0,0
+                points = points(rect)
+            else:
+                rect = Rect(0,0,32,32)
+                points = points(rect)
+        super(PolyGeom, self).__init__(points, pos)
         
         self.tmp_rect = self.rect.copy()
         self._cp = [ControlPoint(self, i) for i in range(len(self._points)+1)]
@@ -426,62 +419,6 @@ class PolyGeom(geometry.PolyGeometry):
         self.grabbed = None
         self.user_data = ''
         self.tiles = tiles[:]
-        
-        # If tiles are given, get the tile rect and grow points to edge of rect.
-        # Ya know, this is a whole lotta work. There's gotta be a less laborious
-        # method. But polygons are created at the very low rate of one per mouse
-        # click, so it'll do for now.
-        if len(tiles):
-            # Get the tile bounding rect.
-            tile_rect = tiles_bounding_rect(tiles)
-            tile_rect.center = pos
-            # Translate points in local rect space.
-            for p in self._points:
-                p += Vec2d(self.rect.topleft) - tile_rect.topleft
-            # Replace self.rect with the tile bounding rect.
-            self.rect = tile_rect
-            self.position = pos
-            # Copy self.rect and translate it to topleft=0,0. This will make
-            # adjusting self._points easier as they are offest from 0,0.
-            angle_of = geometry.angle_of
-            distance = geometry.distance
-            point_on_circumference = geometry.point_on_circumference
-            rect_at_zero = self.rect.copy()
-            rect_at_zero.topleft = 0,0
-            # Create some controls to loop through. They store: a position
-            # projected along a radius; the Vec2d object from self._points;
-            # the angle from center of zeroed rect to point; the radius which
-            # will be extended each loop.
-            center = rect_at_zero.center
-            controls = [
-                Struct(position=p,
-                    point=p,
-                    angle=angle_of(center, p),
-                    radius=distance(center, p))
-                for p in self._points
-            ]
-            # Loop until one of the projected positions is outside the zeroed
-            # rect...
-            done = False
-            while not done:
-                # Project the point's new position. If it falls outside the
-                # zeroed rect then terminate the loop.
-                for control in controls:
-                    control.radius += 1
-                    control.position = point_on_circumference(
-                        center, control.radius, control.angle)
-                    if not rect_at_zero.collidepoint(control.position):
-                        done = True
-                        break
-                if done:
-                    break
-                # If the loop wasn't terminated, the each control holds an
-                # updated position. Save it (rounded) back to the shape's point
-                # object.
-                for control in controls:
-                    newx,newy = control.position
-                    point = control.point
-                    point.x,point.y = round(newx),round(newy)
         
     # PolyGeom.__init__
     
@@ -567,6 +504,42 @@ class PolyGeom(geometry.PolyGeometry):
                 surface.blit(cp.image, world_to_screen(cp.topleft))
         
     # PolyGeom.draw
+    
+    def _minvec(self, seq, i):
+        """Return the minimum elements in seq. i is the index to compare: 0 is
+        x, 1 is y.
+        """
+        minv = []
+        for v in seq:
+            if len(minv):
+                v1 = minv[0]
+                if v[i] < v1[i]:
+                    minv[:] = [v]
+                elif v[i] == v1[i]:
+                    minv.append(v)
+            else:
+                minv.append(v)
+        return minv
+        
+    # PolyGeom._minvec
+    
+    def _maxvec(self, seq, i):
+        """Return the maximum elements in seq. i is the index to compare: 0 is
+        x, 1 is y.
+        """
+        maxv = []
+        for v in seq:
+            if len(maxv):
+                v1 = maxv[0]
+                if v[i] > v1[i]:
+                    maxv[:] = [v]
+                elif v[i] == v1[i]:
+                    maxv.append(v)
+            else:
+                maxv.append(v)
+        return maxv
+        
+    # PolyGeom._maxvec
 
 class CircleGeom(geometry.CircleGeometry):
     """CircleGeom(origin, radius) : CircleGeom
@@ -727,7 +700,7 @@ class MapEditor(object):
         State.file_map = None
         
         ## Test code to launch tilesheet sizer at startup.
-        if False:
+        if True:
             self.gui_tile_sheet_sizer(
                 data.filepath('image','test.png'), self.action_tiles_load)
         
@@ -801,14 +774,17 @@ class MapEditor(object):
             selected.draw()
     
     def draw_mouse(self):
+        """Draw tiles that are attached to the mouse.
+        """
         selected = self.selected_tiles
         if len(selected):
             if not self.gui_hover():
                 draw_tiles(self.mouse_shape.position, selected, alpha=75)
     
     def select(self, shape):
+        """Select a shape and update the form with its info.
+        """
         self.selected = shape
-        # Update shape info form.
         self.gui_form['shape_type'].set_text(self.selected.typ)
         self.gui_form['shape_pos'].set_text(str(tuple(self.selected.position)))
         self.gui_form['user_data'].value = self.selected.user_data
@@ -825,6 +801,8 @@ class MapEditor(object):
             self.gui_form['user_data'].blur()
     
     def set_stamp(self, tileset, rect, surf):
+        """Set tiles and info attached to the mouse for insertion in the map.
+        """
         self.stamp = [surf, rect, tileset]
     
     def make_gui(self):
@@ -1012,8 +990,11 @@ class MapEditor(object):
         self.modal = d
     
     def gui_tile_sheet_sizer(self, file_path, callback):
+        """Dialog to size a tilesheet.
+        """
         d = self.modal
         def mk_inputs(*args):
+            # Return a grouping of Inputs.
             c = gui.Document()
             for name,value in args:
                 w = gui.Input(value=value, name=name, size=3)
@@ -1139,20 +1120,9 @@ class MapEditor(object):
                     geom = RectGeom(tiles, pos)
                 else:
                     geom = RectGeom(0,0,30,30, pos)
-#            elif shape == 'triangle_tool':
-#                geom = PolyGeom([(14,0),(29,29),(0,29)], pos, tiles=tiles)
-#            elif shape == 'quad_tool':
-#                geom = PolyGeom([(0,0),(25,0),(29,29),(0,29)], pos, tiles=tiles)
-#            elif shape == 'poly_tool':
-#                geom = PolyGeom([(14,0),(29,12),(23,29),(7,29),(0,12)], pos, tiles=tiles)
-            elif shape in ('triangle_tool','quad_tool','poly_tool'):
-                point_sets = dict(
-                    triangle_tool=[(14,0),(29,29),(0,29)],
-                    quad_tool=[(0,0),(25,0),(29,29),(0,29)],
-                    poly_tool=[(14,0),(29,12),(23,29),(7,29),(0,12)],
-                )
-                points = point_sets[shape]
-                geom = PolyGeom(points, pos, tiles)
+            elif shape in POLY_POINT_SETS:
+                points = POLY_POINT_SETS[shape]
+                geom = PolyGeom(pos, points, tiles, auto=True)
             elif shape == 'circle_tool':
                 if len(tiles):
                     geom = CircleGeom(pos, tiles)
@@ -1593,6 +1563,8 @@ class MapEditor(object):
 
 
 def get_tilesheet_info(tilesheet_path):
+    """Get the tilesheet meta data from file if it exists.
+    """
     path_part = os.path.splitext(tilesheet_path)[0]
     meta_file = path_part + '.tilesheet'
     values = ['0','0','32','32','0','0']
@@ -1610,6 +1582,8 @@ def get_tilesheet_info(tilesheet_path):
 
 
 def put_tilesheet_info(tilesheet_path, tilesheet_values):
+    """Put the tilesheet meta data to file.
+    """
     path_part = os.path.splitext(tilesheet_path)[0]
     meta_file = path_part + '.tilesheet'
     try:
@@ -1619,7 +1593,6 @@ def put_tilesheet_info(tilesheet_path, tilesheet_values):
         pass
     else:
         f.close()
-    return values
 
 
 def tiles_bounding_rect(tiles):
@@ -1750,7 +1723,7 @@ def make_toolbar(container):
     t.td(gui.Tool(g, gui.Label('Rect'), 'rect_tool', height=h))
     t.td(gui.Tool(g, gui.Label('Triangle'), 'triangle_tool', height=h))
     t.td(gui.Tool(g, gui.Label('Quad'), 'quad_tool', height=h))
-    t.td(gui.Tool(g, gui.Label('Poly'), 'poly_tool', height=h))
+    t.td(gui.Tool(g, gui.Label('Pent'), 'pent_tool', height=h))
     t.td(gui.Tool(g, gui.Label('Circle'), 'circle_tool', height=h))
     x = app.gui_form['menus'].rect.right + 2
     container.add(t, x, 0)
