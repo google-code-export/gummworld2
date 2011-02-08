@@ -281,3 +281,6 @@ SVN rev 206:
 
 SVN rev 208:
   * Fixed: world_editor.py; auto-sizing polygons using vectors from coordinates was not working well. A functional method based on the bounding rect is now used instead, which gives more reliable results.
+
+SVN rev 210:
+  * Fixed: world_editor.py; tiles_bounding_rect() did not remove spacing from width and height, in some cases resulting in geometry that was slightly larger than a tile multi-selection.
