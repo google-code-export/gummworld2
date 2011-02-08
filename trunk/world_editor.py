@@ -100,7 +100,7 @@ Basic to do (complete for 1.0 release):
     *   [DONE] Selected tiles attached to world shapes.
     *   [DONE] Selected tiles attached to mouse pointer for placement.
     *   [DONE] Form for user_data.
-        *   Auto-add tileset/tile info to user_data (tileset name, tile rect).
+        *   Auto-add tileset/tile info to user_data (tileset name, tile rects).
     *   Single operations: Cut, copy, paste?
     *   Undo, redo.
     *   Contrast aid: Cycle through color schemes for world shapes.
@@ -154,6 +154,9 @@ IMAGE_FILE_EXTENSIONS = (
     'lbm', 'pbm', 'pgm', 'xpm',
 )
 
+# These lambdas place points at calculated positions given a bounding rect. This
+# dict is a lookup for tool types. See make_toolbar(), action_mouse_click(), and
+# the *Geom classes.
 POLY_POINT_SETS = dict(
     triangle_tool=lambda r: [
         Vec2d(r.centerx,0),
@@ -175,6 +178,8 @@ POLY_POINT_SETS = dict(
     ],
 )
 
+# I hate this kludge...
+os.environ['SDL_VIDEO_WINDOW_POS'] = '7,30'
 #os.environ['SDL_VIDEO_CENTERED'] = '1'
 
 
@@ -641,11 +646,8 @@ class MapEditor(object):
         tile_size = 128,128
         map_size = 10,10
         
-        ## I hate this kludge...
-#        screen_size = Vec2d(pygame.display.list_modes()[0]) - (20,70)
         screen_size = Vec2d(1024,768)
         screen_size = Vec2d(800,600)
-        os.environ['SDL_VIDEO_WINDOW_POS'] = '7,30'
         
         # Set up the Gummworld2 state.
         State.screen = Screen(screen_size, RESIZABLE)
@@ -668,6 +670,7 @@ class MapEditor(object):
         #   mouse_shape: world entity for mouse interaction.
         #   mouse_down: mouse button currently held down.
         #   selected: world entity currently selected.
+        #   selected_tiles: selections in tile palette.
         #   mouseover_shapes: list of shapes over which the mouse is hovering.
         self.mouse_shape = RectGeom(0,0,5,5)
         self.mouse_down = 0
@@ -700,7 +703,7 @@ class MapEditor(object):
         State.file_map = None
         
         ## Test code to launch tilesheet sizer at startup.
-        if True:
+        if False:
             self.gui_tile_sheet_sizer(
                 data.filepath('image','test.png'), self.action_tiles_load)
         
@@ -1608,6 +1611,11 @@ def tiles_bounding_rect(tiles):
             ny = rect.y // th
             rect.x = nx * tw
             rect.y = ny * th
+            # Remove spacing from width and height.
+            maxx = reduce(max, [t.tile_rect.x for t in tiles])
+            maxy = reduce(max, [t.tile_rect.y for t in tiles])
+            rect.w = rect.w // tw * tw
+            rect.h = rect.h // th * th
         return rect
     else:
         return Rect(0,0,1,1)
