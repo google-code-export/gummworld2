@@ -284,3 +284,8 @@ SVN rev 208:
 
 SVN rev 210:
   * Fixed: world_editor.py; tiles_bounding_rect() did not remove spacing from width and height, in some cases resulting in geometry that was slightly larger than a tile multi-selection.
+
+=== Changes in 0.0.12 ===
+
+SVN rev 213:
+  * New: world_editor.py; Added key actions: Move (left,right,up,down); inflate(minus,equal).
