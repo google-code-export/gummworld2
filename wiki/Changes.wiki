@@ -21,6 +21,7 @@ Controls:
     * Clicking inside a shape selects that shape for further manipulation.
     * Clicking outside a shape deselects the selected shape.
     * Clicking inside stacked shapes selects the next shape.
+    * Clicking a shape's control point selects the control point.
     * Clicking and dragging the center control point moves the shape.
     * Clicking and dragging a corner control point reshapes a shape.
   * Left-click in the tile palette:
@@ -31,6 +32,8 @@ Controls:
   * Keys:
     * Delete: deletes a shape and its attached tiles from the map.
     * Escape: exits program. (Convenient for testing. This behavior will be removed later.)
+    * Left,Right,Up,Down: move an entire shape if the center control point is selected; else, move the selected vertex.
+    * Minus,Equals: scale a shape.
 
 == Issues ==
 
