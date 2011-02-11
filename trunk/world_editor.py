@@ -20,49 +20,43 @@ __version__ = '$Id$'
 __author__ = 'Gummbum, (c) 2011'
 
 
-"""world_editor.py - A world editor for Gummworld2.
+__doc__ = """world_editor.py - A world editor for Gummworld2.
+"""
 
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+HELP_TEXT = """
+Limited saving and loading is available. This is very basic and *will* change over time as features are added to the world file format. However, it is URL-quoted ASCII so it should be easy to script a quick-n-dirty converter.
 
-Limited saving and loading now exist. This is very basic and *will* change over
-time as features are added to the world file format. However, it is URL-quoted
-ASCII so it should be easy to script a quick-n-dirty converter.
+Controls
 
-The recent editor revisions open the tile loading dialog immediately when the
-program starts. The call is at the end of MapEditor.__init__ if you want to
-comment it out. It occurred to me that the terrain tile sheet that is
-currently used may make the world editor look like a map editor, which is not
-intended. It is simply a convenient sheet for my testing at this time. For
-Margin and Spacing, enter 1 in all the input fields to get the proper tile
-dimensions, and just for now imagine they are amazons, zombies, BFG shops,
-whatever blows your hair back.
+    * Menus do what you'd expect.
+    * Scrollbars do what you'd expect.
+    * Toolbar selects a shape to insert into the map.
+    * Right-click in the map:
+        * Inserts a shape into the map. If tiles are attached to the mouse, they are attached to the shape when it is inserted.
 
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    * Left-click in the map:
+        * Clicking inside a shape selects that shape for further manipulation.
+        * Clicking outside a shape deselects the selected shape.
+        * Clicking inside stacked shapes selects the next shape.
+        * Clicking a shape's control point selects the control point.
+        * Clicking and dragging the center control point moves the shape.
+        * Clicking and dragging a corner control point reshapes a shape.
 
-Controls:
-    *   Menus do what you'd expect.
-    *   Scrollbars do what you'd expect.
-    *   Toolbar selects a shape to insert into the map.
-    *   Right-click in the map:
-        *   Inserts a shape into the map. If tiles are attached to the mouse,
-            they are attached to the shape when it is inserted.
-    *   Left-click in the map:
-        *   Clicking inside a shape selects that shape for further manipulation.
-        *   Clicking outside a shape deselects the selected shape.
-        *   Clicking inside stacked shapes selects the next shape.
-        *   Clicking and dragging the center control point moves the shape.
-        *   Clicking and dragging a corner control point reshapes a shape.
-    *   Left-click in the tile palette:
-        *   Clicking on an unselected tile selects that tile. All other tiles
-            are deselected.
-        *   Clicking on a selected tile deselects all tiles.
-    *   Right-click in the tile palette:
-        *   Adds or removes a tile from multiple selection.
-    *   Keys:
-        *   Delete: deletes a shape and its attached tiles from the map.
-        *   Escape: exits program. (Convenient for testing. This behavior will
-            be removed later.)
+    * Left-click in the tile palette:
+        * Clicking on an unselected tile selects that tile. All other tiles are deselected.
+        * Clicking on a selected tile deselects all tiles.
 
+    * Right-click in the tile palette:
+        * Adds or removes a tile from multiple selection.
+
+    * Keys:
+        * Delete: deletes a shape and its attached tiles from the map.
+        * Escape: exits program. (Convenient for testing. This behavior will be removed later.)
+        * Left,Right,Up,Down: move an entire shape if the center control point is selected; else, move the selected vertex.
+        * Minus,Equals: scale a shape.
+"""
+
+"""
 Design:
     There is a form in the space on the right. Selecting a shape will allow data
     entered into the form to be attached to the shape, and data already attached
@@ -81,9 +75,6 @@ Design:
     
     Beyond the essentials, there is a fluid wish list of features which may get
     added as demand dictates and time permits.
-
-Bugs:
-    *   
 
 Basic to do (complete for 1.0 release):
     *   [DONE] Geometry classes auto-size their points to fit selected tiles.
@@ -955,7 +946,9 @@ class MapEditor(object):
         self.make_scrollbars(c, reset)
     
     def gui_modal_off(self, *args):
-        State.app.modal = None
+        if State.app.modal is not None:
+            State.app.modal.close()
+            State.app.modal = None
     
     def gui_hover(self):
         """Return True if the mouse is hovering over a GUI widget.
@@ -1003,6 +996,7 @@ class MapEditor(object):
     def gui_alert(self, message):
         """Simple popup message dialog.
         """
+        self.gui_modal_off()
         button = gui.Button('Ok')
         d = gui.Dialog(gui.Label(message), button)
         button.connect(gui.CLICK, d.close, None)
@@ -1167,6 +1161,70 @@ class MapEditor(object):
     
     # MapEditor.gui_tile_sheet_sizer
     
+    def gui_map_sizer(self, title, callback):
+        """Dialog to size a new map.
+        """
+        d = self.modal
+        
+        def mk_inputs(*args):
+            # Return a grouping of Inputs.
+            c = gui.Document()
+            for name,value in args:
+                w = gui.Input(value=value, name=name, size=5)
+                c.add(w)
+            return c
+        
+        def update_values(form):
+            def get(name):
+                # Convert widget's string value to int.
+                try:
+                    return int(form[name].value)
+                except ValueError:
+                    return 0
+            # Get the Input widgets' values.
+            tx,ty = get('tile_sx'),get('tile_sy')
+            mx,my = get('tile_sx'),get('tile_sy')
+            d.values[:] = mx,my,tx,ty
+        
+        # Dialog and content.
+        t = gui.Table()
+        d = gui.Dialog(gui.Label(title), t)
+        
+        # Tile size inputs.
+        t.tr()
+        t.td(gui.Label('Tile size (w,h):'))
+        t.td(mk_inputs(('tile_sx', ''), ('tile_sy', '')))
+        
+        # Map size inputs.
+        t.tr()
+        t.td(gui.Label('Map size (w,h):'))
+        t.td(mk_inputs(('map_sx', ''), ('map_sy', '')))
+        
+        t.tr()
+        t.td(gui.Spacer(1, 3))
+        
+        # Ok, Cancel buttons.
+        t.tr()
+        c = gui.Document()
+        c.add(gui.Button(gui.Label('Ok'), name='dialog_ok'))
+        c.add(gui.Button(gui.Label('Cancel'), name='dialog_cancel'))
+        t.td(c, colspan=2)
+        
+        ## Values the caller will need.
+        d.values = []
+        # Connections.
+        d.connect(gui.CLOSE, self.gui_modal_off, None)
+        form = self.gui_form
+        for name in ('map_sx','map_sy','tile_sx','tile_sy'):
+            form[name].connect(gui.CHANGE, update_values, form)
+        update_values(form)
+        form['dialog_ok'].connect(gui.CLICK, callback, 'map_sized', d)
+        form['dialog_ok'].connect(gui.CLICK, d.close, None)
+        form['dialog_cancel'].connect(gui.CLICK, d.close, None)
+        
+        d.open()
+        self.modal = d
+    
     def action_set_userdata(self, user_data):
         """GUI input field changed, set the selected shape's user_data.
         """
@@ -1288,17 +1346,27 @@ class MapEditor(object):
             selected.inflate(x, y)
             State.world.add(self.selected)
     
-    def action_map_new(self, *args):
+    def action_map_new(self, sub_action=None, widget=None):
         """New map action: create a new map with default content.
+        
+        This is a reentrant method. The sub_action argument drives the behavior.
+        It is called initially by an event handler, and again by GUI callback.
         """
         # Get map dimensions.
-        ######################################
-        ## Needs a form to get map dimensions.
-        ######################################
-        State.map.clear()
-        toolkit.make_tiles2()
-        self.remake_scrollbars()
-        State.file_map = None
+        if sub_action is None:
+            self.gui_map_sizer('New Map Size', self.action_map_new)
+        elif sub_action is 'map_sized':
+            d = widget
+            for v in d.values:
+                if v <= 0:
+                    self.gui_alert('Negative and zero values not allowed')
+                    return
+            map_size = d.values[0:2]
+            tile_size = d.values[2:4]
+            State.map = Map(tile_size, map_size)
+            toolkit.make_tiles2()
+            self.remake_scrollbars()
+            State.file_map = None
         
     # MapEditor.action_map_new
 
@@ -1334,6 +1402,9 @@ class MapEditor(object):
         
         Also: import BASENAME.tileset, if found, to initialize the defaults in
         the tile sizer; save the tile sizer inputs to BASENAME.tileset.
+        
+        This is a reentrant method. The sub_action argument drives the behavior.
+        It is called initially by an event handler, and again by GUI callback.
         """
         if sub_action is None:
             # Get input file name.
@@ -1380,6 +1451,9 @@ class MapEditor(object):
     
     def action_entities_clear(self, sub_action=None, widget=None):
         """Clear entities action: clear all entities from editor.
+        
+        This is a reentrant method. The sub_action argument drives the behavior.
+        It is called initially by an event handler, and again by GUI callback.
         """
         if sub_action is None:
             # If changed, confirm discard.
@@ -1398,6 +1472,9 @@ class MapEditor(object):
     
     def action_entities_import(self, sub_action=None, widget=None):
         """Import entities action: load entities from a file.
+        
+        This is a reentrant method. The sub_action argument drives the behavior.
+        It is called initially by an event handler, and again by GUI callback.
         """
         if sub_action is None:
             # If changed, confirm discard.
@@ -1485,6 +1562,9 @@ class MapEditor(object):
     def action_entities_save_as(self, sub_action=None, widget=None):
         """Save-as entities action: save entities to a file, selecting a new
         file name.
+        
+        This is a reentrant method. The sub_action argument drives the behavior.
+        It is called initially by an event handler, and again by GUI callback.
         """
         if sub_action is None:
             # Get input file name.
@@ -1498,6 +1578,9 @@ class MapEditor(object):
     
     def action_quit_app(self, sub_action=None, widget=None):
         """Quit app action.
+        
+        This is a reentrant method. The sub_action argument drives the behavior.
+        It is called initially by an event handler, and again by GUI callback.
         """
         if sub_action is None:
             # If changed, confirm discard.
@@ -1528,6 +1611,13 @@ class MapEditor(object):
         """View HUD action: toggle HUD.
         """
         State.show_hud = not State.show_hud
+    
+    def action_view_help(self, *args):
+        """View Help action: open a help viewer dialog.
+        """
+        self.gui_view_text(
+            'Gummworld2 World Editor Help',
+            HELP_TEXT.split('\n'), width=600, height=300)
     
     def get_events(self):
         """Get and dispatch events with nicest idle-wait.
@@ -1821,6 +1911,7 @@ def make_menus(container):
         ('View/Labels',      app.action_view_labels, None),
         ('View/Rects',       app.action_view_rects, None),
         ('View/HUD',         app.action_view_hud, None),
+        ('View/Help',        app.action_view_help, None),
     ], name='menus')
     container.add(menus, 1, 1)
     menus.rect.w,menus.rect.h = menus.resize()
