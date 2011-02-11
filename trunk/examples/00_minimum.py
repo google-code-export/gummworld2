@@ -92,7 +92,7 @@ class App(object):
         
         State.camera.interpolate()
         
-        State.camera.surface.fill(Color('black'))
+        State.screen.clear()
         toolkit.draw_tiles()
         pygame.display.flip()
 
