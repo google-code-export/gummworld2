@@ -292,3 +292,8 @@ SVN rev 210:
 
 SVN rev 213:
   * New: world_editor.py; Added key actions: Move (left,right,up,down); inflate(minus,equal).
+
+SVN rev 216:
+  * Change: default GUI theme; reduced font size by a couple points.
+  * New: world_editor.py; action_map_new() now prompts for new map size.
+  * Fixed: world_editor.py; gui_alert() now forces its modal predecessor to close in order to prevent deadlock situations that sometimes happened when user input checks triggered a popup alert.
