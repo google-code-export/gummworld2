@@ -178,6 +178,14 @@ POLY_POINT_SETS = dict(
     ],
 )
 
+# When the key is pressed, move the selected shape by this amount.
+KEY_SHAPE_STEP = {
+    K_LEFT : -1,
+    K_RIGHT : 1,
+    K_UP : -1,
+    K_DOWN : 1,
+}
+
 # I hate this kludge...
 os.environ['SDL_VIDEO_WINDOW_POS'] = '7,30'
 #os.environ['SDL_VIDEO_CENTERED'] = '1'
@@ -288,24 +296,33 @@ class ControlPoint(Rect):
     """
     
     image = None
+    image_grabbed = None
     
     def __init__(self, parent, attr):
         super(ControlPoint, self).__init__(0,0,7,7)
         if self.image is None:
             self.image = pygame.surface.Surface((7,7))
             self.image.fill(Color('yellow'))
+            self.image_grabbed = pygame.surface.Surface((7,7))
+            self.image_grabbed.fill(Color('red'))
         self.parent = parent
         self.attr = attr
+        self._position = Vec2d(self.center)
         
     # ControlPoint.__init__
     
+    def set_position(self, val):
+        x,y = val
+        p = self._position
+        p.x,p.y = x,y
+        self.center = round(x),round(y)
+    
     @property
     def position(self):
-        return self.center
+        return self._position
     @position.setter
     def position(self, val):
-        x,y = val
-        self.center = round(x),round(y)
+        self.set_position(val)
         self.parent.adjust(self, self.attr)
         
     # ControlPoint.position
@@ -340,7 +357,7 @@ class RectGeom(geometry.RectGeometry):
         r = self.rect
         attrs = self._attrs
         for i,cp in enumerate(controls):
-            cp.center = getattr(r, attrs[i])
+            cp.set_position(getattr(r, attrs[i]))
         return controls
         
     # RectGeom.control_points
@@ -376,6 +393,12 @@ class RectGeom(geometry.RectGeometry):
         
     # RectGeom.adjust
     
+    def inflate(self, x, y):
+        self.rect.inflate_ip(x, y)
+        self.control_points
+        
+    # RectGeom.inflate
+    
     def draw(self):
         app = State.app
         camera = State.camera
@@ -395,7 +418,10 @@ class RectGeom(geometry.RectGeometry):
         # If shape is selected, draw control points in screen space.
         if self is app.selected:
             for cp in self.control_points:
-                surface.blit(cp.image, world_to_screen(cp.topleft))
+                if cp is self.grabbed:
+                    surface.blit(cp.image_grabbed, world_to_screen(cp.topleft))
+                else:
+                    surface.blit(cp.image, world_to_screen(cp.topleft))
         
     # RectGeom.draw
 
@@ -414,7 +440,7 @@ class PolyGeom(geometry.PolyGeometry):
                 rect.topleft = 0,0
                 points = points(rect)
             else:
-                rect = Rect(0,0,32,32)
+                rect = Rect(0,0,64,64)
                 points = points(rect)
         super(PolyGeom, self).__init__(points, pos)
         
@@ -424,6 +450,8 @@ class PolyGeom(geometry.PolyGeometry):
         self.grabbed = None
         self.user_data = ''
         self.tiles = tiles[:]
+        self._angles = [-1] * len(self._points)
+        self._ratios = [None] * len(self._points)
         
     # PolyGeom.__init__
     
@@ -432,9 +460,9 @@ class PolyGeom(geometry.PolyGeometry):
         controls = self._cp
         points = self.points
         for i,p in enumerate(points):
-            controls[i].center = p
+            controls[i].set_position(p)
         i += 1
-        controls[i].center = self.rect.center
+        controls[i].set_position(self.rect.center)
         return controls
         
     # PolyGeom.control_points
@@ -459,28 +487,57 @@ class PolyGeom(geometry.PolyGeometry):
         
         if cp is controls[-1]:
             # Center control grabbed. Just move rect.
-            self.position = cp.center
+            self.position = cp.position
         else:
             # Poly point grabbed. Recalculate rect in world space.
             controls = controls[:-1]
-            xvals = [c.centerx for c in controls]
-            yvals = [c.centery for c in controls]
+            xvals = [c.position.x for c in controls]
+            yvals = [c.position.y for c in controls]
             xmin = reduce(min, xvals)
             width = reduce(max, xvals) - xmin + 1
             ymin = reduce(min, yvals)
             height = reduce(max, yvals) - ymin + 1
-            self.rect.topleft = xmin,ymin
-            self.rect.size = width,height
+            self.rect.topleft = round(xmin),round(ymin)
+            self.rect.size = round(width),round(height)
             p = self._position
-            p.x,p.y = self.rect.center
+            p.x,p.y = xmin+width, ymin+height
             
             # Recalculate points in local space relative to rect.
             topleft = Vec2d(xmin,ymin)
             points = self._points
             for i,c in enumerate(controls):
-                points[i] = c.center - topleft
+                self._angles[i] = -1
+                self._ratios[i] = None
+                points[i] = c.position - topleft
         
     # PolyGeom.adjust
+    
+    def inflate(self, x, y):
+        """Generally you want to inflate by a factor of 2 or the rect's center
+        will shift.
+        """
+        rect = self.rect.inflate(x, y)
+        if rect.w <= 0 or rect.h <= 0:
+            return
+        
+        rect = self.rect.copy()
+        rect.topleft = 0,0
+        self.rect.inflate_ip(x, y)
+        
+        for i,p in enumerate(self._points):
+            if self._ratios[i] is None:
+                xrat = float(p.x) / (rect.w-1)
+                yrat = float(p.y) / (rect.h-1)
+                ratio = Vec2d(xrat,yrat)
+                self._ratios[i] = ratio
+            else:
+                ratio = self._ratios[i]
+            xnew = (self.rect.w-1) * ratio.x
+            ynew = (self.rect.h-1) * ratio.y
+            p.x,p.y = xnew,ynew
+        self.control_points
+        
+    # PolyGeom.inflate
     
     def draw(self):
         app = State.app
@@ -506,7 +563,10 @@ class PolyGeom(geometry.PolyGeometry):
         # If shape is selected, draw control points in screen space.
         if self is app.selected:
             for cp in self.control_points:
-                surface.blit(cp.image, world_to_screen(cp.topleft))
+                if cp is self.grabbed:
+                    surface.blit(cp.image_grabbed, world_to_screen(cp.topleft))
+                else:
+                    surface.blit(cp.image, world_to_screen(cp.topleft))
         
     # PolyGeom.draw
     
@@ -565,7 +625,7 @@ class CircleGeom(geometry.CircleGeometry):
             radius = max(rect.w,rect.h) // 2
         super(CircleGeom, self).__init__(origin, radius)
         
-        self._attrs = 'origin','radius'
+        self._attrs = 'radius','origin'
         self._cp = [ControlPoint(self, self._attrs[i]) for i in range(2)]
         self.grabbed = None
         self.user_data = ''
@@ -577,9 +637,9 @@ class CircleGeom(geometry.CircleGeometry):
     def control_points(self):
         controls = self._cp
         r = self.rect
-        controls[0].center = self.rect.center
-        controls[1].center = geometry.point_on_circumference(
-            self.origin, self.radius, 180.0)
+        controls[0].set_position(geometry.point_on_circumference(
+            self.origin, self.radius, 180.0))
+        controls[1].set_position(self.rect.center)
         return controls
         
     # CircleGeom.control_points
@@ -607,6 +667,12 @@ class CircleGeom(geometry.CircleGeometry):
         
     # CircleGeom.adjust
     
+    def inflate(self, x, y):
+        self.radius += x // 2
+        self.control_points
+        
+    # CircleGeom.inflate
+    
     def draw(self):
         app = State.app
         camera = State.camera
@@ -630,7 +696,10 @@ class CircleGeom(geometry.CircleGeometry):
         # If shape is selected, draw control points in screen space.
         if self is app.selected:
             for cp in self.control_points:
-                surface.blit(cp.image, world_to_screen(cp.topleft))
+                if cp is self.grabbed:
+                    surface.blit(cp.image_grabbed, world_to_screen(cp.topleft))
+                else:
+                    surface.blit(cp.image, world_to_screen(cp.topleft))
         
     # CircleGeom.draw
 
@@ -701,6 +770,8 @@ class MapEditor(object):
         # Files.
         State.file_entities = None
         State.file_map = None
+        
+        pygame.key.set_repeat(150, 1000/30)
         
         ## Test code to launch tilesheet sizer at startup.
         if False:
@@ -788,9 +859,13 @@ class MapEditor(object):
         """Select a shape and update the form with its info.
         """
         self.selected = shape
-        self.gui_form['shape_type'].set_text(self.selected.typ)
-        self.gui_form['shape_pos'].set_text(str(tuple(self.selected.position)))
-        self.gui_form['user_data'].value = self.selected.user_data
+        selected = shape
+        selected.grabbed = selected.control_points[-1]
+        x,y = selected.position
+        gui_form = self.gui_form
+        gui_form['shape_type'].set_text(selected.typ)
+        gui_form['shape_pos'].set_text(str((int(round(x)),int(round(y)))))
+        gui_form['user_data'].value = selected.user_data
     
     def deselect(self):
         """Deselect a shape and release its "grabbed" control point.
@@ -1122,7 +1197,7 @@ class MapEditor(object):
                 if len(tiles):
                     geom = RectGeom(tiles, pos)
                 else:
-                    geom = RectGeom(0,0,30,30, pos)
+                    geom = RectGeom(0,0,64,64, pos)
             elif shape in POLY_POINT_SETS:
                 points = POLY_POINT_SETS[shape]
                 geom = PolyGeom(pos, points, tiles, auto=True)
@@ -1130,7 +1205,7 @@ class MapEditor(object):
                 if len(tiles):
                     geom = CircleGeom(pos, tiles)
                 else:
-                    geom = CircleGeom(pos, 20)
+                    geom = CircleGeom(pos, 32)
             else:
                 return
             self.select(geom)
@@ -1174,15 +1249,44 @@ class MapEditor(object):
                     grabbed.position = State.camera.screen_to_world(e.pos)
                     State.world.add(selected)
                     self.changes_unsaved = True
-            self.gui_form['shape_pos'].set_text(str(tuple(selected.position)))
+            x,y = selected.position
+            self.gui_form['shape_pos'].set_text(str((int(round(x)),int(round(y)))))
         
     # MapEditor.action_mouse_drag
 
     def action_mouse_release(self, e):
-        """Mouse release action: release the selected shape's control point.
+        """Mouse release action: this currently does nothing.
         """
-        if self.selected:
-            self.selected.release()
+        pass
+    
+    def action_key_grab_shape(self, key, mod):
+        """Grab shape action: drag a grabbed control point using the keyboard.
+        """
+        selected = self.selected
+        if selected and selected.grabbed is not None:
+            grabbed = selected.grabbed
+            speed = 4 if mod & KMOD_SHIFT else 1
+            pressed = pygame.key.get_pressed()
+            dirx,diry = 0,0
+            if pressed[K_LEFT]: dirx += -1
+            if pressed[K_RIGHT]: dirx += 1
+            if pressed[K_UP]: diry += -1
+            if pressed[K_DOWN]: diry += 1
+            grabbed.position += (dirx*speed,diry*speed)
+            State.world.add(self.selected)
+    
+    def action_key_inflate_shape(self, key, mod):
+        """Inflate shape action: de/inflate a shape.
+        """
+        selected = self.selected
+        if selected:
+            speed = 4 if mod & KMOD_SHIFT else 1
+            pressed = pygame.key.get_pressed()
+            x,y = 0,0
+            if pressed[K_EQUALS]: x = y = 2
+            if pressed[K_MINUS]: x = y = -2
+            selected.inflate(x, y)
+            State.world.add(self.selected)
     
     def action_map_new(self, *args):
         """New map action: create a new map with default content.
@@ -1197,7 +1301,7 @@ class MapEditor(object):
         State.file_map = None
         
     # MapEditor.action_map_new
-    
+
     def action_map_load(self, sub_action=None, widget=None):
         """Load map action: loads a map from file (currently Tiled TMX only).
         """
@@ -1465,7 +1569,7 @@ class MapEditor(object):
             user_data.focus()
             return
         # Filter out keystrokes that are "ugly" in GUI.
-        if key not in (K_DELETE,):
+        if key not in (K_DELETE,K_LEFT,K_RIGHT,K_UP,K_DOWN):
             self.gui.event(e)
         ## Customization: beware of key conflicts with pgu.gui.
         if not self.modal:
@@ -1476,6 +1580,10 @@ class MapEditor(object):
                     State.world.remove(shape)
             elif key == K_ESCAPE:
                 self.action_quit_app()
+            elif key in (K_EQUALS,K_MINUS):
+                self.action_key_inflate_shape(key, mod)
+            elif key in (K_LEFT,K_RIGHT,K_UP,K_DOWN):
+                self.action_key_grab_shape(key, mod)
             elif key == K_v and mod & KMOD_CTRL:
                 self.verbose = not self.verbose
 #            else:

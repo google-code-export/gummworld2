@@ -477,6 +477,10 @@ class RectGeometry(object):
     
     @property
     def position(self):
+        """GOTCHA: Something like "rect_geom.position.x += 1" will not do what
+        you expect. That operation does not update the rect instance variable.
+        Instead use "rect_geom.position += (1,0)".
+        """
         return self._position
     @position.setter
     def position(self, val):
@@ -510,6 +514,10 @@ class CircleGeometry(object):
     
     @property
     def position(self):
+        """GOTCHA: Something like "circle_geom.position.x += 1" will not do what
+        you expect. That operation does not update the rect instance variable.
+        Instead use "circle_geom.position += (1,0)".
+        """
         return self._position
     @position.setter
     def position(self, val):
@@ -546,6 +554,10 @@ class PolyGeometry(object):
     
     @property
     def position(self):
+        """GOTCHA: Something like "poly_geom.position.x += 1" will not do what
+        you expect. That operation does not update the rect instance variable.
+        Instead use "poly_geom.position += (1,0)".
+        """
         return self._position
     @position.setter
     def position(self, val):
