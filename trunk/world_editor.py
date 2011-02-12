@@ -54,6 +54,8 @@ Controls
         * Escape: exits program. (Convenient for testing. This behavior will be removed later.)
         * Left,Right,Up,Down: move an entire shape if the center control point is selected; else, move the selected vertex.
         * Minus,Equals: scale a shape.
+        * Ctrl-C, Ctrl-X, Ctrl-V: Cut-copy-paste the selected shape.
+        * Tab: cycle shape color scheme for visibility.
 """
 
 """
@@ -66,12 +68,6 @@ Design:
     Below the form in the space on the right is a tile palette. This is for
     decorating the map so that one can see the graphics for spawned and/or
     collidable objects while sizing their shapes for the world.
-    
-    It is undecided at this time if the shape-graphics association will be
-    saved with the world map format. On the one hand it can ease map creation.
-    On the other hand it may greatly complicate parsing world maps. Maybe an
-    editor extension in secondary files is the answer: then game map loaders can
-    choose to use or ignore the association data in secondary files.
     
     Beyond the essentials, there is a fluid wish list of features which may get
     added as demand dictates and time permits.
@@ -92,16 +88,17 @@ Basic to do (complete for 1.0 release):
     *   [DONE] Selected tiles attached to mouse pointer for placement.
     *   [DONE] Form for user_data.
         *   Auto-add tileset/tile info to user_data (tileset name, tile rects).
-    *   Single operations: Cut, copy, paste?
+    *   [DONE] action_map_new() needs a Size Form.
+    *   [DONE] Single operations: Cut, copy, paste?
+    *   [DONE] Contrast aid: Cycle through color schemes for world shapes.
+    *   [DONE] Help viewer? PGU makes it easy.
     *   Undo, redo.
-    *   Contrast aid: Cycle through color schemes for world shapes.
-    *   action_map_new() needs a Size Form.
-    *   Put more thought into working with shapes. e.g. PITA to size a shape
-        after every insert. Maybe a list for history?
-    *   Chooser: Importer and exporter (e.g., ASCII, pickle, custom).
-    *   Help viewer? PGU makes it easy.
 
 Advanced to do:
+    *   Put more thought into working with shapes. e.g. PITA to size a shape
+        after every insert. Maybe: a list for history; a customizable imported
+        list.
+    *   Chooser: Importer and exporter (e.g., ASCII, pickle, custom).
     *   Productivity:
         *   Shape templates: Make a shape, add to template list. Choose from
             list to insert "cookie cut" shapes.
@@ -176,6 +173,35 @@ KEY_SHAPE_STEP = {
     K_UP : -1,
     K_DOWN : 1,
 }
+
+class GeomColors(object):
+    which = 0
+    values = [
+        ## n=normal, h=hover, c=copy, x=cut
+        dict(n=Color(190,190,190,150),h=Color(255,255,255,150),c=Color(255,165,0,150),x=Color(255,0,0,150)),
+        dict(n=Color(160,160,160,150),h=Color(225,225,225,150),c=Color(225,135,0,150),x=Color(225,0,0,150)),
+        dict(n=Color(130,130,130,150),h=Color(195,195,195,150),c=Color(195,105,0,150),x=Color(195,0,0,150)),
+    ]
+    
+    def get(self, obj):
+        app = State.app
+        sel = app.selected
+        hover = app.mouseover_shapes
+        paste = app.paste
+        v = self.values[self.which]
+        if paste is not None and obj in paste:
+            if 'cut' in paste: return v['x']
+            if 'copy' in paste: return v['c']
+        if obj in hover: return v['h']
+        return v['n']
+    
+    def next(self):
+        self.which += 1
+        if self.which == len(self.values):
+            self.which = 0
+
+GEOM_COLORS = GeomColors()
+
 
 # I hate this kludge...
 os.environ['SDL_VIDEO_WINDOW_POS'] = '7,30'
@@ -390,6 +416,15 @@ class RectGeom(geometry.RectGeometry):
         
     # RectGeom.inflate
     
+    def copy(self):
+        if len(self.tiles):
+            dupe = RectGeom(self.tiles, self.position)
+        else:
+            dupe = RectGeom(*tuple(self.rect))
+        return dupe
+    
+    # RectGeom.copy
+    
     def draw(self):
         app = State.app
         camera = State.camera
@@ -397,11 +432,8 @@ class RectGeom(geometry.RectGeometry):
         world_to_screen = camera.world_to_screen
         # Tile image.
         draw_tiles(self.position, self.tiles)
-        # Indicate mouse-over.
-        if self in app.mouseover_shapes:
-            color = Color('white')
-        else:
-            color = Color('grey')
+        # Indicate mouse-over, copy, or cut.
+        color = GEOM_COLORS.get(self)
         # Draw rect in screen space.
         r = self.rect.copy()
         r.center = world_to_screen(self.rect.center)
@@ -491,7 +523,7 @@ class PolyGeom(geometry.PolyGeometry):
             self.rect.topleft = round(xmin),round(ymin)
             self.rect.size = round(width),round(height)
             p = self._position
-            p.x,p.y = xmin+width, ymin+height
+            p.x,p.y = xmin+width/2, ymin+height/2
             
             # Recalculate points in local space relative to rect.
             topleft = Vec2d(xmin,ymin)
@@ -530,6 +562,15 @@ class PolyGeom(geometry.PolyGeometry):
         
     # PolyGeom.inflate
     
+    def copy(self):
+        dupe = PolyGeom(
+            self.position,
+            points=[(p.x,p.y) for p in self._points],
+            tiles=self.tiles)
+        return dupe
+    
+    # PolyGeom.copy
+    
     def draw(self):
         app = State.app
         camera = State.camera
@@ -537,11 +578,8 @@ class PolyGeom(geometry.PolyGeometry):
         world_to_screen = camera.world_to_screen
         # Tile image.
         draw_tiles(self.position, self.tiles)
-        # Indicate mouse-over.
-        if self in app.mouseover_shapes:
-            color = Color('white')
-        else:
-            color = Color('grey')
+        # Indicate mouse-over, copy, or cut.
+        color = GEOM_COLORS.get(self)
         # Draw rect in screen space.
         if State.show_rects:
             r = self.rect.copy()
@@ -664,6 +702,15 @@ class CircleGeom(geometry.CircleGeometry):
         
     # CircleGeom.inflate
     
+    def copy(self):
+        if len(self.tiles):
+            shape = CircleGeom(self.origin, self.tiles)
+        else:
+            shape = CircleGeom(self.origin, self.radius)
+        return shape
+    
+    # CircleGeom.copy
+    
     def draw(self):
         app = State.app
         camera = State.camera
@@ -671,11 +718,8 @@ class CircleGeom(geometry.CircleGeometry):
         world_to_screen = camera.world_to_screen
         # Tile image.
         draw_tiles(self.position, self.tiles)
-        # Indicate mouse-over.
-        if self in app.mouseover_shapes:
-            color = Color('white')
-        else:
-            color = Color('grey')
+        # Indicate mouse-over, copy, or cut.
+        color = GEOM_COLORS.get(self)
         # Draw rect in screen space.
         if State.show_rects:
             r = self.rect.copy()
@@ -738,6 +782,10 @@ class MapEditor(object):
         self.selected_tiles = []
         self.mouseover_shapes = []
         
+        # Keyboard details.
+        pygame.key.set_repeat(150, 1000/30)
+        self.paste = None
+        
         # Some things to aid debugging.
         self.time = TimeThing('%M%S')
         self.verbose = False
@@ -761,8 +809,6 @@ class MapEditor(object):
         # Files.
         State.file_entities = None
         State.file_map = None
-        
-        pygame.key.set_repeat(150, 1000/30)
         
         ## Test code to launch tilesheet sizer at startup.
         if False:
@@ -807,8 +853,6 @@ class MapEditor(object):
         self.mouseover_shapes = [shape for ent,shape in State.world.collisions
             if ent is mouse_shape
         ]
-        if self.verbose:
-            print self.time,State.world.collisions
     
     def draw(self):
         """Draw all.
@@ -1231,6 +1275,51 @@ class MapEditor(object):
         if self.selected is not None:
             self.selected.user_data = user_data.value
             self.changes_unsaved = True
+    
+    def action_shape_delete(self):
+        """Delete shape action: delete the selected shape.
+        """
+        user_data = self.gui_form['user_data']
+        if self.selected and not user_data.container.myfocus is user_data:
+            shape = self.selected 
+            self.deselect()
+            State.world.remove(shape)
+    
+    def action_shape_copy(self):
+        """Copy shape action: target the selected shape for copy-paste action.
+        """
+        if self.selected is None:
+            self.paste = None
+        else:
+            self.paste = ('copy', self.selected)
+    
+    def action_shape_cut(self):
+        """Cut shape action: target the selected shape for cut-paste action.
+        """
+        if self.selected is None:
+            self.paste = None
+        else:
+            self.paste = ('cut', self.selected)
+    
+    def action_shape_paste(self):
+        """Paste shape action: paste the cut or copied shape at the mouse
+        location.
+        """
+        if self.paste is not None:
+            action,shape = self.paste
+            if action == 'cut':
+                shape.position = self.mouse_shape.position
+                State.world.add(shape)
+                self.select(shape)
+            elif action == 'copy':
+                # new_shape = shape.copy()
+                if isinstance(shape, (RectGeom,CircleGeom,PolyGeom)):
+                    shape = shape.copy()
+                    shape.position = self.mouse_shape.position
+                    State.world.add(shape)
+                    self.select(shape)
+    
+    # MapEditor.action_shape_paste
     
     def action_mouse_click(self, e):
         """Mouse click action: button 3 inserts a shape; button 1 selects,
@@ -1659,23 +1748,26 @@ class MapEditor(object):
             user_data.focus()
             return
         # Filter out keystrokes that are "ugly" in GUI.
-        if key not in (K_DELETE,K_LEFT,K_RIGHT,K_UP,K_DOWN):
+        if key not in (K_DELETE,K_LEFT,K_RIGHT,K_UP,K_DOWN,K_TAB):
             self.gui.event(e)
         ## Customization: beware of key conflicts with pgu.gui.
         if not self.modal:
             if key in (K_DELETE,K_KP_PERIOD):
-                if self.selected and not user_data.container.myfocus is user_data:
-                    shape = self.selected 
-                    self.deselect()
-                    State.world.remove(shape)
+                self.action_shape_delete()
             elif key == K_ESCAPE:
                 self.action_quit_app()
             elif key in (K_EQUALS,K_MINUS):
                 self.action_key_inflate_shape(key, mod)
             elif key in (K_LEFT,K_RIGHT,K_UP,K_DOWN):
                 self.action_key_grab_shape(key, mod)
+            elif key == K_c and mod & KMOD_CTRL:
+                self.action_shape_copy()
+            elif key == K_x and mod & KMOD_CTRL:
+                self.action_shape_cut()
             elif key == K_v and mod & KMOD_CTRL:
-                self.verbose = not self.verbose
+                self.action_shape_paste()
+            elif key == K_TAB:
+                GEOM_COLORS.next()
 #            else:
 #                print 'Key down', pygame.key.name(key)
     
