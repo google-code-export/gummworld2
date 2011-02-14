@@ -1119,16 +1119,17 @@ class MapEditor(object):
         def draw_grid(form):
             # Overlay the tile sheet image with a grid to show results of dialog
             # input values.
-            def get(name):
+            def get(name, minval=0):
                 # Convert widget's string value to int.
                 try:
-                    return int(form[name].value)
+                    val = int(form[name].value)
+                    return max(val, minval)
                 except ValueError:
-                    return 0
+                    return minval
             # Get the Input widgets' values.
-            mx,my = get('tile_mx'),get('tile_my')
-            tx,ty = get('tile_tx'),get('tile_ty')
-            sx,sy = get('tile_sx'),get('tile_sy')
+            mx,my = get('tile_mx',0),get('tile_my',0)
+            tx,ty = get('tile_tx',1),get('tile_ty',1)
+            sx,sy = get('tile_sx',0),get('tile_sy',0)
             # Get the Image widget.
             image = form['tile_sheet']
             # Attach to dialog "d" a rects list that can be used to carve up the
