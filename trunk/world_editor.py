@@ -218,9 +218,11 @@ class Struct(object):
 
 
 class Tile(gui.Image):
-    """This is an Image that has just enough event handling to participate in a
-    Group of Tools.
+    """This is an Image that represents a spritesheet tile.
     """
+    
+    tile_hovering = None
+    tile_selected = None
     
     def __init__(self, value, file_path, rect, tileset, **params):
         gui.Image.__init__(self, value.copy(), **params)
@@ -230,16 +232,17 @@ class Tile(gui.Image):
         # Copy of source image.
         self.tile_image = pygame.surface.Surface(rect.size)
         self.tile_image.blit(self.value, (0,0))
-        # An alpha image used as a hover mask.
-        self.tile_hovering = pygame.surface.Surface(rect.size)
-        self.tile_hovering.fill(Color('steelblue'))
-        pygame.draw.rect(self.tile_hovering, Color('blue'), self.tile_hovering.get_rect(), 1)
-        self.tile_hovering.set_alpha(99)
-        # An alpha image used as a selected mask.
-        self.tile_selected = pygame.surface.Surface(rect.size)
-        self.tile_selected.fill(Color('purple'))
-        pygame.draw.rect(self.tile_selected, Color('darkblue'), self.tile_selected.get_rect(), 1)
-        self.tile_selected.set_alpha(99)
+        if self.tile_hovering is None:
+            # An alpha image used as a hover mask.
+            self.tile_hovering = pygame.surface.Surface(rect.size)
+            self.tile_hovering.fill(Color(140,200,250))
+            pygame.draw.rect(self.tile_hovering, Color('blue'), self.tile_hovering.get_rect(), 1)
+            self.tile_hovering.set_alpha(99)
+            # An alpha image used as a selected mask.
+            self.tile_selected = pygame.surface.Surface(rect.size)
+            self.tile_selected.fill(Color(140,250,250))
+            pygame.draw.rect(self.tile_selected, Color('blue'), self.tile_selected.get_rect(), 1)
+            self.tile_selected.set_alpha(99)
         # Translucent mouse image.
         self.mouse_image = self.tile_image.copy()
         self.mouse_image.set_alpha(75)
@@ -2074,8 +2077,8 @@ def make_side_panel(container):
     for tileset in State.app.tilesets:
         prevy = tileset.rects[0].y
         for rect in tileset.rects:
-            if rect.y is not prevy:
-                tile_palette.br(1)
+            if rect.y != prevy:
+##                tile_palette.br(1)
                 tile_palette.block(-1)
                 prevy = rect.y
             tile = Tile(tileset.image.subsurface(rect),
@@ -2083,7 +2086,7 @@ def make_side_panel(container):
             tile.connect(gui.CLICK, State.app.set_stamp,
                 tileset, rect, tile.value)
             tile_palette.add(tile)
-            tile_palette.space((1,0))
+##            tile_palette.space((1,0))
         tile_palette.br(2)
         tile_palette.block(-1)
     
