@@ -306,3 +306,9 @@ SVN rev 218:
 
 SVN rev 221:
   * Fixed: world_editor.py; nasty little bug in gui_tile_sheet_sizer() that blew up when tile size is set to zero, which indeed happens whenever the Input field is cleared.
+
+SVN rev 223:
+  * Fixed: world_editor.py; the loop that builds the tile palette in make_side_panel() inserted erroneous line breaks in some cases.
+  * Changed: world_editor.py; removed grid lines from tile palette. They were kind of an eyesore.
+  * Changed: world_editor.py; in class Tile made tile_hovering and tile_selected class variables because they were wasteful as instance variables. Also, tweaked their colors.
+  * Changed: tiledtmxloader.tmx upgraded to version 2.2.
