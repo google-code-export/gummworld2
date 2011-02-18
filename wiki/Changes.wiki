@@ -317,3 +317,6 @@ SVN rev 225:
   * Fixed: world_editor.py; shapes and control points could not be selected when scrolling beyond the right and bottom edges of the screen.
   * Fixed: world_editor.py; action_load_map() did not resize the world after loading a new map.
   * Fixed: world_editor.py; action_key_grab_shape() did not update the position widget.
+
+SVN rev 227:
+  * Fixed: tiledtmxloader.py; ImageLoaderPygame.load_image_parts() bitten by a pygame Surface constructor bug, was not succeeding at copying tiles. This is a local fix, waiting on official update from DR0ID.
