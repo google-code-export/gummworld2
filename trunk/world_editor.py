@@ -1331,7 +1331,7 @@ class MapEditor(object):
         """
         mouse_shape = self.mouse_shape
         mouseover_shapes = self.mouseover_shapes
-        if not mouse_shape.rect.colliderect(State.camera.view.rect):
+        if not mouse_shape.rect.colliderect(State.camera.rect):
             # Don't change the map if clicking outside the map area.
             return
         elif self.modal is not None:
@@ -1425,6 +1425,8 @@ class MapEditor(object):
             if pressed[K_DOWN]: diry += 1
             grabbed.position += (dirx*speed,diry*speed)
             State.world.add(self.selected)
+            x,y = selected.position
+            self.gui_form['shape_pos'].set_text(str((int(round(x)),int(round(y)))))
     
     def action_key_inflate_shape(self, key, mod):
         """Inflate shape action: de/inflate a shape.
@@ -1457,6 +1459,10 @@ class MapEditor(object):
             map_size = d.values[0:2]
             tile_size = d.values[2:4]
             State.map = Map(tile_size, map_size)
+            entities = State.world.entity_branch.keys()
+            State.world = model.WorldQuadTree(
+                State.map.rect, worst_case=99, collide_entities=True)
+            State.world.add(*entities)
             toolkit.make_tiles2()
             self.remake_scrollbars()
             State.file_map = None
@@ -1478,6 +1484,10 @@ class MapEditor(object):
                 if State.file_map.endswith('.tmx'):
                     try:
                         State.map = toolkit.load_tiled_tmx_map(State.file_map)
+                        entities = State.world.entity_branch.keys()
+                        State.world = model.WorldQuadTree(
+                            State.map.rect, worst_case=99, collide_entities=True)
+                        State.world.add(*entities)
                     except:
                         exc_type,exc_value,exc_traceback = sys.exc_info()
                         self.gui_view_text('Load map failed',
