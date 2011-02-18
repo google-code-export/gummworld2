@@ -312,3 +312,8 @@ SVN rev 223:
   * Changed: world_editor.py; removed grid lines from tile palette. They were kind of an eyesore.
   * Changed: world_editor.py; in class Tile made tile_hovering and tile_selected class variables because they were wasteful as instance variables. Also, tweaked their colors.
   * Changed: tiledtmxloader.tmx upgraded to version 2.2.
+
+SVN rev 225:
+  * Fixed: world_editor.py; shapes and control points could not be selected when scrolling beyond the right and bottom edges of the screen.
+  * Fixed: world_editor.py; action_load_map() did not resize the world after loading a new map.
+  * Fixed: world_editor.py; action_key_grab_shape() did not update the position widget.
