@@ -17,7 +17,7 @@ if __debug__:
     import time
     _start_time = time.time()
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 
 import sys
@@ -25,11 +25,11 @@ from xml.dom import minidom, Node
 import StringIO
 import os.path
 #import codecs
-
+import pygame
 # TODO: 
 # maybe use cStringIO instead of StringIO
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 class IImageLoader(object):
     u"""
     Interface for image loading. Depending on the framework used the
@@ -98,7 +98,7 @@ class IImageLoader(object):
         """
         raise NotImplementedError(u'This should be implemented in a inherited class')
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 class ImageLoaderPygame(IImageLoader):
     u"""
     Pygame image loader.
@@ -142,9 +142,14 @@ class ImageLoaderPygame(IImageLoader):
             self._img_cache[filename] = source_img
         w, h = source_img.get_size()
         images = []
+        ## New: get image depth and flags
+        depth = source_img.get_bitsize()
+        flags = source_img.get_flags()
         for y in xrange(margin, h, tile_height + spacing):
             for x in xrange(margin, w, tile_width + spacing):
-                img_part = self.pygame.Surface((tile_width, tile_height), 0, source_img)
+## The following usage seems to be broken in pygame 1.9.1.
+##                img_part = self.pygame.Surface((tile_width, tile_height), 0, source_img)
+                img_part = self.pygame.Surface((tile_width, tile_height), flags, depth)
                 img_part.blit(source_img, (0, 0), self.pygame.Rect(x, y, tile_width, tile_height))
                 if colorkey:
                     img_part.set_colorkey(colorkey)
@@ -156,7 +161,7 @@ class ImageLoaderPygame(IImageLoader):
         # that is why here it is redirected to the other method
         return self.load_image(file_like_obj, colorkey)
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 class ImageLoaderPyglet(IImageLoader):
     u"""
     Pyglet image loader.
@@ -214,7 +219,7 @@ class ImageLoaderPyglet(IImageLoader):
         # that is why here it is redirected to the other method
         return self.load_image(file_like_obj, colorkey, file_like_obj)
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 class TileMap(object):
     u"""
 
@@ -395,7 +400,7 @@ class TileMap(object):
         """
         for layer in self.layers:
             layer.decode()
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 
 class TileSet(object):
@@ -442,7 +447,7 @@ class TileSet(object):
         self.tileheight = 0
         self.tilewidth = 0
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 class TileImage(object):
     u"""
@@ -475,7 +480,7 @@ class TileImage(object):
         self.trans = None
         self.properties = {} # {name: value}
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 class Tile(object):
     u"""
@@ -495,7 +500,7 @@ class Tile(object):
         self.images = [] # uses TileImage but either only id will be set or image data
         self.properties = {} # {name: value}
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 class TileLayer(object):
     u"""
@@ -611,7 +616,7 @@ class TileLayer(object):
                 s += str(self.decoded_content[num])
                 num += 1
             print s
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 
 class MapObjectGroup(object):
@@ -643,7 +648,7 @@ class MapObjectGroup(object):
         self.y = 0
         self.properties = {} # {name: value}
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 class MapObject(object):
     u"""
@@ -676,7 +681,7 @@ class MapObject(object):
         self.image = None
         self.properties = {} # {name: value}
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def decode_base64(in_str):
     u"""
     Decodes a base64 string and returns it.
@@ -690,7 +695,7 @@ def decode_base64(in_str):
     import base64
     return base64.decodestring(in_str)
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def decompress_gzip(in_str):
     u"""
     Uncompresses a gzip string and returns it.
@@ -709,7 +714,7 @@ def decompress_gzip(in_str):
     gzipper.close()
     return s
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def decompress_zlib(in_str):
     u"""
     Uncompresses a zlib string and returns it.
@@ -723,7 +728,7 @@ def decompress_zlib(in_str):
     import zlib
     s = zlib.decompress(in_str)
     return s
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def printer(obj, ident=''):
     u"""
     Helper function, prints a hirarchy of objects.
@@ -747,7 +752,7 @@ def printer(obj, ident=''):
         for i in l:
             printer(i, ident + '    ')
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 class TileMapParser(object):
     u"""
     Allows to parse and decode map files for 'Tiled', a open source map editor
@@ -886,7 +891,7 @@ class TileMapParser(object):
         world_map.load(image_loader)
         return world_map
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def demo_pygame(file_name):
     pygame = __import__('pygame')
 
@@ -964,7 +969,7 @@ def demo_pygame(file_name):
                                                 screen_img.set_alpha(None)
                                                 alpha_value = int(255. * float(layer.opacity))
                                                 screen_img.set_alpha(alpha_value)
-                                        screen_img = screen_img.convert_alpha()
+                                        ##screen_img = screen_img.convert_alpha()
                                         # draw image at right position using its offset
                                         screen.blit(screen_img, (x + cam_offset_x + offx, y + cam_offset_y + offy))
                                 except Exception, e:
@@ -987,7 +992,7 @@ def demo_pygame(file_name):
             # simple pygame
             pygame.display.flip()
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 def demo_pyglet(file_name):
     """Thanks to: HydroKirby from #pyglet on freenode.org
@@ -1065,7 +1070,7 @@ def demo_pyglet(file_name):
     pyglet.app.run()
 
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def main():
 
     args = sys.argv[1:]
@@ -1083,7 +1088,7 @@ def main():
         print 'missing framework, usage: python test.py mapfile.tmx [pygame|pyglet]'
         sys.exit(-1)
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 if __name__ == '__main__':
     main()
