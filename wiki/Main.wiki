@@ -42,17 +42,17 @@ These are the core classes.
 
   GameClock: Keeps constant game time. No-fuss variable frame rate. Calculates interpolated fraction of a game tick, which can be used for prediction, sub-pixel motion, and precision timing.
 
-  BucketSprite and BucketGroup: pygame-like classes that manage sprites in buckets for optimized updating and rendering. BucketGroup also has a tweaked draw() method needed to render sprites whose rects are expressed in world coordinates; versus pygame's which expect sprite rects to be expressed in screen coordinates. These are for game makers who prefer to use the sprite for both view and model.
+BucketSprite and BucketGroup: Not core classes, but worthy of mention. They are pygame-like classes that manage sprites in buckets for optimized updating and rendering. BucketGroup also has a tweaked draw() method needed to render sprites whose rects are expressed in world coordinates; versus pygame's which expect sprite rects to be expressed in screen coordinates. These are for game makers who prefer to use the sprite for both view and model.
 
 The data module provides resource loaders for various data in the data subdirectories, a la skellington. It should be very easy to figure out and customize as needed.
 
 The geometry module provides numerous collision routines to augment pygame's, geometric calculations, and some shapes.
 
-There are a few utilities to simplify laborious tasks and ease experimentation with concepts: a HUD, map grid, tile labels, popup menu, map generators, Tiled map loader, tile renders, tile collapsing, pygame utilities module. The examples and map_editor.py rely upon those modules. However, they are not required by the library, with the exception that toolkit.py and pygame_utils.py. One can certainly use Gummworld2 for map scrolling and easily ignore the extras. Of special interest, the toolkit module provides a number of "quickie" functions for both practical use and demonstrations of how to manipulate library objects, most notably Map and Camera.
+There are a few utilities to simplify laborious tasks and ease experimentation with concepts: a HUD, map grid, tile labels, popup menu, map generators, Tiled map loader, tile renders, tile collapsing, pygame utilities module, and PGU's gui package. The examples and world_editor.py rely upon those modules. However, they are not required by the library, with the exception that toolkit.py and pygame_utils.py. Of special interest, the toolkit module provides a number of "quickie" functions for both practical use and demonstrations of how to manipulate library objects, most notably Map and Camera.
 
-Some examples use Tiled maps. While this is one of the easiest ways to make and import tile maps, it is not required. Any map source can be used as long as its data can be converted to the Map class's meager requirements. See the toolkit module for a few functions that load maps, the bunny game for an ASCII map, and the Map class documentation.
+The nicer examples use Tiled maps. While this is one of the easiest ways to make and import tile maps, it is not required. Any map source can be used as long as its data can be converted to the Map class's meager requirements. See the toolkit module for a few functions that load maps, the bunny game for an ASCII map, and the Map class documentation.
 
-Note that although pymunk and Tiled are supported, they are not required. There is no need to consider them if you prefer not to use them.
+Note that although pymunk and Tiled are supported, they are not required. There is no need to consider them if you prefer not to use them. However, at this time the world editor only imports Tiled maps. Tiled maps are not critical to the operation of the editor or Gummworld2, but at present they certainly make designing layout a lot easier in the editor.
 
 Lastly, a general caution. The instance variables representing 2D coordinates are typically implemented as `Vec2d`. Attempts will be made to protect them from direct assignment, as clobbering them with a sequence or other object will break some library routines. Keep this in mind when overriding in subclasses or choosing to directly access the underlying private `_attributes`.
 
@@ -60,11 +60,11 @@ Lastly, a general caution. The instance variables representing 2D coordinates ar
 
 Initial efforts focused on the map, its visual presentation, and interface. Recently attention has turned to the world (model) editor. The API has not had any code-breaking changes since version 0.0.7.
 
-A mini game was finished in 0.0.2 as a proof-of-concept, and kept functional as the library evolved. The game and all but one example do not use an external physics library; I would describe them as pygame-only. A few examples use a Tiled map.
+A mini game was finished in 0.0.2 as a proof-of-concept, and kept functional as the library evolved. The game and all but one example do not use an external physics library; I would describe them as pygame-only. A few examples use Tiled maps.
 
-The editor concept has narrowed. It will not do map editing. Tiled already does that well. Gummworld2's editor will supplement Tiled's static maps by visually overlaying tagged geometry for physics--e.g. rects and circles for pygame; lines, circles, and polys for pymunk or others--and placement of interactive game content like baddies, doors, traps, anything you can think of. The geometry would typically be invisible in the game, and used for game events like:
+The editor is not a map editor. Tiled already does that well. Gummworld2's editor supplements Tiled's static maps by visually overlaying tagged geometry for physics--e.g. rects and circles for pygame; circles and polygons for pymunk or others--and placement of interactive game content, e.g. baddies, doors, traps. The geometry would typically be invisible in the game, and used for game events like:
 
-  * Did these two space ships collide.
+  * Did my space ship hit the cavern wall.
   * Did my truck venture into this sand pit.
   * Did the mouse click on this unit of soldiers.
   * Is this baddy in striking range of the avatar.
@@ -72,7 +72,7 @@ The editor concept has narrowed. It will not do map editing. Tiled already does 
 
 Performance is extremely good on my Intel Core i3 laptop. Not so great on my older AMD Athlon X2 desktop, but still much better than the original Gummworld; it screams at Diablo-like resolution (800x600), presumably leaving plenty of capacity for dynamic content. The proof-of-concept bunny game seems to support this expectation, with a two-layer 2056x2056-pixel map, 400 autonomous sprites, collision handling, and a split screen rendering at nearly 250 FPS on the Intel Core i3.
 
-An aged Intel single-core 1.8 GHz with cheap on-board video and SDRAM pulled off 40-60 FPS on examples. However, the scrolling experience was sluggish and really jerky since the platform was not fast enough to drive smooth interpolation and still work in garbage collection. The quadtree examples did not run acceptibly at all, except with low sprite counts.
+An aged Intel single-core 1.8 GHz with cheap on-board video and DDR-333 pulled off 40-60 FPS on examples. However, the scrolling experience was sluggish and really jerky since the platform was not fast enough to drive smooth interpolation and still work in garbage collection. The quadtree examples did not run acceptibly at all, except with low sprite counts. Scrolling on old platforms such as this may still be possible at smaller resolutions.
 
 ===Features===
 
@@ -87,7 +87,6 @@ Library:
     * World is a dumb model with a list for entities (DONE)
     * WorldQuadTree is an advanced model that provides optimal collision checking in large maps with many elements (DONE)
     * WorldPymunk is a model that leverages pymunk; needs more shape classes and pymunk-ish things (incomplete)
-  * Procedural object makers, e.g. random groups of baddies
   * Menu (DONE)
   * Grid (DONE)
   * HUD (DONE)
@@ -95,26 +94,23 @@ Library:
   * Toolkit: hud and tile generators; map loader; render routines; map optimizer (DONE)
 
 Editor:
-  * pymunk editing primitives
-    * Line
+  * Editing primitives
+    * Line (still thinking; it's not compatible with QuadTree)
     * Rect (DONE)
     * Circle (DONE)
-    * Poly (DONE)
+    * Polygons (DONE)
     * Select (DONE)
     * Multi-select
     * Move (DONE)
     * Resize (DONE)
-    * Delete (DONE)
+    * Delete, cut, copy, paste (DONE)
     * Undo/Redo
-  * ~~Map decorating and tiling~~
-    * ~~Tileset loading~~
-    * ~~Palette picking~~
-    * ~~Screen picking~~
-    * ~~Paint~~
-    * ~~Erase~~
-    * ~~Undo/redo~~
-    * ~~Region selection~~
-    * ~~Fill~~
+  * Map decorating and tiling (for in-editor visual aid only)
+    * Tileset loading
+    * Palette picking
+    * Screen picking
+    * Paint
+    * Erase
 
 ==Working Notes==
 
@@ -122,21 +118,16 @@ Editor:
 
 ===pymunk===
 
-pymunk is barely more than a concept thus far. It is fundamentally proven in examples/08_pymunk_motion.py. The pygame portion of the library is about ready for use in map_editor.py. There will be a world-editor file importer for pymunk.
+pymunk is barely more than a concept thus far. It is fundamentally proven in examples/08_pymunk_motion.py. Shape classes and a map importer will eventually come.
 
 ===World Editor===
 
-The plan is for game makers to be able to load a map in the editor, draw shapes on it to define game objects, then save a "physics map". Games will then be able to load the graphics map and physics map, and rely on pymunk or other implementations for run-time physics.
+Game makers can load a map in the editor, draw shapes on it to define game objects, then save a "physics map". Games can load the graphics and physics maps, and rely on pymunk or other implementations for run-time physics.
 
-I am liking the combination of [http://www.mapeditor.org/ Tiled Map Editor] and [http://www.pygame.org/project-map+loader+for+%27tiled%27-1158-2951.html pytmxloader]. Initially the world editor will simply load the tile map, and let one add geometry and tag it with arbitrary info. The exported file will contain all the info needed to recreate shapes in game, and get their info tags.
+[http://www.mapeditor.org/ Tiled Map Editor] and [http://www.pygame.org/project-map+loader+for+%27tiled%27-1158-2951.html pytmxloader] make a great team. It is a no-brainer to use them, unless you've got a pile of reusable content from other sources.
 
-Since the Map class is already source agnostic, it may be easy enough to support multiple map editor formats just by adding a `toolkit.load_*` function or perhaps extension scripts.
-
-Thought... Map layers--Tiled or other--can be used to classify terrain objects, for example "trees go on layer 5". Game makers (i.e., me) may want to do special things with these, like let mobile objects pass under or behind them and temporarily lower the image alpha so the mobile object is not entirely obscured. (This aspect weakens the case for map decorating and tiling in map_editor.py.)
-
-Drawing boundaries on a static map is admittedly nice. However, the world editor must also handle placement of "spawned" game objects, i.e. objects that are not in static map layers. For example, groups of orcs, gates, siege weapons, random rubble. The world editor will likely have to load tilesets to aid visualizing world content design. It's essential to at least be able to insert a physical "device" into the world map, size its geometry accurately, and provide a handle or descriptive data for a few reasons:
+Placing static obstacles and boundaries on a map is admittedly nice. However, the world editor can also be used to place "spawned" game objects, i.e. objects that are not in static map layers. For example, groups of orcs, gates, siege weapons, random rubble. The world editor can load tilesets to aid visualizing world content design. It's very useful to be able to insert a physical "device" into the world map, size its geometry accurately, and provide a handle or descriptive data for a few reasons:
 
   # Shapes are needed for dimensions; and potentially other physics-related purposes in the case of pymunk.
   # Obviously, if objects in the physics dimension are interacting those interactions need to correlate with the presentation layer.
   # Map loaders could detect "Ah, here is a Mark IV Gizmo. I'll load the graphics and game intelligence for it". Or run-time game logic can load presentation content on the fly when the physics are activated by game progression.
-  # Using a world editor for placement would be highly preferable to eyeballing map coordinates in the world editor and hand entering code or data sets to place many gizmos on a map.
