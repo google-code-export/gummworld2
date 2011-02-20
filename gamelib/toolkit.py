@@ -24,11 +24,14 @@ __doc__ = """toolkit.py - Some helper tools for Gummworld2.
 """
 
 
+from os.path import join as joinpath
+
 import pygame
 from pygame.locals import RLEACCEL
 from pygame.sprite import Sprite
 
 from gamelib import data, State, Map, MapLayer, Vec2d
+from gamelib.geometry import RectGeometry, PolyGeometry, CircleGeometry
 from gamelib.ui import HUD, Stat, Statf, hud_font
 from tiledtmxloader import TileMapParser, ImageLoaderPygame
 
@@ -196,11 +199,8 @@ def collapse_map_layer(map, layeri, num_tiles=(2,2)):
                         colorkey = c
                 # Fill dest image if there is a colorkey.
                 if colorkey is None and len(tiles) < num_tiles.x*num_tiles.y:
-                    print 'force colorkey', len(tiles)
                     colorkey = (0,0,0)
                     s.image.fill(colorkey)
-                else:
-                    print 'skip colorkey', len(tiles)
                 # Blit the images (first turning off source colorkey).
                 for tile in tiles:
                     nx,ny = Vec2d(tile.name) - (x,y)
@@ -335,7 +335,11 @@ def load_tiled_tmx_map(map_file_name, load_invisible=False):
                 img_idx = layer.content2D[xpos][ypos]
                 if img_idx == 0:
                     continue
-                offx, offy, screen_img = world_map.indexed_tiles[img_idx]
+                try:
+                    offx, offy, screen_img = world_map.indexed_tiles[img_idx]
+                except KeyError:
+                    print 'KeyError',img_idx,(xpos,ypos)
+                    continue
                 sprite = Sprite()
                 if screen_img.get_alpha():
                     screen_img = screen_img.convert_alpha()
@@ -352,6 +356,34 @@ def load_tiled_tmx_map(map_file_name, load_invisible=False):
     return gummworld_map
 
 # load_tiled_tmx_map
+
+
+def load_entities(filepath, cls_dict={}):
+    """Load entities via the import_world_quadtree plugin. Return a list of
+    entities.
+    
+    The cls_dict argument is a dict of classes to construct when encountering
+    shape data. The following keys are supported: 'rect_cls', 'poly_cls',
+    'circle_cls'. If any of those keys are missing from cls_dict, the following
+    classes will be used by default: geometry.RectGeometry,
+    geometry.PolyGeometry, geometry.CircleGeometry. Classes substituted in this
+    manner must have constructors that are compatible with the default classes.
+    """
+    import_script = data.filepath(
+        'plugins', joinpath('map','import_world_quadtree.py'))
+    State.world.remove(*State.world.entity_branch.keys())
+    file_handle = open(filepath, 'rb')
+    locals_dict = {
+        'fh'         : file_handle,
+    }
+    locals_dict['rect_cls'] = cls_dict.get('rect_cls', RectGeometry)
+    locals_dict['poly_cls'] = cls_dict.get('poly_cls', PolyGeometry)
+    locals_dict['circle_cls'] = cls_dict.get('circle_cls', CircleGeometry)
+    execfile(import_script, {}, locals_dict)
+    file_handle.close()
+    return locals_dict['entities']
+
+# load_world
 
 
 def draw_sprite(s, blit_flags=0):

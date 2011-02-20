@@ -303,8 +303,9 @@ def circle_collided_other(self, other, rect_pre_tested=None):
     origin = self.origin
     radius = self.radius
     if not hasattr(other, 'collided'):
-        return circle_intersects_rect(
-        origin, radius, rect_to_lines(other.rect))
+#        return circle_intersects_rect(
+#        origin, radius, rect_to_lines(other.rect))
+        return circle_intersects_rect(origin, radius, other.rect)
     
     other_collided = other.collided
     if other_collided is circle_collided_other:
@@ -378,8 +379,9 @@ def line_collided_other(self, other, rect_pre_tested=None):
     See circle_collided_other description for other details.
     """
     if not hasattr(other, 'collided'):
-        return circle_intersects_rect(
-            self.origin, self.radius, rect_to_lines(other.rect))
+#        return circle_intersects_rect(
+#            self.origin, self.radius, rect_to_lines(other.rect))
+        return line_intersects_rect(self.end_points, other.rect)
     
     other_collided = other.collided
     if other_collided is circle_collided_other:
@@ -412,8 +414,9 @@ def poly_collided_other(self, other, rect_pre_tested=None):
     See circle_collided_other description for other details.
     """
     if not hasattr(other, 'collided'):
-        return circle_intersects_rect(
-            self.origin, self.radius, rect_to_lines(other.rect))
+#        return circle_intersects_rect(
+#            self.origin, self.radius, rect_to_lines(other.rect))
+        return poly_intersects_rect(self.points, other.rect)
     
     other_collided = other.collided
     if other.collided is circle_collided_other:

@@ -5,9 +5,19 @@ u"""
 TileMap loader for python for Tiled, a generic tile map editor
 from http://mapeditor.org/ .
 It loads the \*.tmx files produced by Tiled.
+
+
+TODO:
+ - maybe use cStringIO instead of StringIO
+ - pyglet demo: better rendering
+ - pygame demo: better rendering
+ - test if object gid is already read in and resolved
+
+
+
 """
 
-__version__ = 2.2
+__version__ = "2.3.0.0"
 __revision__ = u'$Id$'
 __author__ = u'DR0ID_ @ 2009-2011'
 
@@ -25,9 +35,7 @@ from xml.dom import minidom, Node
 import StringIO
 import os.path
 #import codecs
-import pygame
-# TODO: 
-# maybe use cStringIO instead of StringIO
+
 
 # ------------------------------------------------------------------------------
 class IImageLoader(object):
@@ -124,35 +132,24 @@ class ImageLoaderPygame(IImageLoader):
         return img
 
     def load_image_part(self, filename, x, y, w, h, colorkey=None):
+        source_img = self.load_image(filename, colorkey)
+        ## ISSUE 4:
+        ##      The following usage seems to be broken in pygame (1.9.1.):
+        ##      img_part = self.pygame.Surface((tile_width, tile_height), 0, source_img)
+        img_part = self.pygame.Surface((w, h), source_img.get_flags(), source_img.get_bitsize())
         source_rect = self.pygame.Rect(x, y, w, h)
-        img = self._img_cache.get(filename, None)
-        if img is None:
-            img = self.pygame.image.load(filename)
-            self._img_cache[filename] = img
-        img_part = self.pygame.Surface((w, h), 0, img)
-        img_part.blit(img, (0, 0), source_rect)
+        img_part.blit(source_img, (0, 0), source_rect)
         if colorkey:
             img_part.set_colorkey(colorkey)
         return img_part
 
     def load_image_parts(self, filename, margin, spacing, tile_width, tile_height, colorkey=None): #-> [images]
-        source_img = self._img_cache.get(filename, None)
-        if source_img is None:
-            source_img = self.pygame.image.load(filename)
-            self._img_cache[filename] = source_img
+        source_img = self.load_image(filename, colorkey)
         w, h = source_img.get_size()
         images = []
-        ## New: get image depth and flags
-        depth = source_img.get_bitsize()
-        flags = source_img.get_flags()
         for y in xrange(margin, h, tile_height + spacing):
             for x in xrange(margin, w, tile_width + spacing):
-## The following usage seems to be broken in pygame 1.9.1.
-##                img_part = self.pygame.Surface((tile_width, tile_height), 0, source_img)
-                img_part = self.pygame.Surface((tile_width, tile_height), flags, depth)
-                img_part.blit(source_img, (0, 0), self.pygame.Rect(x, y, tile_width, tile_height))
-                if colorkey:
-                    img_part.set_colorkey(colorkey)
+                img_part = self.load_image_part(filename, x, y, tile_width, tile_height, colorkey)
                 images.append(img_part)
         return images
 
@@ -191,26 +188,19 @@ class ImageLoaderPyglet(IImageLoader):
         return img
 
     def load_image_part(self, filename, x, y, w, h, colorkey=None):
-        img = self._img_cache.get(filename, None)
-        if img is None:
-            img = self.pyglet.image.load(filename)
-            self._img_cache[filename] = img
+        image = self.load_image(filename, colorkey)
         img_part = image.get_region(x, y, w, h)
         return img_part
 
 
     def load_image_parts(self, filename, margin, spacing, tile_width, tile_height, colorkey=None): #-> [images]
-        source_img = self._img_cache.get(filename, None)
-        if source_img is None:
-            source_img = self.pyglet.image.load(filename)
-            self._img_cache[filename] = source_img
+        source_img = self.load_image(filename, colorkey)
         images = []
         # Reverse the map column reading to compensate for pyglet's y-origin.
         for y in xrange(source_img.height - tile_height, margin - tile_height,
             -tile_height - spacing):
             for x in xrange(margin, source_img.width, tile_width + spacing):
-                #img_part = source_img.get_region(x, y, tile_width, tile_height)
-                img_part = source_img.get_region(x, y - spacing, tile_width, tile_height)
+                img_part = self.load_image_part(filename, x, y - spacing, tile_width, tile_height)
                 images.append(img_part)
         return images
 
@@ -762,12 +752,35 @@ class TileMapParser(object):
     def _build_tile_set(self, tile_set_node, world_map):
         tile_set = TileSet()
         self._set_attributes(tile_set_node, tile_set)
+        if hasattr(tile_set, "source"):
+            tile_set = self._parse_tsx(tile_set.source, tile_set, world_map)
+        else:
+            tile_set = self._get_tile_set(tile_set_node, tile_set)
+        world_map.tile_sets.append(tile_set)
+
+    def _parse_tsx(self, file_name, tile_set, world_map):
+        # would be more elegant to use  "with open(file_name, "rb") as file:" but that is python 2.6
+        file = None
+        if hasattr(self, 'alt_dir'):
+            file_name = os.path.join(self.alt_dir, file_name)
+        try:
+            file = open(file_name, "rb")
+            dom = minidom.parseString(file.read())
+        finally:
+            if file:
+                file.close()
+        for node in self._get_nodes(dom.childNodes, 'tileset'):
+            tile_set = self._get_tile_set(node, tile_set)
+            break;
+        return tile_set
+
+    def _get_tile_set(self, tile_set_node, tile_set):
         for node in self._get_nodes(tile_set_node.childNodes, u'image'):
             self._build_tile_set_image(node, tile_set)
         for node in self._get_nodes(tile_set_node.childNodes, u'tile'):
             self._build_tile_set_tile(node, tile_set)
         self._set_attributes(tile_set_node, tile_set)
-        world_map.tile_sets.append(tile_set)
+        return tile_set
 
     def _build_tile_set_image(self, image_node, tile_set):
         image = TileImage()
@@ -805,7 +818,7 @@ class TileMapParser(object):
                 layer.encoded_content = []
                 for child in node.childNodes:
                     if child.nodeType == Node.ELEMENT_NODE and child.nodeName == "tile":
-                        val = child.attributes["gid"].nodeValue 
+                        val = child.attributes["gid"].nodeValue
                         #print child, val
                         layer.encoded_content.append(val)
         world_map.layers.append(layer)
@@ -865,7 +878,15 @@ class TileMapParser(object):
         :return: instance of TileMap
         """
         #dom = minidom.parseString(codecs.open(file_name, "r", "utf-8").read())
-        dom = minidom.parseString(open(file_name, "rb").read())
+        # would be more elegant to use  "with open(file_name, "rb") as file:" but that is python 2.6
+        file = None
+        self.alt_dir,_ = os.path.split(file_name)
+        try:
+            file = open(file_name, "rb")
+            dom = minidom.parseString(file.read())
+        finally:
+            if file:
+                file.close()
         for node in self._get_nodes(dom.childNodes, 'map'):
             world_map = self._build_world_map(node)
             break
@@ -945,6 +966,8 @@ def demo_pygame(file_name):
                 if layer.visible:
                     idx = 0
                     # loop over all tiles
+                    # TODO: [21:03]	thorbjorn: DR0ID_: You can generally determine the range of tiles that are visible before your drawing loop, which is much faster than looping over all tiles and checking whether it is visible for each of them.
+
                     for ypos in xrange(0, layer.height):
                         for xpos in xrange(0, layer.width):
                             # add offset in number of tiles
@@ -958,6 +981,7 @@ def demo_pygame(file_name):
                                     # get the actual image and its offset
                                     offx, offy, screen_img = world_map.indexed_tiles[img_idx]
                                     # only draw the tiles that are relly visible (speed up)
+                                    # TODO: move this if before the for loops as suggested by thorbjorn
                                     if x >= cam_offset_x - 3 * world_map.tilewidth and x + cam_offset_x <= screen_width + world_map.tilewidth\
                                        and y >= cam_offset_y - 3 * world_map.tileheight and y + cam_offset_y <= screen_height + 3 * world_map.tileheight:
                                         if screen_img.get_alpha():
@@ -969,7 +993,7 @@ def demo_pygame(file_name):
                                                 screen_img.set_alpha(None)
                                                 alpha_value = int(255. * float(layer.opacity))
                                                 screen_img.set_alpha(alpha_value)
-                                        ##screen_img = screen_img.convert_alpha()
+                                        screen_img = screen_img.convert_alpha()
                                         # draw image at right position using its offset
                                         screen.blit(screen_img, (x + cam_offset_x + offx, y + cam_offset_y + offy))
                                 except Exception, e:
@@ -996,12 +1020,20 @@ def demo_pygame(file_name):
 
 def demo_pyglet(file_name):
     """Thanks to: HydroKirby from #pyglet on freenode.org
-    
+
     Loads and views a map using pyglet.
 
     Holding the arrow keys will scroll along the map.
     Holding the left shift key will make you scroll faster.
     Pressing the escape key ends the application.
+
+    TODO:
+    Maybe use this to put topleft as origin:
+
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho(0.0, (double)mTarget->w, (double)mTarget->h, 0.0, -1.0, 1.0);
+
     """
 
     import pyglet
@@ -1022,6 +1054,18 @@ def demo_pyglet(file_name):
         glLoadIdentity()
         # Move the "eye" to the current location on the map.
         glTranslatef(delta[0], delta[1], 0.0)
+        # TODO: [21:03]	thorbjorn: DR0ID_: You can generally determine the range of tiles that are visible before your drawing loop, which is much faster than looping over all tiles and checking whether it is visible for each of them.
+        # [21:06]	DR0ID_: probably would have to rewrite the pyglet demo to use a similar render loop as you mentioned
+        # [21:06]	thorbjorn: Yeah.
+        # [21:06]	DR0ID_: I'll keep your suggestion in mind, thanks
+        # [21:06]	thorbjorn: I haven't written a specific OpenGL renderer yet, so not sure what's the best approach for a tile map.
+        # [21:07]	thorbjorn: Best to create a single texture with all your tiles, bind it, set up your vertex arrays and fill it with the coordinates of the tiles currently on the screen, and then let OpenGL draw the bunch.
+        # [21:08]	DR0ID_: for each layer?
+        # [21:08]	DR0ID_: yeah, probably a good approach
+        # [21:09]	thorbjorn: Ideally for all layers at the same time, if you don't have to draw anything in between.
+        # [21:09]	DR0ID_: well, the NPC and other dynamic things need to be drawn in between, right?
+        # [21:09]	thorbjorn: Right, so maybe once for the bottom layers, then your complicated stuff, and then another time for the layers on top.
+
         batch.draw()
 
     keys = pyglet.window.key.KeyStateHandler()

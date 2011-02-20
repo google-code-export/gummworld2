@@ -24,13 +24,14 @@ __doc__ = """world_editor.py - A world editor for Gummworld2.
 """
 
 HELP_TEXT = """
-Limited saving and loading is available. This is very basic and *will* change over time as features are added to the world file format. However, it is URL-quoted ASCII so it should be easy to script a quick-n-dirty converter.
+Saving and loading is fully implemented. The file format may change over time as features are added. However, efforts will be made to keep tools backwards compatible. Finally, the file contents are simply URL-quoted ASCII which should be easy to convert.
 
 Controls
 
     * Menus do what you'd expect.
     * Scrollbars do what you'd expect.
     * Toolbar selects a shape to insert into the map.
+
     * Right-click in the map:
         * Inserts a shape into the map. If tiles are attached to the mouse, they are attached to the shape when it is inserted.
 
@@ -50,12 +51,20 @@ Controls
         * Adds or removes a tile from multiple selection.
 
     * Keys:
-        * Delete: deletes a shape and its attached tiles from the map.
-        * Escape: exits program. (Convenient for testing. This behavior will be removed later.)
-        * Left,Right,Up,Down: move an entire shape if the center control point is selected; else, move the selected vertex.
-        * Minus,Equals: scale a shape.
+        * Delete: Delete a shape and its attached tiles from the map.
+        * Enter,Escape: Enter and leave the user data input field for the selected shape.
+        * Left,Right,Up,Down: Move an entire shape if the center control point is selected; else, move the selected vertex.
+        * Minus,Equals: Scale a shape.
         * Ctrl-C, Ctrl-X, Ctrl-V: Cut-copy-paste the selected shape.
-        * Tab: cycle shape color scheme for visibility.
+        * Tab: Cycle shape color scheme for visibility.
+
+What are the double lines?
+
+    These are guide lines for QuadTree which is included in the distribution. If the game will be using WorldQuadTree, it's recommended to keep static objects out of layer 1.
+
+    Wherever a red double line crosses an orange one an object at that location will be pushed up to layer 1. Keeping objects in layer 1 is expensive. It increases the number of unnecessary collision checks each time a mobile object repositions. One can control the size and location of static objects, so it makes perfect sense to avoid, where possible, letting static objects to overlap these junctions.
+
+    The HUD also gives clues about QuadTree layers: The "Selected" item shows a shape's location and its level in the quadtree; and the "In Top Level" item indicates how many world entities are in level 1.
 """
 
 """
@@ -93,11 +102,14 @@ Basic to do (complete for 1.0 release):
     *   [DONE] Contrast aid: Cycle through color schemes for world shapes.
     *   [DONE] Help viewer? PGU makes it easy.
     *   Undo, redo.
+    *   [DONE] QuadTree 1.5 grid lines.
+    *   [DONE] Menu toggle for QuadTree grid lines.
+    *   HUD item to alert about shapes in top level.
 
 Advanced to do:
     *   Put more thought into working with shapes. e.g. PITA to size a shape
         after every insert. Maybe: a list for history; a customizable imported
-        list.
+        list. Note: copy-paste and key-grab helps with this a lot.
     *   Chooser: Importer and exporter (e.g., ASCII, pickle, custom).
     *   Productivity:
         *   Shape templates: Make a shape, add to template list. Choose from
@@ -458,7 +470,7 @@ class PolyGeom(geometry.PolyGeometry):
     draw_poly = pygame.draw.polygon
     draw_rect = pygame.draw.rect
     
-    def __init__(self, pos, points=None, tiles=[], auto=False):
+    def __init__(self, points, pos, tiles=[], auto=False):
         
         if auto:
             if len(tiles):
@@ -567,8 +579,8 @@ class PolyGeom(geometry.PolyGeometry):
     
     def copy(self):
         dupe = PolyGeom(
+            [(p.x,p.y) for p in self._points],
             self.position,
-            points=[(p.x,p.y) for p in self._points],
             tiles=self.tiles)
         return dupe
     
@@ -648,7 +660,7 @@ class CircleGeom(geometry.CircleGeometry):
     draw_rect = pygame.draw.rect
     
     def __init__(self, origin, radius_or_tiles):
-        if isinstance(radius_or_tiles, int):
+        if isinstance(radius_or_tiles, (int,float)):
             tiles = []
             radius = radius_or_tiles
         else:
@@ -763,10 +775,12 @@ class MapEditor(object):
             model.QuadTreeObject(Rect(0,0,5,5)),
             View(State.screen.surface, Rect(0,0,screen_size.x*2/3,screen_size.y))
         )
-        State.world = model.WorldQuadTree(
-            State.map.rect, worst_case=99, collide_entities=True)
+#        State.world = model.WorldQuadTree(
+#            State.map.rect, worst_case=99, collide_entities=True)
+        self.world_grids = []
+        self.make_world()
         State.clock = GameClock(30, 30)
-        State.camera.position = State.camera.view.center
+#        State.camera.position = State.camera.view.center
         pygame.display.set_caption('Gummworld2 World Editor')
         x,y = State.camera.view.rect.topleft
         w,h = Vec2d(screen_size) - (State.camera.view.rect.right,0)
@@ -808,6 +822,7 @@ class MapEditor(object):
         State.show_grid = True
         State.show_labels = True
         State.show_rects = False
+        State.show_world_grid = True
         
         # Files.
         State.file_entities = None
@@ -879,6 +894,12 @@ class MapEditor(object):
         mouse_shape = self.mouse_shape
         selected = self.selected
         things = State.world.entities_in(State.camera.rect)
+        camera = State.camera
+        blit = camera.view.surface.blit
+        world_to_screen = camera.world_to_screen
+        if State.show_world_grid:
+            for grid_line in self.world_grids:
+                blit(grid_line.image, world_to_screen(grid_line.rect.topleft))
         for thing in things:
             if thing not in (mouse_shape,selected):
                 thing.draw()
@@ -920,6 +941,84 @@ class MapEditor(object):
         """Set tiles and info attached to the mouse for insertion in the map.
         """
         self.stamp = [surf, rect, tileset]
+    
+    def make_world(self):
+        if State.world is not None:
+            entities = State.world.entity_branch.keys()
+        else:
+            entities = []
+        State.world = model.WorldQuadTree(
+            State.map.rect, worst_case=99, collide_entities=True)
+        State.world.add(*entities)
+        State.camera.position = State.camera.view.center
+        del self.world_grids[:]
+        num_levels = State.world.num_levels
+        top_rect = State.world.rect
+        worst_case = -State.world.worst_case if State.world.worst_case else 0
+        def make_grid(branch):
+            level = branch.level
+#            do_me = branch.is_root  # this displays all grids
+            do_me = level == 2      # this displays critical top-level grids
+            if do_me:          # this displays
+                rect = branch.rect
+                alpha = 305 - float(level-1)/(num_levels-1)*255
+                if level == 2:
+                    if branch.branch_id > 4:
+                        color = Color('red')
+                        alpha = 255
+                    else:
+                        color = Color('orange')
+                elif level == 3:
+                    color = Color('yellow')
+                elif level == 4:
+                    color = Color('green')
+                if rect.x in (0,worst_case):
+                    # Horizontal line.
+                    s = pygame.sprite.Sprite()
+                    s.image = pygame.surface.Surface((top_rect.w,3))
+                    s.rect = s.image.get_rect()
+                    s.rect.centery = rect.bottom
+                    s.image.fill(color)
+                    pygame.draw.line(s.image, Color('black'), (0,1),(s.rect.w,1))
+                    s.image.set_colorkey(Color('black'))
+                    s.image.set_alpha(alpha)
+                    self.world_grids.append(s)
+                if rect.y in (0,worst_case):
+                    # Vertical line.
+                    s = pygame.sprite.Sprite()
+                    s.image = pygame.surface.Surface((3,top_rect.h))
+                    s.rect = s.image.get_rect()
+                    s.rect.centerx = rect.right
+                    s.image.fill(color)
+                    pygame.draw.line(s.image, Color('black'), (1,0),(1,s.rect.h))
+                    s.image.set_colorkey(Color('black'))
+                    s.image.set_alpha(alpha)
+                    self.world_grids.append(s)
+            for b in branch.branches:
+                make_grid(b)
+        make_grid(State.world)
+#        for branch in State.world.branches[4:-1]:
+#            rect = branch.rect
+#            # Horizontal line.
+#            s = pygame.sprite.Sprite()
+#            s.image = pygame.surface.Surface((rect.w,3))
+#            s.rect = s.image.get_rect(x=rect.x)
+#            s.rect.centery = rect.bottom
+#            s.image.fill(Color('yellow'))
+#            pygame.draw.line(s.image, Color('black'), (0,1),(s.rect.w,1))
+#            s.image.set_colorkey(Color('black'))
+#            s.image.set_alpha(199)
+#            self.world_grids.append(s)
+#            # Vertical line.
+#            s = pygame.sprite.Sprite()
+#            s.image = pygame.surface.Surface((3,rect.h))
+#            s.rect = s.image.get_rect(y=rect.y)
+#            s.rect.centerx = rect.right
+#            s.image.fill(Color('yellow'))
+#            pygame.draw.line(s.image, Color('black'), (1,0),(1,s.rect.h))
+#            s.image.set_colorkey(Color('black'))
+#            s.image.set_alpha(199)
+#            self.world_grids.append(s)
     
     def make_gui(self):
         """Make the entire GUI.
@@ -1351,7 +1450,7 @@ class MapEditor(object):
                     geom = RectGeom(0,0,64,64, pos)
             elif shape in POLY_POINT_SETS:
                 points = POLY_POINT_SETS[shape]
-                geom = PolyGeom(pos, points, tiles, auto=True)
+                geom = PolyGeom(points, pos, tiles, auto=True)
             elif shape == 'circle_tool':
                 if len(tiles):
                     geom = CircleGeom(pos, tiles)
@@ -1459,10 +1558,7 @@ class MapEditor(object):
             map_size = d.values[0:2]
             tile_size = d.values[2:4]
             State.map = Map(tile_size, map_size)
-            entities = State.world.entity_branch.keys()
-            State.world = model.WorldQuadTree(
-                State.map.rect, worst_case=99, collide_entities=True)
-            State.world.add(*entities)
+            self.make_world()
             toolkit.make_tiles2()
             self.remake_scrollbars()
             State.file_map = None
@@ -1484,10 +1580,7 @@ class MapEditor(object):
                 if State.file_map.endswith('.tmx'):
                     try:
                         State.map = toolkit.load_tiled_tmx_map(State.file_map)
-                        entities = State.world.entity_branch.keys()
-                        State.world = model.WorldQuadTree(
-                            State.map.rect, worst_case=99, collide_entities=True)
-                        State.world.add(*entities)
+                        self.make_world()
                     except:
                         exc_type,exc_value,exc_traceback = sys.exc_info()
                         self.gui_view_text('Load map failed',
@@ -1695,15 +1788,20 @@ class MapEditor(object):
             if widget is None or widget.value is True:
                 quit()
     
-    def action_view_grid(self, *args):
+    def action_view_map_grid(self, *args):
         """View grid action: toggle.
         """
         State.show_grid = not State.show_grid
     
-    def action_view_labels(self, *args):
+    def action_view_map_labels(self, *args):
         """View labels action: toggle labels.
         """
         State.show_labels = not State.show_labels
+    
+    def action_view_world_grid(self, *args):
+        """View world grid action: toggle world's level 1.5 branches grid.
+        """
+        State.show_world_grid = not State.show_world_grid
     
     def action_view_rects(self, *args):
         """View rects action: toggle rects.
@@ -1847,6 +1945,7 @@ class MapEditor(object):
         State.screen.eraser.fill(Color('grey'))
         
         # Resize the widgets.
+        self.gui_modal_off()
         self.gui.screen = State.screen.surface
         self.gui.resize()
         self.remake_scrollbars(reset=False)
@@ -1996,6 +2095,12 @@ def make_hud():
             shape.rect.center, State.world.level_of(shape), State.world.num_levels)
     State.hud.add('Selected',
         Statf(next_pos(), 'Selected %s', callback=get_selected, interval=100))
+    
+    def get_top_level():
+        n = len(State.world.entities)
+        return str(n)
+    State.hud.add('In Top Level',
+        Statf(next_pos(), 'In Top Level %s', callback=get_top_level, interval=100))
 
 # make_hud
 
@@ -2013,9 +2118,10 @@ def make_menus(container):
         ('Images/New Map',   app.action_map_new, None),
         ('Images/Load Map',  app.action_map_load, None),
         ('Images/Load Tiles',app.action_tiles_load, None),
-        ('View/Grid',        app.action_view_grid, None),
-        ('View/Labels',      app.action_view_labels, None),
-        ('View/Rects',       app.action_view_rects, None),
+        ('View/Map Grid',    app.action_view_map_grid, None),
+        ('View/Map Labels',  app.action_view_map_labels, None),
+        ('View/World Grid',  app.action_view_world_grid, None),
+        ('View/Shape Rects', app.action_view_rects, None),
         ('View/HUD',         app.action_view_hud, None),
         ('View/Help',        app.action_view_help, None),
     ], name='menus')
