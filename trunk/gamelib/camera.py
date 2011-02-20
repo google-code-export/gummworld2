@@ -264,7 +264,8 @@ class Camera(object):
     def world_to_screen(self, xy):
         """Convert coordinates from world space to screen space.
         """
-        world = self.target.position - xy
+#        world = self.target.position - xy
+        world = Vec2d(self.rect.center) - xy
         return self.abs_screen_center - world
         
     def screen_to_world(self, xy):
