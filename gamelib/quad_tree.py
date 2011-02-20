@@ -326,6 +326,8 @@ class QuadTree(QuadTreeNode):
     
     @property
     def collide_rects(self):
+        """Set True to use entity.rect in collision testing.
+        """
         return self._collide_rects
     @collide_rects.setter
     def collide_rects(self, val):
@@ -334,6 +336,8 @@ class QuadTree(QuadTreeNode):
     
     @property
     def collide_entities(self):
+        """Set True to use entity.collided in collision testing.
+        """
         return self._collide_entities
     @collide_entities.setter
     def collide_entities(self, val):
@@ -341,6 +345,10 @@ class QuadTree(QuadTreeNode):
         self._set_collided()
     
     def _set_collided(self):
+        """Internal use. Set self._collided to the appropriate routine for
+        collision testing based on self._collide_rects and
+        self._collide_entities.
+        """
         if self._collide_rects and self._collide_entities:
             self._collided = self._collided_full
         elif self._collide_entities:
@@ -349,6 +357,9 @@ class QuadTree(QuadTreeNode):
             self._collided = self._collided_rects
     
     def reset_counters(self):
+        """Reset the coll_tests and branch_visits_add to 0. Call this once per
+        game cycle if reporting usage metrics.
+        """
         self.coll_tests = 0
         self.branch_visits_add = 0
     
@@ -387,6 +398,25 @@ class QuadTree(QuadTreeNode):
             for c in collisions.keys():
                 if entity in c:
                     del self.collisions[c]
+    
+    def collisions_dict(self):
+        """Return a collision dict. The key is an entity, the value is a list of
+        entities that the key collided with.
+        
+        Note: This method generates a new dict by iterating over
+        QuadTree.collisions each time it is called. Try not to call it
+        excessively, as it is potentially expensive. Also of note, the returned
+        dict is invalid as soon as an entity is added to or removed from the
+        quadtree.
+        """
+        d = {}
+        for c in self.collisions:
+            a,b = c
+            if a not in d: d[a] = []
+            if b not in d: d[b] = []
+            d[a].append(b)
+            d[b].append(a)
+        return d
     
     def entities_in(self, rect):
         """Return list of entities that collide with rect.
