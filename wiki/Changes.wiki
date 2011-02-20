@@ -337,3 +337,6 @@ SVN rev 229:
 SVN rev 234:
   * Fixed: Camera.interpolate calculated interpolation if GameClock.max_fps is lower than GameClock.ticks_per_second. It now defaults to 1.0.
   * Changed: Added docstrings to QuadTree and QuadTreeNode.
+
+SVN rev 236:
+  * New: QuadTree; added method collisions_dict(), add_list(), and remove_list().
