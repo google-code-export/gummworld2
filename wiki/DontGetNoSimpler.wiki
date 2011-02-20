@@ -99,7 +99,7 @@ class App(object):
         
         State.screen.clear()
         toolkit.draw_tiles()
-        pygame.display.flip()
+        State.screen.flip()
 
     def get_events(self):
         for e in pygame.event.get():
