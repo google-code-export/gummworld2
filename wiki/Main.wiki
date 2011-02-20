@@ -1,25 +1,28 @@
 #summary Design and implementation overview.
 #labels Featured
+As of version 0.0.11 the world editor has reached a point where it was usable. Naturally, taking it out for its first real spin had surfaced many issues, all of which have been fixed in 0.0.12.
 
-Starting with Gummworld2 version 0.0.9 the editor is advancing, thanks in large part to PGU's GUI package. The concept has changed from "map editor" to "world editor". There have been numerous changes to the library to support development of the world editor and fix some issues, but no API changes since version 0.0.7. Some of the world editor basic design is implemented, just enough for a sneak peek.
-
-_IMPORTANT: Please read the comments in world_editor.py. Specifically, the editor cannot yet save any work._
+There have been quite a few changes to the library to fix issues, and support development of the world editor and its proof-of-concept demo, number 17. But no API changes have occurred since version 0.0.7.
 
 = Introduction =
 
 This is Gummworld2. It's designed as a light [http://www.pygame.org pygame] framework for a scrolling game, where the map is larger than the display. It emphasizes simplicity, freedom, and performance.
 
-One should not have to struggle with making a game concept fit into a restrictive paradigm. Gummworld2 solves this with a few core classes and their structural requirements, and a clean and simple update-and-draw run loop.
+Gummworld2 is foremost about optimal scrolling. It provides just a few management classes, driven by a very simple (optional) engine. It is merely a _suggestion_ to use the engine for the game framework, [http://www.mapeditor.org/ Tiled] for maps, and [http://www.pygame.org/project-pymunk-780-2576.html pymunk] for physics. Examples are included to demonstrate the ease of incorporating these. If you prefer to use other libraries and utilities, it is quite easy to use Gummworld2 simply for scrolling maps and leverage your own tools.
 
-One should also be free to choose one's own audiovisual presentation, game intelligence, and GUIs. The benefits should be obvious. Low learning curve: use what you know. Freedom: use whatever you want. You are not forced to learn "The Gummworld Way", and wade through bloated features. Gummworld2 provides just a few management classes, driven by a very simple (optional) engine. It is merely a _suggestion_ to use the engine for the game framework, [http://www.mapeditor.org/ Tiled] for maps, and [http://www.pygame.org/project-pymunk-780-2576.html pymunk] for physics. If you prefer to use other libraries and utilities, it is quite easy to use Gummworld2 for scrolling maps and leverage your own tools.
+Besides ease and speed of scrolling maps, Gummworld2 strives to maintain these ideals:
 
-One should not have to worry about juggling game speed and frame rates. Gummworld2's clock maintains steady game time and variable frame rate without the headaches, and the management classes do what they do with efficiency leaving more computer resources for game content.
+  One should not have to struggle with making a game concept fit into a restrictive paradigm. Gummworld2 fosters this notion by requiring only a few core classes, and a clean and simple update-and-draw run loop.
 
-Since this is Gummworld2, one may wonder about the original [http://www.pygame.org/project-Gummworld-1107-.html Gummworld]. While it was a great learning experience and a lot of fun, it became obvious it was more ambitious than it should have been. It turned out overly complex and restrictive, with a higher learning curve than intended. Consequently it became hard to do anything outside the box.
+  One should be free to choose one's own audiovisual presentation, game intelligence, and GUIs. The benefits should be obvious. Low learning curve: use what you know. Freedom: use whatever you want. You are not forced to learn "The Gummworld Way", and wade through bloated features.
+
+  One should not have to worry about juggling game speed and frame rates, and eking enough horsepower for a smooth gaming experience. Gummworld2's clock maintains steady game time and variable frame rate without the headaches, and the management classes and toolkit do what they do with efficiency leaving more computer resources for game content.
+
+Given the name Gummworld2, one may wonder about the original [http://www.pygame.org/project-Gummworld-1107-.html Gummworld]. While it was a great learning experience and a lot of fun, it became obvious it was more ambitious than it should have been. It turned out overly complex and restrictive, with a higher learning curve than intended. Consequently it became hard to do anything outside the box.
 
 = API Overview =
 
-Gummworld2 is currently developed with Windows 7, Python 2.6, pygame 1.9.1, pymunk 1.0.0, and Tiled Map Editor 0.7.2 (the Java version). Most of the testing is on the development platform. Light testing for demo performance and operation has been done with Windows XP SP 2 and Ubuntu 10. Almost assuredly Gummworld2 will not work with pygame 1.8.1 and earlier, since various classes may not have provided the copy() method (most notably Rect).
+Gummworld2 is currently developed with Windows 7, Python 2.6, pygame 1.9.1, pymunk 1.0.0, and Tiled Map Editor 0.7.2 (the Java version). Most of the testing is on the development platform. Light testing for demo performance and operation has been done with Windows XP SP 2 and Ubuntu 10. Almost assuredly Gummworld2 will not work with pygame 1.8.1 and earlier, since various classes may not have provided the copy() method (most notably Rect) and other new features.
 
 The library performs basic scrolling of tiles by syncing a camera with a target object that moves about the large map space. Change the target object's position and the camera follows.
 
@@ -27,17 +30,17 @@ These are the core classes.
 
   State: A storage container for run-time objects, settings, and values. Because it's easy to access globally, this minimizes the need to pass around core objects in arguments. States can also be saved and restored by name, if desired. The mechanism is straightforward, thus easy to use and extend.
 
-  Engine: A superclass providing the framework for initialization, run loop, update and draw methods, and pygame event handlers. If you decide to write your own engine, look in here to see how the core objects are created. Don't be afraid, no voodoo in here.
+  Engine: A superclass providing the framework for initialization, run loop, update and draw methods, and pygame event handlers. If you decide to write your own framework, look in here to see how the core objects are created. Don't be afraid, no voodoo in here.
 
-  Screen and Surface: Basic display and subsurface wrappers.
+  Screen and View: Basic display and subsurface wrappers.
 
-  Camera: Follows a target object around the map. Calculates 2D range of visible tiles. Constructs map-layer lists of visible tiles. Converts 2D coordinates between world and screen space. Provides interpolated scrolling, taking advantage of faster frame rates to smooth scrolling.
+  Camera: Follows a target object around the map. Calculates 2D range of visible tiles. Constructs map-layer lists of visible tiles. Converts 2D coordinates between world and screen space. Provides interpolated scrolling, taking advantage of faster frame rates to smooth the scrolling experience.
 
-  Map: Serves map tiles in layers. Also serves labels and grid lines.
+  Map: Serves map tiles in layers. Also serves labels and grid lines as design aids.
 
   World`*`: Containers for objects that define the game model. Choices are NoWorld, World, WorldQuadTree, and WorldPymunk which provide some "canned" options for implementing a world. You are free to use these, build your own, or ignore it entirely.
 
-  GameClock: Keeps constant game time. Supports variable frame rate. Calculates interpolated fraction of a game tick, which can be used for prediction, sub-pixel motion, and precision timing.
+  GameClock: Keeps constant game time. No-fuss variable frame rate. Calculates interpolated fraction of a game tick, which can be used for prediction, sub-pixel motion, and precision timing.
 
   BucketSprite and BucketGroup: pygame-like classes that manage sprites in buckets for optimized updating and rendering. BucketGroup also has a tweaked draw() method needed to render sprites whose rects are expressed in world coordinates; versus pygame's which expect sprite rects to be expressed in screen coordinates. These are for game makers who prefer to use the sprite for both view and model.
 
