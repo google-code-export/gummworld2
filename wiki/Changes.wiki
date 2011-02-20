@@ -331,3 +331,9 @@ SVN rev 229:
   * Fixed: geometry.CircleGeometry; constructor did not handle float, resulting in len(arg) being called on float.
   * Fixed: Camera.world_to_screen() used the target's coordinates instead of screen center, causing dynamically rendered world objects to jitter.
   * Changed: world_editor.py closes open modal dialog if the window is resized. PGU doesn't like it when a widget violates window bounds.
+
+=== Changes in 0.0.13 ===
+
+SVN rev 234:
+  * Fixed: Camera.interpolate calculated interpolation if GameClock.max_fps is lower than GameClock.ticks_per_second. It now defaults to 1.0.
+  * Changed: Added docstrings to QuadTree and QuadTreeNode.
