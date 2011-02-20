@@ -322,7 +322,7 @@ SVN rev 227:
   * Fixed: tiledtmxloader.py; ImageLoaderPygame.load_image_parts() bitten by a pygame Surface constructor bug, was not succeeding at copying tiles. This is a local fix, waiting on official update from DR0ID.
 
 SVN rev 229:
-  * Fixed: geometry.*_collide_other(); these all had incorrectly fashioned function calls for self versus rect.
+  * Fixed: geometry.`*_`collide_other(); these all had incorrectly fashioned function calls for self versus rect.
   * New: toolkit.load_entities() invokes the plugin load_quadtree_world.py to load content saved from Gummworld2 Editor.
   * Updated: tiledtmxloader.py updated to version 2.3.
   * Fixed: tiledtmxloader.py; local fix applied to enable TileMapParser to find TSX file in an alternate directory.
