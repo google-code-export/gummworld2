@@ -775,12 +775,9 @@ class MapEditor(object):
             model.QuadTreeObject(Rect(0,0,5,5)),
             View(State.screen.surface, Rect(0,0,screen_size.x*2/3,screen_size.y))
         )
-#        State.world = model.WorldQuadTree(
-#            State.map.rect, worst_case=99, collide_entities=True)
         self.world_grids = []
         self.make_world()
         State.clock = GameClock(30, 30)
-#        State.camera.position = State.camera.view.center
         pygame.display.set_caption('Gummworld2 World Editor')
         x,y = State.camera.view.rect.topleft
         w,h = Vec2d(screen_size) - (State.camera.view.rect.right,0)
@@ -797,6 +794,7 @@ class MapEditor(object):
         self.mouse_down = 0
         self.selected = None
         self.selected_tiles = []
+        self.grabbed_by_mouse = False
         self.mouseover_shapes = []
         
         # Keyboard details.
@@ -957,9 +955,8 @@ class MapEditor(object):
         worst_case = -State.world.worst_case if State.world.worst_case else 0
         def make_grid(branch):
             level = branch.level
-#            do_me = branch.is_root  # this displays all grids
             do_me = level == 2      # this displays critical top-level grids
-            if do_me:          # this displays
+            if do_me:
                 rect = branch.rect
                 alpha = 305 - float(level-1)/(num_levels-1)*255
                 if level == 2:
@@ -997,28 +994,6 @@ class MapEditor(object):
             for b in branch.branches:
                 make_grid(b)
         make_grid(State.world)
-#        for branch in State.world.branches[4:-1]:
-#            rect = branch.rect
-#            # Horizontal line.
-#            s = pygame.sprite.Sprite()
-#            s.image = pygame.surface.Surface((rect.w,3))
-#            s.rect = s.image.get_rect(x=rect.x)
-#            s.rect.centery = rect.bottom
-#            s.image.fill(Color('yellow'))
-#            pygame.draw.line(s.image, Color('black'), (0,1),(s.rect.w,1))
-#            s.image.set_colorkey(Color('black'))
-#            s.image.set_alpha(199)
-#            self.world_grids.append(s)
-#            # Vertical line.
-#            s = pygame.sprite.Sprite()
-#            s.image = pygame.surface.Surface((3,rect.h))
-#            s.rect = s.image.get_rect(y=rect.y)
-#            s.rect.centerx = rect.right
-#            s.image.fill(Color('yellow'))
-#            pygame.draw.line(s.image, Color('black'), (1,0),(1,s.rect.h))
-#            s.image.set_colorkey(Color('black'))
-#            s.image.set_alpha(199)
-#            self.world_grids.append(s)
     
     def make_gui(self):
         """Make the entire GUI.
@@ -1464,13 +1439,15 @@ class MapEditor(object):
         elif self.mouse_down == 1:
             # Left-click: Select, deselect, or grab.
             if self.selected not in mouseover_shapes:
+                print 1
                 self.deselect()
                 if len(mouseover_shapes):
                     self.select(mouseover_shapes[0])
             elif self.selected is not None:
+                print 2
                 if self.selected.grab(mouse_shape):
                     # Grabbed control point.
-                    pass
+                    self.grabbed_by_mouse = True
                 elif len(mouseover_shapes):
                     # Select next shape under cursor.
                     i = mouseover_shapes.index(self.selected)
@@ -1495,7 +1472,7 @@ class MapEditor(object):
             elif self.mouse_down == 1:
                 # Resize the selected shape.
                 grabbed = selected.grabbed
-                if grabbed is not None:
+                if grabbed is not None and self.grabbed_by_mouse:
                     grabbed.position = State.camera.screen_to_world(e.pos)
                     State.world.add(selected)
                     self.changes_unsaved = True
@@ -1505,9 +1482,9 @@ class MapEditor(object):
     # MapEditor.action_mouse_drag
 
     def action_mouse_release(self, e):
-        """Mouse release action: this currently does nothing.
+        """Mouse release action: reset mouse-up state.
         """
-        pass
+        self.grabbed_by_mouse = False
     
     def action_key_grab_shape(self, key, mod):
         """Grab shape action: drag a grabbed control point using the keyboard.
@@ -1714,7 +1691,7 @@ class MapEditor(object):
                     file_handle.close()
                     # Add the entities to the world.
                     entities = locals_dict['entities']
-                    State.world.add(*entities)
+                    State.world.add_list(entities)
                 # Put the mouse shape back.
                 State.world.add(self.mouse_shape)
         
