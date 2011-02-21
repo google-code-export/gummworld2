@@ -340,3 +340,6 @@ SVN rev 234:
 
 SVN rev 236:
   * New: QuadTree; added method collisions_dict(), add_list(), and remove_list().
+
+SVN rev 239:
+  * Fixed: world_editor.py; clicking inside shape and dragging mouse caused the grabbed control point to be moved regardless of whether the mouse had clicked directly on the control point. Added smarts to handle this properly.
