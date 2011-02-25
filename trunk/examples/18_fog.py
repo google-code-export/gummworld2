@@ -20,14 +20,16 @@ __version__ = '$Id$'
 __author__ = 'Gummbum, (c) 2011'
 
 
-"""17_load_and_use_world.py - A demo combining a Tiled Map Editor map and
-Gummworld2 Editor entities.
+"""18_fog.py - A demo combining a Tiled Map Editor map, Gummworld2 Editor
+entities, and some fog images created with DR0ID's gradients module.
+
+For gradients: http://www.pygame.org/project-gradients-307-3051.html
 """
 
 
 import pygame
 from pygame.sprite import Sprite
-from pygame.locals import FULLSCREEN, Color, K_ESCAPE, K_TAB
+from pygame.locals import *
 
 import paths
 from gamelib import (
@@ -49,14 +51,15 @@ class Avatar(model.QuadTreeObject):
 
 class App(Engine):
     
-    def __init__(self, resolution=(800,600)):
+    def __init__(self, resolution=(640,480)):
         
+        caption = '18 Fog - SPACE: Cycle fog radius'
         resolution = Vec2d(resolution)
         
         super(App, self).__init__(
-            caption='17 Load and Use World - TAB: Show World Geometry',
-            camera_target=Avatar((450,770), resolution//2),
-            resolution=resolution,
+            caption=caption,
+            camera_target=Avatar((768,1065), resolution//2),
+            resolution=resolution, display_flags=FULLSCREEN,
             frame_speed=0)
         
         State.map = toolkit.collapse_map(
@@ -66,9 +69,8 @@ class App(Engine):
         load_world(data.filepath('map', 'mini2.entities'))
         
         # I like huds.
-        toolkit.make_hud()
+        toolkit.make_hud(caption)
         State.show_hud = True
-        State.show_world = False
         
         # Create a speed box for converting mouse position to destination
         # and scroll speed. 800x600 has aspect ratio 8:6.
@@ -85,6 +87,20 @@ class App(Engine):
         
         State.speed = 3
         
+        self.fog = None
+        self.fog_rect = None
+        self.fogs = [
+            pygame.image.load(data.filepath('image', name))
+            for name in (
+                'fog-128.png',
+                'fog-156.png',
+                'fog-184.png',
+                'fog-212.png',
+                'fog-240.png',
+            )
+        ]
+        self.fogn = self.set_fog(0)
+    
     def update(self):
         """overrides Engine.update"""
         # If mouse button is held down update for continuous walking.
@@ -111,6 +127,7 @@ class App(Engine):
         
     def update_camera_position(self):
         """Step the camera's position if self.move_to contains a value.
+        Handle collisions.
         """
         if self.move_to is not None:
             # Current position.
@@ -180,66 +197,45 @@ class App(Engine):
                 newy = max(min(newy,rect.bottom), rect.top)
                 camera.position = newx,newy
                 world.add(camera_target)
-        
+    
     def draw(self):
         """overrides Engine.draw"""
         # Draw stuff.
         State.camera.interpolate()
         State.screen.clear()
         toolkit.draw_tiles()
-        self.draw_world()
-        State.hud.draw()
         self.draw_avatar()
+        self.draw_fog()
+        State.hud.draw()
         State.screen.flip()
-        
-    def draw_world(self):
-        """Draw the on-screen shapes in the world.
-        """
-        if not State.show_world:
-            return
-        
-        camera = State.camera
-        camera_target = camera.target
-        things = State.world.entities_in(camera.rect)
-        display = camera.view.surface
-        world_to_screen = camera.world_to_screen
-        color = Color('white')
-        
-        draw_rect = pygame.draw.rect
-        draw_circle = pygame.draw.circle
-        draw_poly = pygame.draw.lines
-        
-        for thing in things:
-            if thing is not camera_target:
-                if isinstance(thing, RectGeometry):
-                    r = thing.rect.copy()
-                    r.center = world_to_screen(thing.position)
-                    draw_rect(display, color, r, 1)
-                elif isinstance(thing, CircleGeometry):
-                    draw_circle(display, color,
-                        world_to_screen(thing.position), thing.radius, 1)
-                elif isinstance(thing, PolyGeometry):
-                    points = [world_to_screen(p) for p in thing.points]
-                    draw_poly(display, color, True, points)
+    
+    def draw_fog(self):
+        State.screen.blit(self.fog, self.fog_rect,
+            special_flags=BLEND_RGBA_MULT)
     
     def draw_avatar(self):
         camera = State.camera
         avatar = camera.target
         camera.surface.blit(avatar.image, avatar.screen_position)
-        
+    
+    def set_fog(self, n):
+        self.fog = self.fogs[n%len(self.fogs)]
+        self.fog_rect = self.fog.get_rect(center=State.screen.center)
+        return n
+    
     def on_mouse_button_down(self, pos, button):
         self.mouse_down = True
-        
+    
     def on_mouse_button_up(self, pos, button):
         self.mouse_down = False
-        
+    
     def on_key_down(self, unicode, key, mod):
         # Turn on key-presses.
-        if key == K_TAB:
-            State.show_world = not State.show_world
+        if key == K_SPACE:
+            self.fogn = self.set_fog(self.fogn+1)
         elif key == K_ESCAPE:
             quit()
-        
+    
     def on_quit(self):
         quit()
         
