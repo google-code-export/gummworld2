@@ -353,3 +353,7 @@ SVN rev 241:
   * Changed: Camera.`_`get_visible_tile_range() calculations adjusted for accuracy/efficiency.
   * Changed: Camera.`_`get_visible_tiles() moved into Camera.visible_tiles(). Camera.update() no longer pre-fetches these, as this led to inaccurate frame interpolation for large update steps--like when panning fast across a large distance.
   * Changed: examples/16_reduce_map.py reworked for compatibility.
+
+SVN rev 243:
+  * Changed: Added pygame Surface.blit-like arguments area and special_flags to Screen.blit().
+  * New: 18_fog.py demo.
