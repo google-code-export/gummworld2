@@ -139,7 +139,7 @@ from pygame.locals import *
 
 ## Gummworld2
 import paths
-from gamelib import (
+from gummworld2 import (
     model, data, geometry, toolkit, pygame_utils,
     State, Camera, Map, Screen, View,
     HUD, Stat, Statf,

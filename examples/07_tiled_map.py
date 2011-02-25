@@ -44,7 +44,7 @@ from pygame.locals import (
 )
 
 import paths
-from gamelib import *
+from gummworld2 import *
 
 
 class Avatar(CameraTargetSprite):

@@ -47,7 +47,7 @@ from urllib import quote
 
 import pygame
 
-from gamelib.geometry import RectGeometry, CircleGeometry, PolyGeometry
+from gummworld2.geometry import RectGeometry, CircleGeometry, PolyGeometry
 
 
 if 'entities' not in locals():

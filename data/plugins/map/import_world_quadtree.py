@@ -53,7 +53,7 @@ from urllib import unquote
 
 import pygame
 
-from gamelib.geometry import RectGeometry, CircleGeometry, PolyGeometry
+from gummworld2.geometry import RectGeometry, CircleGeometry, PolyGeometry
 
 
 if 'fh' not in locals():

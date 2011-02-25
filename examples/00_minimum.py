@@ -29,7 +29,7 @@ import pygame
 from pygame.locals import *
 
 import paths
-from gamelib import State, Screen, Camera, GameClock, Map, Vec2d, toolkit
+from gummworld2 import State, Screen, Camera, GameClock, Map, Vec2d, toolkit
 
 
 class CameraTarget(object):

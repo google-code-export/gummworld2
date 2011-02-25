@@ -45,7 +45,7 @@ except:
     quit()
 
 import paths
-from gamelib import *
+from gummworld2 import *
 
 
 class Avatar(pygame.sprite.Sprite):

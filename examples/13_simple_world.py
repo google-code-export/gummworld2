@@ -36,7 +36,7 @@ from pygame.locals import (
 )
 
 import paths
-from gamelib import *
+from gummworld2 import *
 
 
 def make_image(color, size):
