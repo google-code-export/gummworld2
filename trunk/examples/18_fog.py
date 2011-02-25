@@ -23,7 +23,29 @@ __author__ = 'Gummbum, (c) 2011'
 """18_fog.py - A demo combining a Tiled Map Editor map, Gummworld2 Editor
 entities, and some fog images created with DR0ID's gradients module.
 
-For gradients: http://www.pygame.org/project-gradients-307-3051.html
+For the fog gradients: http://www.pygame.org/project-gradients-307-3051.html
+
+# Here it is...
+import math
+import pygame
+from pygame.locals import *
+import gradients
+pygame.init()
+screen = pygame.display.set_mode((640,480))
+screen_rect = screen.get_rect()
+sp = list(screen_rect.center)
+ep = [screen_rect.centerx,0]
+cf = lambda x: math.cos(1.5*x)
+af = lambda x: x**0.5
+sizes = range(0, screen_rect.centery-100, (screen_rect.centery-100)/5)
+for distance in sizes:
+    ep[1] = distance
+    screen.fill(Color('black'))
+    gradients.draw_circle(screen, sp, ep, Color('black'), Color('white'),
+        Rfunc=cf, Gfunc=cf, Bfunc=cf, Afunc=af,)
+    radius = -screen_rect.centery + distance
+    file = 'fog%d.png'%radius
+    pygame.image.save(screen, file)
 """
 
 

@@ -324,17 +324,20 @@ def reduce_map_layers(map, layersi):
 # reduce_map_layers
 
 
-def load_tiled_tmx_map(map_file_name, load_invisible=False):
+def load_tiled_tmx_map(map_file_name, load_invisible=False, convert_images=False):
     """Load an orthogonal TMX map file that was created by the Tiled Map Editor.
     
-    Thanks to dr0id for his nice tiledtmxloader module:
+    Note: convert_images can actually kill performance. Do it only if
+    there's a benefit.
+    
+    Thanks to DR0ID for his nice tiledtmxloader module:
         http://www.pygame.org/project-map+loader+for+%27tiled%27-1158-2951.html
-
+    
     And the creators of Tiled Map Editor:
         http://www.mapeditor.org/
     """
     
-    # Taken pretty much verbatim from the tiledtmxloader module.
+    # Taken pretty much verbatim from the (old) tiledtmxloader module.
     #
     # The tiledtmxloader.TileMap object is stored in the returned
     # gamelib.Map object in attribute 'tiled_map'.
@@ -364,16 +367,18 @@ def load_tiled_tmx_map(map_file_name, load_invisible=False):
                     print 'KeyError',img_idx,(xpos,ypos)
                     continue
                 sprite = Sprite()
-## Note: format conversion actually kills performance. ???
-#                if screen_img.get_alpha():
-#                    screen_img = screen_img.convert_alpha()
-#                else:
-#                    screen_img = screen_img.convert()
-#                    if layer.opacity > -1:
-#                        screen_img.set_alpha(None)
-#                        alpha_value = int(255. * float(layer.opacity))
-#                        screen_img.set_alpha(alpha_value)
-#                        screen_img = screen_img.convert_alpha()
+                ## Note: format conversion can actually kill performance.
+                ## Do it only if there's a benefit.
+                if convert_images:
+                    if screen_img.get_alpha():
+                        screen_img = screen_img.convert_alpha()
+                    else:
+                        screen_img = screen_img.convert()
+                        if layer.opacity > -1:
+                            screen_img.set_alpha(None)
+                            alpha_value = int(255. * float(layer.opacity))
+                            screen_img.set_alpha(alpha_value)
+                            screen_img = screen_img.convert_alpha()
                 sprite.image = screen_img  #.convert_alpha()
                 sprite.rect = screen_img.get_rect(topleft=(x,y))
                 sprite.name = xpos,ypos
