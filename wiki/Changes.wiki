@@ -357,3 +357,6 @@ SVN rev 241:
 SVN rev 243:
   * Changed: Added pygame Surface.blit-like arguments area and special_flags to Screen.blit().
   * New: 18_fog.py demo.
+
+SVM rev 245:
+  * Changed: toolkit.py; Added a convert_images=False argument to load_tiled_tmx_map(). It already works and ya never know, someone may need it.
