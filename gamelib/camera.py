@@ -85,7 +85,6 @@ class Camera(object):
             view = State.screen
         self._target = target
         self._visible_tile_range = []
-        self._visible_tiles = []
         self.target_moved = Vec2d(0,0)
         self._target_was_moved = False
         self.view = view
@@ -139,24 +138,24 @@ class Camera(object):
         self.map = None
         if State.map:
             self._get_visible_tile_range()
-            self._get_visible_tiles()
         else:
             self._visible_tile_range = []
-            self._visible_tiles = []
         self.update()
         
     def interpolate(self, sprites=None):
         """Interpolate camera position towards target for smoother scrolling
         
-        You typically want to use this or Camera.update(), not both.
-        
         After updating the target position in the main program's update(), call
         this every frame in the main program's draw() before any drawing
         commands. It works best when frame speed is much higher than update
         speed.
+        
+        Experimental: I dunno about this sprites argument. I'm sure it seemed
+        like a good idea at the time, but I seem to have misplaced the original
+        concept.
         """
         target_moved = self.target_moved
-        if State.clock.ticks_per_second >= State.clock.max_fps:
+        if 0 < State.clock.max_fps <= State.clock.ticks_per_second:
             interp = 1.0
             x,y = self.target.position
         else:
@@ -174,6 +173,7 @@ class Camera(object):
                 x,y = abs_screen_pos + interpolated_step
                 s.rect.center = round(x), round(y)
         
+        self._get_visible_tile_range()
         return interp
     
     def update(self):
@@ -187,8 +187,7 @@ class Camera(object):
         elif target_was_moved == 0:
             self.target_moved = Vec2d(0,0)
             self._target_was_moved = -1
-        self._get_visible_tile_range()
-        self._get_visible_tiles()
+#        self._get_visible_tile_range()
     
     def slew(self, vec, dt):
         """Move Camera.target via pymunk.
@@ -221,14 +220,6 @@ class Camera(object):
         target.position = val
         self._target_was_moved = 1
         
-#    @property
-#    def screen_position(self):
-#        """The camera's (target's) position in screen coordinates.
-#        
-#        Obsolete: use Camera.screen_center instead.
-#        """
-#        return Vec2d(self._screen_center)
-    
     @property
     def screen_center(self):
         """The coordinates of the camera surface's center.
@@ -264,7 +255,6 @@ class Camera(object):
     def world_to_screen(self, xy):
         """Convert coordinates from world space to screen space.
         """
-#        world = self.target.position - xy
         world = Vec2d(self.rect.center) - xy
         return self.abs_screen_center - world
         
@@ -289,12 +279,12 @@ class Camera(object):
         for layeri,layer in enumerate(State.map.layers):
             tile_x,tile_y = layer.tile_size
             l,t,w,h = self.rect
-            r = l+w
-            b = t+h
+            r = l+w-1
+            b = t+h-1
             left = int(round(float(l) / tile_x)) - 1
-            right = int(round(float(r) / tile_x)) + 2
+            right = int(round(float(r) / tile_x)) + 1 #2
             top = int(round(float(t) / tile_y)) - 1
-            bottom = int(round(float(b) / tile_y)) + 2
+            bottom = int(round(float(b) / tile_y)) + 1 #2
             range_per_layer.append((left,top,right,bottom))
         
     @property
@@ -302,11 +292,7 @@ class Camera(object):
         """A list of MapLayer objects that would be visible on the display
         surface.
         """
-        return self._visible_tiles
-    
-    def _get_visible_tiles(self):
-        tile_per_layer = self._visible_tiles
-        del tile_per_layer[:]
+        tile_per_layer = []
         tile_range = self.visible_tile_range
         map = State.map
         get_tiles = map.get_tiles
@@ -319,6 +305,7 @@ class Camera(object):
                     for tile in get_tiles(*tile_range[layeri], layer=layeri)
                 ])
             tile_per_layer.append(new_layer)
+        return tile_per_layer
     
     def state_restored(self):
         """Sync a stale camera after swapping it in.

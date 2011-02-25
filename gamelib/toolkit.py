@@ -82,8 +82,8 @@ def make_tiles():
     mw,mh = State.map.map_size
     State.map.layers.append(MapLayer(
         State.map.tile_size, State.map.map_size, True, True, True))
-    for x in range(mw):
-        for y in range(mh):
+    for y in range(mh):
+        for x in range(mw):
             s = pygame.sprite.Sprite()
             s.name = (x,y)
             s.image = pygame.surface.Surface((tw,th))
@@ -110,8 +110,8 @@ def make_tiles2():
     mw,mh = State.map.map_size
     State.map.layers.append(MapLayer(
         State.map.tile_size, State.map.map_size, True, True, True))
-    for x in range(mw):
-        for y in range(mh):
+    for y in range(mh):
+        for x in range(mw):
             s = pygame.sprite.Sprite()
             s.name = (x,y)
             s.image = pygame.surface.Surface((tw,th))
@@ -180,9 +180,9 @@ def collapse_map_layer(map, layeri, num_tiles=(2,2)):
     new_layer = MapLayer((tw,th), (mw,mh), visible=layer.visible,
         make_grid=True, make_labels=True, name=layer.name)
     # walk the old map, stepping by the number of the tiles argument...
-    for x in range(0, map.map_size.x, num_tiles.x):
-        for y in range(0, map.map_size.y, num_tiles.y):
-            # make a new sprite
+    for y in range(0, map.map_size.y, num_tiles.y):
+        for x in range(0, map.map_size.x, num_tiles.x):
+        # make a new sprite
             s = Sprite()
             s.image = pygame.surface.Surface((tw,th))
             s.rect = s.image.get_rect()
@@ -190,6 +190,7 @@ def collapse_map_layer(map, layeri, num_tiles=(2,2)):
             
             # blit (x,y) tile and neighboring tiles to right and lower...
             tiles = map.get_tiles(x, y, x+num_tiles.x, y+num_tiles.y, layer=layeri)
+            tiles = [t for t in tiles if t]
             if len(tiles):
                 # Detect colorkey.
                 colorkey = None
@@ -213,7 +214,10 @@ def collapse_map_layer(map, layeri, num_tiles=(2,2)):
                     s.image.set_colorkey(colorkey, RLEACCEL)
 ##                    s.image.set_alpha(tile.image.get_alpha())
                 s.rect.topleft = Vec2d(x,y) * map.tile_size
-                new_layer[s.name] = s
+#                new_layer[s.name] = s
+                new_layer.append(s)
+            else:
+                new_layer.append(None)
     
     return new_layer
 
@@ -265,26 +269,37 @@ def reduce_map_layers(map, layersi):
     new_map = Map((tw,th), (mw,mh))
     # Prepare a base layer.
     i = layersi[0]
-    layer = map.layers[i]
-    new_layer = MapLayer(layer.tile_size, layer.map_size, visible=layer.visible,
-        make_grid=True, make_labels=True, name=layer.name)
-    new_map.layers.append(new_layer)
+    base_layer = map.layers[i]
+    new_base_layer = MapLayer(base_layer.tile_size, base_layer.map_size, visible=base_layer.visible,
+        make_grid=True, make_labels=True, name=base_layer.name)
+    new_map.layers.append(new_base_layer)
+    # Make the base layer.
+    for s in base_layer:
+        if s:
+            news = pygame.sprite.Sprite()
+            news.image = s.image.copy()
+            news.rect = s.rect.copy()
+            news.name = s.name
+            s = news
+        new_base_layer.append(s)
     # Blit the tiles in the specified layers.
-    for layeri in layersi:
+    for layeri in layersi[1:]:
         layer = map.layers[layeri]
         if not layer.visible:
             # Skip invisible layers.
             continue
-        for xy,src_tile in layer.items():
-            s = map.get_tile_at(xy, layeri)
-            if s is None:
-                s = pygame.sprite.Sprite()
-                s.name = xy
-                s.image = src_tile.image.copy()
-                s.rect = src_tile.rect.copy()
-                new_layer[xy] = s
-            else:
-                s.image.blit(src_tile.image, (0,0))
+        for i,src_tile in enumerate(layer):
+            if src_tile:
+                x,y = src_tile.name
+                s = new_base_layer.get_tile_at(x, y)
+                if s is None:
+                    s = pygame.sprite.Sprite()
+                    s.name = x,y
+                    s.image = src_tile.image.copy()
+                    s.rect = src_tile.rect.copy()
+                    new_base_layer[i] = s
+                else:
+                    s.image.blit(src_tile.image, (0,0))
     # Copy layers that were not specified and layers that are not invisible.
     for i,layer in enumerate(map.layers):
         if i in layersi and layer.visible:
@@ -293,13 +308,20 @@ def reduce_map_layers(map, layersi):
         new_layer = MapLayer(layer.tile_size, layer.map_size,
             visible=layer.visible, make_grid=True, make_labels=True,
             name=layer.name)
-        new_map.append(new_layer)
-        for xy,src_tile in layer.items():
-            new_layer[xy] = src_tile
+        new_map.insert(i, new_layer)
+        for src_tile in layer:
+            if src_tile:
+                s = pygame.sprite.Sprite()
+                s.name = src_tile.name
+                s.image = src_tile.image.copy()
+                s.rect = src_tile.rect.copy()
+            else:
+                s = None
+            new_layer.append(s)
     
     return new_map
 
-# combine_map_layers
+# reduce_map_layers
 
 
 def load_tiled_tmx_map(map_file_name, load_invisible=False):
@@ -334,6 +356,7 @@ def load_tiled_tmx_map(map_file_name, load_invisible=False):
                 y = (ypos + layer.y) * world_map.tileheight
                 img_idx = layer.content2D[xpos][ypos]
                 if img_idx == 0:
+                    gummworld_map.add(None, layer=layeri)
                     continue
                 try:
                     offx, offy, screen_img = world_map.indexed_tiles[img_idx]
@@ -341,15 +364,17 @@ def load_tiled_tmx_map(map_file_name, load_invisible=False):
                     print 'KeyError',img_idx,(xpos,ypos)
                     continue
                 sprite = Sprite()
-                if screen_img.get_alpha():
-                    screen_img = screen_img.convert_alpha()
-                else:
-                    screen_img = screen_img.convert()
-                    if layer.opacity > -1:
-                        screen_img.set_alpha(None)
-                        alpha_value = int(255. * float(layer.opacity))
-                        screen_img.set_alpha(alpha_value)
-                sprite.image = screen_img.convert_alpha()
+## Note: format conversion actually kills performance. ???
+#                if screen_img.get_alpha():
+#                    screen_img = screen_img.convert_alpha()
+#                else:
+#                    screen_img = screen_img.convert()
+#                    if layer.opacity > -1:
+#                        screen_img.set_alpha(None)
+#                        alpha_value = int(255. * float(layer.opacity))
+#                        screen_img.set_alpha(alpha_value)
+#                        screen_img = screen_img.convert_alpha()
+                sprite.image = screen_img  #.convert_alpha()
                 sprite.rect = screen_img.get_rect(topleft=(x,y))
                 sprite.name = xpos,ypos
                 gummworld_map.add(sprite, layer=layeri)
@@ -432,10 +457,30 @@ def draw_tiles():
     
     This function assumes that the tiles stored in the map are sprites.
     """
-    for layer in State.camera.visible_tiles:
-        # the list comprehension filters out sprites that are None
-        for s in layer.values():
-            draw_sprite(s)
+    map = State.map
+    layers = map.layers
+    camera = State.camera
+    visible_tile_range = camera.visible_tile_range
+    blit = camera.surface.blit
+    cx,cy = camera.rect.topleft
+    for layeri in range(len(visible_tile_range)):
+        layer = layers[layeri]
+        if not layer.visible:
+            continue
+        left,top,right,bottom = visible_tile_range[layeri]
+        mapw,maph = layer.map_size
+        if left < 0: left = 0
+        if top < 0: top = 0
+        if right >= mapw: right = mapw #- 1
+        if bottom >= maph: bottom = maph #- 1
+        for y in range(top,bottom):
+            yoff = y * mapw
+            start = yoff + left
+            end = yoff + right
+            for s in layer[start:end]:
+                if s:
+                    rect = s.rect
+                    blit(s.image, (rect.x-cx, rect.y-cy))
 
 # draw_tiles
 

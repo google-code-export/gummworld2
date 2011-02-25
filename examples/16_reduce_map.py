@@ -118,10 +118,14 @@ class App(Engine):
             'Tile size %s', callback=lambda:str(tuple(State.map.tile_size)),
             interval=2000))
         def screen_info():
-            res = State.screen.size
-            vis = State.camera.visible_tile_range[0]
-            tiles = Vec2d(vis[2]-vis[0], vis[3]-vis[1])
-            return 'Screen %dx%d / Visible tiles %dx%d' % (res.x,res.y,tiles.x,tiles.y,)
+            vis = State.camera.visible_tile_range
+            if len(vis):
+                vis = vis[0]
+                res = State.screen.size
+                tiles = Vec2d(vis[2]-vis[0], vis[3]-vis[1])
+                return 'Screen %dx%d / Visible tiles %dx%d' % (res.x,res.y,tiles.x,tiles.y,)
+            else:
+                return ''
         State.hud.add('Screen', Stat(State.hud.next_pos(),
             '', callback=screen_info, interval=2000))
         def map_info():
