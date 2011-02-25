@@ -343,3 +343,13 @@ SVN rev 236:
 
 SVN rev 239:
   * Fixed: world_editor.py; clicking inside shape and dragging mouse caused the grabbed control point to be moved regardless of whether the mouse had clicked directly on the control point. Added smarts to handle this properly.
+
+SVN rev 241:
+  * Cleanup: world_editor.py; removed some old print statements.
+  * Docs: docstring in Camera.interpolate corrected.
+  * Changed: MapLayer now implemented as a list for speed. The dict implementation was wieldy but slow. Got a decent boost in tile-fecthing performance.
+  * Changed: toolkit.load_tiled_tmx_map(); alpha code removed. It kills performance in some cases. Maybe, if alpha support is needed down the road, it can be enabled with via function argument or a dedicated loader function. For now it has been deferred, as it doesn't meet immediate needs.
+  * Changed: toolkit: collapse_map_layer(), reduce_map_layer(), draw_tiles(); functions updated for new MapLayer compatibility.
+  * Changed: Camera.`_`get_visible_tile_range() calculations adjusted for accuracy/efficiency.
+  * Changed: Camera.`_`get_visible_tiles() moved into Camera.visible_tiles(). Camera.update() no longer pre-fetches these, as this led to inaccurate frame interpolation for large update steps--like when panning fast across a large distance.
+  * Changed: examples/16_reduce_map.py reworked for compatibility.
