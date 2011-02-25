@@ -97,10 +97,10 @@ class View(object):
         """
         self.surface.blit(self.eraser, (0,0))
     
-    def blit(self, surf, pos, rect=None):
+    def blit(self, surf, pos, area=None, special_flags=0):
         """Blit a surface to this surface.
         """
-        self.surface.blit(surf, pos, rect)
+        self.surface.blit(surf, pos, area, special_flags)
 
 
 class Screen(View):
