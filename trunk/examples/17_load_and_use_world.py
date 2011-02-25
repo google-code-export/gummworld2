@@ -30,11 +30,11 @@ from pygame.sprite import Sprite
 from pygame.locals import FULLSCREEN, Color, K_ESCAPE, K_TAB
 
 import paths
-from gamelib import (
+from gummworld2 import (
     data, geometry, model, pygame_utils, toolkit,
     State, Engine, Vec2d,
 )
-from gamelib.geometry import RectGeometry, CircleGeometry, PolyGeometry
+from gummworld2.geometry import RectGeometry, CircleGeometry, PolyGeometry
 
 
 class Avatar(model.QuadTreeObject):

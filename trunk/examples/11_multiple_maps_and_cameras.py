@@ -32,8 +32,8 @@ import pygame
 from pygame.locals import Rect, K_ESCAPE, K_TAB, K_UP, K_DOWN, K_LEFT, K_RIGHT
 
 import paths
-from gamelib import *
-from gamelib import state
+from gummworld2 import *
+from gummworld2 import state
 
 
 class App(Engine):

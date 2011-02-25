@@ -46,7 +46,7 @@ import pygame
 from pygame.locals import *
 
 import paths
-from geometry import *
+from gummworld2.geometry import *
 
 
 class RectGeom(object):
