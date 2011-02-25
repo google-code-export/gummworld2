@@ -105,13 +105,14 @@ class Map(object):
     def add(self, *tiles, **kwargs):
         """Map.add(*tiles, layer=0)
         """
-        layer = kwargs.get('layer', 0)
+        layeri = kwargs.get('layer', 0)
+        layer = self.layers[layeri]
         for s in tiles:
-            if not isinstance(s, pygame.sprite.Sprite):
-                raise pygame.error, '*tiles argument must be one or more sprites'
-            if not isinstance(s.name, tuple):
-                raise pygame.error, 'name property must be an (x,y) tuple'
-            self.layers[layer][s.name] = s
+#            if not isinstance(s, pygame.sprite.Sprite):
+#                raise pygame.error, '*tiles argument must be one or more sprites'
+#            if not isinstance(s.name, tuple):
+#                raise pygame.error, 'name property must be an (x,y) tuple'
+            layer.append(s)
     
     def clear(self):
         """Clear all layers.
@@ -122,7 +123,7 @@ class Map(object):
         """Return the tile at grid location (x,y) in the specified layer. If no
         tile exists at the location, None is returned.
         """
-        return self.layers[layer].get((x,y), None)
+        return self.layers[layer].get_tile_at(x, y)
 
     def get_tiles(self, x1, y1, x2, y2, layer=0):
         """Return the list of tiles at the specified layer in range (x1,y1)
@@ -135,21 +136,18 @@ class Map(object):
         
         If the layer is not visible, an empty list is returned.
         """
-        if self.layers[layer].visible:
-            # this is dict.get()
-            get = self.layers[layer].get
-            return [
-                s for s in (
-                    get((x,y), None)
-                        for x in range(x1,x2)
-                            for y in range(y1,y2)
-                ) if s
-            ]
-        else:
-            return []
+        tiles = []
+        layer = self.layers[layer]
+        if layer.visible:
+            mapw = layer.map_size[0]
+            for y in range(y1,y2):
+                start = y*mapw+x1
+                end = y*mapw+x2
+                tiles.extend(layer[start:end])
+        return tiles
 
 
-class MapLayer(dict):
+class MapLayer(list):
     
     def __init__(self, tile_size, map_size, visible=True,
         make_labels=False, make_grid=False, name=''):
@@ -162,6 +160,28 @@ class MapLayer(dict):
         
         The name attribute is reserved for programmer convenience. It is not
         used by the Gummworld2 library.
+        
+        NOTE: For do-it-yerself tile access. MapLayer is a breadth-first flat
+        list, i.e.: it is not a nested list of lists; each row's tiles is
+        stored contiguously; position (x=0,y=0) is element 0, (x=1,y=0) is
+        element 1, and so on. It should be loaded and read by loops like so:
+            
+            for y in range(top, bottom):
+                for x in range(left, right):
+                    pass
+        
+        Array math can be used to access rows and partial rows as slices:
+            
+            map_width = layer.map_size[0]
+            row = 2
+            left = 10
+            right = 20
+            row_idx = row*map_width
+            tiles = layer[row_idx+left : row_idx+right]
+        
+        It is very likely desirable not to return tiles when x<0 or
+        x>=map_width, and when y<0 or y>map_height. See the source of
+        get_tile_at() for an example.
         """
         super(MapLayer, self).__init__()
         self.tile_size = tile_size
@@ -195,6 +215,42 @@ class MapLayer(dict):
                     s.rect = s.image.get_rect(
                         topleft=Vec2d(x*tw,y*th)+(2,2))
                     self.labels[x,y] = s
+    
+    def get_tile_at(self, x, y):
+        """Return the tile at grid location (x,y). If no tile exists at the
+        location, None is returned.
+        """
+        mapw,maph = self.map_size
+        if x < 0 or y < 0:
+            return None
+        if x >= mapw or y >= maph:
+            return None
+        try:
+            return self[y*mapw+x]
+        except IndexError:
+            return None
+    
+    def set_tile_at(self, x, y, tile):
+        """Set the value of grid location (x,y) to tile.
+        
+        This method performs no sanity check or adjustments on x or y. If x or y
+        are calculated without regard to this layer's map size, an IndexError
+        exception may occur, or may give unexpected results if x is negative or
+        larger than map width.
+        """
+        mapw = self.map_size[0]
+        self[y*mapw+x] = tile
+    
+    def index_of(self, x, y):
+        """Return the array index relating to grid location (x,y).
+        
+        This method performs no sanity check or adjustments on x or y. If x or y
+        are calculated without regard to this layer's map size, the return value
+        may be an invalid index, or may be an unexpected value if x is negative
+        or larger than map width..
+        """
+        mapw = self.map_size[0]
+        return y * mapw + x
     
     def get_label_at(self, x, y):
         """Return the label sprite at grid location (x,y). If no sprite exists at

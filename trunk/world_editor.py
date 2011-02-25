@@ -1439,12 +1439,10 @@ class MapEditor(object):
         elif self.mouse_down == 1:
             # Left-click: Select, deselect, or grab.
             if self.selected not in mouseover_shapes:
-                print 1
                 self.deselect()
                 if len(mouseover_shapes):
                     self.select(mouseover_shapes[0])
             elif self.selected is not None:
-                print 2
                 if self.selected.grab(mouse_shape):
                     # Grabbed control point.
                     self.grabbed_by_mouse = True
