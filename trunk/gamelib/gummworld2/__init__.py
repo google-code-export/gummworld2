@@ -62,5 +62,6 @@ import data
 import geometry
 import pygame_utils
 import popup_menu
+import state
 import ui
 import toolkit
