@@ -75,7 +75,8 @@ class App(Engine):
         self.avatar = Avatar(resolution//2)
         
         # Load Tiled TMX map, then update the world's dimensions.
-        State.map = toolkit.load_tiled_tmx_map('Gumm no swamps.tmx')
+        State.map = toolkit.load_tiled_tmx_map(
+            data.filepath('map', 'Gumm no swamps.tmx'))
         State.world.rect = State.map.rect.copy()
         
         # I like huds.

@@ -25,9 +25,12 @@ __doc__ = """toolkit.py - Some helper tools for Gummworld2.
 
 
 import os
+import re
+import urllib
+
 
 import pygame
-from pygame.locals import RLEACCEL
+from pygame.locals import RLEACCEL, SRCALPHA
 from pygame.sprite import Sprite
 
 from gummworld2 import data, State, Map, MapLayer, Vec2d
@@ -223,7 +226,7 @@ def collapse_map_layer(map, layeri, num_tiles=(2,2)):
     The num_tiles argument is a tuple representing the number of tiles in the X
     and Y axes to combine.
     """
-    # new map dimensions
+    # New map dimensions.
     num_tiles = Vec2d(num_tiles)
     tw,th = map.tile_size * num_tiles
     mw,mh = map.map_size // num_tiles
@@ -234,16 +237,16 @@ def collapse_map_layer(map, layeri, num_tiles=(2,2)):
     layer = map.layers[layeri]
     new_layer = MapLayer((tw,th), (mw,mh), visible=layer.visible,
         make_grid=True, make_labels=True, name=layer.name)
-    # walk the old map, stepping by the number of the tiles argument...
+    # Walk the old map, stepping by the number of the tiles argument...
     for y in range(0, map.map_size.y, num_tiles.y):
         for x in range(0, map.map_size.x, num_tiles.x):
-        # make a new sprite
+        # Make a new sprite.
             s = Sprite()
             s.image = pygame.surface.Surface((tw,th))
             s.rect = s.image.get_rect()
             s.name = tuple((x,y) / num_tiles)
             
-            # blit (x,y) tile and neighboring tiles to right and lower...
+            # Blit (x,y) tile and neighboring tiles to right and lower...
             tiles = map.get_tiles(x, y, x+num_tiles.x, y+num_tiles.y, layer=layeri)
             tiles = [t for t in tiles if t]
             if len(tiles):
@@ -329,13 +332,14 @@ def reduce_map_layers(map, layersi):
         make_grid=True, make_labels=True, name=base_layer.name)
     new_map.layers.append(new_base_layer)
     # Make the base layer.
-    for s in base_layer:
-        if s:
-            news = pygame.sprite.Sprite()
-            news.image = s.image.copy()
-            news.rect = s.rect.copy()
-            news.name = s.name
-            s = news
+    for src_sprite in base_layer:
+        if src_sprite:
+            s = pygame.sprite.Sprite()
+            s.image = src_sprite.image.copy()
+            s.rect = src_sprite.rect.copy()
+            s.name = src_sprite.name
+        else:
+            s = None
         new_base_layer.append(s)
     # Blit the tiles in the specified layers.
     for layeri in layersi[1:]:
@@ -343,18 +347,18 @@ def reduce_map_layers(map, layersi):
         if not layer.visible:
             # Skip invisible layers.
             continue
-        for i,src_tile in enumerate(layer):
-            if src_tile:
-                x,y = src_tile.name
+        for i,src_sprite in enumerate(layer):
+            if src_sprite:
+                x,y = src_sprite.name
                 s = new_base_layer.get_tile_at(x, y)
                 if s is None:
                     s = pygame.sprite.Sprite()
                     s.name = x,y
-                    s.image = src_tile.image.copy()
-                    s.rect = src_tile.rect.copy()
+                    s.image = src_sprite.image.copy()
+                    s.rect = src_sprite.rect.copy()
                     new_base_layer[i] = s
                 else:
-                    s.image.blit(src_tile.image, (0,0))
+                    s.image.blit(src_sprite.image, (0,0))
     # Copy layers that were not specified and layers that are not invisible.
     for i,layer in enumerate(map.layers):
         if i in layersi and layer.visible:
@@ -364,12 +368,12 @@ def reduce_map_layers(map, layersi):
             visible=layer.visible, make_grid=True, make_labels=True,
             name=layer.name)
         new_map.insert(i, new_layer)
-        for src_tile in layer:
-            if src_tile:
+        for src_sprite in layer:
+            if src_sprite:
                 s = pygame.sprite.Sprite()
-                s.name = src_tile.name
-                s.image = src_tile.image.copy()
-                s.rect = src_tile.rect.copy()
+                s.name = src_sprite.name
+                s.image = src_sprite.image.copy()
+                s.rect = src_sprite.rect.copy()
             else:
                 s = None
             new_layer.append(s)
@@ -379,11 +383,11 @@ def reduce_map_layers(map, layersi):
 # reduce_map_layers
 
 
-def load_tiled_tmx_map(map_file_name, load_invisible=False, convert_images=False):
+def load_tiled_tmx_map(map_file_name, load_invisible=False, convert_alpha=False):
     """Load an orthogonal TMX map file that was created by the Tiled Map Editor.
     
-    Note: convert_images can actually kill performance. Do it only if
-    there's a benefit.
+    Note: convert_alpha is experimental. It can lower performance when used
+    with some images. Do it only if there's a need.)
     
     Thanks to DR0ID for his nice tiledtmxloader module:
         http://www.pygame.org/project-map+loader+for+%27tiled%27-1158-2951.html
@@ -398,7 +402,7 @@ def load_tiled_tmx_map(map_file_name, load_invisible=False, convert_images=False
     # gamelib.Map object in attribute 'tiled_map'.
     
     world_map = TileMapParser().parse_decode_load(
-        data.filepath('map', map_file_name), ImageLoaderPygame())
+        map_file_name, ImageLoaderPygame())
     tile_size = (world_map.tilewidth, world_map.tileheight)
     map_size = (world_map.width, world_map.height)
     gummworld_map = Map(tile_size, map_size)
@@ -417,14 +421,15 @@ def load_tiled_tmx_map(map_file_name, load_invisible=False, convert_images=False
                     gummworld_map.add(None, layer=layeri)
                     continue
                 try:
-                    offx, offy, screen_img = world_map.indexed_tiles[img_idx]
+                    offx, offy, tile_img = world_map.indexed_tiles[img_idx]
+                    screen_img = tile_img.copy()  #convert(tile_img)
                 except KeyError:
                     print 'KeyError',img_idx,(xpos,ypos)
                     continue
                 sprite = Sprite()
-                ## Note: format conversion can actually kill performance.
+                ## Note: alpha conversion can actually kill performance.
                 ## Do it only if there's a benefit.
-                if convert_images:
+                if convert_alpha:
                     if screen_img.get_alpha():
                         screen_img = screen_img.convert_alpha()
                     else:
@@ -434,7 +439,7 @@ def load_tiled_tmx_map(map_file_name, load_invisible=False, convert_images=False
                             alpha_value = int(255. * float(layer.opacity))
                             screen_img.set_alpha(alpha_value)
                             screen_img = screen_img.convert_alpha()
-                sprite.image = screen_img  #.convert_alpha()
+                sprite.image = screen_img
                 sprite.rect = screen_img.get_rect(topleft=(x,y))
                 sprite.name = xpos,ypos
                 gummworld_map.add(sprite, layer=layeri)
@@ -454,22 +459,194 @@ def load_entities(filepath, cls_dict={}):
     geometry.PolyGeometry, geometry.CircleGeometry. Classes substituted in this
     manner must have constructors that are compatible with the default classes.
     """
-    import_script = data.filepath(
-        'plugins', os.path.join('map','import_world_quadtree.py'))
+#    import_script = data.filepath(
+#        'plugins', os.path.join('map','import_world_quadtree.py'))
     State.world.remove(*State.world.entity_branch.keys())
     file_handle = open(filepath, 'rb')
-    locals_dict = {
-        'fh'         : file_handle,
-    }
-    locals_dict['rect_cls'] = cls_dict.get('rect_cls', RectGeometry)
-    locals_dict['poly_cls'] = cls_dict.get('poly_cls', PolyGeometry)
-    locals_dict['circle_cls'] = cls_dict.get('circle_cls', CircleGeometry)
-    execfile(import_script, {}, locals_dict)
+#    locals_dict = {
+#        'fh'         : file_handle,
+#    }
+#    locals_dict['rect_cls'] = cls_dict.get('rect_cls', RectGeometry)
+#    locals_dict['poly_cls'] = cls_dict.get('poly_cls', PolyGeometry)
+#    locals_dict['circle_cls'] = cls_dict.get('circle_cls', CircleGeometry)
+#    execfile(import_script, {}, locals_dict)
+    entities,tilesheets = import_world_quadtree(
+        file_handle, RectGeometry, PolyGeometry, CircleGeometry)
     file_handle.close()
-    return locals_dict['entities']
+#    return locals_dict['entities']
+    return entities,tilesheets
 
 # load_world
 
+
+def export_world_quadtree(fh, entities):
+    """A quadtree-to-text exporter.
+    
+    This function is required by world_editor.py, and possibly other scripts, to
+    export quadtree entities to a text file.
+    
+    Geometry classes used by this plugin are: RectGeometry, CircleGeometry, and
+    PolyGeometry.
+    
+    The values saved are those needed for each shape-class's constructor, plus a
+    block of arbitrary user data. The user data is url-encoded.
+    """
+    
+    if not isinstance(entities, (list,tuple)) and not hasattr(entities, '__iter__'):
+        raise pygame.error, 'entities must be iterable'
+    
+    def quote(user_data):
+        translated_data = []
+        for line in user_data.split('\n'):
+            line = line.rstrip('\r')
+            line = re.sub(r'\\', '/', line)
+            translated_data.append(line)
+        quoted_data = '\n'.join(translated_data)
+        quoted_data = urllib.quote(quoted_data)
+        return quoted_data
+    
+    for entity in entities:
+        if isinstance(entity, RectGeometry):
+            # format:
+            # rect x y w h
+            # user_data ...
+            x,y = entity.rect.topleft
+            w,h = entity.rect.size
+            user_data = ''
+            if hasattr(entity, 'user_data'):
+                user_data = quote(entity.user_data)
+            fh.write('rect %d %d %d %d\n' % (x, y, w, h))
+            fh.write('user_data ' + user_data + '\n')
+        elif isinstance(entity, CircleGeometry):
+            # format:
+            # circle centerx centery radius
+            # user_data ...
+            x,y = entity.position
+            radius = entity.radius
+            user_data = ''
+            if hasattr(entity, 'user_data'):
+                user_data = quote(entity.user_data)
+            fh.write('circle %d %d %d\n' % (x,y,radius))
+            fh.write('user_data ' + user_data + '\n')
+        elif isinstance(entity, PolyGeometry):
+            # format:
+            # poly centerx centery rel_x1 rel_y1 rel_x2 rel_y2 rel_x3 rel_y3...
+            # user_data ...
+            #
+            # Note: x and y are relative to the containing rect's topleft.
+            center = entity.rect.center
+            x,y = entity.rect.topleft
+            w,h = entity.rect.size
+            user_data = ''
+            if hasattr(entity, 'user_data'):
+                user_data = quote(entity.user_data)
+            fh.write('poly')
+            fh.write(' %d %d' % center)
+            for x1,y1 in entity.points:
+                fh.write(' %d %d' % (x1-x,y1-y))
+            fh.write('\n')
+            fh.write('user_data ' + user_data + '\n')
+        else:
+            raise pygame.error, 'unsupported type: ' + entity.__class__.__name__
+    
+# export_world_quadtree
+
+
+def import_world_quadtree(fh, rect_cls, poly_cls, circle_cls):
+    """A world entity importer compatible with QuadTree.
+    
+    This function is required by world_editor.py, and possibly other scripts, to
+    import world entities from a text file. It understands the format of files
+    created by export_world_quadtree().
+
+    Geometry classes used by this function to create shape objects are specified
+    by the rect_cls, poly_cls, and circle_cls arguments. The constructor
+    parameters must have the same signature as geometry.RectGeometry, et al.
+
+    The values imported are those needed for each shape-class's constructor,
+    plus a block of arbitrary user data which will be placed in the shape
+    instance's user_data attribute.
+
+    The user_data is also parsed for tilesheet info. Tilesets are loaded and
+    returned as a dict of toolkit.Tilesheet, keyed by relative path to the
+    image file.
+    """
+    
+    if not issubclass(rect_cls, RectGeometry):
+        raise pygame.error, 'argument "rect_cls" must be a subclass of geometry.RectGeometry'
+    if not issubclass(poly_cls, PolyGeometry):
+        raise pygame.error, 'argument "poly_cls" must be a subclass of geometry.PolyGeometry'
+    if not issubclass(circle_cls, CircleGeometry):
+        raise pygame.error, 'argument "circle_cls" must be a subclass of geometry.CircleGeometry'
+    
+    entities = []
+    tilesheets = {}
+    
+    line_num = 0
+    for line in fh:
+        line_num += 1
+        line = line.rstrip('\r\n')
+        parts = line.split(' ')
+        if len(parts) < 1:
+            continue
+        what = parts[0]
+        if what == 'user_data':
+            # User data format:
+            # user_data url_encoded_string
+            user_data = []
+            # Unquote the user_data string and split it into lines.
+            lines = urllib.unquote(' '.join(parts[1:])).split('\n')
+            # Scan each line for tile info, load the tilesheets, and populate the
+            # entity's user_data attribute.
+            for line in lines:
+                # Split into space-delimited tokens.
+                parts = line.split(' ')
+                if parts[0] == 'tile':
+                    # Process the tile info entry. Format is:
+                    # 0: tile
+                    # 1: tile_id
+                    # 2..end: relpath_of_image
+                    file_path = ' '.join(parts[2:])
+                    file_path = os.path.join(*file_path.split('/'))
+                    if file_path not in tilesheets:
+                        tilesheet = load_tilesheet(file_path)
+                        tilesheets[file_path] = tilesheet
+                    # Join the parts and append to user_data.
+                    line = ' '.join(parts[0:2] + [file_path])
+                user_data.append(line)
+            entity.user_data = '\n'.join(user_data)
+        elif what == 'rect':
+            # Rect format:
+            # rect x y w h
+            x,y = int(parts[1]), int(parts[2])
+            w,h = int(parts[3]), int(parts[4])
+            entity = rect_cls(x, y, w, h)
+            entities.append(entity)
+        elif what == 'circle':
+            # Circle format:
+            # circle centerx centery radius
+            x,y = int(parts[1]), int(parts[2])
+            radius = float(parts[3])
+            entity = circle_cls((x,y), radius)
+            entities.append(entity)
+        elif what == 'poly':
+            # Polygon format:
+            # poly centerx centery rel_x1 rel_y1 rel_x2 rel_y2 rel_x3 rel_y3...
+            #
+            # Note: x and y are relative to the containing rect's topleft.
+            center = int(parts[1]), int(parts[2])
+            points = []
+            for i in range(3, len(parts), 2):
+                points.append(( int(parts[i]), int(parts[i+1]) ))
+            entity = poly_cls(points, center)
+            entities.append(entity)
+        else:
+            raise pygame.error, 'line %d: keyword "%s" unexpected' % (line_num,what)
+        
+    return entities, tilesheets
+    
+# import_world_quadtree
+    
 
 def load_tilesheet(file_path):
     """Load a tilesheet. A toolkit.Tilesheet containing tilesheet info is

@@ -27,10 +27,6 @@ WorldPymunk and various bodies will be created. Otherwise, only the classes
 World and Object will be available.
 """
 
-import os
-import re
-import urllib
-
 import pygame
 try:
     import pymunk
@@ -43,7 +39,7 @@ try:
 except:
     quad_tree = None
 
-from gummworld2 import State, Vec2d, data, toolkit
+from gummworld2 import State, Vec2d, data
 
 
 class NoWorld(object):
@@ -173,175 +169,6 @@ if quad_tree is not None:
         def step(self):
             pass
 
-
-def export_world_quadtree(fh, entities):
-    """A quadtree-to-text exporter.
-    
-    This function is required by world_editor.py, and possibly other scripts, to
-    export quadtree entities to a text file.
-    
-    Geometry classes used by this plugin are: RectGeometry, CircleGeometry, and
-    PolyGeometry.
-    
-    The values saved are those needed for each shape-class's constructor, plus a
-    block of arbitrary user data. The user data is url-encoded.
-    """
-    
-    if not isinstance(entities, (list,tuple)) and not hasattr(entities, '__iter__'):
-        raise pygame.error, 'entities must be iterable'
-    
-    def quote(user_data):
-        translated_data = []
-        for line in user_data.split('\n'):
-            line = line.rstrip('\r')
-            line = re.sub(r'\\', '/', line)
-            translated_data.append(line)
-        quoted_data = '\n'.join(translated_data)
-        quoted_data = urllib.quote(quoted_data)
-        return quoted_data
-    
-    for entity in entities:
-        if isinstance(entity, RectGeometry):
-            # format:
-            # rect x y w h
-            # user_data ...
-            x,y = entity.rect.topleft
-            w,h = entity.rect.size
-            user_data = ''
-            if hasattr(entity, 'user_data'):
-                user_data = quote(entity.user_data)
-            fh.write('rect %d %d %d %d\n' % (x, y, w, h))
-            fh.write('user_data ' + user_data + '\n')
-        elif isinstance(entity, CircleGeometry):
-            # format:
-            # circle centerx centery radius
-            # user_data ...
-            x,y = entity.position
-            radius = entity.radius
-            user_data = ''
-            if hasattr(entity, 'user_data'):
-                user_data = quote(entity.user_data)
-            fh.write('circle %d %d %d\n' % (x,y,radius))
-            fh.write('user_data ' + user_data + '\n')
-        elif isinstance(entity, PolyGeometry):
-            # format:
-            # poly centerx centery rel_x1 rel_y1 rel_x2 rel_y2 rel_x3 rel_y3...
-            # user_data ...
-            #
-            # Note: x and y are relative to the containing rect's topleft.
-            center = entity.rect.center
-            x,y = entity.rect.topleft
-            w,h = entity.rect.size
-            user_data = ''
-            if hasattr(entity, 'user_data'):
-                user_data = quote(entity.user_data)
-            fh.write('poly')
-            fh.write(' %d %d' % center)
-            for x1,y1 in entity.points:
-                fh.write(' %d %d' % (x1-x,y1-y))
-            fh.write('\n')
-            fh.write('user_data ' + user_data + '\n')
-        else:
-            raise pygame.error, 'unsupported type: ' + entity.__class__.__name__
-    
-# export_world_quadtree
-
-
-def import_world_quadtree(fh, rect_cls, poly_cls, circle_cls):
-    """A world entity importer compatible with QuadTree.
-    
-    This function is required by world_editor.py, and possibly other scripts, to
-    import world entities from a text file. It understands the format of files
-    created by export_world_quadtree().
-
-    Geometry classes used by this function to create shape objects are specified
-    by the rect_cls, poly_cls, and circle_cls arguments. The constructor
-    parameters must have the same signature as geometry.RectGeometry, et al.
-
-    The values imported are those needed for each shape-class's constructor,
-    plus a block of arbitrary user data which will be placed in the shape
-    instance's user_data attribute.
-
-    The user_data is also parsed for tilesheet info. Tilesets are loaded and
-    returned as a dict of toolkit.Tilesheet, keyed by relative path to the
-    image file.
-    """
-    
-    if not issubclass(rect_cls, RectGeometry):
-        raise pygame.error, 'argument "rect_cls" must be a subclass of geometry.RectGeometry'
-    if not issubclass(poly_cls, PolyGeometry):
-        raise pygame.error, 'argument "poly_cls" must be a subclass of geometry.PolyGeometry'
-    if not issubclass(circle_cls, CircleGeometry):
-        raise pygame.error, 'argument "circle_cls" must be a subclass of geometry.CircleGeometry'
-    
-    entities = []
-    tilesheets = {}
-    
-    line_num = 0
-    for line in fh:
-        line_num += 1
-        line = line.rstrip('\r\n')
-        parts = line.split(' ')
-        if len(parts) < 1:
-            continue
-        what = parts[0]
-        if what == 'user_data':
-            # User data format:
-            # user_data url_encoded_string
-            user_data = []
-            # Unquote the user_data string and split it into lines.
-            lines = urllib.unquote(' '.join(parts[1:])).split('\n')
-            # Scan each line for tile info, load the tilesheets, and populate the
-            # entity's user_data attribute.
-            for line in lines:
-                # Split into space-delimited tokens.
-                parts = line.split(' ')
-                if parts[0] == 'tile':
-                    # Process the tile info entry. Format is:
-                    # 0: tile
-                    # 1: tile_id
-                    # 2..end: relpath_of_image
-                    file_path = ' '.join(parts[2:])
-                    file_path = os.path.join(*file_path.split('/'))
-                    if file_path not in tilesheets:
-                        tilesheet = toolkit.load_tilesheet(file_path)
-                        tilesheets[file_path] = tilesheet
-                    # Join the parts and append to user_data.
-                    line = ' '.join(parts[0:2] + [file_path])
-                user_data.append(line)
-            entity.user_data = '\n'.join(user_data)
-        elif what == 'rect':
-            # Rect format:
-            # rect x y w h
-            x,y = int(parts[1]), int(parts[2])
-            w,h = int(parts[3]), int(parts[4])
-            entity = rect_cls(x, y, w, h)
-            entities.append(entity)
-        elif what == 'circle':
-            # Circle format:
-            # circle centerx centery radius
-            x,y = int(parts[1]), int(parts[2])
-            radius = float(parts[3])
-            entity = circle_cls((x,y), radius)
-            entities.append(entity)
-        elif what == 'poly':
-            # Polygon format:
-            # poly centerx centery rel_x1 rel_y1 rel_x2 rel_y2 rel_x3 rel_y3...
-            #
-            # Note: x and y are relative to the containing rect's topleft.
-            center = int(parts[1]), int(parts[2])
-            points = []
-            for i in range(3, len(parts), 2):
-                points.append(( int(parts[i]), int(parts[i+1]) ))
-            entity = poly_cls(points, center)
-            entities.append(entity)
-        else:
-            raise pygame.error, 'line %d: keyword "%s" unexpected' % (line_num,what)
-        
-    return entities, tilesheets
-    
-# import_world_quadtree
-    
 
 if pymunk is not None:
     

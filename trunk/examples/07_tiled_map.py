@@ -73,7 +73,8 @@ class App(Engine):
         
         ## Load Tiled TMX map, then update the world's dimensions. Really, all
         ## there is to it. See the toolkit module for more detail.
-        State.map = toolkit.load_tiled_tmx_map('Gumm no swamps.tmx')
+        State.map = toolkit.load_tiled_tmx_map(
+            data.filepath('map', 'Gumm no swamps.tmx'))
         State.world.rect = State.map.rect.copy()
         
         # I like huds.
