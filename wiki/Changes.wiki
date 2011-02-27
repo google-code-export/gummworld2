@@ -386,3 +386,6 @@ SVN rev 252:
   * *Changed:* toolkit.load_tiled_tmx_map() no longer assumes a data path. The caller must specify the path using the data module or custom means. This is more flexible and in line with the spirit of Gummworld2. This also required changes to the examples that use this function.
   * Changed: moved import_world_quadtree and export_world_quadtree out of model and into toolkit. As toolkit grows, the core modules need to stay as pure as possible to avoid circular module references which cause blowups during package loading.
   * Fixed: world_editor.py; action_entities_clear() did not call App.deselect(), which resulted in an artifact in the user_data field.
+
+SVN rev 260:
+  * Updated: make_docs and docs/.
