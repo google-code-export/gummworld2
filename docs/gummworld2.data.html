@@ -1,14 +1,14 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html><head><title>Python: module gamelib.data</title>
+<html><head><title>Python: module gummworld2.data</title>
 </head><body bgcolor="#f0f0f8">
 
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gamelib.html"><font color="#ffffff">gamelib</font></a>.data</strong></big></big> (version $Id: data.py 103 2011-01-08 08:02:42Z stabbingfinger@gmail.com $)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.data</strong></big></big> (version $Id: data.py 254 2011-02-27 08:24:02Z stabbingfinger@gmail.com $)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/svn/gummworld2/gamelib/data.py">c:\cygwin\home\bw\devel\python\svn\gummworld2\gamelib\data.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/svn/gummworld2/gamelib/gummworld2/data.py">c:\cygwin\home\bw\devel\python\svn\gummworld2\gamelib\gummworld2\data.py</a></font></td></tr></table>
     <p><tt>data.py&nbsp;-&nbsp;Data&nbsp;resource&nbsp;loader&nbsp;for&nbsp;Gummworld2.<br>
 &nbsp;<br>
 Module&nbsp;data:<br>
@@ -39,6 +39,13 @@ The&nbsp;mode&nbsp;argument&nbsp;is&nbsp;passed&nbsp;as&nbsp;the&nbsp;second&nbs
  <dl><dt><a name="-load_map"><strong>load_map</strong></a>(filename)</dt><dd><tt>Open&nbsp;a&nbsp;map&nbsp;file&nbsp;from&nbsp;the&nbsp;map&nbsp;dir&nbsp;and&nbsp;return&nbsp;its&nbsp;file&nbsp;handle.</tt></dd></dl>
  <dl><dt><a name="-load_sound"><strong>load_sound</strong></a>(filename)</dt><dd><tt>Open&nbsp;a&nbsp;sound&nbsp;file&nbsp;from&nbsp;the&nbsp;sound&nbsp;dir&nbsp;and&nbsp;return&nbsp;its&nbsp;file&nbsp;handle.</tt></dd></dl>
  <dl><dt><a name="-load_text"><strong>load_text</strong></a>(filename)</dt><dd><tt>Open&nbsp;a&nbsp;text&nbsp;file&nbsp;from&nbsp;the&nbsp;text&nbsp;dir&nbsp;and&nbsp;return&nbsp;its&nbsp;file&nbsp;handle.</tt></dd></dl>
+ <dl><dt><a name="-relpath"><strong>relpath</strong></a>(filename)</dt><dd><tt>Return&nbsp;the&nbsp;file&nbsp;path&nbsp;relative&nbsp;to&nbsp;data_dir.<br>
+&nbsp;<br>
+For&nbsp;example:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;data.data_dir&nbsp;is&nbsp;"/games/pong/data"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;filename&nbsp;=&nbsp;"/games/pong/data/image/my.png"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;relname&nbsp;=&nbsp;data.<a href="#-relpath">relpath</a>(filename)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;relname&nbsp;is&nbsp;"image/my.png"</tt></dd></dl>
 </td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#55aa55">
@@ -47,10 +54,10 @@ The&nbsp;mode&nbsp;argument&nbsp;is&nbsp;passed&nbsp;as&nbsp;the&nbsp;second&nbs
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><strong>__author__</strong> = 'Gummbum, (c) 2011'<br>
-<strong>__version__</strong> = '$Id: data.py 103 2011-01-08 08:02:42Z stabbingfinger@gmail.com $'<br>
+<strong>__version__</strong> = '$Id: data.py 254 2011-02-27 08:24:02Z stabbingfinger@gmail.com $'<br>
 <strong>data_dir</strong> = r'C:\cygwin\home\bw\devel\python\svn\gummworld2\data'<br>
-<strong>data_py</strong> = r'C:\cygwin\home\bw\devel\python\svn\gummworld2\gamelib'<br>
-<strong>path</strong> = {'font': r'C:\cygwin\home\bw\devel\python\svn\gummworld2\data\font', 'image': r'C:\cygwin\home\bw\devel\python\svn\gummworld2\data\image', 'map': r'C:\cygwin\home\bw\devel\python\svn\gummworld2\data\map', 'sound': r'C:\cygwin\home\bw\devel\python\svn\gummworld2\data\sound', 'text': r'C:\cygwin\home\bw\devel\python\svn\gummworld2\data\text'}</td></tr></table><p>
+<strong>data_py</strong> = r'C:\cygwin\home\bw\devel\python\svn\gummworld2\gamelib\gummworld2'<br>
+<strong>path</strong> = {'font': r'C:\cygwin\home\bw\devel\python\svn\gummworld2\data\font', 'image': r'C:\cygwin\home\bw\devel\python\svn\gummworld2\data\image', 'map': r'C:\cygwin\home\bw\devel\python\svn\gummworld2\data\map', 'plugins': r'C:\cygwin\home\bw\devel\python\svn\gummworld2\data\plugins', 'sound': r'C:\cygwin\home\bw\devel\python\svn\gummworld2\data\sound', 'text': r'C:\cygwin\home\bw\devel\python\svn\gummworld2\data\text', 'theme': r'C:\cygwin\home\bw\devel\python\svn\gummworld2\data\themes'}</td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#7799ee">
 <td colspan=3 valign=bottom>&nbsp;<br>

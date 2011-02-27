@@ -1,14 +1,14 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html><head><title>Python: module gamelib.camera</title>
+<html><head><title>Python: module gummworld2.camera</title>
 </head><body bgcolor="#f0f0f8">
 
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gamelib.html"><font color="#ffffff">gamelib</font></a>.camera</strong></big></big> (version $Id: camera.py 148 2011-01-17 06:03:27Z stabbingfinger@gmail.com $)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.camera</strong></big></big> (version $Id: camera.py 248 2011-02-25 15:40:01Z stabbingfinger@gmail.com $)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/svn/gummworld2/gamelib/camera.py">c:\cygwin\home\bw\devel\python\svn\gummworld2\gamelib\camera.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/svn/gummworld2/gamelib/gummworld2/camera.py">c:\cygwin\home\bw\devel\python\svn\gummworld2\gamelib\gummworld2\camera.py</a></font></td></tr></table>
     <p><tt>camera.py&nbsp;-&nbsp;<a href="#Camera">Camera</a>&nbsp;module&nbsp;for&nbsp;Gummworld2.</tt></p>
 <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
@@ -29,7 +29,7 @@
 <dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
 </font></dt><dd>
 <dl>
-<dt><font face="helvetica, arial"><a href="gamelib.camera.html#Camera">Camera</a>
+<dt><font face="helvetica, arial"><a href="gummworld2.camera.html#Camera">Camera</a>
 </font></dt></dl>
 </dd>
 </dl>
@@ -91,12 +91,14 @@ is&nbsp;exposed&nbsp;view&nbsp;the&nbsp;<a href="#Camera">Camera</a>.surface&nbs
 
 <dl><dt><a name="Camera-interpolate"><strong>interpolate</strong></a>(self, sprites<font color="#909090">=None</font>)</dt><dd><tt>Interpolate&nbsp;camera&nbsp;position&nbsp;towards&nbsp;target&nbsp;for&nbsp;smoother&nbsp;scrolling<br>
 &nbsp;<br>
-You&nbsp;typically&nbsp;want&nbsp;to&nbsp;use&nbsp;this&nbsp;or&nbsp;<a href="#Camera">Camera</a>.<a href="#Camera-update">update</a>(),&nbsp;not&nbsp;both.<br>
-&nbsp;<br>
 After&nbsp;updating&nbsp;the&nbsp;target&nbsp;position&nbsp;in&nbsp;the&nbsp;main&nbsp;program's&nbsp;<a href="#Camera-update">update</a>(),&nbsp;call<br>
 this&nbsp;every&nbsp;frame&nbsp;in&nbsp;the&nbsp;main&nbsp;program's&nbsp;draw()&nbsp;before&nbsp;any&nbsp;drawing<br>
 commands.&nbsp;It&nbsp;works&nbsp;best&nbsp;when&nbsp;frame&nbsp;speed&nbsp;is&nbsp;much&nbsp;higher&nbsp;than&nbsp;update<br>
-speed.</tt></dd></dl>
+speed.<br>
+&nbsp;<br>
+Experimental:&nbsp;I&nbsp;dunno&nbsp;about&nbsp;this&nbsp;sprites&nbsp;argument.&nbsp;I'm&nbsp;sure&nbsp;it&nbsp;seemed<br>
+like&nbsp;a&nbsp;good&nbsp;idea&nbsp;at&nbsp;the&nbsp;time,&nbsp;but&nbsp;I&nbsp;seem&nbsp;to&nbsp;have&nbsp;misplaced&nbsp;the&nbsp;original<br>
+concept.</tt></dd></dl>
 
 <dl><dt><a name="Camera-screen_to_world"><strong>screen_to_world</strong></a>(self, xy)</dt><dd><tt>Convert&nbsp;coordinates&nbsp;from&nbsp;screen&nbsp;space&nbsp;to&nbsp;world&nbsp;space.</tt></dd></dl>
 
@@ -193,7 +195,7 @@ surface.</tt></dd>
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><strong>__author__</strong> = 'Gummbum, (c) 2011'<br>
-<strong>__version__</strong> = '$Id: camera.py 148 2011-01-17 06:03:27Z stabbingfinger@gmail.com $'</td></tr></table><p>
+<strong>__version__</strong> = '$Id: camera.py 248 2011-02-25 15:40:01Z stabbingfinger@gmail.com $'</td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#7799ee">
 <td colspan=3 valign=bottom>&nbsp;<br>

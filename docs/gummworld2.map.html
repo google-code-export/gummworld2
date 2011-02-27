@@ -1,14 +1,14 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html><head><title>Python: module gamelib.map</title>
+<html><head><title>Python: module gummworld2.map</title>
 </head><body bgcolor="#f0f0f8">
 
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gamelib.html"><font color="#ffffff">gamelib</font></a>.map</strong></big></big> (version $Id: map.py 103 2011-01-08 08:02:42Z stabbingfinger@gmail.com $)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.map</strong></big></big> (version $Id: map.py 254 2011-02-27 08:24:02Z stabbingfinger@gmail.com $)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/svn/gummworld2/gamelib/map.py">c:\cygwin\home\bw\devel\python\svn\gummworld2\gamelib\map.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/svn/gummworld2/gamelib/gummworld2/map.py">c:\cygwin\home\bw\devel\python\svn\gummworld2\gamelib\gummworld2\map.py</a></font></td></tr></table>
     <p><tt>map.py&nbsp;-&nbsp;<a href="#Map">Map</a>&nbsp;module&nbsp;for&nbsp;Gummworld2.<br>
 &nbsp;<br>
 Defines&nbsp;the&nbsp;<a href="#Map">Map</a>,&nbsp;which&nbsp;serves&nbsp;tiles,&nbsp;tile&nbsp;labels,&nbsp;and&nbsp;grid&nbsp;outlines.&nbsp;Supports<br>
@@ -17,7 +17,7 @@ tile&nbsp;layers.<br>
 <a href="#Map">Map</a>&nbsp;combines&nbsp;view&nbsp;(pygame)&nbsp;and&nbsp;model&nbsp;(world&nbsp;coordinates).&nbsp;It&nbsp;contains&nbsp;a&nbsp;rect<br>
 attribute&nbsp;defining&nbsp;its&nbsp;dimensions,&nbsp;and&nbsp;observes&nbsp;pygame&nbsp;coordinate&nbsp;space.<br>
 &nbsp;<br>
-The&nbsp;layers&nbsp;attribute&nbsp;is&nbsp;a&nbsp;two-dimensional&nbsp;list&nbsp;of&nbsp;tile&nbsp;sprites.&nbsp;This&nbsp;can&nbsp;be<br>
+The&nbsp;layers&nbsp;attribute&nbsp;is&nbsp;a&nbsp;two-dimensional&nbsp;<a href="__builtin__.html#list">list</a>&nbsp;of&nbsp;tile&nbsp;sprites.&nbsp;This&nbsp;can&nbsp;be<br>
 accessed&nbsp;directly,&nbsp;or&nbsp;via&nbsp;the&nbsp;class&nbsp;methods.&nbsp;See&nbsp;also&nbsp;the&nbsp;Camera&nbsp;class&nbsp;for<br>
 its&nbsp;visible&nbsp;tile&nbsp;range&nbsp;utilities.<br>
 &nbsp;<br>
@@ -69,10 +69,9 @@ Alternatively&nbsp;State.save()&nbsp;and&nbsp;State.restore()&nbsp;can&nbsp;be&n
 <font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
     
 <tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="gamelib.data.html">gamelib.data</a><br>
-</td><td width="25%" valign=top><a href="gamelib.model.html">gamelib.model</a><br>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="gummworld2.data.html">gummworld2.data</a><br>
 </td><td width="25%" valign=top><a href="pygame.html">pygame</a><br>
-</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ee77aa">
 <td colspan=3 valign=bottom>&nbsp;<br>
@@ -80,16 +79,16 @@ Alternatively&nbsp;State.save()&nbsp;and&nbsp;State.restore()&nbsp;can&nbsp;be&n
     
 <tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><dl>
-<dt><font face="helvetica, arial"><a href="__builtin__.html#dict">__builtin__.dict</a>(<a href="__builtin__.html#object">__builtin__.object</a>)
+<dt><font face="helvetica, arial"><a href="__builtin__.html#list">__builtin__.list</a>(<a href="__builtin__.html#object">__builtin__.object</a>)
 </font></dt><dd>
 <dl>
-<dt><font face="helvetica, arial"><a href="gamelib.map.html#MapLayer">MapLayer</a>
+<dt><font face="helvetica, arial"><a href="gummworld2.map.html#MapLayer">MapLayer</a>
 </font></dt></dl>
 </dd>
 <dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
 </font></dt><dd>
 <dl>
-<dt><font face="helvetica, arial"><a href="gamelib.map.html#Map">Map</a>
+<dt><font face="helvetica, arial"><a href="gummworld2.map.html#Map">Map</a>
 </font></dt></dl>
 </dd>
 </dl>
@@ -116,7 +115,7 @@ and&nbsp;height&nbsp;of&nbsp;the&nbsp;map&nbsp;in&nbsp;tiles.</tt></dd></dl>
 <dl><dt><a name="Map-get_tile_at"><strong>get_tile_at</strong></a>(self, x, y, layer<font color="#909090">=0</font>)</dt><dd><tt>Return&nbsp;the&nbsp;tile&nbsp;at&nbsp;grid&nbsp;location&nbsp;(x,y)&nbsp;in&nbsp;the&nbsp;specified&nbsp;layer.&nbsp;If&nbsp;no<br>
 tile&nbsp;exists&nbsp;at&nbsp;the&nbsp;location,&nbsp;None&nbsp;is&nbsp;returned.</tt></dd></dl>
 
-<dl><dt><a name="Map-get_tiles"><strong>get_tiles</strong></a>(self, x1, y1, x2, y2, layer<font color="#909090">=0</font>)</dt><dd><tt>Return&nbsp;the&nbsp;list&nbsp;of&nbsp;tiles&nbsp;at&nbsp;the&nbsp;specified&nbsp;layer&nbsp;in&nbsp;range&nbsp;(x1,y1)<br>
+<dl><dt><a name="Map-get_tiles"><strong>get_tiles</strong></a>(self, x1, y1, x2, y2, layer<font color="#909090">=0</font>)</dt><dd><tt>Return&nbsp;the&nbsp;<a href="__builtin__.html#list">list</a>&nbsp;of&nbsp;tiles&nbsp;at&nbsp;the&nbsp;specified&nbsp;layer&nbsp;in&nbsp;range&nbsp;(x1,y1)<br>
 through&nbsp;(x2,y2).<br>
 &nbsp;<br>
 The&nbsp;arguments&nbsp;x1,y1,x2,y2&nbsp;are&nbsp;ints&nbsp;representing&nbsp;the&nbsp;range&nbsp;of&nbsp;tiles&nbsp;to<br>
@@ -124,7 +123,7 @@ select.<br>
 &nbsp;<br>
 The&nbsp;layer&nbsp;argument&nbsp;is&nbsp;an&nbsp;int&nbsp;representing&nbsp;the&nbsp;tile&nbsp;layer&nbsp;to&nbsp;select.<br>
 &nbsp;<br>
-If&nbsp;the&nbsp;layer&nbsp;is&nbsp;not&nbsp;visible,&nbsp;an&nbsp;empty&nbsp;list&nbsp;is&nbsp;returned.</tt></dd></dl>
+If&nbsp;the&nbsp;layer&nbsp;is&nbsp;not&nbsp;visible,&nbsp;an&nbsp;empty&nbsp;<a href="__builtin__.html#list">list</a>&nbsp;is&nbsp;returned.</tt></dd></dl>
 
 <hr>
 Data descriptors defined here:<br>
@@ -138,33 +137,75 @@ Data descriptors defined here:<br>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="MapLayer">class <strong>MapLayer</strong></a>(<a href="__builtin__.html#dict">__builtin__.dict</a>)</font></td></tr>
+<font color="#000000" face="helvetica, arial"><a name="MapLayer">class <strong>MapLayer</strong></a>(<a href="__builtin__.html#list">__builtin__.list</a>)</font></td></tr>
     
 <tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><dl><dt>Method resolution order:</dt>
-<dd><a href="gamelib.map.html#MapLayer">MapLayer</a></dd>
-<dd><a href="__builtin__.html#dict">__builtin__.dict</a></dd>
+<dd><a href="gummworld2.map.html#MapLayer">MapLayer</a></dd>
+<dd><a href="__builtin__.html#list">__builtin__.list</a></dd>
 <dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
 </dl>
 <hr>
 Methods defined here:<br>
-<dl><dt><a name="MapLayer-__init__"><strong>__init__</strong></a>(self, tile_size, map_size, visible<font color="#909090">=True</font>, make_labels<font color="#909090">=False</font>, make_grid<font color="#909090">=False</font>)</dt><dd><tt>Construct&nbsp;an&nbsp;instance&nbsp;of&nbsp;<a href="#MapLayer">MapLayer</a>.<br>
+<dl><dt><a name="MapLayer-__init__"><strong>__init__</strong></a>(self, tile_size, map_size, visible<font color="#909090">=True</font>, make_labels<font color="#909090">=False</font>, make_grid<font color="#909090">=False</font>, name<font color="#909090">=''</font>)</dt><dd><tt>Construct&nbsp;an&nbsp;instance&nbsp;of&nbsp;<a href="#MapLayer">MapLayer</a>.<br>
 &nbsp;<br>
 Instances&nbsp;of&nbsp;this&nbsp;class&nbsp;can&nbsp;be&nbsp;accessed&nbsp;as&nbsp;dicts&nbsp;to&nbsp;retrieve&nbsp;tiles.<br>
 &nbsp;<br>
 If&nbsp;the&nbsp;visible&nbsp;attribute&nbsp;is&nbsp;True,&nbsp;then&nbsp;this&nbsp;layer&nbsp;is&nbsp;visible.&nbsp;If&nbsp;False,<br>
-it&nbsp;is&nbsp;not&nbsp;visible.</tt></dd></dl>
+it&nbsp;is&nbsp;not&nbsp;visible.<br>
+&nbsp;<br>
+The&nbsp;name&nbsp;attribute&nbsp;is&nbsp;reserved&nbsp;for&nbsp;programmer&nbsp;convenience.&nbsp;It&nbsp;is&nbsp;not<br>
+used&nbsp;by&nbsp;the&nbsp;Gummworld2&nbsp;library.<br>
+&nbsp;<br>
+NOTE:&nbsp;For&nbsp;do-it-yerself&nbsp;tile&nbsp;access.&nbsp;<a href="#MapLayer">MapLayer</a>&nbsp;is&nbsp;a&nbsp;breadth-first&nbsp;flat<br>
+<a href="__builtin__.html#list">list</a>,&nbsp;i.e.:&nbsp;it&nbsp;is&nbsp;not&nbsp;a&nbsp;nested&nbsp;<a href="__builtin__.html#list">list</a>&nbsp;of&nbsp;lists;&nbsp;each&nbsp;row's&nbsp;tiles&nbsp;is<br>
+stored&nbsp;contiguously;&nbsp;position&nbsp;(x=0,y=0)&nbsp;is&nbsp;element&nbsp;0,&nbsp;(x=1,y=0)&nbsp;is<br>
+element&nbsp;1,&nbsp;and&nbsp;so&nbsp;on.&nbsp;It&nbsp;should&nbsp;be&nbsp;loaded&nbsp;and&nbsp;read&nbsp;by&nbsp;loops&nbsp;like&nbsp;so:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;y&nbsp;in&nbsp;range(top,&nbsp;bottom):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;x&nbsp;in&nbsp;range(left,&nbsp;right):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pass<br>
+&nbsp;<br>
+Array&nbsp;math&nbsp;can&nbsp;be&nbsp;used&nbsp;to&nbsp;access&nbsp;rows&nbsp;and&nbsp;partial&nbsp;rows&nbsp;as&nbsp;slices:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;map_width&nbsp;=&nbsp;layer.map_size[0]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;row&nbsp;=&nbsp;2<br>
+&nbsp;&nbsp;&nbsp;&nbsp;left&nbsp;=&nbsp;10<br>
+&nbsp;&nbsp;&nbsp;&nbsp;right&nbsp;=&nbsp;20<br>
+&nbsp;&nbsp;&nbsp;&nbsp;row_idx&nbsp;=&nbsp;row*map_width<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tiles&nbsp;=&nbsp;layer[row_idx+left&nbsp;:&nbsp;row_idx+right]<br>
+&nbsp;<br>
+It&nbsp;is&nbsp;very&nbsp;likely&nbsp;desirable&nbsp;not&nbsp;to&nbsp;return&nbsp;tiles&nbsp;when&nbsp;x&lt;0&nbsp;or<br>
+x&gt;=map_width,&nbsp;and&nbsp;when&nbsp;y&lt;0&nbsp;or&nbsp;y&gt;map_height.&nbsp;See&nbsp;the&nbsp;source&nbsp;of<br>
+<a href="#MapLayer-get_tile_at">get_tile_at</a>()&nbsp;for&nbsp;an&nbsp;example.</tt></dd></dl>
 
 <dl><dt><a name="MapLayer-get_label_at"><strong>get_label_at</strong></a>(self, x, y)</dt><dd><tt>Return&nbsp;the&nbsp;label&nbsp;sprite&nbsp;at&nbsp;grid&nbsp;location&nbsp;(x,y).&nbsp;If&nbsp;no&nbsp;sprite&nbsp;exists&nbsp;at<br>
 that&nbsp;location,&nbsp;None&nbsp;is&nbsp;returned.</tt></dd></dl>
 
-<dl><dt><a name="MapLayer-get_labels"><strong>get_labels</strong></a>(self, x1, y1, x2, y2)</dt><dd><tt>Return&nbsp;the&nbsp;list&nbsp;of&nbsp;labels&nbsp;in&nbsp;range&nbsp;(x1,y1)&nbsp;through&nbsp;(x2,y2).<br>
+<dl><dt><a name="MapLayer-get_labels"><strong>get_labels</strong></a>(self, x1, y1, x2, y2)</dt><dd><tt>Return&nbsp;the&nbsp;<a href="__builtin__.html#list">list</a>&nbsp;of&nbsp;labels&nbsp;in&nbsp;range&nbsp;(x1,y1)&nbsp;through&nbsp;(x2,y2).<br>
 &nbsp;<br>
 The&nbsp;arguments&nbsp;x1,y1,x2,y2&nbsp;are&nbsp;ints&nbsp;representing&nbsp;the&nbsp;range&nbsp;of&nbsp;labels&nbsp;to<br>
 select.</tt></dd></dl>
 
+<dl><dt><a name="MapLayer-get_tile_at"><strong>get_tile_at</strong></a>(self, x, y)</dt><dd><tt>Return&nbsp;the&nbsp;tile&nbsp;at&nbsp;grid&nbsp;location&nbsp;(x,y).&nbsp;If&nbsp;no&nbsp;tile&nbsp;exists&nbsp;at&nbsp;the<br>
+location,&nbsp;None&nbsp;is&nbsp;returned.</tt></dd></dl>
+
 <dl><dt><a name="MapLayer-horizontal_grid_line"><strong>horizontal_grid_line</strong></a>(self, xy<font color="#909090">=None</font>, anchor<font color="#909090">='topleft'</font>)</dt><dd><tt>Return&nbsp;the&nbsp;horizontal&nbsp;grid&nbsp;sprite.&nbsp;If&nbsp;specified,&nbsp;the&nbsp;sprite.rect's<br>
 attribute&nbsp;specified&nbsp;by&nbsp;anchor&nbsp;is&nbsp;set&nbsp;to&nbsp;the&nbsp;value&nbsp;of&nbsp;xy.</tt></dd></dl>
+
+<dl><dt><a name="MapLayer-index_of"><strong>index_of</strong></a>(self, x, y)</dt><dd><tt>Return&nbsp;the&nbsp;array&nbsp;index&nbsp;relating&nbsp;to&nbsp;grid&nbsp;location&nbsp;(x,y).<br>
+&nbsp;<br>
+This&nbsp;method&nbsp;performs&nbsp;no&nbsp;sanity&nbsp;check&nbsp;or&nbsp;adjustments&nbsp;on&nbsp;x&nbsp;or&nbsp;y.&nbsp;If&nbsp;x&nbsp;or&nbsp;y<br>
+are&nbsp;calculated&nbsp;without&nbsp;regard&nbsp;to&nbsp;this&nbsp;layer's&nbsp;map&nbsp;size,&nbsp;the&nbsp;return&nbsp;value<br>
+may&nbsp;be&nbsp;an&nbsp;invalid&nbsp;index,&nbsp;or&nbsp;may&nbsp;be&nbsp;an&nbsp;unexpected&nbsp;value&nbsp;if&nbsp;x&nbsp;is&nbsp;negative<br>
+or&nbsp;larger&nbsp;than&nbsp;map&nbsp;width..</tt></dd></dl>
+
+<dl><dt><a name="MapLayer-set_tile_at"><strong>set_tile_at</strong></a>(self, x, y, tile)</dt><dd><tt>Set&nbsp;the&nbsp;value&nbsp;of&nbsp;grid&nbsp;location&nbsp;(x,y)&nbsp;to&nbsp;tile.<br>
+&nbsp;<br>
+This&nbsp;method&nbsp;performs&nbsp;no&nbsp;sanity&nbsp;check&nbsp;or&nbsp;adjustments&nbsp;on&nbsp;x&nbsp;or&nbsp;y.&nbsp;If&nbsp;x&nbsp;or&nbsp;y<br>
+are&nbsp;calculated&nbsp;without&nbsp;regard&nbsp;to&nbsp;this&nbsp;layer's&nbsp;map&nbsp;size,&nbsp;an&nbsp;IndexError<br>
+exception&nbsp;may&nbsp;occur,&nbsp;or&nbsp;may&nbsp;give&nbsp;unexpected&nbsp;results&nbsp;if&nbsp;x&nbsp;is&nbsp;negative&nbsp;or<br>
+larger&nbsp;than&nbsp;map&nbsp;width.</tt></dd></dl>
 
 <dl><dt><a name="MapLayer-vertical_grid_line"><strong>vertical_grid_line</strong></a>(self, xy<font color="#909090">=None</font>, anchor<font color="#909090">='topleft'</font>)</dt><dd><tt>Return&nbsp;the&nbsp;vertical&nbsp;grid&nbsp;sprite.&nbsp;If&nbsp;specified,&nbsp;the&nbsp;sprite.rect's<br>
 attribute&nbsp;specified&nbsp;by&nbsp;anchor&nbsp;is&nbsp;set&nbsp;to&nbsp;the&nbsp;value&nbsp;of&nbsp;xy.</tt></dd></dl>
@@ -178,12 +219,16 @@ Data descriptors defined here:<br>
 <dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
 </dl>
 <hr>
-Methods inherited from <a href="__builtin__.html#dict">__builtin__.dict</a>:<br>
-<dl><dt><a name="MapLayer-__cmp__"><strong>__cmp__</strong></a>(...)</dt><dd><tt>x.<a href="#MapLayer-__cmp__">__cmp__</a>(y)&nbsp;&lt;==&gt;&nbsp;cmp(x,y)</tt></dd></dl>
+Methods inherited from <a href="__builtin__.html#list">__builtin__.list</a>:<br>
+<dl><dt><a name="MapLayer-__add__"><strong>__add__</strong></a>(...)</dt><dd><tt>x.<a href="#MapLayer-__add__">__add__</a>(y)&nbsp;&lt;==&gt;&nbsp;x+y</tt></dd></dl>
 
-<dl><dt><a name="MapLayer-__contains__"><strong>__contains__</strong></a>(...)</dt><dd><tt>D.<a href="#MapLayer-__contains__">__contains__</a>(k)&nbsp;-&gt;&nbsp;True&nbsp;if&nbsp;D&nbsp;has&nbsp;a&nbsp;key&nbsp;k,&nbsp;else&nbsp;False</tt></dd></dl>
+<dl><dt><a name="MapLayer-__contains__"><strong>__contains__</strong></a>(...)</dt><dd><tt>x.<a href="#MapLayer-__contains__">__contains__</a>(y)&nbsp;&lt;==&gt;&nbsp;y&nbsp;in&nbsp;x</tt></dd></dl>
 
 <dl><dt><a name="MapLayer-__delitem__"><strong>__delitem__</strong></a>(...)</dt><dd><tt>x.<a href="#MapLayer-__delitem__">__delitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;del&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="MapLayer-__delslice__"><strong>__delslice__</strong></a>(...)</dt><dd><tt>x.<a href="#MapLayer-__delslice__">__delslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;del&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
 
 <dl><dt><a name="MapLayer-__eq__"><strong>__eq__</strong></a>(...)</dt><dd><tt>x.<a href="#MapLayer-__eq__">__eq__</a>(y)&nbsp;&lt;==&gt;&nbsp;x==y</tt></dd></dl>
 
@@ -193,7 +238,15 @@ Methods inherited from <a href="__builtin__.html#dict">__builtin__.dict</a>:<br>
 
 <dl><dt><a name="MapLayer-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#MapLayer-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
 
+<dl><dt><a name="MapLayer-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#MapLayer-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
 <dl><dt><a name="MapLayer-__gt__"><strong>__gt__</strong></a>(...)</dt><dd><tt>x.<a href="#MapLayer-__gt__">__gt__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&gt;y</tt></dd></dl>
+
+<dl><dt><a name="MapLayer-__iadd__"><strong>__iadd__</strong></a>(...)</dt><dd><tt>x.<a href="#MapLayer-__iadd__">__iadd__</a>(y)&nbsp;&lt;==&gt;&nbsp;x+=y</tt></dd></dl>
+
+<dl><dt><a name="MapLayer-__imul__"><strong>__imul__</strong></a>(...)</dt><dd><tt>x.<a href="#MapLayer-__imul__">__imul__</a>(y)&nbsp;&lt;==&gt;&nbsp;x*=y</tt></dd></dl>
 
 <dl><dt><a name="MapLayer-__iter__"><strong>__iter__</strong></a>(...)</dt><dd><tt>x.<a href="#MapLayer-__iter__">__iter__</a>()&nbsp;&lt;==&gt;&nbsp;iter(x)</tt></dd></dl>
 
@@ -203,55 +256,51 @@ Methods inherited from <a href="__builtin__.html#dict">__builtin__.dict</a>:<br>
 
 <dl><dt><a name="MapLayer-__lt__"><strong>__lt__</strong></a>(...)</dt><dd><tt>x.<a href="#MapLayer-__lt__">__lt__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&lt;y</tt></dd></dl>
 
+<dl><dt><a name="MapLayer-__mul__"><strong>__mul__</strong></a>(...)</dt><dd><tt>x.<a href="#MapLayer-__mul__">__mul__</a>(n)&nbsp;&lt;==&gt;&nbsp;x*n</tt></dd></dl>
+
 <dl><dt><a name="MapLayer-__ne__"><strong>__ne__</strong></a>(...)</dt><dd><tt>x.<a href="#MapLayer-__ne__">__ne__</a>(y)&nbsp;&lt;==&gt;&nbsp;x!=y</tt></dd></dl>
 
 <dl><dt><a name="MapLayer-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#MapLayer-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
 
+<dl><dt><a name="MapLayer-__reversed__"><strong>__reversed__</strong></a>(...)</dt><dd><tt>L.<a href="#MapLayer-__reversed__">__reversed__</a>()&nbsp;--&nbsp;return&nbsp;a&nbsp;reverse&nbsp;iterator&nbsp;over&nbsp;the&nbsp;<a href="__builtin__.html#list">list</a></tt></dd></dl>
+
+<dl><dt><a name="MapLayer-__rmul__"><strong>__rmul__</strong></a>(...)</dt><dd><tt>x.<a href="#MapLayer-__rmul__">__rmul__</a>(n)&nbsp;&lt;==&gt;&nbsp;n*x</tt></dd></dl>
+
 <dl><dt><a name="MapLayer-__setitem__"><strong>__setitem__</strong></a>(...)</dt><dd><tt>x.<a href="#MapLayer-__setitem__">__setitem__</a>(i,&nbsp;y)&nbsp;&lt;==&gt;&nbsp;x[i]=y</tt></dd></dl>
 
-<dl><dt><a name="MapLayer-__sizeof__"><strong>__sizeof__</strong></a>(...)</dt><dd><tt>D.<a href="#MapLayer-__sizeof__">__sizeof__</a>()&nbsp;-&gt;&nbsp;size&nbsp;of&nbsp;D&nbsp;in&nbsp;memory,&nbsp;in&nbsp;bytes</tt></dd></dl>
+<dl><dt><a name="MapLayer-__setslice__"><strong>__setslice__</strong></a>(...)</dt><dd><tt>x.<a href="#MapLayer-__setslice__">__setslice__</a>(i,&nbsp;j,&nbsp;y)&nbsp;&lt;==&gt;&nbsp;x[i:j]=y<br>
+&nbsp;<br>
+Use&nbsp;&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
 
-<dl><dt><a name="MapLayer-clear"><strong>clear</strong></a>(...)</dt><dd><tt>D.<a href="#MapLayer-clear">clear</a>()&nbsp;-&gt;&nbsp;None.&nbsp;&nbsp;Remove&nbsp;all&nbsp;items&nbsp;from&nbsp;D.</tt></dd></dl>
+<dl><dt><a name="MapLayer-__sizeof__"><strong>__sizeof__</strong></a>(...)</dt><dd><tt>L.<a href="#MapLayer-__sizeof__">__sizeof__</a>()&nbsp;--&nbsp;size&nbsp;of&nbsp;L&nbsp;in&nbsp;memory,&nbsp;in&nbsp;bytes</tt></dd></dl>
 
-<dl><dt><a name="MapLayer-copy"><strong>copy</strong></a>(...)</dt><dd><tt>D.<a href="#MapLayer-copy">copy</a>()&nbsp;-&gt;&nbsp;a&nbsp;shallow&nbsp;copy&nbsp;of&nbsp;D</tt></dd></dl>
+<dl><dt><a name="MapLayer-append"><strong>append</strong></a>(...)</dt><dd><tt>L.<a href="#MapLayer-append">append</a>(<a href="__builtin__.html#object">object</a>)&nbsp;--&nbsp;append&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;to&nbsp;end</tt></dd></dl>
 
-<dl><dt><a name="MapLayer-get"><strong>get</strong></a>(...)</dt><dd><tt>D.<a href="#MapLayer-get">get</a>(k[,d])&nbsp;-&gt;&nbsp;D[k]&nbsp;if&nbsp;k&nbsp;in&nbsp;D,&nbsp;else&nbsp;d.&nbsp;&nbsp;d&nbsp;defaults&nbsp;to&nbsp;None.</tt></dd></dl>
+<dl><dt><a name="MapLayer-count"><strong>count</strong></a>(...)</dt><dd><tt>L.<a href="#MapLayer-count">count</a>(value)&nbsp;-&gt;&nbsp;integer&nbsp;--&nbsp;return&nbsp;number&nbsp;of&nbsp;occurrences&nbsp;of&nbsp;value</tt></dd></dl>
 
-<dl><dt><a name="MapLayer-has_key"><strong>has_key</strong></a>(...)</dt><dd><tt>D.<a href="#MapLayer-has_key">has_key</a>(k)&nbsp;-&gt;&nbsp;True&nbsp;if&nbsp;D&nbsp;has&nbsp;a&nbsp;key&nbsp;k,&nbsp;else&nbsp;False</tt></dd></dl>
+<dl><dt><a name="MapLayer-extend"><strong>extend</strong></a>(...)</dt><dd><tt>L.<a href="#MapLayer-extend">extend</a>(iterable)&nbsp;--&nbsp;extend&nbsp;<a href="__builtin__.html#list">list</a>&nbsp;by&nbsp;appending&nbsp;elements&nbsp;from&nbsp;the&nbsp;iterable</tt></dd></dl>
 
-<dl><dt><a name="MapLayer-items"><strong>items</strong></a>(...)</dt><dd><tt>D.<a href="#MapLayer-items">items</a>()&nbsp;-&gt;&nbsp;list&nbsp;of&nbsp;D's&nbsp;(key,&nbsp;value)&nbsp;pairs,&nbsp;as&nbsp;2-tuples</tt></dd></dl>
+<dl><dt><a name="MapLayer-index"><strong>index</strong></a>(...)</dt><dd><tt>L.<a href="#MapLayer-index">index</a>(value,&nbsp;[start,&nbsp;[stop]])&nbsp;-&gt;&nbsp;integer&nbsp;--&nbsp;return&nbsp;first&nbsp;index&nbsp;of&nbsp;value.<br>
+Raises&nbsp;ValueError&nbsp;if&nbsp;the&nbsp;value&nbsp;is&nbsp;not&nbsp;present.</tt></dd></dl>
 
-<dl><dt><a name="MapLayer-iteritems"><strong>iteritems</strong></a>(...)</dt><dd><tt>D.<a href="#MapLayer-iteritems">iteritems</a>()&nbsp;-&gt;&nbsp;an&nbsp;iterator&nbsp;over&nbsp;the&nbsp;(key,&nbsp;value)&nbsp;items&nbsp;of&nbsp;D</tt></dd></dl>
+<dl><dt><a name="MapLayer-insert"><strong>insert</strong></a>(...)</dt><dd><tt>L.<a href="#MapLayer-insert">insert</a>(index,&nbsp;<a href="__builtin__.html#object">object</a>)&nbsp;--&nbsp;insert&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;before&nbsp;index</tt></dd></dl>
 
-<dl><dt><a name="MapLayer-iterkeys"><strong>iterkeys</strong></a>(...)</dt><dd><tt>D.<a href="#MapLayer-iterkeys">iterkeys</a>()&nbsp;-&gt;&nbsp;an&nbsp;iterator&nbsp;over&nbsp;the&nbsp;keys&nbsp;of&nbsp;D</tt></dd></dl>
+<dl><dt><a name="MapLayer-pop"><strong>pop</strong></a>(...)</dt><dd><tt>L.<a href="#MapLayer-pop">pop</a>([index])&nbsp;-&gt;&nbsp;item&nbsp;--&nbsp;remove&nbsp;and&nbsp;return&nbsp;item&nbsp;at&nbsp;index&nbsp;(default&nbsp;last).<br>
+Raises&nbsp;IndexError&nbsp;if&nbsp;<a href="__builtin__.html#list">list</a>&nbsp;is&nbsp;empty&nbsp;or&nbsp;index&nbsp;is&nbsp;out&nbsp;of&nbsp;range.</tt></dd></dl>
 
-<dl><dt><a name="MapLayer-itervalues"><strong>itervalues</strong></a>(...)</dt><dd><tt>D.<a href="#MapLayer-itervalues">itervalues</a>()&nbsp;-&gt;&nbsp;an&nbsp;iterator&nbsp;over&nbsp;the&nbsp;values&nbsp;of&nbsp;D</tt></dd></dl>
+<dl><dt><a name="MapLayer-remove"><strong>remove</strong></a>(...)</dt><dd><tt>L.<a href="#MapLayer-remove">remove</a>(value)&nbsp;--&nbsp;remove&nbsp;first&nbsp;occurrence&nbsp;of&nbsp;value.<br>
+Raises&nbsp;ValueError&nbsp;if&nbsp;the&nbsp;value&nbsp;is&nbsp;not&nbsp;present.</tt></dd></dl>
 
-<dl><dt><a name="MapLayer-keys"><strong>keys</strong></a>(...)</dt><dd><tt>D.<a href="#MapLayer-keys">keys</a>()&nbsp;-&gt;&nbsp;list&nbsp;of&nbsp;D's&nbsp;keys</tt></dd></dl>
+<dl><dt><a name="MapLayer-reverse"><strong>reverse</strong></a>(...)</dt><dd><tt>L.<a href="#MapLayer-reverse">reverse</a>()&nbsp;--&nbsp;reverse&nbsp;*IN&nbsp;PLACE*</tt></dd></dl>
 
-<dl><dt><a name="MapLayer-pop"><strong>pop</strong></a>(...)</dt><dd><tt>D.<a href="#MapLayer-pop">pop</a>(k[,d])&nbsp;-&gt;&nbsp;v,&nbsp;remove&nbsp;specified&nbsp;key&nbsp;and&nbsp;return&nbsp;the&nbsp;corresponding&nbsp;value.<br>
-If&nbsp;key&nbsp;is&nbsp;not&nbsp;found,&nbsp;d&nbsp;is&nbsp;returned&nbsp;if&nbsp;given,&nbsp;otherwise&nbsp;KeyError&nbsp;is&nbsp;raised</tt></dd></dl>
-
-<dl><dt><a name="MapLayer-popitem"><strong>popitem</strong></a>(...)</dt><dd><tt>D.<a href="#MapLayer-popitem">popitem</a>()&nbsp;-&gt;&nbsp;(k,&nbsp;v),&nbsp;remove&nbsp;and&nbsp;return&nbsp;some&nbsp;(key,&nbsp;value)&nbsp;pair&nbsp;as&nbsp;a<br>
-2-tuple;&nbsp;but&nbsp;raise&nbsp;KeyError&nbsp;if&nbsp;D&nbsp;is&nbsp;empty.</tt></dd></dl>
-
-<dl><dt><a name="MapLayer-setdefault"><strong>setdefault</strong></a>(...)</dt><dd><tt>D.<a href="#MapLayer-setdefault">setdefault</a>(k[,d])&nbsp;-&gt;&nbsp;D.<a href="#MapLayer-get">get</a>(k,d),&nbsp;also&nbsp;set&nbsp;D[k]=d&nbsp;if&nbsp;k&nbsp;not&nbsp;in&nbsp;D</tt></dd></dl>
-
-<dl><dt><a name="MapLayer-update"><strong>update</strong></a>(...)</dt><dd><tt>D.<a href="#MapLayer-update">update</a>(E,&nbsp;**F)&nbsp;-&gt;&nbsp;None.&nbsp;&nbsp;Update&nbsp;D&nbsp;from&nbsp;<a href="__builtin__.html#dict">dict</a>/iterable&nbsp;E&nbsp;and&nbsp;F.<br>
-If&nbsp;E&nbsp;has&nbsp;a&nbsp;.<a href="#MapLayer-keys">keys</a>()&nbsp;method,&nbsp;does:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;k&nbsp;in&nbsp;E:&nbsp;D[k]&nbsp;=&nbsp;E[k]<br>
-If&nbsp;E&nbsp;lacks&nbsp;.<a href="#MapLayer-keys">keys</a>()&nbsp;method,&nbsp;does:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;(k,&nbsp;v)&nbsp;in&nbsp;E:&nbsp;D[k]&nbsp;=&nbsp;v<br>
-In&nbsp;either&nbsp;case,&nbsp;this&nbsp;is&nbsp;followed&nbsp;by:&nbsp;for&nbsp;k&nbsp;in&nbsp;F:&nbsp;D[k]&nbsp;=&nbsp;F[k]</tt></dd></dl>
-
-<dl><dt><a name="MapLayer-values"><strong>values</strong></a>(...)</dt><dd><tt>D.<a href="#MapLayer-values">values</a>()&nbsp;-&gt;&nbsp;list&nbsp;of&nbsp;D's&nbsp;values</tt></dd></dl>
+<dl><dt><a name="MapLayer-sort"><strong>sort</strong></a>(...)</dt><dd><tt>L.<a href="#MapLayer-sort">sort</a>(cmp=None,&nbsp;key=None,&nbsp;reverse=False)&nbsp;--&nbsp;stable&nbsp;sort&nbsp;*IN&nbsp;PLACE*;<br>
+cmp(x,&nbsp;y)&nbsp;-&gt;&nbsp;-1,&nbsp;0,&nbsp;1</tt></dd></dl>
 
 <hr>
-Data and other attributes inherited from <a href="__builtin__.html#dict">__builtin__.dict</a>:<br>
+Data and other attributes inherited from <a href="__builtin__.html#list">__builtin__.list</a>:<br>
 <dl><dt><strong>__hash__</strong> = None</dl>
 
 <dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#MapLayer-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
-
-<dl><dt><strong>fromkeys</strong> = &lt;built-in method fromkeys of type object&gt;<dd><tt><a href="__builtin__.html#dict">dict</a>.<a href="#MapLayer-fromkeys">fromkeys</a>(S[,v])&nbsp;-&gt;&nbsp;New&nbsp;<a href="__builtin__.html#dict">dict</a>&nbsp;with&nbsp;keys&nbsp;from&nbsp;S&nbsp;and&nbsp;values&nbsp;equal&nbsp;to&nbsp;v.<br>
-v&nbsp;defaults&nbsp;to&nbsp;None.</tt></dl>
 
 </td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
@@ -261,7 +310,7 @@ v&nbsp;defaults&nbsp;to&nbsp;None.</tt></dl>
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><strong>__author__</strong> = 'Gummbum, (c) 2011'<br>
-<strong>__version__</strong> = '$Id: map.py 103 2011-01-08 08:02:42Z stabbingfinger@gmail.com $'<br>
+<strong>__version__</strong> = '$Id: map.py 254 2011-02-27 08:24:02Z stabbingfinger@gmail.com $'<br>
 <strong>text_color</strong> = (255, 255, 0, 255)</td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#7799ee">

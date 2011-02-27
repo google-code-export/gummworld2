@@ -1,14 +1,14 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html><head><title>Python: module gamelib.pygame_utils</title>
+<html><head><title>Python: module gummworld2.pygame_utils</title>
 </head><body bgcolor="#f0f0f8">
 
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gamelib.html"><font color="#ffffff">gamelib</font></a>.pygame_utils</strong></big></big> (version $Id: pygame_utils.py 152 2011-01-21 00:46:04Z stabbingfinger@gmail.com $)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.pygame_utils</strong></big></big> (version $Id: pygame_utils.py 254 2011-02-27 08:24:02Z stabbingfinger@gmail.com $)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/svn/gummworld2/gamelib/pygame_utils.py">c:\cygwin\home\bw\devel\python\svn\gummworld2\gamelib\pygame_utils.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/svn/gummworld2/gamelib/gummworld2/pygame_utils.py">c:\cygwin\home\bw\devel\python\svn\gummworld2\gamelib\gummworld2\pygame_utils.py</a></font></td></tr></table>
     <p><tt>pygame_utils.py&nbsp;-&nbsp;Collection&nbsp;of&nbsp;pygame&nbsp;utilities&nbsp;for&nbsp;Gummworld2.</tt></p>
 <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
@@ -17,11 +17,12 @@
 <font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
     
 <tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="os.html">os</a><br>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="imp.html">imp</a><br>
+<a href="os.html">os</a><br>
 </td><td width="25%" valign=top><a href="pygame.html">pygame</a><br>
-</td><td width="25%" valign=top><a href="re.html">re</a><br>
+<a href="re.html">re</a><br>
 </td><td width="25%" valign=top><a href="sys.html">sys</a><br>
-</td></tr></table></td></tr></table><p>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#eeaa77">
 <td colspan=3 valign=bottom>&nbsp;<br>
@@ -82,6 +83,8 @@ The&nbsp;named&nbsp;font&nbsp;is&nbsp;looked&nbsp;up&nbsp;in&nbsp;cached&nbsp;fo
 is&nbsp;always&nbsp;available.&nbsp;See&nbsp;<a href="#-make_font">make_font</a>()&nbsp;for&nbsp;adding&nbsp;custom&nbsp;fonts&nbsp;to&nbsp;the<br>
 cache.</tt></dd></dl>
  <dl><dt><a name="-get_font_names"><strong>get_font_names</strong></a>()</dt><dd><tt>Return&nbsp;a&nbsp;list&nbsp;of&nbsp;existing&nbsp;font&nbsp;names.</tt></dd></dl>
+ <dl><dt><a name="-get_main_dir"><strong>get_main_dir</strong></a>()</dt><dd><tt>Intelligently&nbsp;find&nbsp;the&nbsp;directory&nbsp;the&nbsp;executable&nbsp;is&nbsp;in&nbsp;-&nbsp;needed&nbsp;for&nbsp;py2exe<br>
+compatibility</tt></dd></dl>
  <dl><dt><a name="-import_module"><strong>import_module</strong></a>(fullname)</dt><dd><tt>Dynamically&nbsp;imports&nbsp;a&nbsp;module&nbsp;by&nbsp;name<br>
 &nbsp;<br>
 fullname&nbsp;is&nbsp;a&nbsp;string&nbsp;in&nbsp;any&nbsp;of&nbsp;these&nbsp;syntaxes:<br>
@@ -142,7 +145,7 @@ Return&nbsp;the&nbsp;square&nbsp;root&nbsp;of&nbsp;x.</tt></dd></dl>
 <td width="100%"><strong>MOUSEBUTTONDOWN</strong> = 5<br>
 <strong>RLEACCEL</strong> = 16384<br>
 <strong>__author__</strong> = 'Gummbum, (c) 2011'<br>
-<strong>__version__</strong> = '$Id: pygame_utils.py 152 2011-01-21 00:46:04Z stabbingfinger@gmail.com $'<br>
+<strong>__version__</strong> = '$Id: pygame_utils.py 254 2011-02-27 08:24:02Z stabbingfinger@gmail.com $'<br>
 <strong>pi</strong> = 3.1415926535897931</td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#7799ee">
