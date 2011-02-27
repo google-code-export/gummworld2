@@ -53,6 +53,18 @@ def filepath(typ, filename):
     return join_path(path[typ], filename)
 
 
+def relpath(filename):
+    '''Return the file path relative to data_dir.
+    
+    For example:
+        # data.data_dir is "/games/pong/data"
+        filename = "/games/pong/data/image/my.png"
+        relname = data.relpath(filename)
+        # relname is "image/my.png"
+    '''
+    return os.path.relpath(filename, data_dir)
+
+
 def load(typ, filename, mode='rb'):
     '''Open a file in the data directory and return its file handle.
 
