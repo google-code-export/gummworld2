@@ -334,6 +334,8 @@ SVN rev 229:
 
 === Changes in 0.1.0 ===
 
+NOTE: This release breaks some earlier examples and the bunny mini-game. The demos and mini-game have been updated for compatibility. See *bold* items for changes that may require compatibility mods to source code. Feel free to contact the project owner for tips on converting to this release.
+
 SVN rev 234:
   * Fixed: Camera.interpolate calculated interpolation if GameClock.max_fps is lower than GameClock.ticks_per_second. It now defaults to 1.0.
   * Changed: Added docstrings to QuadTree and QuadTreeNode.
@@ -347,9 +349,9 @@ SVN rev 239:
 *SVN rev 241:*
   * Cleanup: world_editor.py; removed some old print statements.
   * Docs: docstring in Camera.interpolate corrected.
-  * Changed: MapLayer now implemented as a list for speed. The dict implementation was wieldy but slow. Got a decent boost in tile-fecthing performance.
+  * *Changed:* MapLayer now implemented as a list for speed. The dict implementation was wieldy but slow. Got a decent boost in tile-fecthing performance.
   * Changed: toolkit.load_tiled_tmx_map(); alpha code removed. It kills performance in some cases. Maybe, if alpha support is needed down the road, it can be enabled with via function argument or a dedicated loader function. For now it has been deferred, as it doesn't meet immediate needs.
-  * Changed: toolkit: collapse_map_layer(), reduce_map_layer(), draw_tiles(); functions updated for new MapLayer compatibility.
+  * *Changed:* toolkit: collapse_map_layer(), reduce_map_layer(), draw_tiles(); functions updated for new MapLayer compatibility.
   * Changed: Camera.`_`get_visible_tile_range() calculations adjusted for accuracy/efficiency.
   * Changed: Camera.`_`get_visible_tiles() moved into Camera.visible_tiles(). Camera.update() no longer pre-fetches these, as this led to inaccurate frame interpolation for large update steps--like when panning fast across a large distance.
   * Changed: examples/16_reduce_map.py reworked for compatibility.
@@ -362,7 +364,7 @@ SVN rev 245:
   * Changed: toolkit.py; Added a convert_images=False argument to load_tiled_tmx_map(). It already works and ya never know, someone may need it.
 
 *SVN rev 248 through 250:*
-  * Changed: Moved gummworld2 modules out of gamelib/ and into gamelib/gummworld2/. This way game writers can just drop their stuff in gamelib/. Should have done this long ago. Unfortunately, this changes the module path for everything.
+  * *Changed:* Moved gummworld2 modules out of gamelib/ and into gamelib/gummworld2/. This way game writers can just drop their stuff in gamelib/. Should have done this long ago. Unfortunately, this changes the module path for everything.
 
 SVN rev 252:
   * Changed: Added state to gummworld2 package namespace.
@@ -375,7 +377,12 @@ SVN rev 252:
   * New: world_editor.py; tile info is now automatically added to user_data.
   * New: world_editor.py, export_world_quadtree.py, import_world_quadtree.py; tile info is now included in entity export/import.
   * Changed: world_editor.py; user_data textarea height increased; shapes save tile info in user_data.
-  * Changed: export_world_quadtree.py and import_world_quadtree.py obsolesced. They were not working well as plugins due to the crippled globals obstacle. These have been made into functions and moved to the model module.
+  * *Changed:* export_world_quadtree.py and import_world_quadtree.py obsolesced. They were not working well as plugins due to the crippled globals obstacle. These have been made into functions and moved to the model module.
   * Fixed: world_editor.py; MapEditor.on_resize() did not update user_data textarea when shape is selected.
   * Fixed: world_editor.py; calculations within draw_tiles() did not properly align some tile selections with their parent geometry.
   * Changed: map module; removed extraneous imports.
+
+*SVN rev 258:*
+  * *Changed:* toolkit.load_tiled_tmx_map() no longer assumes a data path. The caller must specify the path using the data module or custom means. This is more flexible and in line with the spirit of Gummworld2. This also required changes to the examples that use this function.
+  * Changed: moved import_world_quadtree and export_world_quadtree out of model and into toolkit. As toolkit grows, the core modules need to stay as pure as possible to avoid circular module references which cause blowups during package loading.
+  * Fixed: world_editor.py; action_entities_clear() did not call App.deselect(), which resulted in an artifact in the user_data field.
