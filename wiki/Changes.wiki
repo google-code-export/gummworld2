@@ -332,7 +332,7 @@ SVN rev 229:
   * Fixed: Camera.world_to_screen() used the target's coordinates instead of screen center, causing dynamically rendered world objects to jitter.
   * Changed: world_editor.py closes open modal dialog if the window is resized. PGU doesn't like it when a widget violates window bounds.
 
-=== Changes in 0.0.13 ===
+=== Changes in 0.1.0 ===
 
 SVN rev 234:
   * Fixed: Camera.interpolate calculated interpolation if GameClock.max_fps is lower than GameClock.ticks_per_second. It now defaults to 1.0.
@@ -367,7 +367,7 @@ SVN rev 245:
 SVN rev 252:
   * Changed: Added state to gummworld2 package namespace.
 
-SVN rev 254:
+*SVN rev 254:*
   * New: Added get_main_dir() to pygame_utils.
   * New: Additions to toolkit: class Struct, class Tilesheet, load_entities(), load_tilesheet(), get_tilesheet_info(), put_tilesheet_info(). These were recently inline in world_editor.py. They've been moved to toolkit for reusability.
   * New: data.py; added relpath() to return the path of a resource relative to data_dir.
