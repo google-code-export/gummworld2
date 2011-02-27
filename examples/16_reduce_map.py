@@ -99,7 +99,8 @@ class App(Engine):
             frame_speed=0)
         
         # Load Tiled TMX map, then update the world and camera.
-        self.original_map = toolkit.load_tiled_tmx_map('Gumm multi layer.tmx')
+        self.original_map = toolkit.load_tiled_tmx_map(
+            data.filepath('map', 'Gumm multi layer.tmx'))
         State.map = self.original_map
         State.world.rect = State.map.rect.copy()
         # The map reduced.

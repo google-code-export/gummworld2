@@ -86,7 +86,8 @@ class App(Engine):
             frame_speed=0)
         
         # Load Tiled TMX map, then update the world and camera.
-        self.map = toolkit.load_tiled_tmx_map('Gumm no swamps.tmx')
+        self.map = toolkit.load_tiled_tmx_map(
+            data.filepath('map', 'Gumm no swamps.tmx'))
         State.map = self.map
         State.world.rect = State.map.rect.copy()
         # The collapse stat for the hud.

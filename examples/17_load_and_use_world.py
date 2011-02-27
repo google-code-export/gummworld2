@@ -60,10 +60,13 @@ class App(Engine):
             frame_speed=0)
         
         State.map = toolkit.collapse_map(
-            toolkit.load_tiled_tmx_map('mini2.tmx'), num_tiles=(9,8))
+            toolkit.load_tiled_tmx_map(data.filepath('map', 'mini2.tmx')),
+            num_tiles=(9,8))
         State.world = model.WorldQuadTree(
             State.map.rect, worst_case=1000, collide_entities=True)
-        load_world(data.filepath('map', 'mini2.entities'))
+        entities,tilesheets = toolkit.load_entities(
+            data.filepath('map', 'mini2.entities'))
+        State.world.add(*entities)
         
         # I like huds.
         toolkit.make_hud()
@@ -244,11 +247,6 @@ class App(Engine):
         quit()
         
     # App.on_quit
-
-
-def load_world(filepath):
-    entities = toolkit.load_entities(filepath)
-    State.world.add(*entities)
 
 
 if __name__ == '__main__':

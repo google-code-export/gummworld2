@@ -60,9 +60,9 @@ Controls
 
 What are the double lines?
 
-    These are guide lines for QuadTree which is included in the distribution. If the game will be using WorldQuadTree, it's recommended to keep static objects out of layer 1.
+    These are guide lines for QuadTree which is included in the distribution. If the game will be using WorldQuadTree, it's recommended to keep static objects out of the quadtree's layer 1.
 
-    Wherever a red double line crosses an orange one an object at that location will be pushed up to layer 1. Keeping objects in layer 1 is expensive. It increases the number of unnecessary collision checks each time a mobile object repositions. One can control the size and location of static objects, so it makes perfect sense to avoid, where possible, letting static objects to overlap these junctions.
+    Wherever a red double line crosses an orange one an object at that location will be pushed up to layer 1. Keeping objects in layer 1 is expensive. It increases the number of unnecessary collision checks each time a mobile object repositions. One can control the size and location of static objects, so it makes perfect sense to avoid, where possible, letting static objects overlap these junctions.
 
     The HUD also gives clues about QuadTree layers: The "Selected" item shows a shape's location and its level in the quadtree; and the "In Top Level" item indicates how many world entities are in level 1.
 """
@@ -82,43 +82,55 @@ Design:
     added as demand dictates and time permits.
 
 Basic to do (complete for 1.0 release):
-    *   [DONE] Geometry classes auto-size their points to fit selected tiles.
-    *   [DONE] Form for picking images.
-        *   [DONE] Loader/sizer.
-        *   [DONE] Palette.
-        *   [DONE] Picking from palette.
-        *   [DONE] Stamp, move, delete in map.
-        *   [DONE] Autosave/load tilesheet meta data so it doesn't have to be
+    [X] Geometry classes auto-size their points to fit selected tiles.
+    [X] Form for picking images.
+        [X] Loader/sizer.
+        [X] Palette.
+        [X] Picking from palette.
+        [X] Stamp, move, delete in map.
+        [X] Autosave/load tilesheet meta data so it doesn't have to be
             input every time a tilesheet is loaded. Meta data saved in the same
             directory as the source image file, named "basename.tilesheet". The
             format is one line, space-delimited ASCII:
                 marginx marginy tilewidth tileheight spacingx spacingy
-    *   [DONE] Selected tiles attached to world shapes.
-    *   [DONE] Selected tiles attached to mouse pointer for placement.
-    *   [DONE] Form for user_data.
-        *   Auto-add tileset/tile info to user_data (tileset name, tile rects).
-    *   [DONE] action_map_new() needs a Size Form.
-    *   [DONE] Single operations: Cut, copy, paste?
-    *   [DONE] Contrast aid: Cycle through color schemes for world shapes.
-    *   [DONE] Help viewer? PGU makes it easy.
-    *   Undo, redo.
-    *   [DONE] QuadTree 1.5 grid lines.
-    *   [DONE] Menu toggle for QuadTree grid lines.
-    *   HUD item to alert about shapes in top level.
+    [X] Selected tiles attached to mouse pointer for placement.
+    [X] Selected tiles attached to world shapes.
+    [X] Form for user_data.
+        [X] Auto-add tilesheet/tile info to user_data (tilesheet name, tile
+            rects).
+    [X] Export/import shape and tile data.
+    [X] action_map_new() with Size Form.
+    [X] Single operations: Cut, copy, paste.
+    [X] Contrast aid: Cycle through color schemes for world shapes.
+    [X] Help viewer.
+    [X] QuadTree 1.5 grid lines.
+    [X] Menu toggle for QuadTree grid lines.
+    [X] HUD item to alert about shapes in top level.
+    [X] Dialog to remove tilesheets from the palette.
 
 Advanced to do:
-    *   Put more thought into working with shapes. e.g. PITA to size a shape
+    [_] Tilesheets.
+        [_] Add a list to side panel to show open tilesheet names.
+        [_] Picking tilesheet name from list loads it in palette.
+        [_] No more need to close tilesheets. Get rid of dialog.
+        [_] When world importer loads tilesheets, open the tile sheet sizer
+            dialog for each image file that does not have a tilesheet meta file.
+            Do not load images if the dialog is canceled.
+        [_] Tool: Strip tile info from user_data if no tilesheet is loaded.
+        [_] Tool: Attach or replace tiles for a shape.
+    [_] Undo, redo.
+    [_] Put more thought into working with shapes. e.g. PITA to size a shape
         after every insert. Maybe: a list for history; a customizable imported
         list. Note: copy-paste and key-grab helps with this a lot.
-    *   Chooser: Importer and exporter (e.g., ASCII, pickle, custom).
-    *   Productivity:
-        *   Shape templates: Make a shape, add to template list. Choose from
+    [_] Chooser: Importer and exporter (e.g., ASCII, pickle, custom).
+    [_] Productivity:
+        [_] Shape templates: Make a shape, add to template list. Choose from
             list to insert "cookie cut" shapes.
-        *   User_data templates: a la Shape templates.
-        *   Group operations: Delete, move; cut, copy, paste?
-    *   Proof-reading:
-        *   List unique user_data and count. Click list item to go to shapes.
-    *   Clicking on map while dragging scrollbar inserts a shape. Probably
+        [_] User_data templates: a la Shape templates.
+        [_] Group operations: Delete, move; cut, copy, paste?
+    [_] Proof-reading:
+        [_] List unique user_data and count. Click list item to go to shapes.
+    [_] Clicking on map while dragging scrollbar inserts a shape. Probably
         should sense when GUI is clicked/dragged and not do editor actions. Not
         important, but it is kind of sloppy.
 """
@@ -147,12 +159,6 @@ from gummworld2 import (
 )
 import gui
 
-
-# Filename-matching extensions for image formats that pygame can load.
-IMAGE_FILE_EXTENSIONS = (
-    'gif','png','jpg','jpeg','bmp','pcx', 'tga', 'tif',
-    'lbm', 'pbm', 'pgm', 'xpm',
-)
 
 # These lambdas place points at calculated positions given a bounding rect. This
 # dict is a lookup for tool types. See make_toolbar(), action_mouse_click(), and
@@ -220,27 +226,22 @@ os.environ['SDL_VIDEO_WINDOW_POS'] = '7,30'
 #os.environ['SDL_VIDEO_CENTERED'] = '1'
 
 
-class Struct(object):
-    """A class with arbitrary members. Construct it like a dict, then access the
-    keys as instance values.
-    """
-    
-    def __init__(self, **kwargs):
-        self.__dict__.update(**kwargs)
-
-
 class Tile(gui.Image):
-    """This is an Image that represents a spritesheet tile.
+    """This is an Image that represents a spritesheet tile. It exists in a
+    gui.Document within a gui.Scrollarea. ENTER and EXIT events trigger
+    mouseover highlighting. CLICK events trigger State.app.selected_tiles add
+    and removal.
     """
     
     tile_hovering = None
     tile_selected = None
     
-    def __init__(self, value, file_path, rect, tileset, **params):
+    def __init__(self, value, file_path, rect, tilesheet, tile_id, **params):
         gui.Image.__init__(self, value.copy(), **params)
         self.tile_file_path = file_path
         self.tile_rect = rect
-        self.tile_tileset = tileset
+        self.tile_tilesheet = tilesheet
+        self.tile_id = tile_id
         # Copy of source image.
         self.tile_image = pygame.surface.Surface(rect.size)
         self.tile_image.blit(self.value, (0,0))
@@ -380,6 +381,11 @@ class RectGeom(geometry.RectGeometry):
         self.grabbed = None
         self.user_data = ''
         self.tiles = tiles[:]
+        # Add tile info to user_data
+        for tile in tiles:
+            name = data.relpath(tile.tile_file_path)
+            idx = str(tile.tile_id)
+            self.user_data += ' '.join(['tile', idx, name]) + '\n'
         
     # RectGeom.__init__
     
@@ -490,6 +496,11 @@ class PolyGeom(geometry.PolyGeometry):
         self.tiles = tiles[:]
         self._angles = [-1] * len(self._points)
         self._ratios = [None] * len(self._points)
+        # Add tile info to user_data
+        for tile in tiles:
+            name = data.relpath(tile.tile_file_path)
+            idx = str(tile.tile_id)
+            self.user_data += ' '.join(['tile', idx, name]) + '\n'
         
     # PolyGeom.__init__
     
@@ -674,6 +685,11 @@ class CircleGeom(geometry.CircleGeometry):
         self.grabbed = None
         self.user_data = ''
         self.tiles = tiles[:]
+        # Add tile info to user_data
+        for tile in tiles:
+            name = data.relpath(tile.tile_file_path)
+            idx = str(tile.tile_id)
+            self.user_data += ' '.join(['tile', idx, name]) + '\n'
         
     # CircleGeom.__init__
     
@@ -808,10 +824,14 @@ class MapEditor(object):
         # Gooey stuff.
         self.gui = None
         self.gui_form = None
-        self.tilesets = []
+        self.tilesheets = []
         self.modal = None
         self.changes_unsaved = False
         self.make_gui()
+        
+        # Files.
+        State.file_entities = None
+        State.file_map = None
         
         # Make some default content and HUD.
         toolkit.make_tiles2()
@@ -822,13 +842,9 @@ class MapEditor(object):
         State.show_rects = False
         State.show_world_grid = True
         
-        # Files.
-        State.file_entities = None
-        State.file_map = None
-        
         ## Test code to launch tilesheet sizer at startup.
         if False:
-            self.gui_tile_sheet_sizer(
+            self.gui_tilesheet_sizer(
                 data.filepath('image','test.png'), self.action_tiles_load)
         
     # MapEditor.__init__
@@ -915,6 +931,8 @@ class MapEditor(object):
     def select(self, shape):
         """Select a shape and update the form with its info.
         """
+        if shape is None:
+            return
         self.selected = shape
         selected = shape
         selected.grabbed = selected.control_points[-1]
@@ -935,12 +953,25 @@ class MapEditor(object):
             self.gui_form['user_data'].value = ''
             self.gui_form['user_data'].blur()
     
-    def set_stamp(self, tileset, rect, surf):
+    def set_stamp(self, tilesheet, rect, surf):
         """Set tiles and info attached to the mouse for insertion in the map.
         """
-        self.stamp = [surf, rect, tileset]
+        self.stamp = [surf, rect, tilesheet]
+    
+    def set_entities_file(self, val):
+        """Set the entities file name in State, and update the HUD.
+        """
+        State.file_entities = val
+        if val is None:
+            val = 'none'
+        else:
+            val = data.relpath(val)
+        State.hud.stats['Save File'].set_value(val)
     
     def make_world(self):
+        """Create the world and populate its entities. Make grid lines as
+        visual aid for quadtree.
+        """
         if State.world is not None:
             entities = State.world.entity_branch.keys()
         else:
@@ -1182,7 +1213,7 @@ class MapEditor(object):
         d.open()
         self.modal = d
     
-    def gui_tile_sheet_sizer(self, file_path, callback):
+    def gui_tilesheet_sizer(self, file_path, callback):
         """Dialog to size a tilesheet.
         """
         d = self.modal
@@ -1208,7 +1239,7 @@ class MapEditor(object):
             tx,ty = get('tile_tx',1),get('tile_ty',1)
             sx,sy = get('tile_sx',0),get('tile_sy',0)
             # Get the Image widget.
-            image = form['tile_sheet']
+            image = form['tilesheet']
             # Attach to dialog "d" a rects list that can be used to carve up the
             # tiles, and a values list that holds the form input values used to
             # produce the rects.
@@ -1235,7 +1266,7 @@ class MapEditor(object):
                     surf.blit(mask, rect)
                     d.rects.append(rect)
         # Check for and load tilesheet definition.
-        defaults = get_tilesheet_info(file_path)
+        defaults = toolkit.get_tilesheet_info(file_path)
         # Tile sheet dimensions.
         t = gui.Table()
         t.tr()
@@ -1250,7 +1281,7 @@ class MapEditor(object):
         
         # Sizer gadgets.
         t.tr()
-        image = gui.Image(file_path, name='tile_sheet')
+        image = gui.Image(file_path, name='tilesheet')
         image._value_orig = image.value.copy()
         s = gui.ScrollArea(image, 320, 200)
         t.td(s, colspan=2)
@@ -1275,13 +1306,65 @@ class MapEditor(object):
         for suffix in ('mx','my','tx','ty','sx','sy'):
             form['tile_'+suffix].connect(gui.CHANGE, draw_grid, form)
         draw_grid(form)
-        form['dialog_ok'].connect(gui.CLICK, callback, 'tile_sheet_sized', d)
+        form['dialog_ok'].connect(gui.CLICK, callback, 'tilesheet_sized', d)
         form['dialog_ok'].connect(gui.CLICK, d.close, None)
         form['dialog_cancel'].connect(gui.CLICK, d.close, None)
         d.open()
         self.modal = d
     
-    # MapEditor.gui_tile_sheet_sizer
+    # MapEditor.gui_tilesheet_sizer
+    
+    def gui_tilesheet_closer(self):
+        if not len(self.tilesheets):
+            print 'gui_tilesheet_closer: no tilesheets'
+            return
+        def close_tilesheet(*args):
+            tilesheet_list = self.gui_form['tilesheet_list']
+            if tilesheet_list.value is not None:
+                # Remove the item from self.tilesheets and the GUI list.
+                i = tilesheet_list.value
+                tilesheet_list.value = None
+                tilesheet = self.tilesheets[i]
+                del self.tilesheets[i]
+                tilesheet_list.remove(i)
+                # Renumber the GUI item values so they correspond with
+                # self.tilesheets.
+                i = 0
+                for item in tilesheet_list.items:
+                    item.value = i
+                    i += 1
+                # Remake the side panel.
+                c = self.gui.widget
+                side_panel = self.gui_form['side_panel']
+                c.remove(side_panel)
+                make_side_panel(c)
+        # Dialog with a table.
+        t = gui.Table()
+        d = gui.Dialog(gui.Label('Close Tile Sheets'), t)
+        # List for tilesheet filenames.
+        tilesheet_list = gui.List(width=400, height=300, name='tilesheet_list')
+        t.tr()
+        t.td(tilesheet_list, colspan=2)
+        # Build the list. Truncate program dir from filename so it fits.
+        program_dir = pygame_utils.get_main_dir()
+        i = 0
+        for ts in self.tilesheets:
+            file_path = os.path.relpath(ts.file_path, data.data_dir)
+            tilesheet_list.add(file_path, value=i)
+            i += 1
+        # A couple buttons.
+        t.tr()
+        t.td(gui.Button(gui.Label('Close Tileset'), name='dialog_x'))
+        t.td(gui.Button(gui.Label('Done'), name='dialog_done'))
+        # Connections.
+        d.connect(gui.CLOSE, self.gui_modal_off, None)
+        form = self.gui_form
+        form['dialog_x'].connect(gui.CLICK, close_tilesheet, None)
+        form['dialog_done'].connect(gui.CLICK, d.close, None)
+        d.open()
+        self.modal = d
+    
+    # MapEditor.gui_tiles_heet_closer
     
     def gui_map_sizer(self, title, callback):
         """Dialog to size a new map.
@@ -1571,8 +1654,8 @@ class MapEditor(object):
         """Load tile-sheet action: load a tile sheet from a supported image file
         and add the images to the tile palette.
         
-        Also: import BASENAME.tileset, if found, to initialize the defaults in
-        the tile sizer; save the tile sizer inputs to BASENAME.tileset.
+        Also: import BASENAME.tilesheet, if found, to initialize the defaults in
+        the tile sizer; save the tile sizer inputs to BASENAME.tilesheet.
         
         This is a reentrant method. The sub_action argument drives the behavior.
         It is called initially by an event handler, and again by GUI callback.
@@ -1593,32 +1676,39 @@ class MapEditor(object):
                     return
                 ext = os.path.splitext(file_path)[1][1:]
                 # Make sure we have an image file type (check extension).
-                if ext.lower() not in IMAGE_FILE_EXTENSIONS:
+                if ext.lower() not in toolkit.IMAGE_FILE_EXTENSIONS:
                     self.gui_alert('Unsupported image file type: '+ext)
                     return
                 # Hand off to the sizer dialog.
                 try:
-                    self.gui_tile_sheet_sizer(file_path, self.action_tiles_load)
+                    self.gui_tilesheet_sizer(file_path, self.action_tiles_load)
                 except:
                     pass
-        elif sub_action == 'tile_sheet_sized':
+        elif sub_action == 'tilesheet_sized':
             d = widget
             values = d.values
-            tileset = Struct(
-                file_path=d.file_path,
-                image=d.image,
-                margin=Vec2d(values[0:2]),
-                size=Vec2d(values[2:4]),
-                spacing=Vec2d(values[4:6]),
-                rects=d.rects,
+            tilesheet = toolkit.Tilesheet(
+                d.file_path,
+                d.image,
+                Vec2d(values[0:2]),
+                Vec2d(values[2:4]),
+                Vec2d(values[4:6]),
+                d.rects,
             )
-            self.tilesets.insert(0, tileset)
+            self.tilesheets.insert(0, tilesheet)
             self.gui.widget.remove(self.gui_form['side_panel'])
             make_side_panel(self.gui.widget)
             # Save the tilesheet meta data to PATH.tilesheet.
-            put_tilesheet_info(tileset.file_path, values)
+            toolkit.put_tilesheet_info(tilesheet.file_path, values)
 
     # MapEditor.action_tiles_load
+    
+    def action_tiles_close(self, * args):
+        """Close tiles action: close a tilesheet.
+        """
+        self.gui_tilesheet_closer()
+    
+    # MapEditor.action_tiles_close
     
     def action_entities_clear(self, sub_action=None, widget=None):
         """Clear entities action: clear all entities from editor.
@@ -1636,8 +1726,10 @@ class MapEditor(object):
             if widget is None or widget.value is True:
                 # Clear out the world.
                 State.world.remove(*State.world.entity_branch.keys())
-                State.file_entities = None
+                self.deselect()
+                del self.mouseover_shapes[:]
                 self.changes_unsaved = False
+                self.set_entities_file(None)
         
     # MapEditor.action_entities_clear
     
@@ -1661,22 +1753,14 @@ class MapEditor(object):
         elif sub_action == 'file_picked':
             d = widget
             if d.value is not None:
-                State.file_entities = d.value
-                # Specify the importer plugin to use.
-                import_script = data.filepath(
-                    'plugins', joinpath('map','import_world_quadtree.py'))
+                self.set_entities_file(d.value)
                 # Clear out the world.
                 State.world.remove(*State.world.entity_branch.keys())
                 # Run the importer plugin.
                 try:
                     file_handle = open(State.file_entities, 'rb')
-                    locals_dict = {
-                        'fh'         : file_handle,
-                        'rect_cls'   : RectGeom,
-                        'poly_cls'   : PolyGeom,
-                        'circle_cls' : CircleGeom,
-                    }
-                    execfile(import_script, {}, locals_dict)
+                    entities,tilesheets = toolkit.import_world_quadtree(
+                        file_handle, RectGeom, PolyGeom, CircleGeom)
                     self.changes_unsaved = False
                 except:
                     exc_type,exc_value,exc_traceback = sys.exc_info()
@@ -1688,8 +1772,9 @@ class MapEditor(object):
                 else:
                     file_handle.close()
                     # Add the entities to the world.
-                    entities = locals_dict['entities']
                     State.world.add_list(entities)
+                    load_tiles(entities, tilesheets)
+                    self.deselect()
                 # Put the mouse shape back.
                 State.world.add(self.mouse_shape)
         
@@ -1704,18 +1789,13 @@ class MapEditor(object):
             if State.file_entities is None:
                 return
         # Specify the exporter plugin to use.
-        export_script = data.filepath(
-            'plugins', joinpath('map','export_world_quadtree.py'))
         # Don't save the mouse shape.
         State.world.remove(self.mouse_shape)
         # Run the exporter plugin.
         try:
             file_handle = open(State.file_entities, 'wb')
-            locals_dict = {
-                'entities' : State.world.entity_branch.keys(),
-                'fh' : file_handle,
-            }
-            execfile(export_script, {}, locals_dict)
+            entities = State.world.entity_branch.keys()
+            toolkit.export_world_quadtree(file_handle, entities)
             self.changes_unsaved = False
         except:
             exc_type,exc_value,exc_traceback = sys.exc_info()
@@ -1825,17 +1905,22 @@ class MapEditor(object):
         """Handler for KEYDOWN events.
         """
         # Intercept RETURN and ESCAPE for convenient switch between map-editing
-        # key control and user_data input.
+        # key control and user_data input; and other keystrokes if user_data has
+        # focus.
         user_data = self.gui_form['user_data']
         if user_data.container.myfocus is user_data:
             if key in (K_ESCAPE,):
                 user_data.blur()
                 return
-        elif key == K_RETURN and self.selected is not None:
+            # Filter out keystrokes that are "ugly" in text inputs.
+            if key not in (K_DELETE,K_TAB):
+                self.gui.event(e)
+            return
+        elif not self.modal and key == K_RETURN and self.selected is not None:
             user_data.focus()
             return
-        # Filter out keystrokes that are "ugly" in GUI.
-        if key not in (K_DELETE,K_LEFT,K_RIGHT,K_UP,K_DOWN,K_TAB):
+        # Filter out keystrokes that are "ugly" in text inputs.
+        if key not in (K_DELETE,K_TAB):
             self.gui.event(e)
         ## Customization: beware of key conflicts with pgu.gui.
         if not self.modal:
@@ -1928,6 +2013,7 @@ class MapEditor(object):
         side_panel = self.gui_form['side_panel']
         c.remove(side_panel)
         make_side_panel(c)
+        self.select(self.selected)
     
     def on_user_event(self, e):
         """Handler for USEREVENT events.
@@ -1941,39 +2027,6 @@ class MapEditor(object):
         self.action_quit_app()
         
     # MapEditor.on_quit
-
-
-def get_tilesheet_info(tilesheet_path):
-    """Get the tilesheet meta data from file if it exists.
-    """
-    path_part = os.path.splitext(tilesheet_path)[0]
-    meta_file = path_part + '.tilesheet'
-    values = ['0','0','32','32','0','0']
-    try:
-        f = open(meta_file)
-        line = f.read().strip('\r\n')
-        parts = line.split(' ')
-        if len(parts) == 6:
-            values[:] = parts
-    except:
-        pass
-    else:
-        f.close()
-    return values
-
-
-def put_tilesheet_info(tilesheet_path, tilesheet_values):
-    """Put the tilesheet meta data to file.
-    """
-    path_part = os.path.splitext(tilesheet_path)[0]
-    meta_file = path_part + '.tilesheet'
-    try:
-        f = open(meta_file, 'wb')
-        f.write(' '.join([str(v) for v in tilesheet_values]) + '\n')
-    except:
-        pass
-    else:
-        f.close()
 
 
 def tiles_bounding_rect(tiles):
@@ -1999,16 +2052,30 @@ def tiles_bounding_rect(tiles):
         return Rect(0,0,1,1)
 
 
+def load_tiles(entities, tilesheets):
+    for entity in entities:
+        for line in entity.user_data.split('\n'):
+            if line.startswith('tile '):
+                parts = line.split(' ')
+                name = parts[2]
+                tilesheet = tilesheets[name]
+                tile_id = int(parts[1])
+                info = tilesheet.tile_info(tile_id)
+                entity.tiles.append(Tile(
+                    info.image, info.name, info.rect,
+                    info.tilesheet, info.tile_id))
+
+
 def draw_tiles(position, tiles, alpha=255):
     """Draw a sequence of tiles centered on position.
     """
     if len(tiles) == 0:
         return
     # Get bounding rect for the sequence of tiles.
-    rect = tiles_bounding_rect(tiles)
+    bounding_rect = tiles_bounding_rect(tiles)
     # Calculate offset to argument position.
     move_center = State.camera.world_to_screen(position)
-    diff = Vec2d(move_center) - rect.center
+    diff = bounding_rect.center - Vec2d(bounding_rect.topleft)
     # Place individual tiles...
     tw,th = tiles[0].tile_rect.size
     blit = State.screen.blit
@@ -2016,13 +2083,11 @@ def draw_tiles(position, tiles, alpha=255):
         image = tile.tile_image.copy()
         image.set_alpha(alpha)
         rect = tile.tile_rect.copy()
-        # Grid-align position.
-        nx = rect.x // tw
-        ny = rect.y // th
-        rect.x = nx * tw
-        rect.y = ny * th
-        # Translate to argument position.
-        rect.center += diff
+        # Translate to argument position, removing tile spacing.
+        nx = (rect.x-bounding_rect.x) // tw
+        ny = (rect.y-bounding_rect.y) // th
+        rect.x = (move_center.x - diff.x) + nx * tw
+        rect.y = (move_center.y - diff.y) + ny * th
         blit(image, rect)
 
 
@@ -2037,6 +2102,14 @@ def make_hud():
 #    State.hud.add('FPS',
 #        Statf(next_pos(), 'FPS %d', callback=State.clock.get_fps))
     
+    def get_entities_file():
+        if State.file_entities:
+            return data.relpath(State.file_entities)
+        else:
+            return 'none'
+    State.hud.add('Save File', Statf(next_pos(),
+        'Save File %s', callback=get_entities_file, interval=1000) )
+    
     rect = State.world.rect
     l,t,r,b = rect.left,rect.top,rect.right,rect.bottom
     State.hud.add('Bounds',
@@ -2045,28 +2118,27 @@ def make_hud():
     def get_mouse():
         s = pygame.mouse.get_pos()
         w = State.camera.screen_to_world(s)
-#        return 'S'+str(s) + ' W'+str((int(w.x),int(w.y),))
         return 'S%s W%s@%s' % (str(s), str((int(w.x),int(w.y),)),
-            State.world.level_of(State.app.mouse_shape))
+            str(State.world.level_of(State.app.mouse_shape)).lower())
     State.hud.add('Mouse',
         Statf(next_pos(), 'Mouse %s', callback=get_mouse, interval=100))
     
-    def get_world_pos():
-        s = State.camera.world_to_screen(State.camera.position)
-        w = State.camera.position
-        return 'S'+str((int(s.x),int(s.y),)) + ' W'+str((int(w.x),int(w.y),))
-    State.hud.add('Camera',
-        Statf(next_pos(), 'Camera %s', callback=get_world_pos, interval=100))
+#    def get_world_pos():
+#        s = State.camera.world_to_screen(State.camera.position)
+#        w = State.camera.position
+#        return 'S'+str((int(s.x),int(s.y),)) + ' W'+str((int(w.x),int(w.y),))
+#    State.hud.add('Camera',
+#        Statf(next_pos(), 'Camera %s', callback=get_world_pos, interval=100))
 
-    def gui_name():
-        w = State.app.gui_hover()
-        return w.name if w else 'None'
-    State.hud.add('Widget',
-        Statf(next_pos(), 'Widget %s', callback=gui_name, interval=100))
+#    def gui_name():
+#        w = State.app.gui_hover()
+#        return w.name if w else 'none'
+#    State.hud.add('Widget',
+#        Statf(next_pos(), 'Widget %s', callback=gui_name, interval=100))
     
     def get_selected():
         shape = State.app.selected
-        return 'None' if shape is None else '%s@%d/%d'%(
+        return 'none' if shape is None else '%s@%d/%d'%(
             shape.rect.center, State.world.level_of(shape), State.world.num_levels)
     State.hud.add('Selected',
         Statf(next_pos(), 'Selected %s', callback=get_selected, interval=100))
@@ -2085,20 +2157,21 @@ def make_menus(container):
     """
     app = State.app
     menus = gui.Menus([
-        ('File/Quit',        app.action_quit_app, None),
-        ('Entities/Import',  app.action_entities_import, None),
-        ('Entities/Save',    app.action_entities_save, None),
-        ('Entities/Save As', app.action_entities_save_as, None),
-        ('Entities/Clear',   app.action_entities_clear, None),
-        ('Images/New Map',   app.action_map_new, None),
-        ('Images/Load Map',  app.action_map_load, None),
-        ('Images/Load Tiles',app.action_tiles_load, None),
-        ('View/Map Grid',    app.action_view_map_grid, None),
-        ('View/Map Labels',  app.action_view_map_labels, None),
-        ('View/World Grid',  app.action_view_world_grid, None),
-        ('View/Shape Rects', app.action_view_rects, None),
-        ('View/HUD',         app.action_view_hud, None),
-        ('View/Help',        app.action_view_help, None),
+        ('File/Quit',         app.action_quit_app, None),
+        ('Entities/Import',   app.action_entities_import, None),
+        ('Entities/Save',     app.action_entities_save, None),
+        ('Entities/Save As',  app.action_entities_save_as, None),
+        ('Entities/Clear',    app.action_entities_clear, None),
+        ('Images/New Map',    app.action_map_new, None),
+        ('Images/Load Map',   app.action_map_load, None),
+        ('Images/Load Tiles', app.action_tiles_load, None),
+        ('Images/Close Tiles',app.action_tiles_close, None),
+        ('View/Map Grid',     app.action_view_map_grid, None),
+        ('View/Map Labels',   app.action_view_map_labels, None),
+        ('View/World Grid',   app.action_view_world_grid, None),
+        ('View/Shape Rects',  app.action_view_rects, None),
+        ('View/HUD',          app.action_view_hud, None),
+        ('View/Help',         app.action_view_help, None),
     ], name='menus')
     container.add(menus, 1, 1)
     menus.rect.w,menus.rect.h = menus.resize()
@@ -2148,7 +2221,8 @@ def make_side_panel(container):
     smaller_font = pygame.font.Font(data.filepath('font', 'Vera.ttf'), 10)
     w = (State.screen.width - State.camera.view.width - label.resize()[0] - 20)
     user_data = gui.TextArea(
-        value='', name='user_data', font=smaller_font, width=w)
+        value='', name='user_data',
+        font=smaller_font, width=w, height=5*smaller_font.get_height())
     user_data.connect(gui.CHANGE, State.app.action_set_userdata, user_data)
     t.td(user_data)
     
@@ -2156,7 +2230,7 @@ def make_side_panel(container):
     t.tr()
     t.td(gui.Spacer(1,6), colspan=2)
     t.tr()
-    t.td(gui.Label('Images:'), colspan=2, align=-1)
+    t.td(gui.Label('Tiles:'), colspan=2, align=-1)
     t.tr()
     w = (State.screen.width - State.camera.view.width - 13)
     h = (State.screen.height - t.resize()[1] - 3)
@@ -2165,19 +2239,18 @@ def make_side_panel(container):
     # Tile palette contents (Document).
     toolbar_group = State.app.gui_form['toolbar_group']
     tile_palette.block(-1)
-    for tileset in State.app.tilesets:
-        prevy = tileset.rects[0].y
-        for rect in tileset.rects:
+    for tilesheet in State.app.tilesheets:
+        prevy = tilesheet.rects[0].y
+        for tile_id,rect in enumerate(tilesheet.rects):
             if rect.y != prevy:
-##                tile_palette.br(1)
                 tile_palette.block(-1)
                 prevy = rect.y
-            tile = Tile(tileset.image.subsurface(rect),
-                tileset.file_path, rect, tileset)
+            ti = tilesheet.tile_info(tile_id)
+            tile = Tile(ti.image, ti.name, ti.rect, tilesheet, tile_id)
             tile.connect(gui.CLICK, State.app.set_stamp,
-                tileset, rect, tile.value)
+                tilesheet, rect, tile.value)
             tile_palette.add(tile)
-##            tile_palette.space((1,0))
+            tile_id += 1
         tile_palette.br(2)
         tile_palette.block(-1)
     
