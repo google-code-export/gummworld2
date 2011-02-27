@@ -13,9 +13,9 @@ if __name__ == '__main__':
 ##    help(pydoc)
 
     # write package index gamelib.html
-    sys.path.append('gamelib')
-    sys.argv[1:] = ['-w','gamelib']
+    sys.path.append('gamelib/gummworld2')
+    sys.argv[1:] = ['-w','gummworld2']
     pydoc.cli()
     
     # write module docs
-    pydoc.writedocs('gamelib', pkgpath='gamelib.')
+    pydoc.writedocs('gamelib/gummworld2', pkgpath='gummworld2.')

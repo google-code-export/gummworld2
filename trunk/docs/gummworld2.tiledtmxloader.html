@@ -1,17 +1,24 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html><head><title>Python: module gamelib.tiledtmxloader</title>
+<html><head><title>Python: module gummworld2.tiledtmxloader</title>
 </head><body bgcolor="#f0f0f8">
 
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gamelib.html"><font color="#ffffff">gamelib</font></a>.tiledtmxloader</strong></big></big> (version $Id: tiledtmxloader.py 5 2010-11-21 09:05:45Z dr0iddr0id@gmail.com $)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.tiledtmxloader</strong></big></big> (version 2.3.0.0)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/svn/gummworld2/gamelib/tiledtmxloader.py">c:\cygwin\home\bw\devel\python\svn\gummworld2\gamelib\tiledtmxloader.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/svn/gummworld2/gamelib/gummworld2/tiledtmxloader.py">c:\cygwin\home\bw\devel\python\svn\gummworld2\gamelib\gummworld2\tiledtmxloader.py</a></font></td></tr></table>
     <p><tt><a href="#TileMap">TileMap</a>&nbsp;loader&nbsp;for&nbsp;python&nbsp;for&nbsp;Tiled,&nbsp;a&nbsp;generic&nbsp;tile&nbsp;map&nbsp;editor<br>
 from&nbsp;<a href="http://mapeditor.org/">http://mapeditor.org/</a>&nbsp;.<br>
-It&nbsp;loads&nbsp;the&nbsp;\*.tmx&nbsp;files&nbsp;produced&nbsp;by&nbsp;Tiled.</tt></p>
+It&nbsp;loads&nbsp;the&nbsp;\*.tmx&nbsp;files&nbsp;produced&nbsp;by&nbsp;Tiled.<br>
+&nbsp;<br>
+&nbsp;<br>
+TODO:<br>
+&nbsp;-&nbsp;maybe&nbsp;use&nbsp;cStringIO&nbsp;instead&nbsp;of&nbsp;StringIO<br>
+&nbsp;-&nbsp;pyglet&nbsp;demo:&nbsp;better&nbsp;rendering<br>
+&nbsp;-&nbsp;pygame&nbsp;demo:&nbsp;better&nbsp;rendering<br>
+&nbsp;-&nbsp;test&nbsp;if&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;gid&nbsp;is&nbsp;already&nbsp;read&nbsp;in&nbsp;and&nbsp;resolved</tt></p>
 <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#aa55cc">
@@ -20,13 +27,11 @@ It&nbsp;loads&nbsp;the&nbsp;\*.tmx&nbsp;files&nbsp;produced&nbsp;by&nbsp;Tiled.<
     
 <tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="StringIO.html">StringIO</a><br>
-<a href="base64.html">base64</a><br>
-</td><td width="25%" valign=top><a href="gzip.html">gzip</a><br>
 <a href="xml.dom.minidom.html">xml.dom.minidom</a><br>
 </td><td width="25%" valign=top><a href="os.html">os</a><br>
 <a href="sys.html">sys</a><br>
 </td><td width="25%" valign=top><a href="time.html">time</a><br>
-</td></tr></table></td></tr></table><p>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ee77aa">
 <td colspan=3 valign=bottom>&nbsp;<br>
@@ -37,21 +42,21 @@ It&nbsp;loads&nbsp;the&nbsp;\*.tmx&nbsp;files&nbsp;produced&nbsp;by&nbsp;Tiled.<
 <dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
 </font></dt><dd>
 <dl>
-<dt><font face="helvetica, arial"><a href="gamelib.tiledtmxloader.html#IImageLoader">IImageLoader</a>
+<dt><font face="helvetica, arial"><a href="gummworld2.tiledtmxloader.html#IImageLoader">IImageLoader</a>
 </font></dt><dd>
 <dl>
-<dt><font face="helvetica, arial"><a href="gamelib.tiledtmxloader.html#ImageLoaderPygame">ImageLoaderPygame</a>
-</font></dt><dt><font face="helvetica, arial"><a href="gamelib.tiledtmxloader.html#ImageLoaderPyglet">ImageLoaderPyglet</a>
+<dt><font face="helvetica, arial"><a href="gummworld2.tiledtmxloader.html#ImageLoaderPygame">ImageLoaderPygame</a>
+</font></dt><dt><font face="helvetica, arial"><a href="gummworld2.tiledtmxloader.html#ImageLoaderPyglet">ImageLoaderPyglet</a>
 </font></dt></dl>
 </dd>
-<dt><font face="helvetica, arial"><a href="gamelib.tiledtmxloader.html#MapObject">MapObject</a>
-</font></dt><dt><font face="helvetica, arial"><a href="gamelib.tiledtmxloader.html#MapObjectGroup">MapObjectGroup</a>
-</font></dt><dt><font face="helvetica, arial"><a href="gamelib.tiledtmxloader.html#Tile">Tile</a>
-</font></dt><dt><font face="helvetica, arial"><a href="gamelib.tiledtmxloader.html#TileImage">TileImage</a>
-</font></dt><dt><font face="helvetica, arial"><a href="gamelib.tiledtmxloader.html#TileLayer">TileLayer</a>
-</font></dt><dt><font face="helvetica, arial"><a href="gamelib.tiledtmxloader.html#TileMap">TileMap</a>
-</font></dt><dt><font face="helvetica, arial"><a href="gamelib.tiledtmxloader.html#TileMapParser">TileMapParser</a>
-</font></dt><dt><font face="helvetica, arial"><a href="gamelib.tiledtmxloader.html#TileSet">TileSet</a>
+<dt><font face="helvetica, arial"><a href="gummworld2.tiledtmxloader.html#MapObject">MapObject</a>
+</font></dt><dt><font face="helvetica, arial"><a href="gummworld2.tiledtmxloader.html#MapObjectGroup">MapObjectGroup</a>
+</font></dt><dt><font face="helvetica, arial"><a href="gummworld2.tiledtmxloader.html#Tile">Tile</a>
+</font></dt><dt><font face="helvetica, arial"><a href="gummworld2.tiledtmxloader.html#TileImage">TileImage</a>
+</font></dt><dt><font face="helvetica, arial"><a href="gummworld2.tiledtmxloader.html#TileLayer">TileLayer</a>
+</font></dt><dt><font face="helvetica, arial"><a href="gummworld2.tiledtmxloader.html#TileMap">TileMap</a>
+</font></dt><dt><font face="helvetica, arial"><a href="gummworld2.tiledtmxloader.html#TileMapParser">TileMapParser</a>
+</font></dt><dt><font face="helvetica, arial"><a href="gummworld2.tiledtmxloader.html#TileSet">TileSet</a>
 </font></dt></dl>
 </dd>
 </dl>
@@ -127,7 +132,7 @@ Data descriptors defined here:<br>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="ImageLoaderPygame">class <strong>ImageLoaderPygame</strong></a>(<a href="gamelib.tiledtmxloader.html#IImageLoader">IImageLoader</a>)</font></td></tr>
+<font color="#000000" face="helvetica, arial"><a name="ImageLoaderPygame">class <strong>ImageLoaderPygame</strong></a>(<a href="gummworld2.tiledtmxloader.html#IImageLoader">IImageLoader</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
 <td colspan=2><tt>Pygame&nbsp;image&nbsp;loader.<br>
@@ -138,8 +143,8 @@ It&nbsp;uses&nbsp;an&nbsp;internal&nbsp;image&nbsp;cache.&nbsp;The&nbsp;methods&
 &nbsp;&nbsp;&nbsp;&nbsp;pygame<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%"><dl><dt>Method resolution order:</dt>
-<dd><a href="gamelib.tiledtmxloader.html#ImageLoaderPygame">ImageLoaderPygame</a></dd>
-<dd><a href="gamelib.tiledtmxloader.html#IImageLoader">IImageLoader</a></dd>
+<dd><a href="gummworld2.tiledtmxloader.html#ImageLoaderPygame">ImageLoaderPygame</a></dd>
+<dd><a href="gummworld2.tiledtmxloader.html#IImageLoader">IImageLoader</a></dd>
 <dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
 </dl>
 <hr>
@@ -155,7 +160,7 @@ Methods defined here:<br>
 <dl><dt><a name="ImageLoaderPygame-load_image_parts"><strong>load_image_parts</strong></a>(self, filename, margin, spacing, tile_width, tile_height, colorkey<font color="#909090">=None</font>)</dt></dl>
 
 <hr>
-Data descriptors inherited from <a href="gamelib.tiledtmxloader.html#IImageLoader">IImageLoader</a>:<br>
+Data descriptors inherited from <a href="gummworld2.tiledtmxloader.html#IImageLoader">IImageLoader</a>:<br>
 <dl><dt><strong>__dict__</strong></dt>
 <dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
 </dl>
@@ -166,7 +171,7 @@ Data descriptors inherited from <a href="gamelib.tiledtmxloader.html#IImageLoade
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="ImageLoaderPyglet">class <strong>ImageLoaderPyglet</strong></a>(<a href="gamelib.tiledtmxloader.html#IImageLoader">IImageLoader</a>)</font></td></tr>
+<font color="#000000" face="helvetica, arial"><a name="ImageLoaderPyglet">class <strong>ImageLoaderPyglet</strong></a>(<a href="gummworld2.tiledtmxloader.html#IImageLoader">IImageLoader</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
 <td colspan=2><tt>Pyglet&nbsp;image&nbsp;loader.<br>
@@ -180,8 +185,8 @@ Thanks&nbsp;to&nbsp;HydroKirby&nbsp;from&nbsp;#pyglet&nbsp;to&nbsp;contribute&nb
 &nbsp;&nbsp;&nbsp;&nbsp;pyglet<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%"><dl><dt>Method resolution order:</dt>
-<dd><a href="gamelib.tiledtmxloader.html#ImageLoaderPyglet">ImageLoaderPyglet</a></dd>
-<dd><a href="gamelib.tiledtmxloader.html#IImageLoader">IImageLoader</a></dd>
+<dd><a href="gummworld2.tiledtmxloader.html#ImageLoaderPyglet">ImageLoaderPyglet</a></dd>
+<dd><a href="gummworld2.tiledtmxloader.html#IImageLoader">IImageLoader</a></dd>
 <dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
 </dl>
 <hr>
@@ -197,7 +202,7 @@ Methods defined here:<br>
 <dl><dt><a name="ImageLoaderPyglet-load_image_parts"><strong>load_image_parts</strong></a>(self, filename, margin, spacing, tile_width, tile_height, colorkey<font color="#909090">=None</font>)</dt></dl>
 
 <hr>
-Data descriptors inherited from <a href="gamelib.tiledtmxloader.html#IImageLoader">IImageLoader</a>:<br>
+Data descriptors inherited from <a href="gummworld2.tiledtmxloader.html#IImageLoader">IImageLoader</a>:<br>
 <dl><dt><strong>__dict__</strong></dt>
 <dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
 </dl>
@@ -558,15 +563,29 @@ Data descriptors defined here:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gzip&nbsp;compressed&nbsp;string<br>
 &nbsp;<br>
 :returns:&nbsp;uncompressed&nbsp;string</tt></dd></dl>
- <dl><dt><a name="-demo_pygame"><strong>demo_pygame</strong></a>(file_name)</dt><dd><tt>################################################################################</tt></dd></dl>
+ <dl><dt><a name="-decompress_zlib"><strong>decompress_zlib</strong></a>(in_str)</dt><dd><tt>Uncompresses&nbsp;a&nbsp;zlib&nbsp;string&nbsp;and&nbsp;returns&nbsp;it.<br>
+&nbsp;<br>
+:Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;in_str&nbsp;:&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;zlib&nbsp;compressed&nbsp;string<br>
+&nbsp;<br>
+:returns:&nbsp;uncompressed&nbsp;string</tt></dd></dl>
+ <dl><dt><a name="-demo_pygame"><strong>demo_pygame</strong></a>(file_name)</dt><dd><tt>#&nbsp;------------------------------------------------------------------------------</tt></dd></dl>
  <dl><dt><a name="-demo_pyglet"><strong>demo_pyglet</strong></a>(file_name)</dt><dd><tt>Thanks&nbsp;to:&nbsp;HydroKirby&nbsp;from&nbsp;#pyglet&nbsp;on&nbsp;freenode.org<br>
 &nbsp;<br>
 Loads&nbsp;and&nbsp;views&nbsp;a&nbsp;map&nbsp;using&nbsp;pyglet.<br>
 &nbsp;<br>
 Holding&nbsp;the&nbsp;arrow&nbsp;keys&nbsp;will&nbsp;scroll&nbsp;along&nbsp;the&nbsp;map.<br>
 Holding&nbsp;the&nbsp;left&nbsp;shift&nbsp;key&nbsp;will&nbsp;make&nbsp;you&nbsp;scroll&nbsp;faster.<br>
-Pressing&nbsp;the&nbsp;escape&nbsp;key&nbsp;ends&nbsp;the&nbsp;application.</tt></dd></dl>
- <dl><dt><a name="-main"><strong>main</strong></a>()</dt><dd><tt>################################################################################</tt></dd></dl>
+Pressing&nbsp;the&nbsp;escape&nbsp;key&nbsp;ends&nbsp;the&nbsp;application.<br>
+&nbsp;<br>
+TODO:<br>
+Maybe&nbsp;use&nbsp;this&nbsp;to&nbsp;put&nbsp;topleft&nbsp;as&nbsp;origin:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;glMatrixMode(GL_PROJECTION);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;glLoadIdentity();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;glOrtho(0.0,&nbsp;(double)mTarget-&gt;w,&nbsp;(double)mTarget-&gt;h,&nbsp;0.0,&nbsp;-1.0,&nbsp;1.0);</tt></dd></dl>
+ <dl><dt><a name="-main"><strong>main</strong></a>()</dt><dd><tt>#&nbsp;------------------------------------------------------------------------------</tt></dd></dl>
  <dl><dt><a name="-printer"><strong>printer</strong></a>(obj, ident<font color="#909090">=''</font>)</dt><dd><tt>Helper&nbsp;function,&nbsp;prints&nbsp;a&nbsp;hirarchy&nbsp;of&nbsp;objects.</tt></dd></dl>
 </td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
@@ -575,13 +594,14 @@ Pressing&nbsp;the&nbsp;escape&nbsp;key&nbsp;ends&nbsp;the&nbsp;application.</tt>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><strong>__author__</strong> = u'DR0ID_ @ 2009'<br>
-<strong>__version__</strong> = u'$Id: tiledtmxloader.py 5 2010-11-21 09:05:45Z dr0iddr0id@gmail.com $'</td></tr></table><p>
+<td width="100%"><strong>__author__</strong> = u'DR0ID_ @ 2009-2011'<br>
+<strong>__revision__</strong> = u'$Id: tiledtmxloader.py 248 2011-02-25 15:40:01Z stabbingfinger@gmail.com $'<br>
+<strong>__version__</strong> = '2.3.0.0'</td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#7799ee">
 <td colspan=3 valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Author</strong></big></font></td></tr>
     
 <tr><td bgcolor="#7799ee"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%">DR0ID_&nbsp;@&nbsp;2009</td></tr></table>
+<td width="100%">DR0ID_&nbsp;@&nbsp;2009-2011</td></tr></table>
 </body></html>
