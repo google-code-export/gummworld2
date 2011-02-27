@@ -24,6 +24,7 @@ __doc__ = """pygame_utils.py - Collection of pygame utilities for Gummworld2.
 """
 
 
+import imp
 from math import sqrt, pow, pi, atan2, sin, cos, degrees, radians
 import os
 import re
@@ -33,7 +34,26 @@ import pygame
 from pygame.locals import Color, MOUSEBUTTONDOWN, RLEACCEL
 
 
-def split_thousands(s, sep=','): 
+def get_main_dir():
+    """Intelligently find the directory the executable is in - needed for py2exe
+    compatibility
+    """
+    def main_is_frozen():
+        return (hasattr(sys, "frozen") or # new py2exe
+                hasattr(sys, "importers") # old py2exe
+                or imp.is_frozen("__main__")) # tools/freeze
+    if main_is_frozen():
+        # Program run from an executable, e.g. py2exe
+        return os.path.dirname(sys.executable)
+    elif os.path.dirname(sys.argv[0]) != '':
+        # Program run as: python somepath/prog.py
+        return os.path.dirname(sys.argv[0])
+    else:
+        # Program run as: python prog.py
+        return sys.path[0]
+
+
+def split_thousands(s, sep=','):
     """insert a comma every thousands place"""
     if len(s) <= 3: return s
     return split_thousands(s[:-3], sep) + sep + s[-3:]

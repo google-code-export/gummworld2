@@ -24,7 +24,7 @@ __doc__ = """toolkit.py - Some helper tools for Gummworld2.
 """
 
 
-from os.path import join as joinpath
+import os
 
 import pygame
 from pygame.locals import RLEACCEL
@@ -34,6 +34,61 @@ from gummworld2 import data, State, Map, MapLayer, Vec2d
 from gummworld2.geometry import RectGeometry, PolyGeometry, CircleGeometry
 from gummworld2.ui import HUD, Stat, Statf, hud_font
 from tiledtmxloader import TileMapParser, ImageLoaderPygame
+
+
+# Filename-matching extensions for image formats that pygame can load.
+IMAGE_FILE_EXTENSIONS = (
+    'gif','png','jpg','jpeg','bmp','pcx', 'tga', 'tif',
+    'lbm', 'pbm', 'pgm', 'xpm',
+)
+
+
+class Struct(object):
+    """A class with arbitrary members. Construct it like a dict, then access the
+    keys as instance attributes.
+    
+    s = Struct(x=2, y=4)
+    print s.x,s.y
+    """
+    
+    def __init__(self, **kwargs):
+        self.__dict__.update(**kwargs)
+
+
+class Tilesheet(object):
+    
+    def __init__(self, file_path, image, margin, tile_size, spacing, rects):
+        self.file_path = file_path
+        self.image = image
+        self.margin = margin
+        self.tile_size = tile_size
+        self.spacing = spacing
+        self.rects = rects
+    
+    def get_image(self, tile_id):
+        rect = self.rects[tile_id]
+        tile = self.image.subsurface(rect).copy()
+        return tile
+    
+    def tile_info(self, tile_id):
+        """Return a Struct populated with tilesheet info for tile_id. This info
+        represents everything needed by the Tile class constructor in
+        world_editor.py.
+        
+        Struct members:
+            name : str; relative path to image file
+            image : pygame.surface.Surface; the loaded image
+            margin : Vec2d; size of image's edge border
+            size : Vec2d; size of a single tile
+            spacing : Vec2d; spacing between tiles
+            rects : pygame.Rect; list of rects defining tile subsurfaces
+        """
+        tile = self.get_image(tile_id)
+        rect = self.rects[tile_id]
+        info = Struct(image=tile, name=self.file_path, rect=rect,
+                    tilesheet=self, tile_id=tile_id)
+        return info
+
 
 
 def make_hud(caption=None):
@@ -400,7 +455,7 @@ def load_entities(filepath, cls_dict={}):
     manner must have constructors that are compatible with the default classes.
     """
     import_script = data.filepath(
-        'plugins', joinpath('map','import_world_quadtree.py'))
+        'plugins', os.path.join('map','import_world_quadtree.py'))
     State.world.remove(*State.world.entity_branch.keys())
     file_handle = open(filepath, 'rb')
     locals_dict = {
@@ -416,15 +471,75 @@ def load_entities(filepath, cls_dict={}):
 # load_world
 
 
-def draw_sprite(s, blit_flags=0):
-    """Draw a sprite on the camera's surface using world-to-screen conversion.
+def load_tilesheet(file_path):
+    """Load a tilesheet. A toolkit.Tilesheet containing tilesheet info is
+    returned.
+    
+    The file_path argument is the path to the image file. If file_path is a
+    relative path, it must exist relative to data.data_dir (see the
+    gummworld2.data module). If file_path.tilesheet exists it will be used to
+    size the tiles; otherwise the defaults (0,0,32,32,0,0) will be used.
     """
-    camera = State.camera
-    cx,cy = camera.rect.topleft
-    sx,sy = s.rect.topleft
-    camera.surface.blit(s.image, (sx-cx, sy-cy), special_flags=blit_flags)
+    # Make sure we have an image file type (check file extension).
+    if not os.path.isabs(file_path):
+        file_path = os.path.join(data.data_dir,file_path)
+    junk,ext = os.path.splitext(file_path)
+    ext = ext.lstrip('.')
+    if ext.lower() not in IMAGE_FILE_EXTENSIONS:
+        self.gui_alert('Unsupported image file type: '+ext)
+        return
+    # Load the image and tilesheet dimensions.
+    image = pygame.image.load(file_path)
+    values = [int(s) for s in get_tilesheet_info(file_path)]
+    margin = Vec2d(values[0:2])
+    tile_size = Vec2d(values[2:4])
+    spacing = Vec2d(values[4:6])
+    rects = []
+    # Carve up the tile sheet, working in margin and spacing offsets.
+    w,h = image.get_size()
+    tx,ty = tile_size
+    mx,my = margin
+    sx,sy = spacing
+    nx,ny = w//tx, h//ty
+    for y in range(ny):
+        for x in range(nx):
+            rx = mx + x * (tx + sx)
+            ry = my + y * (ty + sy)
+            rects.append(pygame.Rect(rx,ry,tx,ty))
+    # Make a tilesheet.
+    tilesheet = Tilesheet(file_path, image, margin, tile_size, spacing, rects)
+    return tilesheet
 
-# draw_sprite
+
+def get_tilesheet_info(tilesheet_path):
+    """Get the tilesheet meta data from file if it exists.
+    """
+    meta_file = tilesheet_path + '.tilesheet'
+    values = ['0','0','32','32','0','0']
+    try:
+        f = open(meta_file)
+        line = f.read().strip('\r\n')
+        parts = line.split(' ')
+        if len(parts) == 6:
+            values[:] = parts
+    except:
+        pass
+    else:
+        f.close()
+    return values
+
+
+def put_tilesheet_info(tilesheet_path, tilesheet_values):
+    """Put the tilesheet meta data to file.
+    """
+    meta_file = tilesheet_path + '.tilesheet'
+    try:
+        f = open(meta_file, 'wb')
+        f.write(' '.join([str(v) for v in tilesheet_values]) + '\n')
+    except:
+        pass
+    else:
+        f.close()
 
 
 def interpolated_step(pos, step, interp):
@@ -455,6 +570,17 @@ def interpolated_step(pos, step, interp):
     return pos - step + interp_step
 
 # interpolated_step
+
+
+def draw_sprite(s, blit_flags=0):
+    """Draw a sprite on the camera's surface using world-to-screen conversion.
+    """
+    camera = State.camera
+    cx,cy = camera.rect.topleft
+    sx,sy = s.rect.topleft
+    camera.surface.blit(s.image, (sx-cx, sy-cy), special_flags=blit_flags)
+
+# draw_sprite
 
 
 def draw_tiles():

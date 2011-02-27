@@ -79,7 +79,7 @@ Alternatively State.save() and State.restore() can be used to facilitate this.
 import pygame
 from pygame.locals import Color
 
-from gummworld2 import data, model, State, Vec2d
+from gummworld2 import data, Vec2d
 from gummworld2.ui import text_color
 
 
