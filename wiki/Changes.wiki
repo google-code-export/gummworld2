@@ -366,3 +366,16 @@ SVN rev 245:
 
 SVN rev 252:
   * Changed: Added state to gummworld2 package namespace.
+
+SVN rev 254:
+  * New: Added get_main_dir() to pygame_utils.
+  * New: Additions to toolkit: class Struct, class Tilesheet, load_entities(), load_tilesheet(), get_tilesheet_info(), put_tilesheet_info(). These were recently inline in world_editor.py. They've been moved to toolkit for reusability.
+  * New: data.py; added relpath() to return the path of a resource relative to data_dir.
+  * New: world_editor.py; dialog for closing tilesheets.
+  * New: world_editor.py; tile info is now automatically added to user_data.
+  * New: world_editor.py, export_world_quadtree.py, import_world_quadtree.py; tile info is now included in entity export/import.
+  * Changed: world_editor.py; user_data textarea height increased; shapes save tile info in user_data.
+  * Changed: export_world_quadtree.py and import_world_quadtree.py obsolesced. They were not working well as plugins due to the crippled globals obstacle. These have been made into functions and moved to the model module.
+  * Fixed: world_editor.py; MapEditor.on_resize() did not update user_data textarea when shape is selected.
+  * Fixed: world_editor.py; calculations within draw_tiles() did not properly align some tile selections with their parent geometry.
+  * Changed: map module; removed extraneous imports.
