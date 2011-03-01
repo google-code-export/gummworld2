@@ -1,8 +1,13 @@
 #summary Design and implementation overview.
 #labels Featured
-As of version 0.0.11 the world editor has reached a point where it was usable. Naturally, taking it out for its first real spin had surfaced many issues, all of which have been fixed in 0.0.12.
 
-There have been quite a few changes to the library to fix issues, and support development of the world editor and its proof-of-concept demo, number 17. But no API changes have occurred since version 0.0.7.
+= News =
+
+Lots of new stuff in release 0.1.0. I think the only thing remaining before a 1.0 release are the pymunk entity classes, and maybe some helpers (for example, pymunk collision detection and handling).
+
+Even with the all-Python QuadTree and geometry code, the library seems to be quite usable on new-ish hardware. Dual-core systems that I've tried perform well. Single core systems chug and snort, though.
+
+In v0.1.0 smaller tiles became a lot faster as a result of the MapLayer change from dict to list. Even collapsed maps are a quite bit faster. Sorry of the reimplementation has broken any works in progress. Fortunately, accessing lists instead of dicts should only require changes to code (e.g. Gummworld2's toolkit) that directly access MapLayer.
 
 = Introduction =
 
