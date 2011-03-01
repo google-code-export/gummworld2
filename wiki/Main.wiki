@@ -122,12 +122,14 @@ pymunk is barely more than a concept thus far. It is fundamentally proven in exa
 
 ===World Editor===
 
-Game makers can load a map in the editor, draw shapes on it to define game objects, then save a "physics map". Games can load the graphics and physics maps, and rely on pymunk or other implementations for run-time physics.
+Game makers can load a map in the editor, draw shapes on it to define game objects, then save a "physics map". Games can load the graphics and physics maps, and rely on pymunk or other implementations for run-time physics. For Python purists, Gummworld2 provides a QuadTree implementation that is compatible with editor files and can leverage geometric shapes for collision detection.
 
 [http://www.mapeditor.org/ Tiled Map Editor] and [http://www.pygame.org/project-map+loader+for+%27tiled%27-1158-2951.html pytmxloader] make a great team. It is a no-brainer to use them, unless you've got a pile of reusable content from other sources.
 
 Placing static obstacles and boundaries on a map is admittedly nice. However, the world editor can also be used to place "spawned" game objects, i.e. objects that are not in static map layers. For example, groups of orcs, gates, siege weapons, random rubble. The world editor can load tilesets to aid visualizing world content design. It's very useful to be able to insert a physical "device" into the world map, size its geometry accurately, and provide a handle or descriptive data for a few reasons:
 
   # Shapes are needed for dimensions; and potentially other physics-related purposes in the case of pymunk.
+  # Shapes do not necessarily require a visual component.
+  # Shapes offer geometry options. One can choose irregular shapes, or shapes that snug the edges of visuals smaller than an entire tile.
   # Obviously, if objects in the physics dimension are interacting those interactions need to correlate with the presentation layer.
-  # Map loaders could detect "Ah, here is a Mark IV Gizmo. I'll load the graphics and game intelligence for it". Or run-time game logic can load presentation content on the fly when the physics are activated by game progression.
+  # World loaders could detect "Ah, here is a Mark IV Gizmo. I'll load the graphics and game intelligence for it". Or run-time game logic can load presentation content on the fly when the physics are activated by game progression.
