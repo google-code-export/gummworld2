@@ -91,7 +91,7 @@ Library:
   * Grid (DONE)
   * HUD (DONE)
   * Geometry for more collision detection choices without external library requirements (DONE)
-  * Toolkit: hud and tile generators; map loader; render routines; map optimizer (DONE)
+  * Toolkit: hud and tile generators; map loader; world entity loader; render routines; map optimizers (DONE)
 
 Editor:
   * Editing primitives
