@@ -1,4 +1,5 @@
 #summary Look in here if "engines" scare you--Rarr. :)
+#labels Featured
 
 Welcome to aversion therapy. =)
 
@@ -27,14 +28,20 @@ __author__ = 'Gummbum, (c) 2011'
 
 __doc__ = """00_minimum.py - The barest minimum to use a scrolling map in
 Gummworld2.
+
+PLEASE NOTE: THIS IS ONE OF THE MANY EXAMPLES IN THE GUMMWORLD2
+DISTRIBUTION. YOU NEED GUMMWORLD2 TO RUN IT.
 """
 
 
 import pygame
 from pygame.locals import *
 
-import paths
-from gummworld2 import State, Screen, Camera, GameClock, Map, Vec2d, toolkit
+try:
+    import paths
+    from gummworld2 import State, Screen, Camera, GameClock, Map, Vec2d, toolkit
+except:
+    raise pygame.error, __doc__
 
 
 class CameraTarget(object):
