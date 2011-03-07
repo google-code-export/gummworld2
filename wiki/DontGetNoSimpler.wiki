@@ -27,10 +27,10 @@ __author__ = 'Gummbum, (c) 2011'
 
 
 __doc__ = """00_minimum.py - The barest minimum to use a scrolling map in
-Gummworld2.
+Gummworld2. This demonstrates *not* using the Engine class.
 
-PLEASE NOTE: THIS IS ONE OF THE MANY EXAMPLES IN THE GUMMWORLD2
-DISTRIBUTION. YOU NEED GUMMWORLD2 TO RUN IT.
+PLEASE NOTE: This is one of the many examples in the Gummworld2
+distribution. YOU NEED GUMMWORLD2 TO RUN IT.
 """
 
 
