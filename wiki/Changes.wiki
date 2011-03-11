@@ -389,3 +389,10 @@ SVN rev 252:
 
 SVN rev 260:
   * Updated: make_docs and docs/.
+
+=== Changes in 0.1.1 ===
+
+SVN rev 268:
+  * Changed: Upgraded to pytmxloader 2.3.1.1.
+  * New: Documentation INSTALL.txt and README.txt.
+  * New: data.py; Helper functions and docstrings to aid customization of data paths.
