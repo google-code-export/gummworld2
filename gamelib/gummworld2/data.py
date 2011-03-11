@@ -20,13 +20,15 @@ __version__ = '$Id$'
 __author__ = 'Gummbum, (c) 2011'
 
 
-__doc__ = """
-data.py - Data resource loader for Gummworld2.
+__doc__ = """data.py - Data resource loader for Gummworld2.
 
-Module data:
-    * data_py is the absolute path for this module file's directory.
-    * data_dir is the root data directory.
-    * path is a dict containing lookups for subdirectories of each data type.
+Module data may be used directly, but use of the module functions is preferred:
+    *   data_py is the absolute path for this module file's directory.
+    *   data_dir is the root data directory.
+    *   subdirs is a dict(name=subdir) for looking up resource sub-directories
+        by name. name is simply an abstract type or description.
+    *   paths is a "cooked" dict containing lookups for subdirectories of each
+        data type.
 """
 
 
@@ -34,23 +36,49 @@ import os
 from os.path import join as join_path
 
 
-data_py = os.path.abspath(os.path.dirname(__file__))
-data_dir = os.path.normpath(join_path(data_py, '..', '..', 'data'))
-path = dict(
-    font    = join_path(data_dir, 'font'),
-    image   = join_path(data_dir, 'image'),
-    map     = join_path(data_dir, 'map'),
-    plugins = join_path(data_dir, 'plugins'),
-    sound   = join_path(data_dir, 'sound'),
-    text    = join_path(data_dir, 'text'),
-    theme   = join_path(data_dir, 'themes'),
-)
+def set_data_dir(base):
+    """Set the base data directory for game resources.
+    
+    base may be a relative or absolute path. It will be converted to an absolute
+    path and then normalized.
+    
+    Calling this function changes the base data directory. The full path to a
+    data resource is constructed by joining data_dir and a subdir.
+    
+    The default data directory is '../../data', relative to the path of this
+    module file.
+    
+    NOTE: Call this early, before attempting to construct any library objects or
+    load resources.
+    
+    Any previously loaded resources are unaffected. However, there may be
+    side-effects, for example memory leaks if a user-defined caching mechanism
+    uses data paths to fetch resources from cache.
+    """
+    global data_dir
+    data_dir = os.path.abspath(os.path.normpath(base))
+    paths.clear()
+    for name,value in subdirs.items():
+        paths[name] = join_path(data_dir,value)
+
+
+def set_subdir(name, subdir):
+    """Set or add a new sub-directory for game resources.
+    
+    name is the unique key used to look up the resource location. subdir is the
+    path component(s) to append to the data_path base directory.
+    
+    subdir is assumed to be a relative path and is taken at face value. No
+    sanity or access checks are performed.
+    """
+    subdirs[name] = subdir
+    paths[name] = join_path(data_dir,subdir)
 
 
 def filepath(typ, filename):
     '''Return the path to a file in the data directory.
     '''
-    return join_path(path[typ], filename)
+    return join_path(paths[typ], filename)
 
 
 def relpath(filename):
@@ -101,3 +129,19 @@ def load_text(filename):
     """Open a text file from the text dir and return its file handle.
     """
     return load('text', filename, 'r')
+
+
+data_py = os.path.abspath(os.path.dirname(__file__))
+##data_dir = os.path.normpath(join_path(data_py, '..', '..', 'data'))
+data_dir = None
+subdirs = dict(
+   font  = 'font',
+    image = 'image',
+    map   = 'map',
+    sound = 'sound',
+    text  = 'text',
+    theme = 'themes',
+)
+paths = {}
+
+set_data_dir(join_path(data_py,'..','..','data'))

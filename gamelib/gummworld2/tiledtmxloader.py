@@ -7,17 +7,9 @@ from http://mapeditor.org/ .
 It loads the \*.tmx files produced by Tiled.
 
 
-TODO:
- - maybe use cStringIO instead of StringIO
- - pyglet demo: better rendering
- - pygame demo: better rendering
- - test if object gid is already read in and resolved
-
-
-
 """
 
-__version__ = "2.3.0.0"
+__version__ = "2.3.1.1"
 __revision__ = u'$Id$'
 __author__ = u'DR0ID_ @ 2009-2011'
 
@@ -34,7 +26,6 @@ import sys
 from xml.dom import minidom, Node
 import StringIO
 import os.path
-#import codecs
 
 
 # ------------------------------------------------------------------------------
@@ -606,6 +597,29 @@ class TileLayer(object):
                 s += str(self.decoded_content[num])
                 num += 1
             print s
+
+    # def get_visible_tile_range(self, xmin, ymin, xmax, ymax):
+        # tile_w = self.pixel_width / self.width
+        # tile_h = self.pixel_height / self.height
+        # left = int(round(float(xmin) / tile_w)) - 1
+        # right = int(round(float(xmax) / tile_w)) + 2
+        # top = int(round(float(ymin) / tile_h)) - 1
+        # bottom = int(round(float(ymax) / tile_h)) + 2
+        # return (left, top, left - right, top - bottom)
+
+    # def get_tiles(self, xmin, ymin, xmax, ymax):
+        # tiles = []
+        # if self.visible:
+            # for ypos in range(ymin, ymax):
+                # for xpos in range(xmin, xmax):
+                    # try:
+                        # img_idx = self.content2D[xpos][ypos]
+                        # if img_idx:
+                            # tiles.append((xpos, ypos, img_idx))
+                    # except IndexError:
+                        # pass
+        # return tiles
+
 # ------------------------------------------------------------------------------
 
 
@@ -755,14 +769,17 @@ class TileMapParser(object):
         if hasattr(tile_set, "source"):
             tile_set = self._parse_tsx(tile_set.source, tile_set, world_map)
         else:
-            tile_set = self._get_tile_set(tile_set_node, tile_set)
+            tile_set = self._get_tile_set(tile_set_node, tile_set, self.map_file_name)
         world_map.tile_sets.append(tile_set)
 
     def _parse_tsx(self, file_name, tile_set, world_map):
+        # ISSUE 5: the *.tsx file is probably relative to the *.tmx file
+        if not os.path.isabs(file_name):
+            print "map file name", self.map_file_name
+            file_name = self._get_abs_path(self.map_file_name, file_name)
+        print "tsx filename: ", file_name
         # would be more elegant to use  "with open(file_name, "rb") as file:" but that is python 2.6
         file = None
-        if hasattr(self, 'alt_dir'):
-            file_name = os.path.join(self.alt_dir, file_name)
         try:
             file = open(file_name, "rb")
             dom = minidom.parseString(file.read())
@@ -770,26 +787,34 @@ class TileMapParser(object):
             if file:
                 file.close()
         for node in self._get_nodes(dom.childNodes, 'tileset'):
-            tile_set = self._get_tile_set(node, tile_set)
+            tile_set = self._get_tile_set(node, tile_set, file_name)
             break;
         return tile_set
 
-    def _get_tile_set(self, tile_set_node, tile_set):
+    def _get_tile_set(self, tile_set_node, tile_set, base_path):
         for node in self._get_nodes(tile_set_node.childNodes, u'image'):
-            self._build_tile_set_image(node, tile_set)
+            self._build_tile_set_image(node, tile_set, base_path)
         for node in self._get_nodes(tile_set_node.childNodes, u'tile'):
             self._build_tile_set_tile(node, tile_set)
         self._set_attributes(tile_set_node, tile_set)
         return tile_set
 
-    def _build_tile_set_image(self, image_node, tile_set):
+    def _build_tile_set_image(self, image_node, tile_set, base_path):
         image = TileImage()
         self._set_attributes(image_node, image)
         # id of TileImage has to be set!! -> Tile.TileImage will only have id set
         for node in self._get_nodes(image_node.childNodes, u'data'):
             self._set_attributes(node, image)
             image.content = node.childNodes[0].nodeValue
+        image.source = self._get_abs_path(base_path, image.source) # ISSUE 5
         tile_set.images.append(image)
+
+    def _get_abs_path(self, base, relative):
+            if os.path.isabs(relative):
+                return relative
+            if os.path.isfile(base):
+                base = os.path.dirname(base)
+            return os.path.abspath(os.path.join(base, relative))
 
     def _build_tile_set_tile(self, tile_set_node, tile_set):
         tile = Tile()
@@ -877,12 +902,11 @@ class TileMapParser(object):
         Parses the given map. Does no decoding nor loading the data.
         :return: instance of TileMap
         """
-        #dom = minidom.parseString(codecs.open(file_name, "r", "utf-8").read())
         # would be more elegant to use  "with open(file_name, "rb") as file:" but that is python 2.6
+        self.map_file_name = os.path.abspath(file_name)
         file = None
-        self.alt_dir,_ = os.path.split(file_name)
         try:
-            file = open(file_name, "rb")
+            file = open(self.map_file_name, "rb")
             dom = minidom.parseString(file.read())
         finally:
             if file:
@@ -890,7 +914,7 @@ class TileMapParser(object):
         for node in self._get_nodes(dom.childNodes, 'map'):
             world_map = self._build_world_map(node)
             break
-        world_map.map_file_name = os.path.abspath(file_name)
+        world_map.map_file_name = self.map_file_name
         world_map.convert()
         return world_map
 
@@ -913,7 +937,241 @@ class TileMapParser(object):
         return world_map
 
 # ------------------------------------------------------------------------------
+
+class RendererPygame(object):
+
+    # TODO: methods: add_sprite/remove_sprite
+    # TODO: collapse/uncollapse
+    # TODO: do calculations of set_camera_position per layer
+    def __init__(self, world_map):
+        self._world_map = world_map
+        self._cam_offset_x = 0
+        self._cam_offset_y = 0
+        self._cam_width = 10
+        self._cam_height = 10
+        self._visible_x_range = []
+        self._visible_y_range = []
+        
+        self._maincache = {}
+        self._backcache = {}
+        self._cachemax = 400
+        self._cachestart = 70
+        
+        self._layer_sprites = {} # {layer_id:[sprites]}
+
+    def set_camera_position(self, offset_x, offset_y, width, height, margin=1):
+        self._cam_offset_x = offset_x
+        self._cam_offset_y = offset_y
+        self._cam_width = width
+        self._cam_height = height
+        tile_w = self._world_map.tilewidth
+        tile_h = self._world_map.tileheight
+        left = int(round(float(offset_x) / tile_w)) - margin
+        right = int(round(float(offset_x + width) / tile_w)) + margin + 1
+        top = int(round(float(offset_y) / tile_h)) - margin
+        bottom = int(round(float(offset_y + height) / tile_h)) + margin + 1
+        left = max(left, 0)
+        right = min(right, self._world_map.width)
+        top = max(top, 0)
+        bottom = min(bottom, self._world_map.height)
+        self._visible_x_range = range(left, right)
+        self._visible_y_range = range(top, bottom)
+
+    def render_layer(self, surf, layer_id):
+        layer = self._world_map.layers[layer_id]
+        if layer.visible:
+            # optimizations
+            surf_blit = surf.blit
+            layer_content2D = layer.content2D
+            self__world_map_indexed_tiles = self._world_map.indexed_tiles
+            self__world_map_tilewidth = self._world_map.tilewidth
+            self__world_map_tileheight = self._world_map.tileheight
+            self__cam_offset_x = self._cam_offset_x
+            self__cam_offset_y = self._cam_offset_y
+            # sprites
+            spr_idx = 0
+            len_sprites = 0
+            sprites = self._layer_sprites.get(layer_id)
+            if sprites:
+                sprites.sort(key=lambda sprite: sprite.rect.y)
+                sprite = sprites[0]
+                len_sprites = len(sprites)
+            
+            for ypos in self._visible_y_range:
+                # TODO: layer.y and layer.x are not supported well now
+                screen_tile_y =(ypos + layer.y) * self__world_map_tileheight - self__cam_offset_y
+                # draw sprites in this layer
+                while spr_idx < len_sprites and screen_tile_y < sprite.rect.y - self__cam_offset_y <= screen_tile_y + self__world_map_tileheight:
+                    surf_blit(sprite.image, sprite.rect.move(-self__cam_offset_x, -self__cam_offset_y - sprite.rect.height))
+                    spr_idx += 1
+                    if spr_idx < len_sprites:
+                        sprite = sprites[spr_idx]
+                # next line of the map
+                for xpos in self._visible_x_range:
+                    img_idx = layer_content2D[xpos][ypos]
+                    if img_idx:
+                        # get the actual image and its offset
+                        offx, offy, screen_img = self__world_map_indexed_tiles[img_idx]
+                        # add offset in number of tiles
+                        pos = (xpos + layer.x) * self__world_map_tilewidth - self__cam_offset_x + offx, screen_tile_y + offy
+                        # draw image at right position using its offset
+                        surf_blit(screen_img, pos)
+
+    # def set_layer_paralax_factor(layer_id, factor_x, factor_y=None, center_x=0, center_y=0):
+        # self._world_map[layer_id].paralax_factor_x = factor_x
+        # if paralax_factor_y:
+            # self._world_map[layer_id].paralax_factor_y = factor_y
+        # else:
+            # self._world_map[layer_id].paralax_factor_y = factor_x
+        # self._world_map[layer_id].paralax_cemter_x = center_x
+        # self._world_map[layer_id].paralax_cemter_y = center_y
+
+
+# ------------------------------------------------------------------------------
 def demo_pygame(file_name):
+    pygame = __import__('pygame')
+
+    # parser the map
+    world_map = TileMapParser().parse_decode(file_name)
+
+    # init pygame and set up a screen
+    pygame.init()
+    pygame.display.set_caption("tiledtmxloader - " + file_name)
+    screen_width = min(1024, world_map.pixel_width)
+    screen_height = min(768, world_map.pixel_height)
+    screen = pygame.display.set_mode((screen_width, screen_height), pygame.DOUBLEBUF)
+
+    # load the images using pygame
+    world_map.load(ImageLoaderPygame())
+    layer_range = range(len(world_map.layers))
+    #printer(world_map)
+
+    # prepare map rendering
+    assert world_map.orientation == "orthogonal"
+    renderer = RendererPygame(world_map)
+
+
+    # cam_offset is for scrolling
+    cam_offset_x = 0
+    cam_offset_y = 0
+
+    # variables
+    frames_per_sec = 60.0
+    running = True
+    draw_obj = True
+    clock = pygame.time.Clock()
+    font = pygame.font.Font(None, 15)
+    s = "Frames Per Second: 0.0"
+    message = font.render(s, 0, (255,255,255)).convert()
+    
+    # for timed fps update
+    pygame.time.set_timer(pygame.USEREVENT, 1000)
+    
+    # optimizations
+    clock_tick = clock.tick
+    pygame_event_get = pygame.event.get
+    pygame_key_get_pressed = pygame.key.get_pressed
+    renderer_render_layer = renderer.render_layer
+    renderer_set_camera_position = renderer.set_camera_position
+    pygame_display_flip = pygame.display.flip
+    
+    # add sprites (TODO)
+    renderer._layer_sprites[1] = []
+    num_sprites = 100
+    for i in range(num_sprites):
+        sprite = pygame.sprite.Sprite()
+        sprite.image = pygame.Surface((20, i*40.0/num_sprites+10))
+        sprite.image.fill(((255+200*i)%255, (2*i+255)%255, (5*i)%255))
+        sprite.rect = sprite.image.get_rect()
+        renderer._layer_sprites[1].append(sprite)
+
+    # mainloop
+    while running:
+        dt = clock_tick()#60.0)
+        
+        # event handling
+        for event in pygame_event_get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+                elif event.key == pygame.K_F1:
+                    print "fps:", clock.get_fps()
+                    print renderer._visible_x_range, renderer._visible_y_range
+                elif event.key == pygame.K_F2:
+                    draw_obj = not draw_obj
+                elif event.key == pygame.K_w:
+                    cam_offset_y -= world_map.tileheight
+                elif event.key == pygame.K_s:
+                    cam_offset_y += world_map.tileheight
+                elif event.key == pygame.K_d:
+                    cam_offset_x += world_map.tilewidth
+                elif event.key == pygame.K_a:
+                    cam_offset_x -= world_map.tilewidth
+            elif event.type == pygame.USEREVENT:
+                s = "Frames Per Second: %.2f" % clock.get_fps()
+                message = font.render(s, 0, (255,255,255)).convert()
+
+        pressed = pygame_key_get_pressed()
+
+        # The speed is 3 by default.
+        # When left Shift is held, the speed increases.
+        # The speed interpolates based on time passed, so the demo navigates
+        # at a reasonable pace even on huge maps.
+        speed = (3.0 + pressed[pygame.K_LSHIFT] * 12.0) * (dt / frames_per_sec)
+
+        if pressed[pygame.K_DOWN]:
+            cam_offset_y += speed
+        if pressed[pygame.K_UP]:
+            cam_offset_y -= speed
+        if pressed[pygame.K_LEFT]:
+            cam_offset_x -= speed
+        if pressed[pygame.K_RIGHT]:
+            cam_offset_x += speed
+
+        # update sprites position
+        for i in range(num_sprites):
+            renderer._layer_sprites[1][i].rect.center = cam_offset_x + 0.5*num_sprites*i/num_sprites + screen_width // 2 , cam_offset_y + i + screen_height // 2
+
+        # adjust camera according the keypresses
+        renderer_set_camera_position(cam_offset_x, cam_offset_y, screen_width, screen_height, 3)
+
+        # clear screen, might be left out if every pixel is redrawn anyway
+        screen.fill((0,0,0))
+
+        # render the map
+        for id in layer_range:
+            renderer_render_layer(screen, id)
+
+        # map objects
+        if draw_obj:
+            for obj_group in world_map.object_groups:
+                goffx = obj_group.x
+                goffy = obj_group.y
+                for map_obj in obj_group.objects:
+                    size = (map_obj.width, map_obj.height)
+                    if map_obj.image_source:
+                        surf = pygame.image.load(map_obj.image_source)
+                        surf = pygame.transform.scale(surf, size)
+                        screen.blit(surf, (goffx + map_obj.x - cam_offset_x, goffy + map_obj.y - cam_offset_y))
+                    else:
+                        r = pygame.Rect((goffx + map_obj.x - cam_offset_x, goffy + map_obj.y - cam_offset_y), size)
+                        pygame.draw.rect(screen, (255, 255, 0), r, 1)
+                        text_img = font.render(map_obj.name, 1, (255, 255, 0))
+                        screen.blit(text_img, r.move(1, 2))
+        
+        screen.blit(message, (0,0))
+        # simple pygame
+        pygame_display_flip()
+
+# ------------------------------------------------------------------------------
+# TODO:
+ # - pyglet demo: better rendering
+ # - pygame demo: better rendering
+ # - test if object gid is already read in and resolved
+
+def demo_pygame_old(file_name):
     pygame = __import__('pygame')
 
     # parser the map
@@ -924,6 +1182,9 @@ def demo_pygame(file_name):
     screen_width = min(1024, world_map.pixel_width)
     screen_height = min(768, world_map.pixel_height)
     screen = pygame.display.set_mode((screen_width, screen_height))
+
+    frames_per_sec = 60.0
+
 
     # load the images using pygame
     world_map.load(ImageLoaderPygame())
@@ -938,29 +1199,43 @@ def demo_pygame(file_name):
     # cam_offset is for scrolling
     cam_offset_x = 0
     cam_offset_y = 0
+    clock_tick = pygame.time.Clock().tick
+    pygame_event_get = pygame.event.get
+    pygame_key_get_pressed = pygame.key.get_pressed
     # mainloop
     while running:
-        # eventhandling
-        events = [pygame.event.wait()]
-        events.extend(pygame.event.get())
-        for event in events:
-            dirty = True
+        dt = clock_tick(60.0)
+        for event in pygame_event_get():
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     running = False
-                elif event.key == pygame.K_DOWN:
-                    cam_offset_y -= world_map.tileheight
-                elif event.key == pygame.K_UP:
-                    cam_offset_y += world_map.tileheight
-                elif event.key == pygame.K_LEFT:
-                    cam_offset_x += world_map.tilewidth
-                elif event.key == pygame.K_RIGHT:
-                    cam_offset_x -= world_map.tilewidth
+
+        pressed = pygame_key_get_pressed()
+
+        # The speed is 3 by default.
+        # When left Shift is held, the speed increases.
+        # The speed interpolates based on time passed, so the demo navigates
+        # at a reasonable pace even on huge maps.
+        speed = (3.0 + pressed[pygame.K_LSHIFT] * 6.0) * \
+                (dt / frames_per_sec)
+
+        if pressed[pygame.K_DOWN]:
+            cam_offset_y -= speed
+        if pressed[pygame.K_UP]:
+            cam_offset_y += speed
+        if pressed[pygame.K_LEFT]:
+            cam_offset_x += speed
+        if pressed[pygame.K_RIGHT]:
+            cam_offset_x -= speed
+
+        print cam_offset_x, cam_offset_y
+
+        screen.fill((0,0,0))
 
         # draw the map
-        if dirty:
+        if dirty or True:
             dirty = False
             for layer in world_map.layers[:]:
                 if layer.visible:
@@ -991,7 +1266,7 @@ def demo_pygame(file_name):
                                             if layer.opacity > -1:
                                                 #print 'per surf alpha', layer.opacity
                                                 screen_img.set_alpha(None)
-                                                alpha_value = int(255. * float(layer.opacity))
+                                                alpha_value = int(255.0 * float(layer.opacity))
                                                 screen_img.set_alpha(alpha_value)
                                         screen_img = screen_img.convert_alpha()
                                         # draw image at right position using its offset

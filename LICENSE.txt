@@ -1,6 +1,9 @@
-$Id:$
+Welcome to Gummworld2
 Gummbum, (c) 2011
 
+
+LICENSE
+=======
 
 This file is part of Gummworld2.
 
@@ -17,6 +20,9 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with Gummworld2.  If not, see <http://www.gnu.org/licenses/>.
 
+
+THIRD PARTY CONTENT
+===================
 
 Gummworld2 may contain content copyrighted and licensed by third parties.
 The authors of Gummworld2 do not assume ownership or responsibility for
