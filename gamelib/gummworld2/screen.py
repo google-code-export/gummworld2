@@ -64,6 +64,7 @@ class View(object):
             self.surface = surface
             self.parent_rect = self.surface.get_rect()
         self.eraser = self.surface.copy()
+        self.eraser.fill(pygame.Color('black'))
         self.rect = self.surface.get_rect()
     
     @property
