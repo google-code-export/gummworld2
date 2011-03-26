@@ -155,11 +155,20 @@ class Camera(object):
         concept.
         """
         target_moved = self.target_moved
-        if 0 < State.clock.max_fps <= State.clock.ticks_per_second:
+## Nasty bug fixed.
+#        if 0 < State.clock.max_fps <= State.clock.ticks_per_second:
+#        if 0 < State.clock.get_ups() < State.clock.ticks_per_second:
+#            interp = 1.0
+#            x,y = self.target.position
+#        else:
+#            interp = State.clock.interpolate()
+#            interpolated_step = target_moved - target_moved * interp
+#            x,y = self.target.position - interpolated_step
+        interp = State.clock.interpolate()
+        if interp > 1.0:
             interp = 1.0
             x,y = self.target.position
         else:
-            interp = State.clock.interpolate()
             interpolated_step = target_moved - target_moved * interp
             x,y = self.target.position - interpolated_step
         self.rect.center = round(x), round(y)

@@ -1629,7 +1629,7 @@ class MapEditor(object):
         if sub_action is None:
             # Get input file name.
             self.gui_browse_file("Import Map",
-                data.path['map'], self.action_map_load)
+                data.paths['map'], self.action_map_load)
         elif sub_action == 'file_picked':
             d = widget
             if d.value is not None:
@@ -1663,7 +1663,7 @@ class MapEditor(object):
         if sub_action is None:
             # Get input file name.
             self.gui_browse_file('Import Tiles',
-                data.path['image'], self.action_tiles_load)
+                data.paths['image'], self.action_tiles_load)
         elif sub_action == 'file_picked':
             # Verify the file extension is a supported image type, then open the
             # tile-sheet sizer.
@@ -1749,7 +1749,7 @@ class MapEditor(object):
             if widget is None or widget.value is True:
                 # Get input file name.
                 self.gui_browse_file("Import Entities",
-                    data.path['map'], self.action_entities_import)
+                    data.paths['map'], self.action_entities_import)
         elif sub_action == 'file_picked':
             d = widget
             if d.value is not None:
@@ -1820,7 +1820,7 @@ class MapEditor(object):
         if sub_action is None:
             # Get input file name.
             self.gui_browse_file("Save Entities As",
-                data.path['map'], self.action_entities_save_as)
+                data.paths['map'], self.action_entities_save_as)
         elif sub_action == 'file_picked':
             d = widget
             if d.value is not None:
