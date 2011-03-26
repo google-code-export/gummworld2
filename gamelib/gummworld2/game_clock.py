@@ -68,7 +68,7 @@ class GameClock(object):
     
     def __init__(self, ticks_per_second=25, max_fps=0, use_wait=True, max_frame_skip=5):
         self._wait = time.sleep
-        self._get_ticks = time.clock
+        self._get_ticks = time.time
         self._elapsed = 0.0
         self.ticks_per_second = ticks_per_second
         self.max_fps = max_fps
