@@ -38,6 +38,8 @@ from gummworld2.geometry import RectGeometry, PolyGeometry, CircleGeometry
 from gummworld2.ui import HUD, Stat, Statf, hud_font
 from tiledtmxloader import TileMapParser, ImageLoaderPygame
 
+# HACK by Cosmo to get pygame 1.8 working
+haspygame19 = pygame.version.vernum >= (1, 9)
 
 # Filename-matching extensions for image formats that pygame can load.
 IMAGE_FILE_EXTENSIONS = (
@@ -185,7 +187,34 @@ def make_tiles2():
 # make_tiles2
 
 
-def collapse_map(map, num_tiles=(2,2)):
+# def collapse_map(map, num_tiles=(2,2)):
+    # """Collapse all layers in a map by combining num_tiles into one tile.
+    # Returns a new map.
+    
+    # The map argument is the source map. It must be an instance of Map.
+    
+    # The num_tiles argument is a tuple representing the number of tiles in the X
+    # and Y axes to combine.
+    # """
+    # # new map dimensions
+    # num_tiles = Vec2d(num_tiles)
+    # tw,th = map.tile_size * num_tiles
+    # mw,mh = map.map_size // num_tiles
+    # if mw * num_tiles.x != map.map_size.x:
+        # mw += 1
+    # if mh * num_tiles.y != map.map_size.y:
+        # mh += 1
+    # # new map
+    # new_map = Map((tw,th), (mw,mh))
+    # # collapse the tiles in each layer...
+    # for layeri,layer in enumerate(map.layers):
+        # new_layer = collapse_map_layer(map, layeri, num_tiles)
+        # # add a new layer
+        # new_map.layers.append(new_layer)
+    # if hasattr(map, 'tiled_map'):
+        # new_map.tiled_map = map.tiled_map
+    # return new_map
+def collapse_map(map, num_tiles=(2,2), layers=None):
     """Collapse all layers in a map by combining num_tiles into one tile.
     Returns a new map.
     
@@ -205,7 +234,10 @@ def collapse_map(map, num_tiles=(2,2)):
     # new map
     new_map = Map((tw,th), (mw,mh))
     # collapse the tiles in each layer...
-    for layeri,layer in enumerate(map.layers):
+    if layers is None:
+        layers = range(len(map.layers))
+    for layeri in layers:
+        layer = map.layers[layeri]
         new_layer = collapse_map_layer(map, layeri, num_tiles)
         # add a new layer
         new_map.layers.append(new_layer)
@@ -440,7 +472,7 @@ def load_tiled_tmx_map(map_file_name, load_invisible=False, convert_alpha=False)
                             screen_img.set_alpha(alpha_value)
                             screen_img = screen_img.convert_alpha()
                 sprite.image = screen_img
-                sprite.rect = screen_img.get_rect(topleft=(x,y))
+                sprite.rect = screen_img.get_rect(topleft=(x + offx, y + offy))
                 sprite.name = xpos,ypos
                 gummworld_map.add(sprite, layer=layeri)
     return gummworld_map
@@ -755,7 +787,10 @@ def draw_sprite(s, blit_flags=0):
     camera = State.camera
     cx,cy = camera.rect.topleft
     sx,sy = s.rect.topleft
-    camera.surface.blit(s.image, (sx-cx, sy-cy), special_flags=blit_flags)
+    if haspygame19:
+        camera.surface.blit(s.image, (sx-cx, sy-cy), special_flags=blit_flags)
+    else:
+        camera.surface.blit(s.image, (sx-cx, sy-cy))
 
 # draw_sprite
 
@@ -793,6 +828,41 @@ def draw_tiles():
 # draw_tiles
 
 
+def draw_tiles_of_layer(layeri, pallax_factor_x=1.0, pallax_factor_y=1.0):
+    """Draw visible tiles.
+    
+    This function assumes that the tiles stored in the map are sprites.
+    """
+    if layeri < len(State.map.layers):
+        layer = State.map.layers[layeri]
+        if not layer.visible:
+            return
+        camera = State.camera
+        visible_tile_range = camera.visible_tile_range
+        blit = camera.surface.blit
+        cx,cy = camera.rect.topleft
+        mapw,maph = layer.map_size
+        if pallax_factor_x == 1.0 and pallax_factor_y == 1.0:
+            left,top,right,bottom = visible_tile_range[layeri]
+        else:
+            left,top,right,bottom = 0, 0, mapw, maph
+        if left < 0: left = 0
+        if top < 0: top = 0
+        if right >= mapw: right = mapw #- 1
+        if bottom >= maph: bottom = maph #- 1
+        for y in range(top,bottom):
+            yoff = y * mapw
+            start = yoff + left
+            end = yoff + right
+            for s in layer[start:end]:
+                if s:
+                    rect = s.rect
+                    blit(s.image, (rect.x - (cx * pallax_factor_x), rect.y - (cy * pallax_factor_y)))
+    else:
+        if __debug__ and hasattr(State, 'silence_draw_tiles'):
+            print "ERROR: layer", layeri, "not defined int map!"
+
+
 def draw_labels(layer=0):
     """Draw visible labels if enabled.
     
@@ -823,15 +893,18 @@ def draw_grid(layer=0):
         # speed up access to grid lines and their rects
         map = State.map
         map_layer = map.layers[layer]
-        hline = map_layer.h_line
-        vline = map_layer.v_line
-        hrect = hline.rect
-        vrect = vline.rect
-        for s in map.get_tiles(x1, y1, x2, y2):
-            srect = s.rect
-            hrect.topleft = srect.bottomleft
-            draw_sprite(hline)
-            vrect.topleft = srect.topright
-            draw_sprite(vline)
+        tw,th = map_layer.tile_size
+        vertical_grid_line = map_layer.vertical_grid_line
+        horizontal_grid_line = map_layer.horizontal_grid_line
+        map_rect = map.rect
+        x1 = max(x1*tw, map_rect.left)
+        x2 = min(x2*tw, map_rect.right)
+        y1 = max(y1*th, map_rect.top)
+        y2 = min(y2*th, map_rect.bottom)
+        for y in xrange(y1,y2,th):
+            for x in xrange(x1,x2,tw):
+                pos = x,y
+                draw_sprite(vertical_grid_line(pos))
+                draw_sprite(horizontal_grid_line(pos))
 
 # draw_grid
