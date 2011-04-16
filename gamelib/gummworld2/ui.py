@@ -46,16 +46,22 @@ class HUD(pygame.sprite.OrderedUpdates):
     def __init__(self):
         super(HUD, self).__init__()
         self.stats = {}
+        self.ordered = []
         self.top = 5
         self.font_height = hud_font.get_height()
-        self.y = lambda n: self.top + self.font_height * n
+#        self.y = lambda n: self.top + self.font_height * n
         self.x = State.screen.rect.x + 5
         self.i = 0
+
+    @property
+    def bottom(self):
+        return self.top + sum([s.font.size('W')[1] for s in self])
 
     def next_pos(self):
         i = self.i
         self.i += 1
-        return self.x, self.y(i)
+#        return self.x, self.y(i)
+        return self.x, self.bottom
 
     def add(self, *args):
         """args: name, stat"""
@@ -93,9 +99,9 @@ class HUD(pygame.sprite.OrderedUpdates):
 class Stat(pygame.sprite.Sprite):
     """a HUD stat with plain string"""
     
-    def __init__(self, pos, text=None, callback=None, interval=2000):
+    def __init__(self, pos, text=None, callback=None, interval=2000, font=hud_font):
         pygame.sprite.Sprite.__init__(self)
-        self.font = hud_font
+        self.font = font
         self.text = None
         self.callback = callback
         self.interval = interval
@@ -126,9 +132,9 @@ class Stat(pygame.sprite.Sprite):
 class Statf(pygame.sprite.Sprite):
     """a HUD stat with formatted string"""
     
-    def __init__(self, pos, fmt, value=None, callback=None, interval=2000):
+    def __init__(self, pos, fmt, value=None, callback=None, interval=2000, font=hud_font):
         pygame.sprite.Sprite.__init__(self)
-        self.font = hud_font
+        self.font = font
         self.fmt = fmt
         self.value = None
         self.callback = callback

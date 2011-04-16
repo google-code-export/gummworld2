@@ -138,6 +138,12 @@ class Map(object):
         """
         tiles = []
         layer = self.layers[layer]
+        map_rect = self.rect
+        tw,th = layer.tile_size
+        x1 = max(x1, map_rect.left//tw)
+        x2 = min(x2, map_rect.right//tw)
+        y1 = max(y1, map_rect.top//th)
+        y2 = min(y2, map_rect.bottom//th)
         if layer.visible:
             mapw = layer.map_size[0]
             for y in range(y1,y2):
@@ -145,7 +151,21 @@ class Map(object):
                 end = y*mapw+x2
                 tiles.extend(layer[start:end])
         return tiles
-
+    
+    def get_tiles_in_rect(self, rect, layer=0):
+        layeri = layer
+        layer = self.layers[layeri]
+        tile_x,tile_y = layer.tile_size
+        l,t,w,h = rect
+        r = l+w-1
+        b = t+h-1
+        left = int(round(float(l) / tile_x))
+        right = int(round(float(r) / tile_x))
+        top = int(round(float(t) / tile_y))
+        bottom = int(round(float(b) / tile_y))
+        tiles = self.get_tiles(left, top, right, bottom, layer=layeri)
+        return tiles
+    
 
 class MapLayer(list):
     

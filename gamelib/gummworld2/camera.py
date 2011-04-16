@@ -228,7 +228,30 @@ class Camera(object):
         self.target_moved = val - target.position
         target.position = val
         self._target_was_moved = 1
+    
+    @property
+    def anti_interp(self):
+        return self.target_moved * self.interp - self.target_moved
+    
+    @property
+    def steady_target_position(self):
+        """The camera target's position with factored interpolation.
         
+        Use this to get the interpolated position of camera target. Note that
+        this is different than interpolating a tile or free-roaming sprite,
+        which scroll in the opposite direction of the camera target.
+        
+        Example:
+            target_rect.center = camera.steady_target_position
+            screen.blit(target_image, target_rect)
+        
+        Think of it as an alternative to hard-coding screen center:
+            target_rect.center = 300,300
+            screen.blit(target_image, target_rect)
+        """
+        x,y = self.position + self.anti_interp
+        return round(x),round(y)
+    
     @property
     def screen_center(self):
         """The coordinates of the camera surface's center.
@@ -316,7 +339,7 @@ class Camera(object):
             tile_per_layer.append(new_layer)
         return tile_per_layer
     
-    def state_restored(self):
+    def state_restored(self, prev):
         """Sync a stale camera after swapping it in.
         
         If switching states either manually, you may want to call this to
@@ -325,4 +348,11 @@ class Camera(object):
         values in the _move_to and _move_from attributes. When swapping a camera
         in via State.restore(), this method is called automatically.
         """
-        self.update()
+        if prev is not self:
+            self._target_was_moved = prev._target_was_moved
+            self.target_moved = Vec2d(prev.target_moved)
+            self.rect.center = prev.rect.center
+            self._interp = prev._interp
+            self._get_visible_tile_range()
+        else:
+            self._get_visible_tile_range()

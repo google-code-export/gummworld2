@@ -33,10 +33,10 @@ and restore() methods for their own use.
 
 ## The default attributes that are saved and restored.
 _default_attrs = [
-    'camera',
     'world',
     'world_type',
     'map',
+    'camera',
 ]
 
 ## The default attributes that are saved and restored when the name argument is
@@ -141,12 +141,18 @@ class State(object):
         """
         if name == 'init' and attrs is _default_attrs:
             attrs = _init_attrs
+#        for attr in attrs:
+#            setattr(State, attr, states[name][attr])
+#        for attr in attrs:
+#            obj = getattr(State, attr)
+#            if hasattr(obj, 'state_restored'):
+#                obj.state_restored()
         for attr in attrs:
-            setattr(State, attr, states[name][attr])
-        for attr in attrs:
-            obj = getattr(State, attr)
-            if hasattr(obj, 'state_restored'):
-                obj.state_restored()
+            prev = getattr(State, attr)
+            rest = states[name][attr]
+            setattr(State, attr, rest)
+            if hasattr(rest, 'state_restored'):
+                rest.state_restored(prev)
         State.name = name
 
 

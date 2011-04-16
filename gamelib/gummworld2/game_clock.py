@@ -66,9 +66,9 @@ class GameClock(object):
         reset() -> Reset clock counters.
     """
     
-    def __init__(self, ticks_per_second=25, max_fps=0, use_wait=True, max_frame_skip=5):
+    def __init__(self, ticks_per_second=25, max_fps=0, use_wait=True, max_frame_skip=5, time_source=time.time):
         self._wait = time.sleep
-        self._get_ticks = time.time
+        self._get_ticks = time_source
         self._elapsed = 0.0
         self.ticks_per_second = ticks_per_second
         self.max_fps = max_fps
@@ -178,13 +178,13 @@ class GameClock(object):
         self._tps += 1
         self._flip()
         self._update_ready = self._frame_ready = False
-        if self._get_ticks() >= self._next_game_tick and \
+        if self._time >= self._next_game_tick and \
             self._loops < self.max_frame_skip:
             self._update_count += 1
             self._next_game_tick += self._skip_ticks
             self._loops += 1
             self._update_ready = True
-        if self._get_ticks() >= self._next_frame or \
+        if self._time >= self._next_frame or \
             self._loops >= self.max_frame_skip:
             self._frame_count += 1
             self._next_frame += self._skip_frames
@@ -197,7 +197,7 @@ class GameClock(object):
 #                self._wait(ms/1000)
 # The following is more straightforward and introduces only one fairly accurate
 # wait for each frame.
-            wait_ms = float(self._next_frame) - self._get_ticks()
+            wait_ms = float(self._next_frame) - self._time
             if wait_ms > 0:
                 self._wait(wait_ms/1000.0)
         return self._ticks
