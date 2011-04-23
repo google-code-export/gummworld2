@@ -97,6 +97,7 @@ class App(Engine):
         State.save('main', ['camera'])
         State.camera = Camera(State.camera.target,
             View(State.screen.surface, pygame.Rect(30,20,*State.screen.size*2//3)))
+        State.clock.schedule_frame(State.camera.interpolate)
         State.name = 'small'
         State.save(State.name, ['camera'])
 
@@ -135,7 +136,7 @@ class App(Engine):
         self.speed = None
         self.mouse_down = False
         
-    def update(self):
+    def update(self, dt):
         """overrides Engine.update"""
         # If mouse button is held down update for continuous walking.
         if self.mouse_down:
@@ -182,7 +183,7 @@ class App(Engine):
             wy = max(min(wy,rect.bottom), rect.top)
             camera.position = wx,wy
         
-    def draw(self):
+    def draw(self, dt):
         """overrides Engine.draw"""
         # Draw stuff.
         State.camera.interpolate()

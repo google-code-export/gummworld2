@@ -212,6 +212,13 @@ def distance(a, b):
     return (diffx*diffx + diffy*diffy) ** 0.5
 
 
+def interpolant_of_line(mag, (x1,y1), (x2,y2)):
+    """Find the point at magnitude mag along a line."""
+    dx = (x2 - x1) * mag
+    dy = (y2 - y1) * mag
+    return (x1+dx, y1+dy)
+
+
 def point_on_circumference(center, radius, degrees_):
     """Calculate the point on the circumference of a circle defined by center and
     radius along the given angle. Returns a tuple (x,y).

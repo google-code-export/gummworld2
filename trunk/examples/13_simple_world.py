@@ -124,7 +124,7 @@ class App(Engine):
         self.move_x = 0
         self.move_y = 0
         
-    def update(self):
+    def update(self, dt):
         """overrides Engine.update"""
         self.update_camera_position()
         State.camera.update()
@@ -142,10 +142,9 @@ class App(Engine):
             wy = max(min(wy,rect.bottom), rect.top)
             camera.position = wx,wy
         
-    def draw(self):
+    def draw(self, dt):
         """overrides Engine.draw"""
         # Draw stuff.
-        State.camera.interpolate()
         State.screen.clear()
         toolkit.draw_tiles()
         self.draw_scene()
@@ -154,7 +153,7 @@ class App(Engine):
     def draw_scene(self):
         surf = State.camera.surface
         images = self.images
-        interp = State.camera.interp
+        interp = State.camera.interpolate()
         ## Display the "thing" as a wireframe or an image.
         if self.wireframe:
             for frame in [f for f in State.world.objects() if isinstance(f, Thing)]:

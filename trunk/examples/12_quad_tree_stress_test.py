@@ -263,7 +263,7 @@ class App(Engine):
         State.hud.add('Worst case', Statf(next_pos(),
             'Worst case: %s', callback=get_worst_case, interval=66))
 
-    def update(self):
+    def update(self, dt):
         self.update_world()
         self.update_collisions()
         State.hud.update()
@@ -284,7 +284,7 @@ class App(Engine):
         for c in State.world.collisions:
             c[0].hit = 255
     
-    def draw(self):
+    def draw(self, dt):
         State.screen.clear()
         if self.show_grid:
             self.draw_grid(self.draw_level)

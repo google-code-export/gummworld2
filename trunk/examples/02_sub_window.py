@@ -45,12 +45,12 @@ class App(Engine):
         self.move_x = 0
         self.move_y = 0
         
-    def update(self):
+    def update(self, dt):
         """overrides Engine.update"""
         self.update_camera_position()
         State.camera.update()
 
-    def draw(self):
+    def draw(self, dt):
         """overrides Engine.draw"""
         # Draw stuff.
         State.camera.interpolate()

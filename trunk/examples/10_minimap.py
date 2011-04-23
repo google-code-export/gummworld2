@@ -148,12 +148,12 @@ class App(Engine):
         self.move_x = 0
         self.move_y = 0
         
-    def update(self):
+    def update(self, dt):
         """overrides Engine.update"""
         self.update_camera_position()
         State.camera.update()
         self.sprite_group.update()
-        if State.clock.interpolate() < 0.1:
+        if State.clock.interpolate < 0.1:
             pygame.display.set_caption(self.caption+' - %d fps' % State.clock.get_fps())
 
     def update_camera_position(self):
@@ -167,7 +167,7 @@ class App(Engine):
             wy = max(min(wy,rect.bottom), rect.top)
             camera.position = wx,wy
         
-    def draw(self):
+    def draw(self, dt):
         """overrides Engine.draw"""
         # Draw stuff.
         self.interp = State.camera.interpolate()

@@ -50,7 +50,7 @@ class NoWorld(object):
     def add(self, *args):
         pass
     
-    def step(self):
+    def step(self, dt):
         pass
 
 
@@ -119,7 +119,7 @@ class World(object):
     def objects(self):
         return self._object_dict.keys()
     
-    def step(self):
+    def step(self, dt):
         for o in self.objects():
             o.update()
     
@@ -166,7 +166,7 @@ if quad_tree is not None:
 
     class WorldQuadTree(quad_tree.QuadTree):
         
-        def step(self):
+        def step(self, dt):
             pass
 
 
@@ -182,8 +182,8 @@ if pymunk is not None:
             super(WorldPymunk, self).__init__()
             self.rect = pygame.Rect(rect)
         
-        def step(self):
-            super(WorldPymunk, self).step(State.dt)
+        def step(self, dt):
+            super(WorldPymunk, self).step(dt)
 
 
     class CircleBody(pymunk.Body):

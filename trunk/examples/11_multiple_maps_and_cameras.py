@@ -54,6 +54,7 @@ class App(Engine):
         
         ## Set up the first view. Save the state.
         State.camera.position = State.world.rect.center
+        State.camera.update_when_restored = False
         toolkit.make_tiles()
         self.view1 = State.camera.view
         State.save(self.view1)
@@ -64,8 +65,10 @@ class App(Engine):
             Rect(half_width,0, half_width,full_height))
         State.camera = Camera(model.Object(), self.view2)
         State.camera.position = State.world.rect.center
+        State.camera.update_when_restored = False
         State.map = Map(State.map.tile_size, State.map.map_size)
         toolkit.make_tiles2()
+        State.clock.schedule_frame(State.camera.interpolate)
         State.save(self.view2)
         
         # Add some data to contribute to motion.
@@ -76,7 +79,7 @@ class App(Engine):
         self.view2.step = -3
         self.view2.radius = 64
         
-    def update(self):
+    def update(self, dt):
         """overrides Engine.update"""
         ## Restore each view and update its camera.
         for view in (self.view1, self.view2):
@@ -99,7 +102,7 @@ class App(Engine):
             origin, radius, angle)
         view.angle = angle
     
-    def draw(self):
+    def draw(self, dt):
         """overrides Engine.draw"""
         ## Restore each view and draw its map.
         for view in (self.view1, self.view2):

@@ -97,6 +97,7 @@ class Map(object):
         self.tile_size = Vec2d(tile_size)
         self.map_size = Vec2d(map_size)
         self.layers = []
+        self.subpixel_cache = {}
         
         tw,th = tile_size
         mw,mh = map_size

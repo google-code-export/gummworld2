@@ -20,8 +20,8 @@ __version__ = '$Id$'
 __author__ = 'Gummbum, (c) 2011'
 
 
-__doc__ = """14_collision_sandbox.py - A sandbox / unit test for the geometry
-module's collision routines in Gummworld2.
+__doc__ = """14_collision_sandbox.py - A sandbox / integration test for the
+geometry module's collision routines in Gummworld2.
 
 This test uses the eyeballs to validate. Do the following:
     
