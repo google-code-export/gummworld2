@@ -98,7 +98,9 @@ class State(object):
     
     running = False             # Engine.run() terminator
     speed = 4                   # an arbitrary speed constant
-    dt = 0                      # milliseconds elapsed in previous game tick
+## obsolesced: use State.clock.update_elapsed instead, or get dt from a
+## schedule callback.
+##    dt = 0                      # milliseconds elapsed in previous game tick
     
     ## map editor settings
     

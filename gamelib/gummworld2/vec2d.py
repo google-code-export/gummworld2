@@ -39,7 +39,15 @@ class Vec2d(object):
             self.y = value
         else:
             raise IndexError("Invalid subscript "+str(key)+" to Vec2d")
- 
+    
+    def __getslice__(self, i, j):
+        return [self.x,self.y][i:j]
+    
+    def __setslice__(self, i, j, seq):
+        me = [self.x,self.y]
+        me[i:j] = seq
+        self.x,self.y = me
+    
     # String representaion (for debugging)
     def __repr__(self):
         return 'Vec2d(%s, %s)' % (self.x, self.y)

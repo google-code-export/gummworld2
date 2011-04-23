@@ -27,7 +27,7 @@ camera.py - Camera module for Gummworld2.
 
 import pygame
 
-from gummworld2 import State, MapLayer, Vec2d
+from gummworld2 import State, MapLayer, Vec2d, geometry
 
 
 class Camera(object):
@@ -69,6 +69,13 @@ class Camera(object):
     (0,1), ...] that are visible on the screen.
     
     Property visible_tiles returns a list of MapLayer objects that are visible.
+    
+    If creating multiple cameras to save and restore in State contexts, by
+    default the state_restored() method updates the new camera from the old.
+    This solves a split-brain condition that occurs when the cameras' internals
+    fall out of sync. In some scenarios you may want to have two independent
+    cameras. To prevent them from syncing during a restore, set the cameras'
+    update_when_restored=False.
     """
     
     def __init__(self, target, view=None):
@@ -84,11 +91,11 @@ class Camera(object):
         if view is None:
             view = State.screen
         self._target = target
+        self._prev_target = target
         self._visible_tile_range = []
-        self.target_moved = Vec2d(0,0)
-        self._target_was_moved = False
         self.view = view
-        
+        self.update_when_restored = True
+    
     @property
     def interp(self):
         """The clock's interpolation value after the last call to
@@ -135,103 +142,61 @@ class Camera(object):
         self._abs_screen_center = Vec2d(self.rect.center) + self.abs_offset
         
         self._interp = 0.0
+        self._move_to = Vec2d(self.target.position)
+        self._move_from = Vec2d(self._move_to)
+        self._position = Vec2d(self._move_to)
         self.map = None
         if State.map:
             self._get_visible_tile_range()
         else:
             self._visible_tile_range = []
         self.update()
-        
-    def interpolate(self, sprites=None):
-        """Interpolate camera position towards target for smoother scrolling
-        
-        After updating the target position in the main program's update(), call
-        this every frame in the main program's draw() before any drawing
-        commands. It works best when frame speed is much higher than update
-        speed.
-        
-        Experimental: I dunno about this sprites argument. I'm sure it seemed
-        like a good idea at the time, but I seem to have misplaced the original
-        concept.
-        """
-        target_moved = self.target_moved
-## Nasty bug fixed.
-#        if 0 < State.clock.max_fps <= State.clock.ticks_per_second:
-#        if 0 < State.clock.get_ups() < State.clock.ticks_per_second:
-#            interp = 1.0
-#            x,y = self.target.position
-#        else:
-#            interp = State.clock.interpolate()
-#            interpolated_step = target_moved - target_moved * interp
-#            x,y = self.target.position - interpolated_step
-        interp = State.clock.interpolate()
-        if interp > 1.0:
-            interp = 1.0
-            x,y = self.target.position
-        else:
-            interpolated_step = target_moved - target_moved * interp
-            x,y = self.target.position - interpolated_step
-        self.rect.center = round(x), round(y)
-        self._interp = interp
-        
-        if sprites:
-            world_to_screen = self.world_to_screen
-            for s in sprites:
-                abs_screen_pos = world_to_screen(s.position)
-                interpolated_step = target_moved - target_moved * interp
-                x,y = abs_screen_pos + interpolated_step
-                s.rect.center = round(x), round(y)
-        
-        self._get_visible_tile_range()
-        return interp
+    
     
     def update(self):
         """Update Camera internals to prepare for efficient interpolation.
         
         Call in the game's update routine after changing Camera.position.
         """
-        target_was_moved = self._target_was_moved
-        if target_was_moved == 1:
-            self._target_was_moved = 0
-        elif target_was_moved == 0:
-            self.target_moved = Vec2d(0,0)
-            self._target_was_moved = -1
-#        self._get_visible_tile_range()
+        self._position[:] = self._move_from[:] = self._move_to
+        self._move_to[:] = self.target.position
+    
+    def interpolate(self, *args):
+        """Interpolate camera position towards target for smoother scrolling
+        
+        After updating the target position in the main program's update(), call
+        this every frame in the main program's draw() before any drawing
+        commands. It works best when frame speed is much higher than update
+        speed.
+        """
+        interp = State.clock.interpolate
+        x,y = self._position[:] = geometry.interpolant_of_line(
+            interp, self._move_from, self._move_to)
+        self.rect.center = round(x),round(y)
+        self._interp = interp
+        self._get_visible_tile_range()
+        return interp
     
     def slew(self, vec, dt):
         """Move Camera.target via pymunk.
         
         If using pymunk, use this instead of Camera.position.
         """
-        vec = Vec2d(vec)
-        self._target_was_moved = 1
-        self.target_moved = vec - self.target.position
-        self.target.slew(vec, State.dt)
+        self.target.slew(vec, dt)
     
     @property
     def position(self):
         """Move Camera.target in world coordinates.
-        
-        IMPORTANT: Call this instead of directly modifying the target object's
-        position.
-        
-        IMPORTANT: In order for interpolated scrolling to be effective, only
-        call this once per update cycle. If you need to adjust the target sprite/
-        model/copter object more than once, then use a temporary object to
-        accumulate adjustments and then set Camera.position once. This will
-        ensure the poles are accurately spaced for interpolation.
         """
         return self.target.position
     @position.setter
     def position(self, val):
-        target = self.target
-        self.target_moved = val - target.position
-        target.position = val
-        self._target_was_moved = 1
+        self.target.position = val
     
     @property
     def anti_interp(self):
-        return self.target_moved * self.interp - self.target_moved
+##        return self.target_moved * self.interp - self.target_moved
+        pass
     
     @property
     def steady_target_position(self):
@@ -348,9 +313,7 @@ class Camera(object):
         values in the _move_to and _move_from attributes. When swapping a camera
         in via State.restore(), this method is called automatically.
         """
-        if prev is not self:
-            self._target_was_moved = prev._target_was_moved
-            self.target_moved = Vec2d(prev.target_moved)
+        if self.update_when_restored and prev is not self:
             self.rect.center = prev.rect.center
             self._interp = prev._interp
             self._get_visible_tile_range()

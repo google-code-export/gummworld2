@@ -43,11 +43,12 @@ pygame.init()
 # Classes
 from vec2d import Vec2d
 from state import State
+from subpixel import SubPixelSurface
 
 from screen import Screen, View
 from map import Map, MapLayer
 from camera import Camera
-from game_clock import GameClock
+from gameclock import GameClock
 from popup_menu import PopupMenu
 from ui import HUD, Stat, Statf
 from canvas import Canvas
@@ -57,6 +58,7 @@ from engine import Engine, NO_WORLD, SIMPLE_WORLD, QUADTREE_WORLD, PYMUNK_WORLD
 
 
 # Toolkits and utilities
+import version
 import model
 import data
 import geometry

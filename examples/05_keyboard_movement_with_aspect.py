@@ -73,13 +73,13 @@ class App(Engine):
         # Warp avatar to center map.
         State.camera.position = State.world.rect.center
         
-    def update(self):
+    def update(self, dt):
         """overrides Engine.update"""
         self.update_camera_position()
         State.camera.update()
         State.hud.update()
         
-    def draw(self):
+    def draw(self, dt):
         """overrides Engine.draw"""
         # Draw stuff.
         State.camera.interpolate()

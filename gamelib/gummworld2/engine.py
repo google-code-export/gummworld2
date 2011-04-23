@@ -41,22 +41,15 @@ Engine.__init__(), Engine.run(), and examples/00_minimum.py for helpful clues.
 """
 
 
+import sys
+
 import pygame
 from pygame.locals import (
     QUIT,
-    ACTIVEEVENT,
-    KEYDOWN,
-    KEYUP,
-    MOUSEMOTION,
-    MOUSEBUTTONUP,
-    MOUSEBUTTONDOWN,
-    JOYAXISMOTION,
-    JOYBALLMOTION,
-    JOYHATMOTION,
-    JOYBUTTONUP,
-    JOYBUTTONDOWN,
-    VIDEORESIZE,
-    VIDEOEXPOSE,
+    KEYDOWN, KEYUP,
+    MOUSEMOTION, MOUSEBUTTONUP, MOUSEBUTTONDOWN,
+    JOYAXISMOTION, JOYBALLMOTION, JOYHATMOTION, JOYBUTTONUP, JOYBUTTONDOWN,
+    ACTIVEEVENT, VIDEORESIZE, VIDEOEXPOSE,
     USEREVENT,
 )
 try:
@@ -216,11 +209,22 @@ class Engine(object):
                 camera_view = State.screen
         State.camera = Camera(camera_target, camera_view)
         
-        State.clock = GameClock(update_speed, frame_speed)
+        ## Clock setup. Use pygame.time.get_ticks unless in Windows.
+        if sys.platform in('win32','cygwin'):
+            time_source = None
+        else:
+            time_source = lambda:pygame.time.get_ticks()/1000.
+        State.clock = GameClock(
+            update_speed, frame_speed,
+            update_callback=self.update, frame_callback=self.draw,
+            time_source=time_source)
+        ## Schedule default items.
+        State.clock.schedule_update(self._get_events)
+        State.clock.schedule_update(State.world.step)
         
         self._joysticks = pygame_utils.init_joystick()
         self._get_pygame_events = pygame.event.get
-        
+    
     def run(self):
         """Start the run loop.
         
@@ -228,15 +232,16 @@ class Engine(object):
         """
         State.running = True
         while State.running:
-            State.dt = State.clock.tick()
-            if State.clock.update_ready():
-                self._get_events()
-                self.update()
-                State.world.step()
-            if State.clock.frame_ready():
-                self.draw()
-        
-    def update(self):
+            State.clock.tick()
+## No longer using direct polling. Using scheduled callback instead.
+##            if State.clock.update_ready():
+##                self._get_events()
+##                self.update()
+##                State.world.step()
+##            if State.clock.frame_ready():
+##                self.draw()
+    
+    def update(self, dt):
         """Override this method. Called by run() when the clock signals an
         update cycle is ready.
         
@@ -246,8 +251,8 @@ class Engine(object):
             ... custom update the rest of the game ...
         """
         pass
-        
-    def draw(self):
+    
+    def draw(self, dt):
         """Override this method. Called by run() when the clock signals a
         frame cycle is ready.
         
@@ -258,14 +263,14 @@ class Engine(object):
             State.screen.flip()
         """
         pass
-        
+    
     @property
     def joysticks(self):
         """List of initialized joysticks.
         """
         return list(self._joysticks)
     
-    def _get_events(self):
+    def _get_events(self, dt):
         """Get events and call the handler. Called automatically by run() each
         time the clock indicates an update cycle is ready.
         """
@@ -301,7 +306,7 @@ class Engine(object):
                     self.on_quit()
             elif typ == ACTIVEEVENT:
                 self.on_active_event(e.gain, e.state)
-        
+    
     ## Override an event handler to get specific events.
     def on_active_event(self, gain, state): pass
     def on_joy_axis_motion(self, joy, axis, value): pass

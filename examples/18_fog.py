@@ -124,7 +124,7 @@ class App(Engine):
         ]
         self.fogn = self.set_fog(0)
     
-    def update(self):
+    def update(self, dt):
         """overrides Engine.update"""
         # If mouse button is held down update for continuous walking.
         if self.mouse_down:
@@ -221,7 +221,7 @@ class App(Engine):
                 camera.position = newx,newy
                 world.add(camera_target)
     
-    def draw(self):
+    def draw(self, dt):
         """overrides Engine.draw"""
         # Draw stuff.
         State.camera.interpolate()

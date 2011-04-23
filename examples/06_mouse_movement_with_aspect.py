@@ -96,7 +96,7 @@ class App(Engine):
         self.speed = None
         self.mouse_down = False
 
-    def update(self):
+    def update(self, dt):
         """overrides Engine.update"""
         ## If mouse button is held down update for continuous walking.
         if self.mouse_down:
@@ -151,7 +151,7 @@ class App(Engine):
             wy = max(min(wy,rect.bottom), rect.top)
             camera.position = wx,wy
         
-    def draw(self):
+    def draw(self, dt):
         """overrides Engine.draw"""
         # Draw stuff.
         State.camera.interpolate()
