@@ -33,7 +33,7 @@ import pygame
 from pygame.locals import RLEACCEL, SRCALPHA
 from pygame.sprite import Sprite
 
-from gummworld2 import data, State, Map, MapLayer, Vec2d
+from gummworld2 import data, State, Map, MapLayer, Vec2d, SubPixelSurface
 from gummworld2.geometry import RectGeometry, PolyGeometry, CircleGeometry
 from gummworld2.ui import HUD, Stat, Statf, hud_font
 from tiledtmxloader import TileMapParser, ImageLoaderPygame
@@ -304,7 +304,9 @@ def collapse_map_layer(map, layeri, num_tiles=(2,2)):
                     s.image.set_colorkey(colorkey, RLEACCEL)
 ##                    s.image.set_alpha(tile.image.get_alpha())
                 s.rect.topleft = Vec2d(x,y) * map.tile_size
-#                new_layer[s.name] = s
+                if not s.image in map.subpixel_cache:
+                    map.subpixel_cache[s.image] = SubPixelSurface(s.image, 4)
+                s.subpixel_image = map.subpixel_cache[s.image]
                 new_layer.append(s)
             else:
                 new_layer.append(None)
@@ -474,6 +476,9 @@ def load_tiled_tmx_map(map_file_name, load_invisible=False, convert_alpha=False)
                 sprite.image = screen_img
                 sprite.rect = screen_img.get_rect(topleft=(x + offx, y + offy))
                 sprite.name = xpos,ypos
+                if not tile_img in gummworld_map.subpixel_cache:
+                    gummworld_map.subpixel_cache[tile_img] = SubPixelSurface(tile_img, 4)
+                sprite.subpixel_image = gummworld_map.subpixel_cache[tile_img]
                 gummworld_map.add(sprite, layer=layeri)
     return gummworld_map
 
@@ -806,6 +811,7 @@ def draw_tiles():
     visible_tile_range = camera.visible_tile_range
     blit = camera.surface.blit
     cx,cy = camera.rect.topleft
+    realx,realy = camera._position
     for layeri in range(len(visible_tile_range)):
         layer = layers[layeri]
         if not layer.visible:
@@ -823,7 +829,11 @@ def draw_tiles():
             for s in layer[start:end]:
                 if s:
                     rect = s.rect
-                    blit(s.image, (rect.x-cx, rect.y-cy))
+                    if hasattr(s, 'subpixel_image'):
+                        image = s.subpixel_image.at(realx, realy)
+                    else:
+                        image = s.image
+                    blit(image, (rect.x-cx, rect.y-cy))
 
 # draw_tiles
 
