@@ -160,6 +160,15 @@ class Engine(object):
         
         The clock sacrifices frames per second in order to achieve the desired
         updates per second. If frame_speed is 0 the frame rate is uncapped.
+        
+        The Engine class schedules two items that are run every time update()
+        is called: event processing and world step. Event processing is
+        scheduled with a priority of -2.0. World stepping is scheduled with a
+        priority of -1.0. update() always has a priority of 0.0. This means
+        events are processed first, then the world is stepped, then update() is
+        called. This allows user items to be scheduled in between these engine
+        items by using an appropriate float value: lower priorities will be run
+        first.
         """
         
         ## If you don't use this engine, then in general you will still want
@@ -219,8 +228,8 @@ class Engine(object):
             update_callback=self.update, frame_callback=self.draw,
             time_source=time_source)
         ## Schedule default items.
-        State.clock.schedule_update(self._get_events)
-        State.clock.schedule_update(State.world.step)
+        State.clock.schedule_update_priority(self._get_events, -2.0)
+        State.clock.schedule_update_priority(State.world.step, -1.0)
         
         self._joysticks = pygame_utils.init_joystick()
         self._get_pygame_events = pygame.event.get

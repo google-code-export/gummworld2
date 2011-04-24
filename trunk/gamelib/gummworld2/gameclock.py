@@ -118,9 +118,10 @@ import time
 
 class _Item(object):
     """A spammy item runs all the time."""
-    __slots__ = ['func', 'args', 'kwargs']
-    def __init__(self, func, args, kwargs):
+    __slots__ = ['func', 'pri', 'args', 'kwargs']
+    def __init__(self, func, pri, args, kwargs):
         self.func = func
+        self.pri = pri
         self.args = args
         self.kwargs = kwargs
 
@@ -363,16 +364,30 @@ class GameClock(object):
         
         # Schedules cycled every update.
         if self.update_ready:
+            update_called = self.update_callback is None
             for sched in self._update_schedules:
-                sched.func(self.update_elapsed, *sched.args, **sched.kwargs)
-            if self.update_callback:
+                if update_called:
+                    sched.func(self.update_elapsed, *sched.args, **sched.kwargs)
+                else:
+                    if sched.pri > 0.0:
+                        self.update_callback(self.update_elapsed)
+                        update_called = True
+                    sched.func(self.update_elapsed, *sched.args, **sched.kwargs)
+            if not update_called:
                 self.update_callback(self.update_elapsed)
         
         # Schedules cycled every frame.
         if self.frame_ready:
+            frame_called = self.frame_callback is None
             for sched in self._frame_schedules:
-                sched.func(self.frame_elapsed, *sched.args, **sched.kwargs)
-            if self.frame_callback:
+                if frame_called:
+                    sched.func(self.frame_elapsed, *sched.args, **sched.kwargs)
+                else:
+                    if sched.pri > 0.0:
+                        self.frame_callback(self.frame_elapsed)
+                        frame_called = True
+                    sched.func(self.frame_elapsed, *sched.args, **sched.kwargs)
+            if not frame_called:
                 self.frame_callback(self.frame_elapsed)
         
         return DT
@@ -403,19 +418,45 @@ class GameClock(object):
 
     def schedule(self, func, *args, **kwargs):
         """Schedule an item to be called back each time tick() is called."""
-        item = _Item(func, args, kwargs)
+        item = _Item(func, 0, args, kwargs)
         self._schedules.append(item)
 
     def schedule_update(self, func, *args, **kwargs):
         """Schedule an item to be called back each time update_ready is True."""
-        item = _Item(func, args, kwargs)
+        item = _Item(func, -1, args, kwargs)
         self._update_schedules.append(item)
+    
+    def schedule_update_priority(self, func, pri, *args, **kwargs):
+        """Schedule an item to be called back each time update_ready is True.
+        
+        Items are called in order of priority, low to high. If the clock's
+        update_callback is not None, its priority is always 0.0.
+        """
+        new_item = _Item(func, pri, args, kwargs)
+        for i,sched in enumerate(self._update_schedules):
+            if sched.pri > new_item.pri:
+                self._update_schedules.insert(i, new_item)
+                return
+        self._update_schedules.append(new_item)
 
     def schedule_frame(self, func, *args, **kwargs):
         """Schedule an item to be called back each time frame_ready is True."""
         item = _Item(func, args, kwargs)
         self._frame_schedules.append(item)
     
+    def schedule_frame_priority(self, func, pri, *args, **kwargs):
+        """Schedule an item to be called back each time frame_ready is True.
+        
+        Items are called in order of priority, low to high. If the clock's
+        frame_callback is not None, its priority is always 0.0.
+        """
+        new_item = _Item(func, pri, args, kwargs)
+        for i,sched in enumerate(self._update_schedules):
+            if sched.pri > new_item.pri:
+                self._update_schedules.insert(i, new_item)
+                return
+        self._update_schedules.append(new_item)
+
     def schedule_interval(self, func, interval, *args, **kwargs):
         """Schedule an item to be called back each time an interval elapses.
         
