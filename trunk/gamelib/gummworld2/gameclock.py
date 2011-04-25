@@ -459,11 +459,11 @@ class GameClock(object):
         frame_callback is not None, its priority is always 0.0.
         """
         new_item = _Item(func, pri, args, kwargs)
-        for i,sched in enumerate(self._update_schedules):
+        for i,sched in enumerate(self._frame_schedules):
             if sched.pri > new_item.pri:
-                self._update_schedules.insert(i, new_item)
+                self._frame_schedules.insert(i, new_item)
                 return
-        self._update_schedules.append(new_item)
+        self._frame_schedules.append(new_item)
 
     def schedule_interval(self, func, interval, *args, **kwargs):
         """Schedule an item to be called back each time an interval elapses.
