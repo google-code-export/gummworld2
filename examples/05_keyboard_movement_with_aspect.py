@@ -49,11 +49,13 @@ class App(Engine):
         self.aspect = Vec2d(1.0, 0.5)
 
         # Create two cameras.
+        self.unschedule_default()
         State.save('main')
         State.camera = Camera(State.camera.target,
             View(State.screen.surface, pygame.Rect(30,20,500,500)))
         State.name = 'small'
         State.save(State.name)
+        self.schedule_default()
         
         # Easy way to select the "next" state name.
         self.next_state = {
@@ -64,33 +66,18 @@ class App(Engine):
         # Make some default content.
         toolkit.make_tiles2()
         toolkit.make_hud()
-        State.show_hud = True
+        State.clock.schedule_update_priority(State.hud.update, 1.0)
         State.show_labels = True
         
         self.move_x = 0
         self.move_y = 0
         
         # Warp avatar to center map.
-        State.camera.position = State.world.rect.center
+        State.camera.init_position(State.world.rect.center)
         
     def update(self, dt):
         """overrides Engine.update"""
         self.update_camera_position()
-        State.camera.update()
-        State.hud.update()
-        
-    def draw(self, dt):
-        """overrides Engine.draw"""
-        # Draw stuff.
-        State.camera.interpolate()
-        State.screen.clear()
-        toolkit.draw_tiles()
-        toolkit.draw_labels()
-        State.hud.draw()
-        if State.name == 'small':
-            pygame.draw.rect(State.screen.surface, (99,99,99),
-                State.camera.view.parent_rect, 1)
-        State.screen.flip()
         
     def update_camera_position(self):
         """update the camera's position if any movement keys are held down
@@ -102,6 +89,18 @@ class App(Engine):
             wx = max(min(wx,rect.right), rect.left)
             wy = max(min(wy,rect.bottom), rect.top)
             camera.position = wx,wy
+        
+    def draw(self, dt):
+        """overrides Engine.draw"""
+        # Draw stuff.
+        State.screen.clear()
+        toolkit.draw_tiles()
+        toolkit.draw_labels()
+        State.hud.draw()
+        if State.name == 'small':
+            pygame.draw.rect(State.screen.surface, (99,99,99),
+                State.camera.view.parent_rect, 1)
+        State.screen.flip()
         
     def on_key_down(self, unicode, key, mod):
         # Turn on key-presses.
@@ -116,7 +115,9 @@ class App(Engine):
             self.move_x = -1 * State.speed * self.aspect.x
         elif key == K_TAB:
             # Select the next state name and and restore it.
+            self.unschedule_default()
             State.restore(self.next_state[State.name])
+            self.schedule_default()
         elif key == K_ESCAPE:
             quit()
         

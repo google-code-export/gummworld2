@@ -81,7 +81,7 @@ class App(Engine):
         
         # I like huds.
         toolkit.make_hud()
-        State.show_hud = True
+        State.clock.schedule_update_priority(State.hud.update, 1.0)
         
         # Warp avatar to location on map, and add it to the pymunk space.
         State.camera.target.position = 325,420
@@ -104,8 +104,6 @@ class App(Engine):
         if self.mouse_down:
             self.update_mouse_movement(pygame.mouse.get_pos())
         self.update_camera_position()
-        State.camera.update()
-        State.hud.update()
         
     def update_mouse_movement(self, pos):
         # Angle of movement.
@@ -150,7 +148,6 @@ class App(Engine):
     def draw(self, dt):
         """overrides Engine.draw"""
         # Draw stuff.
-        State.camera.interpolate()
         State.screen.clear()
         toolkit.draw_tiles()
         toolkit.draw_grid()

@@ -93,7 +93,7 @@ class App(Engine):
         
         # I like huds.
         toolkit.make_hud(caption)
-        State.show_hud = True
+        State.clock.schedule_update_priority(State.hud.update, 1.0)
         
         # Create a speed box for converting mouse position to destination
         # and scroll speed. 800x600 has aspect ratio 8:6.
@@ -130,9 +130,7 @@ class App(Engine):
         if self.mouse_down:
             self.update_mouse_movement(pygame.mouse.get_pos())
         self.update_camera_position()
-        State.camera.update()
-        State.hud.update()
-        
+    
     def update_mouse_movement(self, pos):
         # Angle of movement.
         angle = geometry.angle_of(self.speed_box.center, pos)
@@ -147,7 +145,7 @@ class App(Engine):
                 self.speed = geometry.distance(
                     self.speed_box.center, (x,y)) / self.max_speed_box
                 break
-        
+    
     def update_camera_position(self):
         """Step the camera's position if self.move_to contains a value.
         Handle collisions.
@@ -159,10 +157,10 @@ class App(Engine):
             
             # Speed formula.
             speed = self.speed * State.speed
-
+            
             # newx,newy is the new vector, which will be adjusted to avoid
             # collisions...
-
+            
             if geometry.distance((wx,wy), self.move_to) < speed:
                 # If within spitting distance, a full step would overshoot the
                 # destination. Therefore, jump right to it.
@@ -224,7 +222,6 @@ class App(Engine):
     def draw(self, dt):
         """overrides Engine.draw"""
         # Draw stuff.
-        State.camera.interpolate()
         State.screen.clear()
         toolkit.draw_tiles()
         self.draw_avatar()

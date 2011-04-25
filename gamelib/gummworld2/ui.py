@@ -27,11 +27,11 @@ callback.
 """
 
 
-import time
-
 import pygame
 from pygame.locals import Color, RLEACCEL
 
+if __name__ == '__main__':
+    import paths
 from gummworld2 import data, State
 
 
@@ -83,11 +83,11 @@ class HUD(pygame.sprite.OrderedUpdates):
                         del self.stats[key]
             super(HUD, self).remove(sprite)
 
-    def update(self):
+    def update(self, dt):
         for stat in self.stats.values():
-            stat.update()
+            stat.update(dt)
 
-    def draw(self, surface=None):
+    def draw(self, dt=0, surface=None):
         if not State.show_hud:
             return
         if surface is None:
@@ -99,28 +99,28 @@ class HUD(pygame.sprite.OrderedUpdates):
 class Stat(pygame.sprite.Sprite):
     """a HUD stat with plain string"""
     
-    def __init__(self, pos, text=None, callback=None, interval=2000, font=hud_font):
+    def __init__(self, pos, text=None, callback=None, interval=2., font=hud_font):
         pygame.sprite.Sprite.__init__(self)
         self.font = font
         self.text = None
         self.callback = callback
         self.interval = interval
-        self.next_time = pygame.time.get_ticks()
+        self.time_left = 0
         if text is not None:
             self.set_value(text)
         elif callback:
-            self.update()
+            self.update(0)
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
 
-    def update(self, *args):
+    def update(self, dt):
         if self.callback:
-            now = pygame.time.get_ticks()
-            if self.next_time <= now:
+            self.time_left -= dt
+            if self.time_left <= 0.0:
                 value = self.callback()
                 if value is not None:
                     self.set_value(value)
-                self.next_time = now + self.interval
+                self.time_left = self.interval
     
     def set_value(self, text):
         if isinstance(text, str) and text != self.text:
@@ -132,29 +132,29 @@ class Stat(pygame.sprite.Sprite):
 class Statf(pygame.sprite.Sprite):
     """a HUD stat with formatted string"""
     
-    def __init__(self, pos, fmt, value=None, callback=None, interval=2000, font=hud_font):
+    def __init__(self, pos, fmt, value=None, callback=None, interval=2., font=hud_font):
         pygame.sprite.Sprite.__init__(self)
         self.font = font
         self.fmt = fmt
         self.value = None
         self.callback = callback
         self.interval = interval
-        self.next_time = pygame.time.get_ticks()
+        self.time_left = 0
         if value is not None:
             self.set_value(value)
         elif callback:
-            self.update()
+            self.update(0)
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
     
-    def update(self, *args):
+    def update(self, dt):
         if self.callback:
-            now = pygame.time.get_ticks()
-            if self.next_time <= now:
+            self.time_left -= dt
+            if self.time_left <= 0.0:
                 value = self.callback()
                 if value is not None:
                     self.set_value(value)
-                self.next_time = now + self.interval
+                self.time_left = self.interval
     
     def set_value(self, value):
         if value is not None and value != self.value:
@@ -163,20 +163,22 @@ class Statf(pygame.sprite.Sprite):
             self.image.set_alpha(hud_alpha)
 
 if __name__ == '__main__':
-    screen = pygame.display.set_mode((600,600))
-    clock = pygame.time.Clock()
+    from gummworld2 import Screen, GameClock
+    State.screen = Screen((600,600))
+    State.clock = GameClock()
     left = 20
     top = 20
     height = hud_font.get_height()
-    hud = HUD()
+    State.hud = HUD()
+    State.show_hud = True
     y = lambda n: top+height*n
-    hud.add('stat1', Stat((left,y(0)), 'Stat 1'))
-    hud.add('time', Statf((left,y(1)), 'Time %d', callback=time.time, interval=100))
-    hud.add('fps', Statf((left,y(2)), 'FPS %d', callback=clock.get_fps))
+    State.hud.add('stat1', Stat((left,y(0)), 'Stat 1'))
+    State.hud.add('time', Statf((left,y(1)), 'Time %d', callback=lambda:State.clock.time, interval=.1))
+    State.hud.add('fps', Statf((left,y(2)), 'FPS %d', callback=State.clock.get_fps))
+    State.clock.schedule_update_priority(State.hud.update, 1.0)
     while 1:
-        clock.tick()
-        screen.fill((0,0,0))
-        hud.update()
-        hud.draw(screen)
-        pygame.display.flip()
+        State.clock.tick()
+        State.screen.clear()
+        State.hud.draw(surface=State.screen.surface)
+        State.screen.flip()
         pygame.event.get()

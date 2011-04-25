@@ -78,10 +78,7 @@ class App(Engine):
         # Make some default content.
         toolkit.make_tiles2()
         toolkit.make_hud()
-        State.show_hud = True
-        
-        # Warp avatar to center map.
-#        State.camera.position = State.world.rect.center
+        State.clock.schedule_update_priority(State.hud.update, 1.0)
         
         ## Mouse movement is going to use a diamond geometry to calculate a
         ## speed factor that's derived from the distance from center to the
@@ -102,8 +99,6 @@ class App(Engine):
         if self.mouse_down:
             self.update_mouse_movement(pygame.mouse.get_pos())
         self.update_camera_position()
-        State.camera.update()
-        State.hud.update()
         
     def update_mouse_movement(self, pos):
         ## Speed box center is screen center, this is the origin. Mouse pos is
@@ -154,7 +149,6 @@ class App(Engine):
     def draw(self, dt):
         """overrides Engine.draw"""
         # Draw stuff.
-        State.camera.interpolate()
         State.screen.clear()
         toolkit.draw_tiles()
         toolkit.draw_grid()

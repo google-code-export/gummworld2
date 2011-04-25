@@ -131,7 +131,7 @@ class Camera(object):
         return self._surface
         
     def _init(self):
-        """must be called after setting surface
+        """Automatically called after setting view.
         """
         self._surface = self.view.surface
         self.rect = self.surface.get_rect()
@@ -152,8 +152,7 @@ class Camera(object):
             self._visible_tile_range = []
         self.update()
     
-    
-    def update(self):
+    def update(self, *args):
         """Update Camera internals to prepare for efficient interpolation.
         
         Call in the game's update routine after changing Camera.position.
@@ -183,6 +182,17 @@ class Camera(object):
         If using pymunk, use this instead of Camera.position.
         """
         self.target.slew(vec, dt)
+    
+    def init_position(self, pos):
+        """Hard set position to pos.
+        
+        This circumvents interpolation, which may be desirable if for example
+        setting the initial position of the camera, or moving the camera a
+        great distance when you don't want it to pan.
+        """
+        self.target.position[:] = pos
+        self._move_to[:] = self._move_from[:] = self._position[:] = pos
+        self.interpolate()
     
     @property
     def position(self):
@@ -316,6 +326,9 @@ class Camera(object):
         if self.update_when_restored and prev is not self:
             self.rect.center = prev.rect.center
             self._interp = prev._interp
+            self._move_from = prev._move_from
+            self._move_to = prev._move_to
+            self._position = prev._position
             self._get_visible_tile_range()
         else:
             self._get_visible_tile_range()
