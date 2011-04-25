@@ -312,32 +312,17 @@ class GameClock(object):
         self.update_ready = self.frame_ready = False
         
         if TIME >= self._last_update+self._tick_step*self.dilation:
-            self.update_count += 1
-            self._last_update += self._tick_step
-            drift = self._tick_step / 5.0
-            if not (TIME-drift < self._last_update < TIME+drift):
-                self._last_update = TIME
-            self._frames_skipped += 1
-            self.update_elapsed = self._update_elapsed
-            self._update_elapsed = 0.0
             self.update_ready = True
         
-        if TIME >= self._last_frame+self._frame_step or \
+        if self.max_fps == 0:
+            self.frame_ready = True
+        elif TIME >= self._last_frame+self._frame_step or \
             self._frames_skipped >= self.max_frame_skip:
-            self.frame_count += 1
-            if self._frame_step:
-                self._last_frame += self._frame_step
-                drift = self._frame_step / 5.0
-                if not (TIME-drift < self._last_frame < TIME+drift):
-                    self._last_frame = TIME
-            self._frames_skipped = 0
-            self.frame_elapsed = self._frame_elapsed
-            self._frame_elapsed = 0.0
             self.frame_ready = True
         elif self._use_wait and self.max_fps > 0:
-            wait_ms = float(self._next_frame) - self.time
-            if wait_ms > 0:
-                self._wait(wait_ms/1000.0)
+            wait_sec = self._last_frame + self._frame_step - self._get_ticks()
+            if wait_sec > 0.:
+                self._wait(wait_sec)
             self.frame_ready = True
         
         # Schedules cycled every tick.
@@ -364,6 +349,17 @@ class GameClock(object):
         
         # Schedules cycled every update.
         if self.update_ready:
+            # Flip the state variables.
+            self.update_count += 1
+            self._frames_skipped += 1
+            self.update_elapsed = self._update_elapsed
+            self._update_elapsed = 0.0
+            # Reconcile if we're way too fast or slow.
+            self._last_update += self._tick_step
+            drift = self._tick_step / 5.0
+            if not (TIME-drift < self._last_update < TIME+drift):
+                self._last_update = TIME
+            # Run the schedules.
             update_called = self.update_callback is None
             for sched in self._update_schedules:
                 if update_called:
@@ -378,6 +374,18 @@ class GameClock(object):
         
         # Schedules cycled every frame.
         if self.frame_ready:
+            # Flip the state variables.
+            self.frame_count += 1
+            self._frames_skipped = 0
+            self.frame_elapsed = self._frame_elapsed
+            self._frame_elapsed = 0.0
+            # Reconcile if we're way too fast or slow.
+            if self._frame_step:
+                self._last_frame += self._frame_step
+                drift = self._frame_step * self.max_frame_skip
+                if not (TIME-drift < self._last_frame < TIME+drift):
+                    self._last_frame = TIME
+            # Run the schedules.
             frame_called = self.frame_callback is None
             for sched in self._frame_schedules:
                 if frame_called:
@@ -441,7 +449,7 @@ class GameClock(object):
 
     def schedule_frame(self, func, *args, **kwargs):
         """Schedule an item to be called back each time frame_ready is True."""
-        item = _Item(func, args, kwargs)
+        item = _Item(func, 0.0, args, kwargs)
         self._frame_schedules.append(item)
     
     def schedule_frame_priority(self, func, pri, *args, **kwargs):
