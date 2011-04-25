@@ -20,8 +20,8 @@ __version__ = '$Id$'
 __author__ = 'Gummbum, (c) 2011'
 
 
-__doc__ = """00_minimum.py - The barest minimum to use a scrolling map in
-Gummworld2.
+__doc__ = """00_engine.py - The barest minimum to use the scrolling map engine
+in Gummworld2.
 """
 
 
@@ -37,13 +37,14 @@ class CameraTarget(object):
     def __init__(self, position=(0,0)):
         self._position = Vec2d(position)
     
+    ## A camera target just needs to have a Vec2d position attribute. It helps
+    ## to protect it from overwriting with other types.
     @property
     def position(self):
         return self._position
     @position.setter
     def position(self, val):
-        p = self._position
-        p.x,p.y = val
+        self._position[:] = val
 
 
 class App(Engine):
@@ -54,17 +55,11 @@ class App(Engine):
         tile_size = 128,128
         map_size = 10,10
         
-        self.speed = 5
         self.movex = 0
         self.movey = 0
         
         ## Set up the State variables and load some map content.
         
-#        State.screen = Screen((800,600))
-#        State.map = Map(tile_size, map_size)
-#        camera_target = CameraTarget(State.screen.center)
-#        State.camera = Camera(camera_target)
-#        State.clock = GameClock(30, 0)
         Engine.__init__(self,
             resolution=screen_size,
             camera_target=CameraTarget(screen_size//2),
@@ -73,36 +68,28 @@ class App(Engine):
         toolkit.make_tiles()
     
     def update(self, dt):
-        ## For each update cycle, update your game info and then the camera.
-        self.update_camera()
-    
-    def update_camera(self):
+        ## For each update cycle, update your game info and camera.
         if self.movex or self.movey:
             State.camera.position += self.movex,self.movey
-        State.camera.update()
     
     def draw(self, dt):
-        ## For each frame cycle, update the camera's interpolation and then draw
-        ## the screen contents.
-        
-        State.camera.interpolate()
-        
+        ## For each frame cycle, draw the screen contents.
         State.screen.clear()
         toolkit.draw_tiles()
         State.screen.flip()
 
     def on_key_down(self, unicode, key, mod):
-        if key == K_DOWN: self.movey += self.speed
-        elif key == K_UP: self.movey += -self.speed
-        elif key == K_RIGHT: self.movex += self.speed
-        elif key == K_LEFT: self.movex += -self.speed
+        if key == K_DOWN: self.movey += State.speed
+        elif key == K_UP: self.movey += -State.speed
+        elif key == K_RIGHT: self.movex += State.speed
+        elif key == K_LEFT: self.movex += -State.speed
         elif key == K_ESCAPE: quit()
     
     def on_key_up(self, key, mod):
-        if key == K_DOWN: self.movey -= self.speed
-        elif key == K_UP: self.movey -= -self.speed
-        elif key == K_RIGHT: self.movex -= self.speed
-        elif key == K_LEFT: self.movex -= -self.speed
+        if key == K_DOWN: self.movey -= State.speed
+        elif key == K_UP: self.movey -= -State.speed
+        elif key == K_RIGHT: self.movex -= State.speed
+        elif key == K_LEFT: self.movex -= -State.speed
     
     def on_quit(self):
         quit()

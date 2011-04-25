@@ -38,7 +38,7 @@ objects, but without it the balls' movement is unpleasantly jerky because of the
 from random import randrange, choice
 
 import pygame
-from pygame.locals import Color, K_ESCAPE, K_UP, K_DOWN, K_LEFT, K_RIGHT
+from pygame.locals import *
 
 import paths
 from gummworld2 import *
@@ -86,8 +86,9 @@ class Minimap(object):
         self.tiny_rect.size = round(size.x),round(size.y)
         
         # A dot represents a full sprite on the minimap.
-        self.dot = pygame.surface.Surface((1,1))
-        self.dot.fill(Color('white'))
+        dot = pygame.surface.Surface((1,1))
+        dot.fill(Color('white'))
+        self.dot = SubPixelSurface(dot)
         
         # Pre-compute some reusable values.
         mini_screen = self.mini_screen
@@ -116,10 +117,10 @@ class Minimap(object):
         # Draw the camera area as a filled rect.
         pygame.draw.rect(mini_surf, Color(200,0,255), self.tiny_rect)
         # Draw sprites as dots.
-        dot = self.dot
         for s in sprite_group:
             pos = s.rect.topleft / full_size * mini_size
-            mini_surf.blit(dot, (round(pos.x), round(pos.y)))
+            dot = self.dot.at(pos.x, pos.y)
+            mini_surf.blit(dot, pos, None, BLEND_RGBA_ADD)
         
         # Draw a border.
         pygame.draw.rect(State.screen.surface, (99,99,99),
@@ -145,16 +146,15 @@ class App(Engine):
         for i in range(50):
             self.sprite_group.add(Sprite())
         
+        State.clock.schedule_interval(self.set_caption, 2.)
+        
         self.move_x = 0
         self.move_y = 0
         
     def update(self, dt):
         """overrides Engine.update"""
         self.update_camera_position()
-        State.camera.update()
         self.sprite_group.update()
-        if State.clock.interpolate < 0.1:
-            pygame.display.set_caption(self.caption+' - %d fps' % State.clock.get_fps())
 
     def update_camera_position(self):
         """update the camera's position if any movement keys are held down
@@ -167,10 +167,12 @@ class App(Engine):
             wy = max(min(wy,rect.bottom), rect.top)
             camera.position = wx,wy
         
+    def set_caption(self, dt):
+        pygame.display.set_caption(self.caption+' - %d fps' % State.clock.fps)
+    
     def draw(self, dt):
         """overrides Engine.draw"""
         # Draw stuff.
-        self.interp = State.camera.interpolate()
         State.screen.clear()
         toolkit.draw_tiles()
         self.draw_balls()
@@ -182,13 +184,14 @@ class App(Engine):
         # out the motion.
         camera = State.camera
         camera_pos = Vec2d(camera.rect.topleft)
-        interp = self.interp
+        interp = State.camera.interp
+        blit = camera.view.blit
+        interpolated_step = toolkit.interpolated_step
         # Draw visible sprites...
         for s in self.sprite_group.sprites_in_range(
-            State.camera.visible_tile_range[0]):
-            x,y = toolkit.interpolated_step(
-                s.rect.topleft-camera_pos, s.dir, interp)
-            camera.surface.blit(s.image, (round(x),round(y)))
+            camera.visible_tile_range[0]):
+            x,y = interpolated_step(s.rect.topleft-camera_pos, s.dir, interp)
+            blit(s.image, (round(x),round(y)))
     
     def on_key_down(self, unicode, key, mod):
         # Turn on key-presses.

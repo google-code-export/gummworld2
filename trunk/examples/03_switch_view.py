@@ -45,9 +45,11 @@ from gummworld2 import *
 class App(Engine):
     
     def __init__(self):
+        ## Turn off default_schedules. We'll call the camera and world updaters
+        ## directly in our update() and draw() methods.
         super(App, self).__init__(
             caption='03 Switch View - Press TAB to cycle views',
-            frame_speed=0)
+            frame_speed=0, default_schedules=False)
         
         ## Create two cameras so we can switch between them...
         
@@ -73,6 +75,9 @@ class App(Engine):
         
         self.move_x = 0
         self.move_y = 0
+        
+        ## Start the default schedules.
+        self.schedule_default()
         
     def update(self, dt):
         """overrides Engine.update"""

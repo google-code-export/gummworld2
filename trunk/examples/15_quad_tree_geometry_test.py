@@ -218,11 +218,12 @@ class App(Engine):
         self.num_sprites = 90
 
         super(App, self).__init__(
+            caption='12 Quadtree Stress Test - [-+]: Entities | W: Worst case | [1239]: Level grid',
             resolution=(600,600),
             tile_size=self.tile_size, map_size=self.map_size,
-            update_speed=30, frame_speed=0,
+            update_speed=30, frame_speed=0, default_schedules=False,
         )
-        State.camera.position = 300,300
+        State.camera.init_position((300,300))
 
         # Make starting set of things.
         self.things = []
@@ -242,7 +243,6 @@ class App(Engine):
         self.draw_level = 2
         
         self.make_hud()
-        State.show_hud = True
     
     def make_thing(self, pos):
         GeomClass = choice([
@@ -263,11 +263,13 @@ class App(Engine):
     
     def make_hud(self):
         State.hud = HUD()
+        State.show_hud = True
+        State.clock.schedule_update_priority(State.hud.update, 1.0)
         next_pos = State.hud.next_pos
         
         # Frames per second
         State.hud.add('FPS', Statf(next_pos(),
-            'FPS %d', callback=State.clock.get_fps, interval=200))
+            'FPS %d', callback=State.clock.get_fps, interval=.2))
         
         # Which level's grid is drawn / Number of levels there are
         def get_levels():
@@ -290,7 +292,7 @@ class App(Engine):
                 level_9 += len(b.entities)
             return '%02d'%level_1 + '/' + '%02d'%level_9
         State.hud.add('Catch-all', Statf(next_pos(),
-            'Catch-all %s', callback=get_catch_all, interval=66))
+            'Catch-all %s', callback=get_catch_all, interval=.15))
         
         # Collision tests per tick / Node visits per tick
         def get_collisions():
@@ -298,14 +300,14 @@ class App(Engine):
             visits = '%05d' % State.world.branch_visits_add
             return colls+'/'+visits
         State.hud.add('Colls/Visits', Statf(next_pos(),
-            'Colls/Visits %s', callback=get_collisions, interval=66))
+            'Colls/Visits %s', callback=get_collisions, interval=.15))
 
         def get_worst_case():
             alert_threshold = 15
             count = len(State.world.entities)
             if count >= alert_threshold:
                 if count > self.worst_case_count or self.worst_case_cooldown == 0:
-                    self.worst_case_cooldown = 30
+                    self.worst_case_cooldown = 7
                     return '!! %d in level 1' % count
             if self.worst_case_cooldown == 0:
                 self.worst_case_count = 0
@@ -316,12 +318,11 @@ class App(Engine):
         self.worst_case_count = 0
         self.worst_case_cooldown = 30
         State.hud.add('Worst case', Statf(next_pos(),
-            'Worst case: %s', value='OK', callback=get_worst_case, interval=66))
+            'Worst case: %s', value='OK', callback=get_worst_case, interval=.15))
 
     def update(self, dt):
         self.update_world()
         self.update_collisions()
-        State.hud.update()
     
     def update_world(self):
         space = State.world
@@ -341,8 +342,7 @@ class App(Engine):
     
     def draw(self, dt):
         State.screen.clear()
-        if self.show_grid:
-            self.draw_grid(self.draw_level)
+        self.draw_grid(self.draw_level)
         self.draw_world()
         State.screen.flip()
     
@@ -353,6 +353,8 @@ class App(Engine):
         State.hud.draw()
     
     def draw_grid(self, level=0, b=None):
+        if not self.show_grid:
+            return
         if b is None:
             b = State.world
         if b.level == level or (level == 9 and b.level == 2):

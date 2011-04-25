@@ -96,11 +96,12 @@ class Tilesheet(object):
 
 
 
-def make_hud(caption=None):
+def make_hud(caption=None, visible=True):
     """Create a HUD with dynamic items. This creates a default hud to serve
     both as an example, and for an early design and debugging convenience.
     """
     State.hud = HUD()
+    State.show_hud = visible
     next_pos = State.hud.next_pos
     
     if caption:
@@ -119,14 +120,14 @@ def make_hud(caption=None):
         w = State.camera.screen_to_world(s)
         return 'S'+str(s) + ' W'+str((int(w.x),int(w.y),))
     State.hud.add('Mouse',
-        Statf(next_pos(), 'Mouse %s', callback=get_mouse, interval=100))
+        Statf(next_pos(), 'Mouse %s', callback=get_mouse, interval=.1))
     
     def get_world_pos():
         s = State.camera.world_to_screen(State.camera.position)
         w = State.camera.position
         return 'S'+str((int(s.x),int(s.y),)) + ' W'+str((int(w.x),int(w.y),))
     State.hud.add('Camera',
-        Statf(next_pos(), 'Camera %s', callback=get_world_pos, interval=100))
+        Statf(next_pos(), 'Camera %s', callback=get_world_pos, interval=.1))
 
 # make_hud
 
@@ -875,11 +876,13 @@ def draw_labels(layer=0):
     weird.
     """
     if State.show_labels:
-        x1,y1,x2,y2 = State.camera.visible_tile_range[layer]
-        map_layer = State.map.layers[layer]
-        get = map_layer.get_labels
-        for s in get(x1,y1,x2,y2):
-            draw_sprite(s)
+        tile_range = State.camera.visible_tile_range
+        if len(tile_range):
+            x1,y1,x2,y2 = tile_range[layer]
+            map_layer = State.map.layers[layer]
+            get = map_layer.get_labels
+            for s in get(x1,y1,x2,y2):
+                draw_sprite(s)
 
 # draw_labels
 

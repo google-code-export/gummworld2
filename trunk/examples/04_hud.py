@@ -55,9 +55,8 @@ class App(Engine):
         # Make some default content.
         toolkit.make_tiles()
         
-        ## Make the hud and turn it on.
+        ## Make the hud. toolkit makes it visible by default.
         toolkit.make_hud()
-        State.show_hud = True
         
         self.move_x = 0
         self.move_y = 0
@@ -67,7 +66,7 @@ class App(Engine):
         self.update_camera_position()
         State.camera.update()
         ## Update the hud.
-        State.hud.update()
+        State.hud.update(dt)
         
     def draw(self, dt):
         """overrides Engine.draw"""

@@ -21,8 +21,10 @@ __author__ = 'Gummbum, (c) 2011'
 
 
 __doc__ = """00_minimum.py - The barest minimum to use a scrolling map in
-Gummworld2. This does not use the Engine class. The Engine class would trim some
-of the code in App.__init__(), and manage run() and abstract get_events().
+Gummworld2. This does not use the Engine class. The Engine class would: trim
+some of the code in App.__init__() by initializing the core State variables;
+manage the run() loop; conveniently abstract get_events(); schedule some default
+callbacks.
 """
 
 
@@ -38,13 +40,14 @@ class CameraTarget(object):
     def __init__(self, position=(0,0)):
         self._position = Vec2d(position)
     
+    ## A camera target just needs to have a Vec2d position attribute. It helps
+    ## to protect it from overwriting with other types.
     @property
     def position(self):
         return self._position
     @position.setter
     def position(self, val):
-        p = self._position
-        p.x,p.y = val
+        self._position[:] = val
 
 
 class App(object):

@@ -97,7 +97,7 @@ class App(Engine):
         
         super(App, self).__init__(
             caption='13 Simple World - Space: show images',
-            frame_speed=0,
+            frame_speed=0, default_schedules=False,
             world_type=SIMPLE_WORLD)
         
         # Make some default content.

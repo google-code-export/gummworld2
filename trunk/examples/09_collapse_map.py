@@ -83,7 +83,7 @@ class App(Engine):
             camera_target=Avatar((325,420), resolution//2),
             resolution=resolution,
             display_flags=FULLSCREEN,
-            frame_speed=0)
+            frame_speed=0, default_schedules=False)
         
         # Load Tiled TMX map, then update the world and camera.
         self.map = toolkit.load_tiled_tmx_map(
@@ -93,15 +93,16 @@ class App(Engine):
         # The collapse stat for the hud.
         self.collapse = 1
         
-        # Make two cameras.
+        # Save first camera.
         State.save('main', ['camera'])
+        # Make a second camera.
         State.camera = Camera(State.camera.target,
             View(State.screen.surface, pygame.Rect(30,20,*State.screen.size*2//3)))
-        State.clock.schedule_frame(State.camera.interpolate)
         State.name = 'small'
         State.save(State.name, ['camera'])
-
-
+        # Schedule default items. (Switch them later when we switch cameras.)
+        self.schedule_default()
+        
         # Easy way to select the "next" state name.
         self.next_state = {
             'main' : 'small',
@@ -123,7 +124,7 @@ class App(Engine):
             return 'Screen %dx%d / Visible tiles %dx%d' % (res.x,res.y,tiles.x,tiles.y,)
         State.hud.add('Screen', Stat(State.hud.next_pos(),
             '', callback=screen_info, interval=2000))
-        State.show_hud = True
+        State.clock.schedule_update_priority(State.hud.update, 1.0)
         
         # Create a speed box for converting mouse position to destination
         # and scroll speed.
@@ -142,8 +143,6 @@ class App(Engine):
         if self.mouse_down:
             self.update_mouse_movement(pygame.mouse.get_pos())
         self.update_camera_position()
-        State.camera.update()
-        State.hud.update()
         
     def update_mouse_movement(self, pos):
         # Angle of movement.
@@ -186,7 +185,6 @@ class App(Engine):
     def draw(self, dt):
         """overrides Engine.draw"""
         # Draw stuff.
-        State.camera.interpolate()
         State.screen.clear()
         toolkit.draw_tiles()
         toolkit.draw_grid()
@@ -203,6 +201,12 @@ class App(Engine):
         avatar = camera.target
         camera.surface.blit(avatar.image, camera.screen_center)
         
+    def swap_camera(self):
+        self.unschedule_default()
+        State.restore(self.next_state[State.name], ['camera'])
+        self.schedule_default()
+        self.speed_box.center = State.camera.abs_screen_center
+    
     def on_mouse_button_down(self, pos, button):
         self.mouse_down = True
         
@@ -212,12 +216,7 @@ class App(Engine):
     def on_key_down(self, unicode, key, mod):
         # Turn on key-presses.
         if key == K_TAB:
-            # Select the next state name and and restore it.
-            State.restore(self.next_state[State.name], ['camera'])
-            if State.name == 'small':
-                self.speed_box.center = State.camera.abs_screen_center
-            else:
-                self.speed_box.center = State.camera.abs_screen_center
+            self.swap_camera()
         elif key == K_g:
             State.show_grid = not State.show_grid
         elif key == K_l:

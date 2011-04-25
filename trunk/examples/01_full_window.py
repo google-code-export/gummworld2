@@ -49,16 +49,7 @@ class App(Engine):
     def update(self, dt):
         """overrides Engine.update"""
         self.update_camera_position()
-        State.camera.update()
 
-    def draw(self, dt):
-        """overrides Engine.draw"""
-        # Draw stuff.
-        State.camera.interpolate()
-        State.screen.clear()
-        toolkit.draw_tiles()
-        State.screen.flip()
-        
     def update_camera_position(self):
         """update the camera's position if any movement keys are held down
         """
@@ -69,6 +60,13 @@ class App(Engine):
             wx = max(min(wx,rect.right), rect.left)
             wy = max(min(wy,rect.bottom), rect.top)
             camera.position = wx,wy
+        
+    def draw(self, dt):
+        """overrides Engine.draw"""
+        # Draw stuff.
+        State.screen.clear()
+        toolkit.draw_tiles()
+        State.screen.flip()
         
     def on_key_down(self, unicode, key, mod):
         # Turn on key-presses.

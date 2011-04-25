@@ -78,7 +78,7 @@ class Engine(object):
         screen_surface=None, resolution=(600,600), display_flags=0, caption=None,
         camera_target=None, camera_view=None, camera_view_rect=None,
         tile_size=(128,128), map_size=(10,10),
-        update_speed=30, frame_speed=30,
+        update_speed=30, frame_speed=30, default_schedules=True,
         world_type=NO_WORLD, world_args={}):
         """Construct an instance of Engine.
         
@@ -161,14 +161,27 @@ class Engine(object):
         The clock sacrifices frames per second in order to achieve the desired
         updates per second. If frame_speed is 0 the frame rate is uncapped.
         
-        The Engine class schedules two items that are run every time update()
-        is called: event processing and world step. Event processing is
-        scheduled with a priority of -2.0. World stepping is scheduled with a
-        priority of -1.0. update() always has a priority of 0.0. This means
-        events are processed first, then the world is stepped, then update() is
-        called. This allows user items to be scheduled in between these engine
-        items by using an appropriate float value: lower priorities will be run
-        first.
+        Engine.update() and Engine.draw() are registered as callbacks in the
+        clock.
+        
+        By default the Engine class schedules these additional items:
+            
+            clock.schedule_update_priority(self._get_event, -2.0)
+            clock.schedule_update_priority(State.world.step, -1.0)
+            clock.schedule_update_priority(State.camera.update, 1.0)
+            clock.schedule_frame_priority(State.camera.interpolate, -1.0)
+            
+        The first three items coincide with the clock's callback to
+        Engine.update(). The last item coincides with Engine.draw().
+        
+        The use of priorities allows user items to be scheduled in between these
+        default items by using an appropriate float value: lower priorities will
+        be run first. See gameclock.GameClock.schedule_*_priority().
+        
+        To prevent scheduling the world and camera items, pass the constructor
+        argument default_schedules=False. If these are not scheduled by Engine,
+        the using program will either need to schedule them or place them
+        directly in the overridden update() and draw() methods, as appropriate.
         """
         
         ## If you don't use this engine, then in general you will still want
@@ -223,16 +236,41 @@ class Engine(object):
             time_source = None
         else:
             time_source = lambda:pygame.time.get_ticks()/1000.
+        ## Create the camera, specifying callbacks for update() and draw().
         State.clock = GameClock(
             update_speed, frame_speed,
             update_callback=self.update, frame_callback=self.draw,
             time_source=time_source)
-        ## Schedule default items.
-        State.clock.schedule_update_priority(self._get_events, -2.0)
-        State.clock.schedule_update_priority(State.world.step, -1.0)
         
+        ## Default schedules.
+        State.clock.schedule_update_priority(self._get_events, -2.0)
+        if default_schedules:
+            self.schedule_default()
+        
+        ## Init joysticks.
         self._joysticks = pygame_utils.init_joystick()
         self._get_pygame_events = pygame.event.get
+    
+    def schedule_default(self):
+        """Schedule default items.
+        
+        Note: These are not tracked. If you intend to manually replace
+        State.world or State.camera after constructing the Engine object,
+        you'll likely want to unschedule some or all of these and manage the
+        schedules yourself. If you replace the objects without unscheduling
+        their callbacks, the lost references will result in memory and CPU
+        leaks.
+        """
+        State.clock.schedule_update_priority(State.world.step, -1.0)
+        State.clock.schedule_update_priority(State.camera.update, 1.0)
+        State.clock.schedule_frame_priority(State.camera.interpolate, -1.0)
+    
+    def unschedule_default(self):
+        """Unschedule default items.
+        """
+        State.clock.unschedule(State.world.step)
+        State.clock.unschedule(State.camera.update)
+        State.clock.unschedule(State.camera.interpolate)
     
     def run(self):
         """Start the run loop.

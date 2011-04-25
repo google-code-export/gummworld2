@@ -53,25 +53,28 @@ class App(Engine):
         State.default_attrs = ['camera','map']
         
         ## Set up the first view. Save the state.
-        State.camera.position = State.world.rect.center
         State.camera.update_when_restored = False
         toolkit.make_tiles()
         self.view1 = State.camera.view
         State.save(self.view1)
         
-        ## Set up the second view. We can get tile_size and map_size from the
-        ## first map. Save the state.
+        ## Set up the second view and camera.
         self.view2 = View(State.screen.surface,
             Rect(half_width,0, half_width,full_height))
         State.camera = Camera(model.Object(), self.view2)
-        State.camera.position = State.world.rect.center
         State.camera.update_when_restored = False
+        ## Make another map.
         State.map = Map(State.map.tile_size, State.map.map_size)
         toolkit.make_tiles2()
-        State.clock.schedule_frame(State.camera.interpolate)
+        ## Save the state.
         State.save(self.view2)
         
-        # Add some data to contribute to motion.
+        ## Schedule the second camera callbacks like Engine does.
+        State.clock.schedule_update_priority(State.camera.update, 1.0)
+        State.clock.schedule_frame_priority(State.camera.interpolate, -1.0)
+        State.clock.schedule_interval(self.set_caption, 2.)
+        
+        # Some data to contribute to motion.
         self.view1.angle = 180
         self.view1.step = -6
         self.view1.radius = 64
@@ -79,35 +82,42 @@ class App(Engine):
         self.view2.step = -3
         self.view2.radius = 64
         
+        # Force the initial camera positions since we could not calculate them
+        # until after the views were constructed.
+        for view in (self.view1,self.view2):
+            camera = state.states[view]['camera']
+            angle,pos = self.calc_camera_position(view)
+            camera.init_position(pos)
+        
     def update(self, dt):
         """overrides Engine.update"""
         ## Restore each view and update its camera.
         for view in (self.view1, self.view2):
             State.restore(view)
             self.update_camera_position(view)
-            State.camera.update()
-        if view.angle == 0:
-            pygame.display.set_caption(
-                self.caption + ' - %d fps' % State.clock.get_fps())
 
     def update_camera_position(self, view):
         """move the camera's position
         """
-        angle = view.angle
+        new_angle,new_pos = self.calc_camera_position(view)
+        State.camera.position = new_pos
+        view.angle = new_angle
+    
+    def calc_camera_position(self, view):
         step = view.step
-        angle = (angle + step) % 360
+        angle = (view.angle + step) % 360
         radius = view.radius
         origin = State.world.rect.center
-        State.camera.position = geometry.point_on_circumference(
-            origin, radius, angle)
-        view.angle = angle
+        return angle, geometry.point_on_circumference(origin, radius, angle)
+        
+    def set_caption(self, dt):
+        pygame.display.set_caption(self.caption+' - %d fps' % State.clock.fps)
     
     def draw(self, dt):
         """overrides Engine.draw"""
         ## Restore each view and draw its map.
         for view in (self.view1, self.view2):
             State.restore(view)
-            State.camera.interpolate()
             view.clear()
             toolkit.draw_tiles()
         State.screen.flip()

@@ -70,8 +70,7 @@ class App(Engine):
         
         # I like huds.
         toolkit.make_hud()
-        State.show_hud = True
-        State.show_world = False
+        State.clock.schedule_update_priority(State.hud.update, 1.0)
         
         # Create a speed box for converting mouse position to destination
         # and scroll speed. 800x600 has aspect ratio 8:6.
@@ -86,6 +85,7 @@ class App(Engine):
         self.mouse_down = False
         self.side_steps = []
         
+        State.show_world = False
         State.speed = 3
         
     def update(self, dt):
@@ -94,8 +94,6 @@ class App(Engine):
         if self.mouse_down:
             self.update_mouse_movement(pygame.mouse.get_pos())
         self.update_camera_position()
-        State.camera.update()
-        State.hud.update()
         
     def update_mouse_movement(self, pos):
         # Angle of movement.
@@ -187,7 +185,6 @@ class App(Engine):
     def draw(self, dt):
         """overrides Engine.draw"""
         # Draw stuff.
-        State.camera.interpolate()
         State.screen.clear()
         toolkit.draw_tiles()
         self.draw_world()
