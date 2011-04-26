@@ -74,6 +74,11 @@ PYMUNK_WORLD = 3
 
 class Engine(object):
     
+    NO_WORLD = NO_WORLD
+    SIMPLE_WORLD = SIMPLE_WORLD
+    QUADTREE_WORLD = QUADTREE_WORLD
+    PYMUNK_WORLD = PYMUNK_WORLD
+    
     def __init__(self,
         screen_surface=None, resolution=(600,600), display_flags=0, caption=None,
         camera_target=None, camera_view=None, camera_view_rect=None,
