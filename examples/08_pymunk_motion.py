@@ -49,7 +49,7 @@ from gummworld2 import Engine, State, CameraTargetSprite, Vec2d
 class Avatar(Sprite):
     
     def __init__(self, screen_pos):
-        super(Avatar, self).__init__()
+        Sprite.__init__(self)
         self.image = pygame.Surface((10,10))
         self.rect = self.image.get_rect()
         pygame.draw.circle(self.image, Color('yellow'), self.rect.center, 4)

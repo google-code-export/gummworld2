@@ -35,7 +35,7 @@ from gummworld2 import context, Engine, State, Camera, View, toolkit
 class App(Engine):
     
     def __init__(self):
-        super(App, self).__init__(
+        Engine.__init__(self,
             caption='04 HUD - TAB: view | H: HUD',
             resolution=(800,600),
             tile_size=(128,128), map_size=(10,10),
