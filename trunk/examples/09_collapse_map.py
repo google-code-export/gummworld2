@@ -55,7 +55,7 @@ from gummworld2 import Engine, State, CameraTargetSprite, Vec2d, Stat, Statf
 class Avatar(CameraTargetSprite):
     
     def __init__(self, map_pos, screen_pos):
-        super(Avatar, self).__init__()
+        CameraTargetSprite.__init__(self)
         self.image = pygame.Surface((10,10))
         self.rect = self.image.get_rect()
         pygame.draw.circle(self.image, Color('yellow'), self.rect.center, 4)
@@ -76,7 +76,7 @@ class App(Engine):
         
         resolution = Vec2d(resolution)
         
-        super(App, self).__init__(
+        Engine.__init__(self,
             caption=caption,
             camera_target=Avatar((325,420), resolution//2),
             resolution=resolution,
