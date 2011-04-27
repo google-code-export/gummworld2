@@ -32,7 +32,9 @@ import pygame
 from pygame.locals import Rect, K_ESCAPE, K_TAB, K_UP, K_DOWN, K_LEFT, K_RIGHT
 
 import paths
-from gummworld2 import *
+import gummworld2
+from gummworld2 import context, state, model, geometry, toolkit
+from gummworld2 import Engine, State, Camera, Map, View, Vec2d
 
 
 class App(Engine):
@@ -44,8 +46,9 @@ class App(Engine):
         half_width = resolution.x // 2
         full_height = resolution.y
         
-        super(App, self).__init__(
+        Engine.__init__(self,
             resolution=resolution, caption=self.caption,
+            tile_size=(128,128), map_size=(10,10),
             camera_view_rect=Rect(0,0, half_width,full_height),
             frame_speed=0)
         
@@ -124,12 +127,12 @@ class App(Engine):
         
     def on_key_down(self, unicode, key, mod):
         if key == K_ESCAPE:
-            quit()
+            context.pop()
     
     def on_quit(self):
-        quit()
+        context.pop()
 
 
 if __name__ == '__main__':
     app = App()
-    app.run()
+    gummworld2.run(app)

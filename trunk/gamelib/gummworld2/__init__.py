@@ -40,9 +40,13 @@ else:
 import pygame
 pygame.init()
 
+from gummworld2 import version
+if __debug__: print 'loading gummworld2 v%s' % version.version
+
 # Classes
 from vec2d import Vec2d
 from state import State
+from context import Context
 from subpixel import SubPixelSurface
 
 from screen import Screen, View
@@ -54,11 +58,11 @@ from ui import HUD, Stat, Statf
 from canvas import Canvas
 from sprite import CameraTargetSprite, BucketSprite, BucketGroup
 
-from engine import Engine, NO_WORLD, SIMPLE_WORLD, QUADTREE_WORLD, PYMUNK_WORLD
+from engine import run, Engine, NO_WORLD, SIMPLE_WORLD, QUADTREE_WORLD, PYMUNK_WORLD
 
 
 # Toolkits and utilities
-import version
+import context
 import model
 import data
 import geometry

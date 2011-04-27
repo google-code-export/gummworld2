@@ -44,21 +44,19 @@ Watch what happens to the frame rate as tile size increases.
 
 import pygame
 from pygame.sprite import Sprite
-from pygame.locals import (
-    FULLSCREEN,
-    Color,
-    K_TAB, K_ESCAPE, K_g, K_l, K_0, K_1, K_2, K_9,
-)
+from pygame.locals import *
 
 import paths
-from gummworld2 import *
+import gummworld2
+from gummworld2 import context, data, model, geometry, toolkit
+from gummworld2 import Engine, State, CameraTargetSprite, Vec2d, Stat, Statf
 
 
 class Avatar(CameraTargetSprite):
     
     def __init__(self, map_pos, screen_pos):
         super(Avatar, self).__init__()
-        self.image = pygame.surface.Surface((10,10))
+        self.image = pygame.Surface((10,10))
         self.rect = self.image.get_rect()
         pygame.draw.circle(self.image, Color('yellow'), self.rect.center, 4)
         self.image.set_colorkey(Color('black'))
@@ -88,42 +86,31 @@ class App(Engine):
         # Load Tiled TMX map, then update the world and camera.
         self.map = toolkit.load_tiled_tmx_map(
             data.filepath('map', 'Gumm no swamps.tmx'))
-        State.map = self.map
-        State.world.rect = State.map.rect.copy()
+        self.world = model.NoWorld(self.map.rect)
+        self.set_state()
+        self.schedule_default()
         # The collapse stat for the hud.
         self.collapse = 1
-        
-        # Save first camera.
-        State.save('main', ['camera'])
-        # Make a second camera.
-        State.camera = Camera(State.camera.target,
-            View(State.screen.surface, pygame.Rect(30,20,*State.screen.size*2//3)))
-        State.name = 'small'
-        State.save(State.name, ['camera'])
-        # Schedule default items. (Switch them later when we switch cameras.)
-        self.schedule_default()
-        
-        # Easy way to select the "next" state name.
-        self.next_state = {
-            'main' : 'small',
-            'small' : 'main',
-        }
         
         # I like huds. Add more stuff to the canned hud.
         toolkit.make_hud(caption)
         State.hud.add('Collapse', Statf(State.hud.next_pos(),
             'Collapse %d', callback=lambda:self.collapse,
-            interval=2000))
+            interval=2.))
         State.hud.add('Tile size', Statf(State.hud.next_pos(),
             'Tile size %s', callback=lambda:str(tuple(State.map.tile_size)),
-            interval=2000))
+            interval=2.))
         def screen_info():
+            visible_tiles = State.camera.visible_tile_range
             res = State.screen.size
-            vis = State.camera.visible_tile_range[0]
-            tiles = Vec2d(vis[2]-vis[0], vis[3]-vis[1])
+            if len(visible_tiles):
+                vis = visible_tiles[0]
+                tiles = Vec2d(vis[2]-vis[0], vis[3]-vis[1])
+            else:
+                tiles = Vec2d(0,0)
             return 'Screen %dx%d / Visible tiles %dx%d' % (res.x,res.y,tiles.x,tiles.y,)
         State.hud.add('Screen', Stat(State.hud.next_pos(),
-            '', callback=screen_info, interval=2000))
+            '', callback=screen_info, interval=2.))
         State.clock.schedule_update_priority(State.hud.update, 1.0)
         
         # Create a speed box for converting mouse position to destination
@@ -201,12 +188,6 @@ class App(Engine):
         avatar = camera.target
         camera.surface.blit(avatar.image, camera.screen_center)
         
-    def swap_camera(self):
-        self.unschedule_default()
-        State.restore(self.next_state[State.name], ['camera'])
-        self.schedule_default()
-        self.speed_box.center = State.camera.abs_screen_center
-    
     def on_mouse_button_down(self, pos, button):
         self.mouse_down = True
         
@@ -215,9 +196,7 @@ class App(Engine):
         
     def on_key_down(self, unicode, key, mod):
         # Turn on key-presses.
-        if key == K_TAB:
-            self.swap_camera()
-        elif key == K_g:
+        if key == K_g:
             State.show_grid = not State.show_grid
         elif key == K_l:
             State.show_labels = not State.show_labels
@@ -232,12 +211,12 @@ class App(Engine):
             State.world.rect = State.map.rect.copy()
             self.collapse = n
         elif key == K_ESCAPE:
-            quit()
+            context.pop()
         
     def on_quit(self):
-        quit()
+        context.pop()
 
 
 if __name__ == '__main__':
     app = App()
-    app.run()
+    gummworld2.run(app)

@@ -29,7 +29,8 @@ import pygame
 from pygame.locals import *
 
 import paths
-from gummworld2 import State, Engine, Vec2d, toolkit
+import gummworld2
+from gummworld2 import context, State, Engine, Vec2d, toolkit
 
 
 class CameraTarget(object):
@@ -62,6 +63,7 @@ class App(Engine):
         
         Engine.__init__(self,
             resolution=screen_size,
+            tile_size=tile_size, map_size=map_size,
             camera_target=CameraTarget(screen_size//2),
             frame_speed=0)
         
@@ -83,7 +85,7 @@ class App(Engine):
         elif key == K_UP: self.movey += -State.speed
         elif key == K_RIGHT: self.movex += State.speed
         elif key == K_LEFT: self.movex += -State.speed
-        elif key == K_ESCAPE: quit()
+        elif key == K_ESCAPE: context.pop()
     
     def on_key_up(self, key, mod):
         if key == K_DOWN: self.movey -= State.speed
@@ -92,9 +94,9 @@ class App(Engine):
         elif key == K_LEFT: self.movex -= -State.speed
     
     def on_quit(self):
-        quit()
+        context.pop()
 
 
 if __name__ == '__main__':
     app = App()
-    app.run()
+    gummworld2.run(app)

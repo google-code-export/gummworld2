@@ -37,21 +37,19 @@ Thanks to dr0id for his nice tiledtmxloader module:
 
 import pygame
 from pygame.sprite import Sprite
-from pygame.locals import (
-    FULLSCREEN,
-    Color,
-    K_ESCAPE, K_g, K_l,
-)
+from pygame.locals import *
 
 import paths
-from gummworld2 import *
+import gummworld2
+from gummworld2 import context, data, model, geometry, toolkit
+from gummworld2 import Engine, State, CameraTargetSprite, Vec2d
 
 
 class Avatar(CameraTargetSprite):
     
     def __init__(self, map_pos, screen_pos):
         super(Avatar, self).__init__()
-        self.image = pygame.surface.Surface((10,10))
+        self.image = pygame.Surface((10,10))
         self.rect = self.image.get_rect()
         pygame.draw.circle(self.image, Color('yellow'), self.rect.center, 4)
         self.image.set_colorkey(Color('black'))
@@ -65,17 +63,19 @@ class App(Engine):
         
         resolution = Vec2d(resolution)
         
-        super(App, self).__init__(
+        Engine.__init__(self,
             caption='07 Tiled Map -  G: grid | L: labels',
-            camera_target=Avatar((325,420), resolution//2),
             resolution=resolution,
+            camera_target=Avatar((325,420), resolution//2),
             frame_speed=0)
         
         ## Load Tiled TMX map, then update the world's dimensions. Really, all
         ## there is to it. See the toolkit module for more detail.
-        State.map = toolkit.load_tiled_tmx_map(
+        self.map = toolkit.load_tiled_tmx_map(
             data.filepath('map', 'Gumm no swamps.tmx'))
-        State.world.rect = State.map.rect.copy()
+        self.world = model.NoWorld(self.map.rect)
+        ## Update State after manual initialization of map and world.
+        self.set_state()
         
         # I like huds.
         toolkit.make_hud()
@@ -169,12 +169,12 @@ class App(Engine):
         elif key == K_l:
             State.show_labels = not State.show_labels
         elif key == K_ESCAPE:
-            quit()
+            context.pop()
         
     def on_quit(self):
-        quit()
+        context.pop()
 
 
 if __name__ == '__main__':
     app = App()
-    app.run()
+    gummworld2.run(app)

@@ -82,25 +82,22 @@ class State(object):
     
     name = 'init'               # name of initial saved state
     
-    ## objects
+    ## core objects
     
-    screen = None               # gamelib.screen.Screen
-    world = None                # gamelib.model.World
-    world_type = None           # gamelib.engine.*_WORLD
+    screen = None               # screen.Screen
+    world = None                # model.World
+    world_type = None           # engine.*_WORLD
     
-    camera = None               # gamelib.Camera
-    map = None                  # gamelib.Map
+    camera = None               # camera.Camera
+    camera_target = None        # camera.Camera.target
+    map = None                  # map.Map
     
-    clock = None                # gamelib.GameClock
-    menu = None                 # gamelib.PopupMenu
+    clock = None                # gameclock.GameClock
+    menu = None                 # popup_menu.PopupMenu
     
     ## game settings
     
-    running = False             # Engine.run() terminator
     speed = 4                   # an arbitrary speed constant
-## obsolesced: use State.clock.update_elapsed instead, or get dt from a
-## schedule callback.
-##    dt = 0                      # milliseconds elapsed in previous game tick
     
     ## map editor settings
     

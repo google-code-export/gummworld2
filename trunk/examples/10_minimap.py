@@ -41,15 +41,19 @@ import pygame
 from pygame.locals import *
 
 import paths
-from gummworld2 import *
+import gummworld2
+from gummworld2 import (
+    context, toolkit,
+    Engine, State, BucketSprite, BucketGroup, SubPixelSurface, View, Vec2d,
+)
 
 
 class Sprite(BucketSprite):
     """A fast moving square of random color."""
     
     def __init__(self):
-        super(Sprite, self).__init__()
-        self.image = pygame.surface.Surface((10,10))
+        BucketSprite.__init__(self)
+        self.image = pygame.Surface((10,10))
         rr = randrange
         color = Color(rr(128,255), rr(128,255), rr(128,255), rr(128,255))
         self.image.fill(color)
@@ -85,7 +89,10 @@ class Minimap(object):
         size = size / State.world.rect.size * self.mini_screen.rect.size
         self.tiny_rect.size = round(size.x),round(size.y)
         
-        # A dot represents a full sprite on the minimap.
+        # A dot represents a full sprite on the minimap. SubPixelSurface is a
+        # generated set of antialiased images that give the illusion of movement
+        # smaller than one pixel. If we did not do this the dots would have an
+        # annoying jerky movement.
         dot = pygame.surface.Surface((1,1))
         dot.fill(Color('white'))
         self.dot = SubPixelSurface(dot)
@@ -134,6 +141,7 @@ class App(Engine):
         super(App, self).__init__(
             caption=self.caption,
             resolution=(600,600),
+            tile_size=(128,128), map_size=(10,10),
             frame_speed=0)
         
         # Set up the minimap.
@@ -204,7 +212,7 @@ class App(Engine):
         elif key == K_LEFT:
             self.move_x = -1 * State.speed
         elif key == K_ESCAPE:
-            quit()
+            context.pop()
         
     def on_key_up(self, key, mod):
         # Turn off key-presses.
@@ -214,9 +222,9 @@ class App(Engine):
             self.move_x = 0
         
     def on_quit(self):
-        quit()
+        context.pop()
 
 
 if __name__ == '__main__':
     app = App()
-    app.run()
+    gummworld2.run(app)

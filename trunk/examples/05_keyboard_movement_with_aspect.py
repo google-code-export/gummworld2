@@ -26,10 +26,11 @@ Gummworld2.
 
 
 import pygame
-from pygame.locals import K_TAB, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_ESCAPE
+from pygame.locals import *
 
 import paths
-from gummworld2 import *
+import gummworld2
+from gummworld2 import context, Engine, State, Camera, View, Vec2d, toolkit
 
 
 class App(Engine):
@@ -39,23 +40,24 @@ class App(Engine):
         ## This is not necessary for the effect, as the scrolling suggests more
         ## playfield is visible along the y-axis. However, if the tiling pattern
         ## is visible a "squat" appearance to the tiles can add to the effect.
-        super(App, self).__init__(
+        Engine.__init__(self,
             caption='05 Keyboard Movement with Aspect - Press TAB to cycle views',
-            tile_size=(128,64), map_size=(10,20), frame_speed=0)
-
+            resolution=(600,600),
+            tile_size=(128,64), map_size=(10,20),
+            frame_speed=0, default_schedules=False)
+        
         ## Map scrolls 1.0X on x-axis, 0.5X on y-axis. See on_key_down() for the
         ## application of these values. The net visual effect is that the map
         ## scrolls slower along the y-axis than the x-axis.
         self.aspect = Vec2d(1.0, 0.5)
-
+        
         # Create two cameras.
-        self.unschedule_default()
+        State.camera.init_position(State.world.rect.center)
         State.save('main')
+        State.name = 'main'
         State.camera = Camera(State.camera.target,
             View(State.screen.surface, pygame.Rect(30,20,500,500)))
-        State.name = 'small'
-        State.save(State.name)
-        self.schedule_default()
+        State.save('small')
         
         # Easy way to select the "next" state name.
         self.next_state = {
@@ -71,14 +73,12 @@ class App(Engine):
         
         self.move_x = 0
         self.move_y = 0
-        
-        # Warp avatar to center map.
-        State.camera.init_position(State.world.rect.center)
-        
+    
     def update(self, dt):
         """overrides Engine.update"""
         self.update_camera_position()
-        
+        State.camera.update(dt)
+    
     def update_camera_position(self):
         """update the camera's position if any movement keys are held down
         """
@@ -89,10 +89,11 @@ class App(Engine):
             wx = max(min(wx,rect.right), rect.left)
             wy = max(min(wy,rect.bottom), rect.top)
             camera.position = wx,wy
-        
+    
     def draw(self, dt):
         """overrides Engine.draw"""
         # Draw stuff.
+        State.camera.interpolate()
         State.screen.clear()
         toolkit.draw_tiles()
         toolkit.draw_labels()
@@ -101,7 +102,7 @@ class App(Engine):
             pygame.draw.rect(State.screen.surface, (99,99,99),
                 State.camera.view.parent_rect, 1)
         State.screen.flip()
-        
+    
     def on_key_down(self, unicode, key, mod):
         # Turn on key-presses.
         ## Factor X and Y aspect into speed.
@@ -115,23 +116,21 @@ class App(Engine):
             self.move_x = -1 * State.speed * self.aspect.x
         elif key == K_TAB:
             # Select the next state name and and restore it.
-            self.unschedule_default()
             State.restore(self.next_state[State.name])
-            self.schedule_default()
         elif key == K_ESCAPE:
-            quit()
-        
+            context.pop()
+    
     def on_key_up(self, key, mod):
         # Turn off key-presses.
         if key in (K_DOWN,K_UP):
             self.move_y = 0
         elif key in (K_RIGHT,K_LEFT):
             self.move_x = 0
-        
+    
     def on_quit(self):
-        quit()
+        context.pop()
 
 
 if __name__ == '__main__':
     app = App()
-    app.run()
+    gummworld2.run(app)
