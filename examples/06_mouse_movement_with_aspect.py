@@ -38,20 +38,19 @@ whether the mouse position is more vertical or horizontal.
 
 
 import pygame
-from pygame.locals import (
-    FULLSCREEN,
-    Color, K_ESCAPE, K_g, K_l,
-)
+from pygame.locals import *
 
 import paths
-from gummworld2 import *
+import gummworld2
+from gummworld2 import Engine, State, CameraTargetSprite, Vec2d
+from gummworld2 import context, geometry, toolkit
 
 
 class Avatar(CameraTargetSprite):
     
     def __init__(self, map_pos, screen_pos):
         super(Avatar, self).__init__()
-        self.image = pygame.surface.Surface((10,10))
+        self.image = pygame.Surface((10,10))
         self.rect = self.image.get_rect()
         pygame.draw.circle(self.image, Color('yellow'), self.rect.center, 4)
         self.image.set_colorkey(Color('black'))
@@ -65,16 +64,13 @@ class App(Engine):
         
         resolution = Vec2d(640,480)
         
-        ## Make tiles wider than they are high to an give illusion of depth.
-        ## This is not necessary for the effect, as the scrolling suggests more
-        ## playfield is visible along the y-axis. However, if the tiling pattern
-        ## is visible a "squat" appearance to the tiles can add to the effect.
         super(App, self).__init__(
             caption='06 Mouse Movement with Aspect - G: grid | L: labels',
-            camera_target=Avatar((325,420), resolution//2),
             resolution=resolution,
-            tile_size=(128,64), map_size=(10,20), frame_speed=0)
-
+            camera_target=Avatar((325,420), resolution//2),
+            tile_size=(128,64), map_size=(10,20),
+            frame_speed=0)
+        
         # Make some default content.
         toolkit.make_tiles2()
         toolkit.make_hud()
@@ -92,14 +88,14 @@ class App(Engine):
         self.move_to = None
         self.speed = None
         self.mouse_down = False
-
+    
     def update(self, dt):
         """overrides Engine.update"""
         ## If mouse button is held down update for continuous walking.
         if self.mouse_down:
             self.update_mouse_movement(pygame.mouse.get_pos())
         self.update_camera_position()
-        
+    
     def update_mouse_movement(self, pos):
         ## Speed box center is screen center, this is the origin. Mouse pos is
         ## the other end point, which makes a line. Start by getting the angle
@@ -119,7 +115,7 @@ class App(Engine):
                     self.speed_box.center, (x,y)) / self.max_speed_box
                 break
         self.mouse_down = True
-        
+    
     def update_camera_position(self):
         """update the camera's position if any movement keys are held down
         """
@@ -145,7 +141,7 @@ class App(Engine):
             wx = max(min(wx,rect.right), rect.left)
             wy = max(min(wy,rect.bottom), rect.top)
             camera.position = wx,wy
-        
+    
     def draw(self, dt):
         """overrides Engine.draw"""
         # Draw stuff.
@@ -156,7 +152,7 @@ class App(Engine):
         State.hud.draw()
         self.draw_avatar()
         State.screen.flip()
-        
+    
     def draw_avatar(self):
         camera = State.camera
         avatar = camera.target
@@ -164,10 +160,10 @@ class App(Engine):
     
     def on_mouse_button_down(self, pos, button):
         self.mouse_down = True
-        
+    
     def on_mouse_button_up(self, pos, button):
         self.mouse_down = False
-        
+    
     def on_key_down(self, unicode, key, mod):
         # Turn on key-presses.
         if key == K_g:
@@ -175,12 +171,12 @@ class App(Engine):
         elif key == K_l:
             State.show_labels = not State.show_labels
         elif key == K_ESCAPE:
-            quit()
-        
+            context.pop()
+    
     def on_quit(self):
-        quit()
+        context.pop()
 
 
 if __name__ == '__main__':
     app = App()
-    app.run()
+    gummworld2.run(app)

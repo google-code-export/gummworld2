@@ -28,15 +28,18 @@ import pygame
 from pygame.locals import K_ESCAPE, K_UP, K_DOWN, K_LEFT, K_RIGHT
 
 import paths
-from gummworld2 import *
+import gummworld2
+from gummworld2 import context, Engine, State, toolkit
 
 
 class App(Engine):
     
     def __init__(self):
         
-        super(App, self).__init__(
+        Engine.__init__(self,
             caption='01 Full Window',
+            resolution=(600,600),
+            tile_size=(128,128), map_size=(10,10),
             frame_speed=0)
         
         # Make some default content.
@@ -79,7 +82,7 @@ class App(Engine):
         elif key == K_LEFT:
             self.move_x = -1 * State.speed
         elif key == K_ESCAPE:
-            quit()
+            context.pop()
         
     def on_key_up(self, key, mod):
         # Turn off key-presses.
@@ -89,9 +92,9 @@ class App(Engine):
             self.move_x = 0
         
     def on_quit(self):
-        quit()
+        context.pop()
 
 
 if __name__ == '__main__':
     app = App()
-    app.run()
+    gummworld2.run(app)

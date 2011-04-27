@@ -190,7 +190,8 @@ class Camera(object):
         setting the initial position of the camera, or moving the camera a
         great distance when you don't want it to pan.
         """
-        self.target.position[:] = pos
+        tpos = self.target.position
+        tpos.x,tpos.y = pos
         self._move_to[:] = self._move_from[:] = self._position[:] = pos
         self.interpolate()
     

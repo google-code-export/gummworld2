@@ -39,7 +39,8 @@ import pygame
 from pygame.locals import K_ESCAPE, K_TAB, K_UP, K_DOWN, K_LEFT, K_RIGHT
 
 import paths
-from gummworld2 import *
+import gummworld2
+from gummworld2 import context, Engine, State, Camera, View, toolkit
 
 
 class App(Engine):
@@ -47,22 +48,24 @@ class App(Engine):
     def __init__(self):
         ## Turn off default_schedules. We'll call the camera and world updaters
         ## directly in our update() and draw() methods.
-        super(App, self).__init__(
+        Engine.__init__(self,
             caption='03 Switch View - Press TAB to cycle views',
+            resolution=(600,600),
+            tile_size=(128,128), map_size=(10,10),
             frame_speed=0, default_schedules=False)
         
-        ## Create two cameras so we can switch between them...
+        ## Create a second camera so we can switch between them...
         
         ## Save the main state.
         State.save('main')
+        State.name = 'main'
         
         ## Create a view as the alternate camera's drawing surface, then save
         ## the state under a different name.
         
         State.camera = Camera(State.camera.target,
             View(State.screen.surface, pygame.Rect(33,33,500,500)))
-        State.name = 'small'
-        State.save(State.name)
+        State.save('small')
         
         ## Easy way to select the "next" state name.
         self.next_state = {
@@ -125,7 +128,7 @@ class App(Engine):
             ## with State.save() and State.restore().
             State.restore(self.next_state[State.name])
         elif key == K_ESCAPE:
-            quit()
+            context.pop()
         
     def on_key_up(self, key, mod):
         # Turn off key-presses.
@@ -135,9 +138,9 @@ class App(Engine):
             self.move_x = 0
         
     def on_quit(self):
-        quit()
+        context.pop()
 
 
 if __name__ == '__main__':
     app = App()
-    app.run()
+    gummworld2.run(app)

@@ -104,13 +104,14 @@ import pygame
 from pygame.locals import *
 
 import paths
+import gummworld2
 from gummworld2 import *
 
 
 class Thing(model.Object):
     
     def __init__(self, position):
-        super(Thing, self).__init__()
+        model.Object.__init__(self)
         
         self.rect = pygame.Rect(0,0,20,20)
         
@@ -174,14 +175,14 @@ class App(Engine):
         self.worst_case = 0
         self.num_sprites = 100
 
-        super(App, self).__init__(
+        Engine.__init__(self,
             caption='12 Quadtree Stress Test - [-+]: Entities | W: Worst case | [1239]: Level grid',
             resolution=(600,600),
             tile_size=self.tile_size, map_size=self.map_size,
             update_speed=30, frame_speed=0, default_schedules=False,
             world_type=QUADTREE_WORLD,
         )
-        State.camera.position = 300,300
+        State.camera.init_position((300,300))
         
         # Make starting set of things.
         self.things = []
@@ -204,9 +205,9 @@ class App(Engine):
     
     def make_space(self):
         world_rect = State.world.rect
-        State.world = model.WorldQuadTree(
+        self.world = State.world = model.WorldQuadTree(
             world_rect, min_size=self.min_size, worst_case=self.worst_case)
-        State.world.add(*self.things)
+        State.world.add_list(self.things)
     
     def make_hud(self):
         State.hud = HUD()
@@ -323,7 +324,7 @@ class App(Engine):
             # Set level of grid to show.
             self.draw_level = key - K_0
         elif key == K_ESCAPE:
-            sys.exit()
+            context.pop()
         elif key == K_w:
             # Toggle worst-case handling.
             if self.worst_case == 0:
@@ -348,16 +349,23 @@ class App(Engine):
             State.world.remove(*del_things)
 
     def on_quit(self):
-        sys.exit()
+        context.pop()
 
     def on_mouse_motion(self, pos, rel, buttons):
         self.mouse_thing.position = State.camera.screen_to_world(pos)
         State.world.add(self.mouse_thing)
 
-app = App()
-if True:
-    app.run()
-else:
-    cProfile.run('app.run()')
-    p = pstats.Stats()
-    p.print_stats()
+
+if __name__ == '__main__':
+    
+    def run_it():
+        gummworld2.run(app)
+    
+    app = App()
+
+    if True:
+        run_it()
+    else:
+        cProfile.run('run_it()')
+        p = pstats.Stats()
+        p.print_stats()

@@ -33,11 +33,7 @@ demo.
 
 import pygame
 from pygame.sprite import Sprite
-from pygame.locals import (
-    FULLSCREEN,
-    Color,
-    K_ESCAPE, K_g, K_l,
-)
+from pygame.locals import *
 try:
     import pymunk
 except:
@@ -45,14 +41,16 @@ except:
     quit()
 
 import paths
-from gummworld2 import *
+import gummworld2
+from gummworld2 import context, data, model, geometry, toolkit
+from gummworld2 import Engine, State, CameraTargetSprite, Vec2d
 
 
-class Avatar(pygame.sprite.Sprite):
+class Avatar(Sprite):
     
     def __init__(self, screen_pos):
         super(Avatar, self).__init__()
-        self.image = pygame.surface.Surface((10,10))
+        self.image = pygame.Surface((10,10))
         self.rect = self.image.get_rect()
         pygame.draw.circle(self.image, Color('yellow'), self.rect.center, 4)
         self.rect.center = screen_pos
@@ -62,30 +60,31 @@ class Avatar(pygame.sprite.Sprite):
 class App(Engine):
     
     def __init__(self, resolution=(640,480)):
-        ## Camera target is a pymunk body.
-        super(App, self).__init__(
+        ## Camera target is a pymunk circle body. We want to delay scheduling
+        ## the world and camera items until after we create the world.
+        Engine.__init__(self,
             caption='08 pymunk Motion -  G: grid | L: labels',
-            camera_target=model.CircleBody(),
             resolution=resolution,
-            frame_speed=0,
-            world_type=PYMUNK_WORLD)
+            camera_target=model.CircleBody(),
+            frame_speed=0, default_schedules=False)
         
         # Make an avatar sprite so we have something to draw.
         resolution = Vec2d(resolution)
         self.avatar = Avatar(resolution//2)
         
         # Load Tiled TMX map, then update the world's dimensions.
-        State.map = toolkit.load_tiled_tmx_map(
+        self.map = toolkit.load_tiled_tmx_map(
             data.filepath('map', 'Gumm no swamps.tmx'))
-        State.world.rect = State.map.rect.copy()
+        self.world = model.WorldPymunk(self.map.rect)
+        self.world.add(self.camera_target)
+        # Update State after manual initialization of map and world. Schedule
+        # the world and camera items now.
+        self.set_state()
+        self.schedule_default()
         
         # I like huds.
         toolkit.make_hud()
         State.clock.schedule_update_priority(State.hud.update, 1.0)
-        
-        # Warp avatar to location on map, and add it to the pymunk space.
-        State.camera.target.position = 325,420
-        State.world.add(State.camera.target)
         
         # Create a speed box for converting mouse position to destination
         # and scroll speed.
@@ -97,14 +96,16 @@ class App(Engine):
         self.move_to = None
         self.speed = None
         self.mouse_down = False
-
+        
+        State.camera.init_position((325,420))
+    
     def update(self, dt):
         """overrides Engine.update"""
         # If mouse button is held down update for continuous walking.
         if self.mouse_down:
             self.update_mouse_movement(pygame.mouse.get_pos())
         self.update_camera_position()
-        
+    
     def update_mouse_movement(self, pos):
         # Angle of movement.
         angle = geometry.angle_of(self.speed_box.center, pos)
@@ -119,7 +120,7 @@ class App(Engine):
                 self.speed = geometry.distance(
                     self.speed_box.center, (x,y)) / self.max_speed_box
                 break
-        
+    
     def update_camera_position(self):
         """update the camera's position if any movement keys are held down
         """
@@ -144,7 +145,7 @@ class App(Engine):
             camera.slew(Vec2d(wx,wy), State.clock.update_elapsed)
         elif State.camera.target.velocity != (0,0):
             State.camera.target.velocity = (0,0)
-        
+    
     def draw(self, dt):
         """overrides Engine.draw"""
         # Draw stuff.
@@ -155,17 +156,17 @@ class App(Engine):
         State.hud.draw()
         self.draw_avatar()
         State.screen.flip()
-        
+    
     def draw_avatar(self):
         avatar = self.avatar
         State.camera.surface.blit(avatar.image, avatar.rect)
     
     def on_mouse_button_down(self, pos, button):
         self.mouse_down = True
-        
+    
     def on_mouse_button_up(self, pos, button):
         self.mouse_down = False
-        
+    
     def on_key_down(self, unicode, key, mod):
         # Turn on key-presses.
         if key == K_g:
@@ -173,12 +174,12 @@ class App(Engine):
         elif key == K_l:
             State.show_labels = not State.show_labels
         elif key == K_ESCAPE:
-            quit()
-        
+            context.pop()
+    
     def on_quit(self):
-        quit()
+        context.pop()
 
 
 if __name__ == '__main__':
     app = App()
-    app.run()
+    gummworld2.run(app)

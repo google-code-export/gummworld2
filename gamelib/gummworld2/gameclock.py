@@ -225,10 +225,10 @@ class GameClock(object):
         # interval schedules: trigger on elapsed time
         # update schedules: trigger on update_ready
         # frames schedules: trigger on frame_ready
-        self._schedules = []
-        self._interval_schedules = []
-        self._update_schedules = []
-        self._frame_schedules = []
+        self.schedules = []
+        self.interval_schedules = []
+        self.update_schedules = []
+        self.frame_schedules = []
         self._need_sort = False  # for interval schedules only
         
         # stats
@@ -326,14 +326,14 @@ class GameClock(object):
             self.frame_ready = True
         
         # Schedules cycled every tick.
-        for sched in self._schedules:
+        for sched in self.schedules:
             sched.func(DT, *sched.args, **sched.kwargs)
         
         # Schedules cycled when their interval elapses.
         if self._need_sort:
-            self._interval_schedules.sort(key=_IntervalItem.sort_key)
+            self.interval_schedules.sort(key=_IntervalItem.sort_key)
         self.need_sort = False
-        for sched in self._interval_schedules:
+        for sched in self.interval_schedules:
             due = sched.lasttime + sched.interval*self.dilation
             if TIME >= due:
                 drift = TIME - due
@@ -361,7 +361,7 @@ class GameClock(object):
                 self._last_update = TIME
             # Run the schedules.
             update_called = self.update_callback is None
-            for sched in self._update_schedules:
+            for sched in self.update_schedules:
                 if update_called:
                     sched.func(self.update_elapsed, *sched.args, **sched.kwargs)
                 else:
@@ -387,7 +387,7 @@ class GameClock(object):
                     self._last_frame = TIME
             # Run the schedules.
             frame_called = self.frame_callback is None
-            for sched in self._frame_schedules:
+            for sched in self.frame_schedules:
                 if frame_called:
                     sched.func(self.frame_elapsed, *sched.args, **sched.kwargs)
                 else:
@@ -426,13 +426,15 @@ class GameClock(object):
 
     def schedule(self, func, *args, **kwargs):
         """Schedule an item to be called back each time tick() is called."""
+        self.unschedule(func)
         item = _Item(func, 0, args, kwargs)
-        self._schedules.append(item)
+        self.schedules.append(item)
 
     def schedule_update(self, func, *args, **kwargs):
         """Schedule an item to be called back each time update_ready is True."""
+        self.unschedule(func)
         item = _Item(func, -1, args, kwargs)
-        self._update_schedules.append(item)
+        self.update_schedules.append(item)
     
     def schedule_update_priority(self, func, pri, *args, **kwargs):
         """Schedule an item to be called back each time update_ready is True.
@@ -440,17 +442,19 @@ class GameClock(object):
         Items are called in order of priority, low to high. If the clock's
         update_callback is not None, its priority is always 0.0.
         """
+        self.unschedule(func)
         new_item = _Item(func, pri, args, kwargs)
-        for i,sched in enumerate(self._update_schedules):
+        for i,sched in enumerate(self.update_schedules):
             if sched.pri > new_item.pri:
-                self._update_schedules.insert(i, new_item)
+                self.update_schedules.insert(i, new_item)
                 return
-        self._update_schedules.append(new_item)
+        self.update_schedules.append(new_item)
 
     def schedule_frame(self, func, *args, **kwargs):
         """Schedule an item to be called back each time frame_ready is True."""
+        self.unschedule(func)
         item = _Item(func, 0.0, args, kwargs)
-        self._frame_schedules.append(item)
+        self.frame_schedules.append(item)
     
     def schedule_frame_priority(self, func, pri, *args, **kwargs):
         """Schedule an item to be called back each time frame_ready is True.
@@ -458,12 +462,13 @@ class GameClock(object):
         Items are called in order of priority, low to high. If the clock's
         frame_callback is not None, its priority is always 0.0.
         """
+        self.unschedule(func)
         new_item = _Item(func, pri, args, kwargs)
-        for i,sched in enumerate(self._frame_schedules):
+        for i,sched in enumerate(self.frame_schedules):
             if sched.pri > new_item.pri:
-                self._frame_schedules.insert(i, new_item)
+                self.frame_schedules.insert(i, new_item)
                 return
-        self._frame_schedules.append(new_item)
+        self.frame_schedules.append(new_item)
 
     def schedule_interval(self, func, interval, *args, **kwargs):
         """Schedule an item to be called back each time an interval elapses.
@@ -471,14 +476,15 @@ class GameClock(object):
         Parameters:
             interval -> The time in seconds (float).
         """
+        self.unschedule(func)
         item = _IntervalItem(func, interval, self._get_ticks(), args, kwargs)
-        self._interval_schedules.append(item)
+        self.interval_schedules.append(item)
         self._need_sort = True
     
     def unschedule(self, func):
         """Unschedule a managed function."""
         for sched in (
-            self._schedules, self._update_schedules, self._frame_schedules,
+            self.schedules, self.update_schedules, self.frame_schedules,
         ):
             for item in list(sched):
                 if item.func == func:

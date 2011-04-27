@@ -28,7 +28,8 @@ import pygame
 from pygame.locals import K_TAB, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_ESCAPE, K_h
 
 import paths
-from gummworld2 import *
+import gummworld2
+from gummworld2 import context, Engine, State, Camera, View, toolkit
 
 
 class App(Engine):
@@ -36,15 +37,17 @@ class App(Engine):
     def __init__(self):
         super(App, self).__init__(
             caption='04 HUD - TAB: view | H: HUD',
-            frame_speed=0)
+            resolution=(800,600),
+            tile_size=(128,128), map_size=(10,10),
+            frame_speed=0, default_schedules=False)
         
         # Create two cameras. This will let us switch the view and observe what
         # the HUD reports.
         State.save('main')
+        State.name = 'main'
         State.camera = Camera(State.camera.target,
             View(State.screen.surface, pygame.Rect(30,20,500,500)))
-        State.name = 'small'
-        State.save(State.name)
+        State.save('small')
         
         # Easy way to select the "next" state name.
         self.next_state = {
@@ -108,7 +111,7 @@ class App(Engine):
             # Select the next state name and and restore it.
             State.restore(self.next_state[State.name])
         elif key == K_ESCAPE:
-            quit()
+            context.pop()
         
     def on_key_up(self, key, mod):
         # Turn off key-presses.
@@ -118,9 +121,9 @@ class App(Engine):
             self.move_x = 0
         
     def on_quit(self):
-        quit()
+        context.pop()
 
 
 if __name__ == '__main__':
     app = App()
-    app.run()
+    gummworld2.run(app)

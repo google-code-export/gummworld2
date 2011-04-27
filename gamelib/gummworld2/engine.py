@@ -61,8 +61,8 @@ if __name__ == '__main__':
     import paths
 
 from gummworld2 import (
-    State, Screen, View, model, Map, Camera, GameClock,
-    pygame_utils,
+    State, Context, Screen, View, Map, Camera, GameClock,
+    context, model, pygame_utils,
 )
 
 
@@ -72,7 +72,7 @@ QUADTREE_WORLD = 2
 PYMUNK_WORLD = 3
 
 
-class Engine(object):
+class Engine(Context):
     
     NO_WORLD = NO_WORLD
     SIMPLE_WORLD = SIMPLE_WORLD
@@ -80,9 +80,9 @@ class Engine(object):
     PYMUNK_WORLD = PYMUNK_WORLD
     
     def __init__(self,
-        screen_surface=None, resolution=(600,600), display_flags=0, caption=None,
+        screen_surface=None, resolution=None, display_flags=0, caption=None,
         camera_target=None, camera_view=None, camera_view_rect=None,
-        tile_size=(128,128), map_size=(10,10),
+        map=None, tile_size=None, map_size=None,
         update_speed=30, frame_speed=30, default_schedules=True,
         world_type=NO_WORLD, world_args={}):
         """Construct an instance of Engine.
@@ -192,69 +192,150 @@ class Engine(object):
         ## If you don't use this engine, then in general you will still want
         ## to initialize your State objects in the same order you see here.
         
-        State.world_type = world_type
+        self.world_type = world_type
+        self.screen = None
+        self.caption = caption
+        self.map = None
+        self.world = None
+        self.camera = None
+        self.camera_target = camera_target
+        self.clock = None
         
+        ## Screen.
         if screen_surface:
-            State.screen = Screen(surface=screen_surface)
-        elif State.screen is None:
-            if screen_surface is None:
-                State.screen = Screen(resolution, display_flags)
-            else:
-                State.screen = Screen(surface=screen_surface)
-            
-        if caption is not None:
-            pygame.display.set_caption(caption)
+            if __debug__: print 'Engine: Screen(surface=screen_surface)'
+            self.screen = Screen(surface=screen_surface)
+        elif resolution:
+            if __debug__: print 'Engine: Screen(resolution, display_flags)'
+            self.screen = Screen(resolution, display_flags)
+        else:
+            if __debug__: print 'Engine: no screen surface or resolution: skipping screen creation'
         
-        State.map = Map(tile_size, map_size)
+        ## Map.
+        if map:
+            if __debug__: print 'Engine: using pre-made map'
+            self.map = map
+        elif tile_size and map_size:
+            if __debug__: print 'Engine: Map(tile_size, map_size)'
+            self.map = Map(tile_size, map_size)
+        else:
+            if __debug__: print 'Engine: no map, tile_size, or map_size: skipping map creation'
         
-        ## This is the only complicated thing in here. If you want to use the
-        ## camera target as a world entity, you have to use the right object
-        ## type. Type checking and exception handling is purposely not done so
-        ## that the code is easier to read.
-        if world_type == NO_WORLD:
-            State.world = model.NoWorld(State.map.rect)
+        ## If you want to use the camera target as a world entity, you have to
+        ## use the right object type. Type checking and exception handling are
+        ## not done. This is to allow flexible initialization of the Engine
+        ## context.
+        if __debug__ and self.camera_target:
+            print 'Engine: using pre-made camera target'
+        if not self.map:
+            if __debug__: print 'Engine: no map: skipping world creation'
+            pass
+        elif world_type == NO_WORLD:
+            if __debug__: print 'Engine: NoWorld(self.map.rect)'
+            self.world = model.NoWorld(self.map.rect)
             if camera_target is None:
-                camera_target = model.Object()
+                if __debug__: print 'Engine: making camera target Object()'
+                self.camera_target = model.Object()
         elif world_type == SIMPLE_WORLD:
-            State.world = model.World(State.map.rect)
+            if __debug__: print 'Engine: World(self.map.rect)'
+            self.world = model.World(self.map.rect)
             if camera_target is None:
-                camera_target = model.Object()
+                if __debug__: print 'Engine: making camera target Object()'
+                self.camera_target = model.Object()
         elif world_type == PYMUNK_WORLD:
-            State.world = model.WorldPymunk(State.map.rect)
+            if __debug__: print 'Engine: WorldPymunk(self.map.rect)'
+            self.world = model.WorldPymunk(self.map.rect)
             if camera_target is None:
-                camera_target = model.CircleBody()
+                if __debug__: print 'Engine: making camera target CircleBody()'
+                self.camera_target = model.CircleBody()
         elif world_type == QUADTREE_WORLD:
-            State.world = model.WorldQuadTree(
-                State.map.rect, **world_args)
+            if __debug__: print 'Engine: WorldQuadTree(self.map.rect, **world_args)'
+            self.world = model.WorldQuadTree(self.map.rect, **world_args)
             if camera_target is None:
-                camera_target = model.QuadTreeObject(pygame.Rect(0,0,20,20))
+                if __debug__: print 'Engine: making camera target QuadTreeObject()'
+                self.camera_target = model.QuadTreeObject(pygame.Rect(0,0,20,20))
         
-        if camera_view is None:
-            if camera_view_rect:
-                camera_view = View(State.screen.surface, camera_view_rect)
+        if any((self.camera_target, camera_view, camera_view_rect)):
+            if camera_view:
+                if __debug__: print 'Engine: using pre-made camera view'
             else:
-                camera_view = State.screen
-        State.camera = Camera(camera_target, camera_view)
+                if camera_view_rect:
+                    if __debug__: print 'Engine: making camera view from rect'
+                    camera_view = View((self.screen or State.screen).surface, camera_view_rect)
+                else:
+                    if __debug__: print 'Engine: making camera view from screen'
+                    camera_view = self.screen
+            if __debug__: print 'Engine: making camera'
+            self.camera = Camera(self.camera_target, camera_view)
+        else:
+            if __debug__: print 'Engine: no camera target, view, or view rect: skipping camera creation'
         
         ## Clock setup. Use pygame.time.get_ticks unless in Windows.
         if sys.platform in('win32','cygwin'):
+            if __debug__: print 'Engine: using time.clock for Windows platform'
             time_source = None
         else:
+            if __debug__: print 'Engine: using pygame.time.get_ticks for non-Windows platform'
             time_source = lambda:pygame.time.get_ticks()/1000.
         ## Create the camera, specifying callbacks for update() and draw().
-        State.clock = GameClock(
+        if __debug__: print 'Engine: creating GameClock'
+        self.clock = GameClock(
             update_speed, frame_speed,
             update_callback=self.update, frame_callback=self.draw,
             time_source=time_source)
         
         ## Default schedules.
-        State.clock.schedule_update_priority(self._get_events, -2.0)
+        if __debug__: print 'Engine: scheduling _get_events at priority -2.0'
+        self.clock.schedule_update_priority(self._get_events, -2.0)
         if default_schedules:
+            if __debug__: print 'Engine: scheduling default items'
             self.schedule_default()
         
         ## Init joysticks.
-        self._joysticks = pygame_utils.init_joystick()
+        if not pygame.joystick.get_init():
+            if __debug__: print 'Engine: initializing joysticks'
+            self._joysticks = pygame_utils.init_joystick()
         self._get_pygame_events = pygame.event.get
+        
+        ## Dumb test to discern if we need to initialize State. If this test is
+        ## true we'll assume the top-level game state needs to be initialized.
+        ## If this test is false the user is either using the context manager,
+        ## or man-handling the library to switch contexts.
+        if State.screen is None and self.screen:
+            if __debug__: print 'Engine: copying my objects to State'
+            self.set_state()
+    
+    def enter(self):
+        """Called when the context is entered.
+        
+        If you override this, make sure you call the super.
+        """
+        self.set_state()
+    
+    def resume(self):
+        """Called when the context is resumed.
+        
+        If you override this, make sure you call the super.
+        """
+        self.set_state()
+    
+    def set_state(self):
+        if self.world_type is not None:
+            State.world_type = self.world_type
+        if self.screen is not None:
+            State.screen = self.screen
+        if self.caption is not None:
+            pygame.display.set_caption(self.caption)
+        if self.map is not None:
+            State.map = self.map
+        if self.world is not None:
+            State.world = self.world
+        if self.camera is not None:
+            State.camera = self.camera
+        if self.camera_target is not None:
+            State.camera_target = self.camera_target
+        if self.clock is not None:
+            State.clock = self.clock
     
     def schedule_default(self):
         """Schedule default items.
@@ -266,32 +347,20 @@ class Engine(object):
         their callbacks, the lost references will result in memory and CPU
         leaks.
         """
-        State.clock.schedule_update_priority(State.world.step, -1.0)
-        State.clock.schedule_update_priority(State.camera.update, 1.0)
-        State.clock.schedule_frame_priority(State.camera.interpolate, -1.0)
+        if self.world:
+            self.clock.schedule_update_priority(self.world.step, -1.0)
+        if self.camera:
+            self.clock.schedule_update_priority(self.camera.update, 1.0)
+            self.clock.schedule_frame_priority(self.camera.interpolate, -1.0)
     
     def unschedule_default(self):
         """Unschedule default items.
         """
-        State.clock.unschedule(State.world.step)
-        State.clock.unschedule(State.camera.update)
-        State.clock.unschedule(State.camera.interpolate)
-    
-    def run(self):
-        """Start the run loop.
-        
-        To exit the run loop gracefully, set State.running=False.
-        """
-        State.running = True
-        while State.running:
-            State.clock.tick()
-## No longer using direct polling. Using scheduled callback instead.
-##            if State.clock.update_ready():
-##                self._get_events()
-##                self.update()
-##                State.world.step()
-##            if State.clock.frame_ready():
-##                self.draw()
+        if self.world:
+            self.clock.unschedule(self.world.step)
+        if self.camera:
+            self.clock.unschedule(self.camera.update)
+            self.clock.unschedule(self.camera.interpolate)
     
     def update(self, dt):
         """Override this method. Called by run() when the clock signals an
@@ -375,6 +444,16 @@ class Engine(object):
     def on_user_event(self, e): pass
     def on_video_expose(self): pass
     def on_video_resize(self, size, w, h): pass
+
+
+def run(app):
+    """Push app onto the context stack and start the run loop.
+    
+    To exit the run loop gracefully, call context.pop().
+    """
+    context.push(app)
+    while context.top():
+        State.clock.tick()
 
 
 if __name__ == '__main__':
