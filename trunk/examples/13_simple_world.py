@@ -30,12 +30,10 @@ This uses the dumb model.World class to store model objects.
 from random import randrange, choice
 
 import pygame
-from pygame.locals import (
-    Color,
-    K_ESCAPE, K_SPACE, K_UP, K_DOWN, K_LEFT, K_RIGHT,
-)
+from pygame.locals import *
 
 import paths
+import gummworld2
 from gummworld2 import *
 
 
@@ -53,7 +51,7 @@ class Thing(model.Object):
     """
     
     def __init__(self, color_name, size):
-        super(Thing, self).__init__()
+        model.Object.__init__(self)
         self.color = color_name
         self.size = size
         self.rect = pygame.Rect(0,0,*size)
@@ -95,8 +93,10 @@ class App(Engine):
     
     def __init__(self):
         
-        super(App, self).__init__(
+        Engine.__init__(self,
             caption='13 Simple World - Space: show images',
+            resolution=(800,600),
+            tile_size=(128,128), map_size=(10,10),
             frame_speed=0, default_schedules=False,
             world_type=SIMPLE_WORLD)
         
@@ -123,6 +123,8 @@ class App(Engine):
         # Hold cursor key-down states.
         self.move_x = 0
         self.move_y = 0
+        
+        State.camera.init_position(State.screen.center)
         
     def update(self, dt):
         """overrides Engine.update"""
@@ -187,7 +189,7 @@ class App(Engine):
             else:
                 pygame.display.set_caption('13 Simple World - Space: show wireframe')
         elif key == K_ESCAPE:
-            quit()
+            context.pop()
         
     def on_key_up(self, key, mod):
         # Turn off key-presses.
@@ -202,9 +204,9 @@ class App(Engine):
             self.move_x = 0
         
     def on_quit(self):
-        quit()
+        context.pop()
 
 
 if __name__ == '__main__':
     app = App()
-    app.run()
+    gummworld2.run(app)

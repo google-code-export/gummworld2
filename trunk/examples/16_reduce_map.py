@@ -58,20 +58,17 @@ to 400 tiles.
 
 import pygame
 from pygame.sprite import Sprite
-from pygame.locals import (
-    FULLSCREEN,
-    Color,
-    K_ESCAPE, K_b, K_c, K_g, K_l, K_o, K_r,
-)
+from pygame.locals import *
 
 import paths
+import gummworld2
 from gummworld2 import *
 
 
 class Avatar(CameraTargetSprite):
     
     def __init__(self, map_pos, screen_pos):
-        super(Avatar, self).__init__()
+        CameraTargetSprite.__init__(self)
         self.image = pygame.surface.Surface((10,10))
         self.rect = self.image.get_rect()
         pygame.draw.circle(self.image, Color('yellow'), self.rect.center, 4)
@@ -92,7 +89,7 @@ class App(Engine):
         
         resolution = Vec2d(resolution)
         
-        super(App, self).__init__(
+        Engine.__init__(self,
             caption=caption,
             camera_target=Avatar(resolution//2, resolution//2),
             resolution=resolution,
@@ -101,8 +98,10 @@ class App(Engine):
         # Load Tiled TMX map, then update the world and camera.
         self.original_map = toolkit.load_tiled_tmx_map(
             data.filepath('map', 'Gumm multi layer.tmx'))
-        State.map = self.original_map
-        State.world.rect = State.map.rect.copy()
+        self.map = self.original_map
+        self.world = model.NoWorld(self.map.rect)
+        self.set_state()
+        
         # The map reduced.
         self.reduced_map = toolkit.reduce_map_layers(
             self.original_map, range(len(self.original_map.layers)))
@@ -117,7 +116,7 @@ class App(Engine):
         toolkit.make_hud(caption)
         State.hud.add('Tile size', Statf(State.hud.next_pos(),
             'Tile size %s', callback=lambda:str(tuple(State.map.tile_size)),
-            interval=2000))
+            interval=2.))
         def screen_info():
             vis = State.camera.visible_tile_range
             if len(vis):
@@ -128,7 +127,7 @@ class App(Engine):
             else:
                 return ''
         State.hud.add('Screen', Stat(State.hud.next_pos(),
-            '', callback=screen_info, interval=2000))
+            '', callback=screen_info, interval=2.))
         def map_info():
             layern = len(State.map.layers)
             tilen = 0
@@ -136,7 +135,7 @@ class App(Engine):
                 tilen += len(layer)
             return '%d/%d' % (layern,tilen)
         State.hud.add('Layers/Tiles', Statf(State.hud.next_pos(),
-            'Layers/Tiles: %s', callback=map_info, interval=2000))
+            'Layers/Tiles: %s', callback=map_info, interval=2.))
         State.clock.schedule_update_priority(State.hud.update, 1.0)
         
         # Create a speed box for converting mouse position to destination
@@ -232,12 +231,12 @@ class App(Engine):
         elif key == K_o:
             State.map = self.original_map
         elif key == K_ESCAPE:
-            quit()
+            context.pop()
         
     def on_quit(self):
-        quit()
+        context.pop()
 
 
 if __name__ == '__main__':
     app = App()
-    app.run()
+    gummworld2.run(app)

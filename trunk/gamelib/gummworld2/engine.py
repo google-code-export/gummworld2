@@ -209,7 +209,7 @@ class Engine(Context):
             if __debug__: print 'Engine: Screen(resolution, display_flags)'
             self.screen = Screen(resolution, display_flags)
         else:
-            if __debug__: print 'Engine: no screen surface or resolution: skipping screen creation'
+            if __debug__: print 'Engine: SKIPPING screen creation: no screen surface or resolution'
         
         ## Map.
         if map:
@@ -219,7 +219,7 @@ class Engine(Context):
             if __debug__: print 'Engine: Map(tile_size, map_size)'
             self.map = Map(tile_size, map_size)
         else:
-            if __debug__: print 'Engine: no map, tile_size, or map_size: skipping map creation'
+            if __debug__: print 'Engine: SKIPPING map creation: no map, tile_size, or map_size'
         
         ## If you want to use the camera target as a world entity, you have to
         ## use the right object type. Type checking and exception handling are
@@ -228,7 +228,7 @@ class Engine(Context):
         if __debug__ and self.camera_target:
             print 'Engine: using pre-made camera target'
         if not self.map:
-            if __debug__: print 'Engine: no map: skipping world creation'
+            if __debug__: print 'Engine: SKIPPING world creation: no map'
             pass
         elif world_type == NO_WORLD:
             if __debug__: print 'Engine: NoWorld(self.map.rect)'
@@ -268,7 +268,7 @@ class Engine(Context):
             if __debug__: print 'Engine: making camera'
             self.camera = Camera(self.camera_target, camera_view)
         else:
-            if __debug__: print 'Engine: no camera target, view, or view rect: skipping camera creation'
+            if __debug__: print 'Engine: SKIPPING camera creation: no camera target, view, or view rect'
         
         ## Clock setup. Use pygame.time.get_ticks unless in Windows.
         if sys.platform in('win32','cygwin'):

@@ -30,10 +30,8 @@ from pygame.sprite import Sprite
 from pygame.locals import FULLSCREEN, Color, K_ESCAPE, K_TAB
 
 import paths
-from gummworld2 import (
-    data, geometry, model, pygame_utils, toolkit,
-    State, Engine, Vec2d,
-)
+import gummworld2
+from gummworld2 import *
 from gummworld2.geometry import RectGeometry, CircleGeometry, PolyGeometry
 
 
@@ -41,7 +39,7 @@ class Avatar(model.QuadTreeObject):
     
     def __init__(self, map_pos, screen_pos):
         self.image = pygame.surface.Surface((10,10))
-        super(Avatar, self).__init__(self.image.get_rect(), map_pos)
+        model.QuadTreeObject.__init__(self, self.image.get_rect(), map_pos)
         pygame.draw.circle(self.image, Color('yellow'), (5,5), 4)
         self.image.set_colorkey(Color('black'))
         self.screen_position = screen_pos - 5
@@ -53,17 +51,19 @@ class App(Engine):
         
         resolution = Vec2d(resolution)
         
-        super(App, self).__init__(
+        Engine.__init__(self,
             caption='17 Load and Use World - TAB: Show World Geometry',
             camera_target=Avatar((450,770), resolution//2),
             resolution=resolution,
             frame_speed=0)
         
-        State.map = toolkit.collapse_map(
+        self.map = toolkit.collapse_map(
             toolkit.load_tiled_tmx_map(data.filepath('map', 'mini2.tmx')),
             num_tiles=(9,8))
-        State.world = model.WorldQuadTree(
-            State.map.rect, worst_case=1000, collide_entities=True)
+        self.world = model.WorldQuadTree(
+            self.map.rect, worst_case=1000, collide_entities=True)
+        self.set_state()
+        
         entities,tilesheets = toolkit.load_entities(
             data.filepath('map', 'mini2.entities'))
         State.world.add(*entities)
@@ -238,14 +238,14 @@ class App(Engine):
         if key == K_TAB:
             State.show_world = not State.show_world
         elif key == K_ESCAPE:
-            quit()
+            context.pop()
         
     def on_quit(self):
-        quit()
+        context.pop()
         
     # App.on_quit
 
 
 if __name__ == '__main__':
     app = App()
-    app.run()
+    gummworld2.run(app)

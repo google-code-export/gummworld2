@@ -31,7 +31,8 @@ import pygame
 from pygame.locals import *
 
 import paths
-from gummworld2 import State, Engine, MapLayer, Vec2d, toolkit
+import gummworld2
+from gummworld2 import context, State, Engine, MapLayer, Vec2d, toolkit
 
 
 class App(Engine):
@@ -82,7 +83,7 @@ class App(Engine):
         elif key == K_UP: self.move.y += -State.speed
         elif key == K_RIGHT: self.move.x += State.speed
         elif key == K_LEFT: self.move.x += -State.speed
-        elif key == K_ESCAPE: quit()
+        elif key == K_ESCAPE: context.pop()
     
     def on_key_up(self, key, mod):
         if key == K_DOWN: self.move.y -= State.speed
@@ -91,7 +92,7 @@ class App(Engine):
         elif key == K_LEFT: self.move.x -= -State.speed
     
     def on_quit(self):
-        quit()
+        context.pop()
 
 
 def make_map():
@@ -111,7 +112,7 @@ def make_map():
                 pygame.draw.line(sprite.image, Color('white'), p, p)
             layer.append(sprite)
     ## A great big moon.
-    pygame.draw.circle(layer.get_tile_at(2,0).image, Color(255,255,150), (128,128), 75)
+    pygame.draw.circle(layer.get_tile_at(2,0).image, Color(255,255,170), (128,128), 75)
     map.layers.append(layer)
     ## Layer 1: Mountains.
     layer = MapLayer(map.tile_size, map.map_size)
@@ -174,4 +175,4 @@ def make_map():
 
 if __name__ == '__main__':
     app = App()
-    app.run()
+    gummworld2.run(app)
