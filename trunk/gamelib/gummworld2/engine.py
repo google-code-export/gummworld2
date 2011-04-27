@@ -20,8 +20,7 @@ __version__ = '$Id$'
 __author__ = 'Gummbum, (c) 2011'
 
 
-__doc__ = """
-engine.py - A sample engine for Gummworld2.
+__doc__ = """engine.py - A sample engine for Gummworld2.
 
 This module provides an Engine class that can be subclassed for an application
 framework that's easy to use.
@@ -188,6 +187,8 @@ class Engine(Context):
         the using program will either need to schedule them or place them
         directly in the overridden update() and draw() methods, as appropriate.
         """
+        
+        Context.__init__(self)
         
         ## If you don't use this engine, then in general you will still want
         ## to initialize your State objects in the same order you see here.
