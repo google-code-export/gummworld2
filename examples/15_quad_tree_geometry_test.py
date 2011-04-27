@@ -102,6 +102,7 @@ import pygame
 from pygame.locals import *
 
 import paths
+import gummworld2
 from gummworld2 import *
 
 
@@ -192,8 +193,8 @@ class TriangleGeom(geometry.PolyGeometry, GeomBehavior):
     shape = (12,0),(24,24),(0,24)
     
     def __init__(self, position):
-        GeomBehavior.__init__(self)
         geometry.PolyGeometry.__init__(self, self.shape, position)
+        GeomBehavior.__init__(self)
         
         self.image_green = pygame.surface.Surface(self.rect.size)
         self.image_green.fill(Color('black'))
@@ -217,7 +218,7 @@ class App(Engine):
         self.worst_case = 0
         self.num_sprites = 90
 
-        super(App, self).__init__(
+        Engine.__init__(self,
             caption='12 Quadtree Stress Test - [-+]: Entities | W: Worst case | [1239]: Level grid',
             resolution=(600,600),
             tile_size=self.tile_size, map_size=self.map_size,
@@ -254,7 +255,7 @@ class App(Engine):
     
     def make_space(self):
         world_rect = State.world.rect
-        State.world = model.WorldQuadTree(
+        self.world = State.world = model.WorldQuadTree(
             world_rect, min_size=self.min_size, worst_case=self.worst_case,
             ## turn on both rect.colliderect and entity.collided tests
             collide_rects=True,
@@ -400,19 +401,26 @@ class App(Engine):
             del self.things[0:10]
             State.world.remove(*del_things)
         elif key == K_ESCAPE:
-            sys.exit()
+            context.pop()
 
     def on_quit(self):
-        sys.exit()
+        context.pop()
 
     def on_mouse_motion(self, pos, rel, buttons):
         self.mouse_thing.position = State.camera.screen_to_world(pos)
         State.world.add(self.mouse_thing)
 
-app = App()
-if True:
-    app.run()
-else:
-    cProfile.run('app.run()')
-    p = pstats.Stats()
-    p.print_stats()
+
+if __name__ == '__main__':
+    
+    def run_it():
+        gummworld2.run(app)
+    
+    app = App()
+    
+    if True:
+        run_it()
+    else:
+        cProfile.run('run_it()')
+        p = pstats.Stats()
+        p.print_stats()

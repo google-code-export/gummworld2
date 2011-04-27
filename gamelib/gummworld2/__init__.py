@@ -41,7 +41,7 @@ import pygame
 pygame.init()
 
 from gummworld2 import version
-if __debug__: print 'loading gummworld2 v%s' % version.version
+if __debug__: print 'gummworld2 v%s loading...' % version.version
 
 # Classes
 from vec2d import Vec2d
@@ -71,3 +71,5 @@ import popup_menu
 import state
 import ui
 import toolkit
+
+if __debug__: print 'gummworld2 v%s loaded' % version.version
