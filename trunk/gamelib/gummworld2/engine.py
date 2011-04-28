@@ -83,7 +83,8 @@ class Engine(Context):
         camera_target=None, camera_view=None, camera_view_rect=None,
         map=None, tile_size=None, map_size=None,
         update_speed=30, frame_speed=30, default_schedules=True,
-        world_type=NO_WORLD, world_args={}):
+        world_type=NO_WORLD, world_args={},
+        set_state=True):
         """Construct an instance of Engine.
         
         This constructor does the following:
@@ -211,6 +212,7 @@ class Engine(Context):
             self.screen = Screen(resolution, display_flags)
         else:
             if __debug__: print 'Engine: SKIPPING screen creation: no screen surface or resolution'
+            self.screen = State.screen
         
         ## Map.
         if map:
@@ -298,11 +300,8 @@ class Engine(Context):
             self._joysticks = pygame_utils.init_joystick()
         self._get_pygame_events = pygame.event.get
         
-        ## Dumb test to discern if we need to initialize State. If this test is
-        ## true we'll assume the top-level game state needs to be initialized.
-        ## If this test is false the user is either using the context manager,
-        ## or man-handling the library to switch contexts.
-        if State.screen is None and self.screen:
+        ## Initialize State.
+        if set_state:
             if __debug__: print 'Engine: copying my objects to State'
             self.set_state()
     
