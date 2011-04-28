@@ -4,7 +4,7 @@ from math import floor
 
 class SubPixelSurface(object):
 
-    def __init__(self, surface, x_level=3, y_level=None):
+    def __init__(self, surface, level=3):
 
         """Creates a sub pixel surface object.
 
@@ -14,67 +14,49 @@ class SubPixelSurface(object):
 
         """
 
-        self.x_level = x_level
-        self.y_level = y_level or x_level
+        self.level = level
 
-        x_steps = [float(n) / self.x_level for n in xrange(self.x_level)]
-        y_steps = [float(n) / self.y_level for n in xrange(self.y_level)]
+        x_steps = [float(n) / self.level for n in xrange(self.level)]
+        y_steps = [float(n) / self.level for n in xrange(self.level)]
 
         self.surfaces = []
         for frac_y in y_steps:
             row = []
             self.surfaces.append(row)
             for frac_x in x_steps:
-                row.append( SubPixelSurface._generate(surface.copy(), frac_x, frac_y) )
+                row.append( SubPixelSurface._generate(surface.copy(), frac_x, frac_y, level) )
 
 
     @staticmethod
-    def _generate(s, frac_x, frac_y):
-        frac_x = 1. - frac_x
+    def _generate(orig_surf, frac_x, frac_y, level):
 
-        sa = (1.-frac_x) * (1.-frac_y)
-        sb = (1.-frac_x) * frac_y
-        sc = frac_x * (1.-frac_y)
-        sd = (frac_x * frac_y)
+        surf_x = int( frac_x * level )
+        surf_y = int( frac_y * level )
 
-        assert round(sa + sb + sc + sd, 6) == 1.0
+        orig_w, orig_h = orig_surf.get_size()
+        surf = pygame.Surface((orig_w+2, orig_h+2), pygame.SRCALPHA)
+        surf.fill((0,0,0,0))
+        surf.blit(orig_surf, (1,1), None, pygame.BLEND_RGBA_ADD)
+        orig_surf = surf
 
-        w, h = s.get_size()
-        surf = pygame.Surface((w+1, h+1), pygame.SRCALPHA)
-        # black, fully transparent surface
-        surf.fill((0, 0, 0, 0))
+        assert surf_x < level and surf_y < level
 
-        ss = s.copy()
-        pc = int( round(sc * 255.0 ))
-        # make alpha adjustment on every pixel
-        ss.fill((pc, pc, pc, pc), None, pygame.BLEND_RGBA_MULT)
-        # add that result to the black surface
-        surf.blit(ss, (0, 0), None, pygame.BLEND_RGBA_ADD)
+        orig_w, orig_h = orig_surf.get_size()
+        w = level * orig_w
+        h = level * orig_h
+        s = pygame.transform.smoothscale(orig_surf, (w, h))
 
-        ss = s.copy()
-        pc = int( round(sa * 255.0 ))
-        # make alpha adjustment on every pixel
-        ss.fill((pc, pc, pc, pc), None, pygame.BLEND_RGBA_MULT)
-        # add that result to the black surface
-        surf.blit(ss, (1, 0), None, pygame.BLEND_RGBA_ADD)
+        surf = pygame.Surface((w + level, h + level), pygame.SRCALPHA)
+        surf.fill((0,0,0,0))
 
-        ss = s.copy()
-        pc = int( round(sd * 255.0 ))
-        # make alpha adjustment on every pixel
-        ss.fill((pc, pc, pc, pc), None, pygame.BLEND_RGBA_MULT)
-        # add that result to the black surface
-        surf.blit(ss, (0, 1), None, pygame.BLEND_RGBA_ADD)
+        surf.blit(s, (surf_x, surf_y), None, pygame.BLEND_RGBA_ADD)
 
-        ss = s.copy()
-        pc = int( round(sb * 255.0 ))
-        # make alpha adjustment on every pixel
-        ss.fill((pc, pc, pc, pc), None, pygame.BLEND_RGBA_MULT)
-        # add that result to the black surface
-        surf.blit(ss, (1, 1), None, pygame.BLEND_RGBA_ADD)
+        # surf = pygame.transform.smoothscale(surf, (orig_w + 1, orig_h + 1))
+        surf = pygame.transform.smoothscale(surf, (orig_w + 0, orig_h + 0))
 
         return surf
-
-
+    
+    
     def at(self, x, y):
 
         """Gets a sub-pixel surface for a given coordinate.
@@ -84,7 +66,7 @@ class SubPixelSurface(object):
 
         """
 
-        surf_x = int( (x - floor(x)) * self.x_level )
-        surf_y = int( (y - floor(y)) * self.y_level )
+        surf_x = int( (x - floor(x)) * self.level )
+        surf_y = int( (y - floor(y)) * self.level )
 
         return self.surfaces[surf_y][surf_x]
