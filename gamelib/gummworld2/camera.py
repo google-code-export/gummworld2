@@ -93,6 +93,9 @@ class Camera(object):
         self._target = target
         self._prev_target = target
         self._visible_tile_range = []
+        self._move_to = Vec2d(self.target.position)
+        self._move_from = Vec2d(self.target.position)
+        self._position = Vec2d(self.target.position)
         self.view = view
         self.update_when_restored = True
     
@@ -142,9 +145,9 @@ class Camera(object):
         self._abs_screen_center = Vec2d(self.rect.center) + self.abs_offset
         
         self._interp = 0.0
-        self._move_to = Vec2d(self.target.position)
-        self._move_from = Vec2d(self._move_to)
-        self._position = Vec2d(self._move_to)
+#        self._move_to = Vec2d(self.target.position)
+#        self._move_from = Vec2d(self._move_to)
+#        self._position = Vec2d(self._move_to)
         self.map = None
         if State.map:
             self._get_visible_tile_range()
