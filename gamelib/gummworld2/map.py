@@ -137,35 +137,10 @@ class Map(object):
         
         If the layer is not visible, an empty list is returned.
         """
-        tiles = []
-        layer = self.layers[layer]
-        map_rect = self.rect
-        tw,th = layer.tile_size
-        x1 = max(x1, map_rect.left//tw)
-        x2 = min(x2, map_rect.right//tw)
-        y1 = max(y1, map_rect.top//th)
-        y2 = min(y2, map_rect.bottom//th)
-        if layer.visible:
-            mapw = layer.map_size[0]
-            for y in range(y1,y2):
-                start = y*mapw+x1
-                end = y*mapw+x2
-                tiles.extend(layer[start:end])
-        return tiles
+        return self.layers[layer].get_tiles(x1,y1,x2,y2)
     
     def get_tiles_in_rect(self, rect, layer=0):
-        layeri = layer
-        layer = self.layers[layeri]
-        tile_x,tile_y = layer.tile_size
-        l,t,w,h = rect
-        r = l+w-1
-        b = t+h-1
-        left = int(round(float(l) / tile_x))
-        right = int(round(float(r) / tile_x))
-        top = int(round(float(t) / tile_y))
-        bottom = int(round(float(b) / tile_y))
-        tiles = self.get_tiles(left, top, right, bottom, layer=layeri)
-        return tiles
+        return self.layers[layeri].get_tiles_in_rect(rect)
     
 
 class MapLayer(list):
@@ -261,6 +236,39 @@ class MapLayer(list):
         """
         mapw = self.map_size[0]
         self[y*mapw+x] = tile
+    
+    def get_tiles(self, x1, y1, x2, y2):
+        """Return the list of tiles in range (x1,y1) through (x2,y2).
+        
+        The arguments x1,y1,x2,y2 are ints representing the range of tiles to
+        select.
+        
+        If the layer is not visible, an empty list is returned.
+        """
+        tiles = []
+        if self.visible:
+            mw,mh = self.map_size
+            if x1 < 0: x1 = 0
+            if y1 < 0: y1 = 0
+            if x2 > mw: x2 = mw
+            if y2 > mh: y2 = mh
+            for y in range(y1,y2):
+                start = y*mw+x1
+                end = y*mw+x2
+                tiles.extend(self[start:end])
+        return tiles
+    
+    def get_tiles_in_rect(self, rect):
+        tile_x,tile_y = self.tile_size
+        l,t,w,h = rect
+        r = l+w-1
+        b = t+h-1
+        left = int(round(float(l) / tile_x))
+        right = int(round(float(r) / tile_x))
+        top = int(round(float(t) / tile_y))
+        bottom = int(round(float(b) / tile_y))
+        tiles = self.get_tiles(left, top, right, bottom)
+        return tiles
     
     def index_of(self, x, y):
         """Return the array index relating to grid location (x,y).
