@@ -189,6 +189,8 @@ class Engine(Context):
         directly in the overridden update() and draw() methods, as appropriate.
         """
         
+        if __debug__: print 'Engine: -- new engine --'
+        
         Context.__init__(self)
         
         ## If you don't use this engine, then in general you will still want
@@ -258,6 +260,7 @@ class Engine(Context):
                 if __debug__: print 'Engine: making camera target QuadTreeObject()'
                 self.camera_target = model.QuadTreeObject(pygame.Rect(0,0,20,20))
         
+        ## Create the camera.
         if any((self.camera_target, camera_view, camera_view_rect)):
             if camera_view:
                 if __debug__: print 'Engine: using pre-made camera view'
@@ -280,7 +283,7 @@ class Engine(Context):
         else:
             if __debug__: print 'Engine: using pygame.time.get_ticks for non-Windows platform'
             time_source = lambda:pygame.time.get_ticks()/1000.
-        ## Create the camera, specifying callbacks for update() and draw().
+        ## Create the clock, specifying callbacks for update() and draw().
         if __debug__: print 'Engine: creating GameClock'
         self.clock = GameClock(
             update_speed, frame_speed,
