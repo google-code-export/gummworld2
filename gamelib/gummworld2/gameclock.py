@@ -31,8 +31,9 @@ GameClock manages time in the following ways:
     3.  Schedule callback items to coincide with tick(), update_ready,
         frame_ready, and elapsed intervals.
     4.  Employ on-demand time dilation.
+    5.  Gracefully handles some worst cases.
 
-Note that Python Library docs mention that time.clock() does not return
+Note that Python Library docs mention that time functions do not return
 fractions of a second on all computer platforms. Therefore this module will not
 work on such platforms.
 
@@ -71,7 +72,7 @@ Special callback:
 Special callbacks can be directly set and cleared at any time:
     
     clock.update_callback = my_new_update
-    clock.frame_callback = my_new_update
+    clock.frame_callback = my_new_draw
     
     clock.update_callback = None
     clock.frame_callback = None
