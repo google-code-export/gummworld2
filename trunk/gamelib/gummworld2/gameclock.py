@@ -157,6 +157,12 @@ class GameClock(object):
             injecting any waits, and can result in smoother frames.
         max_frame_skip -> Positive integer. Max game ticks allowed before
             forcing a frame display.
+        update_callback -> Callable. Special callback to invoke when update is
+            ready.
+        frame_callback -> Callable. Special callback to invoke when frame is
+            ready.
+        time_source -> Callable. Custom time source, e.g.
+            lambda:pygame.time.get_ticks() / 1000.0.
     Properties:
         interpolate -> Read-only. Float (range 0 to 1) factor representing the
             exact point in time between the previous and next ticks.
@@ -187,6 +193,10 @@ class GameClock(object):
         get_time() -> Return the milliseconds elapsed in the previous call to tick().
         get_fps() -> Return the frame rate from the previous second.
         get_ups() -> Return the update rate from the previous second.
+        schedule(), schedule_update(), schedule_update_priority(),
+            schedule_frame(), schedule_frame_priority(),
+            schedule_interval() -> Various scheduling facilities.
+        unschedule() -> Schedule removal.
     """
     
     def __init__(self,
