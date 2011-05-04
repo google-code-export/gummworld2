@@ -45,19 +45,27 @@ class View(object):
     a subsurface then rect and parent_rect will be equivalent.
     """
     
-    def __init__(self, surface, subsurface_rect=None):
-        """Create an instance of Surface.
+    def __init__(self, parent=None, subsurface_rect=None):
+        """Create an instance of View.
         
-        If only surface is specified then it is used as the instance's surface.
-        If subsurface_rect is specified then a subsurface of the surface
-        argument is gotten for the instance's surface.
+        parent can be a pygame Surface or a Gummworld2 Screen or View. If only
+        parent is specified then it is used as the instance's surface. If parent
+        is None then State.screen will be used.
         
-        The surface argument is a pygame surface.
-        
-        The subsurface_rect argument is the area of a subsurface to get from
-        the surface argument.
+        If subsurface_rect is specified then it defines the subsurface of the
+        parent.
         """
+        if parent is None:
+            if __debug__: print '%s: %s' % (self.__class__.__name__,'parent is None: using State.screen')
+            parent = State.screen
+        if isinstance(parent, Screen):
+            surface = parent.surface
+        elif isinstance(parent, pygame.Surface):
+            surface = parent
+        else:
+            raise pygame.error, 'unsupported type: %s'%type(parent)
         if subsurface_rect is not None:
+            if __debug__: print '%s: creating subsurface %s' % (self.__class__.__name__,subsurface_rect[:])
             self.surface = surface.subsurface(subsurface_rect)
             self.parent_rect = subsurface_rect
         else:
@@ -121,7 +129,13 @@ class Screen(View):
         """
         if surface is None:
             surface = pygame.display.set_mode(size, flags)
-        super(Screen, self).__init__(surface)
+        View.__init__(self, surface)
+    
+    def update(self, rects=None):
+        """Update the pygame display. rects can be None (entire display), a
+        pygame Rect, or a list of pygame Rect items.
+        """
+        pygame.display.update(rects)
     
     def flip(self):
         """Flip the pygame display.
