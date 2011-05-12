@@ -496,6 +496,7 @@ class GameClock(object):
         """Unschedule a managed function."""
         for sched in (
             self.schedules, self.update_schedules, self.frame_schedules,
+            self.interval_schedules,
         ):
             for item in list(sched):
                 if item.func == func:
