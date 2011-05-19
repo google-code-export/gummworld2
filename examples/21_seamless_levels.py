@@ -132,7 +132,9 @@ class LevelManager(Engine):
         rect = pygame.Rect(-1,0,1,1)
         self.levels = [Level0(rect), Level1(rect)]
         self.current = 0        # current "primary" level has draw precedence
-        self.on_screen = []     # list of levels that are on screen
+        self.on_screen = []     # levels that are on screen
+        self.cam_rects = {}     # camera rect for each layer
+        self.tiles = {}         # tiles for each layer
         
         self.levels[0].set_state()
         State.clock.update_callback = self.update
@@ -146,6 +148,7 @@ class LevelManager(Engine):
         State.speed = 10
         
         self.set_state()
+        self.update(0)
     
         State.clock.schedule_interval(self.set_caption, 2.)
     
@@ -176,23 +179,23 @@ class LevelManager(Engine):
             self.on_screen.append(current+1)
         self.on_screen.sort(reverse=True)
         # Build the tile list to render.
-        self.cam_rect = None
-        self.tiles = []
+        self.cam_rects.clear()
+        self.tiles.clear()
         for layeri in range(len(self.levels[0].map.layers)):
-            tiles = []
-            for i in self.on_screen:
-                level = self.levels[i]
+            for leveli in self.on_screen:
+                level = self.levels[leveli]
                 map = level.map
                 layer = map.layers[layeri]
                 parallax = layer.parallax
                 (x1,y1,x2,y2),cam_rect = toolkit.get_parallax_tile_range(
                     State.camera, map, layer, parallax)
-                if not self.cam_rect:
-                    self.cam_rect = cam_rect
+                # Save the data used to render the tiles.
+                KEY = leveli,layeri
+                if KEY not in self.tiles: self.tiles[KEY] = []
+                self.cam_rects[KEY] = cam_rect
                 # A tile can be None. Filter them.
-                tiles.extend([t for t in map.get_tiles(x1,y1,x2,y2, layeri) if t])
-            tiles.sort(key=sprite_sort_key)
-            self.tiles.append(tiles)
+                self.tiles[KEY].extend(
+                    [t for t in map.get_tiles(x1,y1,x2,y2, layeri) if t])
     
     def draw(self, dt):
         ## TODO: something wrong with my methodology. Parallax isn't rendering
@@ -200,9 +203,14 @@ class LevelManager(Engine):
         ## right.
         State.camera.interpolate()
         State.screen.clear()
-        for layeri,tiles in enumerate(self.tiles):
-            layer = self.levels[0].map.layers[layeri]
-            toolkit.draw_parallax_tiles(layer, tiles, self.cam_rect)
+        for leveli in self.on_screen:
+            level = self.levels[leveli]
+            layers = level.map.layers
+            for layeri,layer in enumerate(layers):
+                KEY = leveli,layeri
+                tiles = self.tiles[KEY]
+                cam_rect = self.cam_rects[KEY]
+                toolkit.draw_parallax_tiles(layer, tiles, cam_rect)
         State.screen.flip()
     
     def on_key_down(self, unicode, key, mod):
