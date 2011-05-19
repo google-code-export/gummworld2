@@ -25,9 +25,10 @@ __doc__ = """21_seamless_levels.py - Connecting levels in Gummworld2.
 
 NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE 
 
-This doesn't work right yet. To see how it is intended to look, take a look at
-19_parallax.py. Demo 19 uses one map, whereas this one attempts to link two maps
-seamlessly in realtime.
+To see how it is intended to look, take a look at 19_parallax.py. Demo 19 uses
+one map, whereas this one attempts to link two maps seamlessly in realtime.
+
+Parallax rendering is working in this demo, but the seamless part is not.
 
 """
 
@@ -121,8 +122,8 @@ class LevelManager(Engine):
     
     def __init__(self):
         
-        screen_size = Vec2d(512,512)
-        ## changing screen size messes with parallax
+        ## changing screen size messes with parallax rendering
+        screen_size = Vec2d(320,512)
         ##screen_size = Vec2d(300,300)
         
         Engine.__init__(self,
@@ -153,7 +154,7 @@ class LevelManager(Engine):
         State.clock.schedule_interval(self.set_caption, 2.)
     
     def set_caption(self, dt):
-        pygame.display.set_caption('19 Parallax - %d fps | Current: %d' % (
+        pygame.display.set_caption('21 Seamless - %d fps | Current: %d' % (
             State.clock.fps, self.current))
     
     def update(self, dt):
@@ -169,38 +170,33 @@ class LevelManager(Engine):
                     self.current = current = i
                     break
         # If screen is straddling levels, add the other level to render.
-        del self.on_screen[:]
-        self.on_screen.append(current)
         cam_rect = State.camera.rect
         world_rect = level.world.rect
+        self.on_screen[:] = [current]
         if cam_rect.left < world_rect.left:
-            self.on_screen.append(current-1)
+            self.on_screen.insert(0,current-1)
         elif cam_rect.right > world_rect.right:
             self.on_screen.append(current+1)
-        self.on_screen.sort(reverse=True)
         # Build the tile list to render.
         self.cam_rects.clear()
         self.tiles.clear()
-        for layeri in range(len(self.levels[0].map.layers)):
-            for leveli in self.on_screen:
-                level = self.levels[leveli]
-                map = level.map
-                layer = map.layers[layeri]
+        for leveli in self.on_screen:
+            level = self.levels[leveli]
+            map = level.map
+            layers = map.layers
+            for layeri,layer in enumerate(layers):
                 parallax = layer.parallax
                 (x1,y1,x2,y2),cam_rect = toolkit.get_parallax_tile_range(
                     State.camera, map, layer, parallax)
-                # Save the data used to render the tiles.
+                # Save the tiles and camera rects used to render the tiles.
                 KEY = leveli,layeri
-                if KEY not in self.tiles: self.tiles[KEY] = []
                 self.cam_rects[KEY] = cam_rect
+                if KEY not in self.tiles: self.tiles[KEY] = []
                 # A tile can be None. Filter them.
                 self.tiles[KEY].extend(
                     [t for t in map.get_tiles(x1,y1,x2,y2, layeri) if t])
     
     def draw(self, dt):
-        ## TODO: something wrong with my methodology. Parallax isn't rendering
-        ## at all. And the tile selection (in update()?) and positioning isn't
-        ## right.
         State.camera.interpolate()
         State.screen.clear()
         for leveli in self.on_screen:
