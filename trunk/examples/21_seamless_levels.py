@@ -21,6 +21,14 @@ __author__ = 'Gummbum, (c) 2011'
 
 
 __doc__ = """21_seamless_levels.py - Connecting levels in Gummworld2.
+
+
+NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE 
+
+This doesn't work right yet. To see how it is intended to look, take a look at
+19_parallax.py. Demo 19 uses one map, whereas this one attempts to link two maps
+seamlessly in realtime.
+
 """
 
 
@@ -36,6 +44,11 @@ from gummworld2 import State, Engine, Map, MapLayer, View, Vec2d
 
 
 class Level(Engine):
+    ## This just holds a map and a camera for tile processing. It was originally
+    ## intended to be a context; exchanging contexts triggers State to be
+    ## modified. But that behavior may no longer be needed: the experiment
+    ## parallax functions take camera and map arguments and do their own
+    ## tile-picking.
     
     def __init__(self, rect):
         
@@ -61,22 +74,9 @@ class Level(Engine):
         
         self.test_rect = Rect(State.camera.rect)
         
-        State.clock.schedule_interval(self.set_caption, 2.)
-    
-    def set_caption(self, dt):
-        pygame.display.set_caption('19 Parallax - %d fps' % State.clock.fps)
-    
     def update(self, dt):
         """override"""
         pass
-    
-    def draw(self, dt):
-        self.draw_tiles()
-    
-    def draw_tiles(self):
-        for layeri,layer in enumerate(State.map.layers):
-            parallax = layer.parallax
-            toolkit.draw_tiles_of_layer(layeri, parallax.x, parallax.y)
 
 
 class Level0(Level):
@@ -121,8 +121,9 @@ class LevelManager(Engine):
     
     def __init__(self):
         
-        #screen_size = Vec2d(512,512)
-        screen_size = Vec2d(300,300)
+        screen_size = Vec2d(512,512)
+        ## changing screen size messes with parallax
+        ##screen_size = Vec2d(300,300)
         
         Engine.__init__(self,
             resolution=screen_size,
@@ -130,8 +131,8 @@ class LevelManager(Engine):
             frame_speed=0)
         rect = pygame.Rect(-1,0,1,1)
         self.levels = [Level0(rect), Level1(rect)]
-        self.current = 0
-        self.on_screen = []
+        self.current = 0        # current "primary" level has draw precedence
+        self.on_screen = []     # list of levels that are on screen
         
         self.levels[0].set_state()
         State.clock.update_callback = self.update
@@ -146,6 +147,12 @@ class LevelManager(Engine):
         
         self.set_state()
     
+        State.clock.schedule_interval(self.set_caption, 2.)
+    
+    def set_caption(self, dt):
+        pygame.display.set_caption('19 Parallax - %d fps | Current: %d' % (
+            State.clock.fps, self.current))
+    
     def update(self, dt):
         current = self.current
         levels = self.levels
@@ -158,9 +165,9 @@ class LevelManager(Engine):
                 if level.world.rect.collidepoint(State.camera.position):
                     self.current = current = i
                     break
+        # If screen is straddling levels, add the other level to render.
         del self.on_screen[:]
         self.on_screen.append(current)
-        # If screen is straddling levels, add the other level to render.
         cam_rect = State.camera.rect
         world_rect = level.world.rect
         if cam_rect.left < world_rect.left:
@@ -168,7 +175,7 @@ class LevelManager(Engine):
         elif cam_rect.right > world_rect.right:
             self.on_screen.append(current+1)
         self.on_screen.sort(reverse=True)
-        #
+        # Build the tile list to render.
         self.cam_rect = None
         self.tiles = []
         for layeri in range(len(self.levels[0].map.layers)):
@@ -179,55 +186,18 @@ class LevelManager(Engine):
                 layer = map.layers[layeri]
                 parallax = layer.parallax
                 (x1,y1,x2,y2),cam_rect = toolkit.get_parallax_tile_range(
-                    map, layer, parallax)
+                    State.camera, map, layer, parallax)
                 if not self.cam_rect:
                     self.cam_rect = cam_rect
+                # A tile can be None. Filter them.
                 tiles.extend([t for t in map.get_tiles(x1,y1,x2,y2, layeri) if t])
             tiles.sort(key=sprite_sort_key)
             self.tiles.append(tiles)
     
-    def X_draw(self, dt):
-        State.camera.interpolate()
-        State.screen.clear()
-        levels = self.levels
-        for i in self.on_screen:
-            level = levels[i]
-            level.set_state()
-            cam_rect = State.camera.rect
-            map_rect = State.map.rect
-            if cam_rect.left < map_rect.right < cam_rect.right:
-                # Draw left half of split screen.
-                rect = pygame.Rect(0,0,1,1)
-                rect.width = map_rect.right - cam_rect.left
-                rect.left = 0
-                try:
-                    State.camera.view = View(State.screen.surface, rect)
-                    level.draw(dt)
-                    State.camera.view = State.screen
-                except ValueError, e:
-                    print e
-                    print 'LEFT',rect
-            elif cam_rect.left < map_rect.left < cam_rect.right:
-                # Draw right half of split screen.
-                rect = pygame.Rect(0,0,1,1)
-                rect.width = cam_rect.right - map_rect.left
-                rect.right = State.screen.rect.right
-                try:
-                    State.camera.view = View(State.screen.surface, rect)
-                    level.draw(dt)
-                    State.camera.view = State.screen
-                except ValueError, e:
-                    print e
-                    print 'RIGHT',rect
-            elif State.camera.view != State.screen:
-                # Draw full screen.
-                State.camera.view = State.screen
-                level.draw(dt)
-            else:
-                level.draw(dt)
-        State.screen.flip()
-    
     def draw(self, dt):
+        ## TODO: something wrong with my methodology. Parallax isn't rendering
+        ## at all. And the tile selection (in update()?) and positioning isn't
+        ## right.
         State.camera.interpolate()
         State.screen.clear()
         for layeri,tiles in enumerate(self.tiles):
@@ -253,6 +223,8 @@ class LevelManager(Engine):
 
 
 def sprite_sort_key(self):
+    # self.name is a tuple representing the x,y grid position of the tile in
+    # the map, e.g. (0,0), (1,0)...
     return self.name
 
 
@@ -311,8 +283,8 @@ def make_map(map, moon=False):
         (Color(0,22,0), Vec2d(.8,.8), th*11/16,  75),
         (Color(0,33,0), Vec2d(1.,1.),   th*15/16, 50),
     ]
-    make_grid = False
-    make_labels = False
+    make_grid = True
+    make_labels = True
     for color,parallax,treetops,numtrees in tree_data:
         layer = MapLayer(map.tile_size, map.map_size, make_labels=True, make_grid=True)
         layer.parallax = parallax
