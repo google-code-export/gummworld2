@@ -832,27 +832,9 @@ def draw_tiles():
 # draw_tiles
 
 
-## EXPERIMENTAL: deprecated
-def X_get_parallax_tile_range(cam, map, layer, parallax):
-    # Compute the camera center for this layer's parallax.
-    mapw,maph = layer.map_size
-    tile_size = layer.tile_size
-    map_off = map.rect.topleft
-    cam_rect = pygame.Rect(cam.rect)
-    map_center = Vec2d(map.rect.center)
-    cam_center = Vec2d(cam_rect.center)
-    distance = (cam_center - map_center) * parallax
-    cam_rect.center = map_center + distance
-    # Get the visible tile range.
-    left,top = (cam_rect.topleft-tile_size-map_off) // tile_size
-    right,bottom = (cam_rect.bottomright+tile_size-map_off) // tile_size
-    if left < 0: left = 0
-    if top < 0: top = 0
-    if right > mapw: right = mapw
-    if bottom > maph: bottom = maph
-    return (left,top,right,bottom),cam_rect
 ## EXPERIMENTAL: not working quite right
-def get_parallax_tile_range(cam, map, layer, parallax, orig='bottomleft'):
+#def get_parallax_tile_range(cam, map, layer, parallax, orig='bottomleft'):
+def get_parallax_tile_range(cam, map, layer, parallax, orig='center'):
     # Compute the camera center for this layer's parallax.
     mapw,maph = layer.map_size
     tile_size = layer.tile_size
@@ -881,13 +863,16 @@ def draw_parallax_tile_range(layer, tile_range, pax_rect):
 ## EXPERIMENTAL: not working quite right
 def draw_parallax_tiles(layer, tiles, pax_rect):
     tile_size = layer.tile_size
-    parallax_cam_center = pax_rect.center
+    parallax_cam_center = Vec2d(pax_rect.center)
+    parallax_cam_topleft = Vec2d(pax_rect.topleft)
     blit = State.camera.view.blit
     for s in tiles:
         if s:
             r = pygame.Rect(s.rect)
             # I have no idea why "- tile_size" fixes this...
-            r.center -= parallax_cam_center - tile_size
+##This was the draw parallax bug:
+##            r.center -= parallax_cam_center - tile_size
+            r.center -= parallax_cam_topleft
             blit(s.image, r)
 
 
