@@ -157,6 +157,13 @@ class LevelManager(Engine):
         self.update(0)
         
         State.clock.schedule_interval(self.set_caption, 2.)
+        
+        ## EXPERIMENT
+        # (5,2) = (10,1)
+        # (6,2) = (10,2)
+#        level0,level1 = self.levels
+#        sprite = level1.map.layers[1].get_tile_at(10,1)
+#        level1.map.layers[1].set_tile_at(5,2,sprite)
     
     def set_caption(self, dt):
         pygame.display.set_caption('21 Seamless - %d fps | Current: %d' % (
@@ -203,23 +210,25 @@ class LevelManager(Engine):
         if len(self.on_screen) > 1:
             # We have two visible levels. Make an exclusive subsurface for each
             # to control tile "spillover".
-            #
-            # We want to use the 1.0 layer (no parallax factor) to define our
-            # bounding rect for drawing tiles.
             screen_rect = State.screen.rect
             camera = State.camera
             cam_rect = camera.rect
             w2s = camera.world_to_screen
             for leveli,level in enumerate(list(self.on_screen)):
                 map_rect = level.map.rect
+                # Get x,y.
                 x,y = w2s(map_rect.topleft)
                 if x < screen_rect.x: x = screen_rect.x
                 if y < screen_rect.y: y = screen_rect.y
+                # Get w,h.
                 right,bottom = w2s(map_rect.bottomright)
                 if right > screen_rect.right: right = screen_rect.right
                 if bottom > screen_rect.bottom: bottom = screen_rect.bottom
                 w = right - x
                 h = bottom - y
+                # Because we test self.hit_rect, this can produce negative
+                # widths and heights. We need to remove these cases when they
+                # occur or Python will segfault. =)
                 if w < 0 or h < 0:
                     del self.on_screen[leveli]
                 else:
@@ -266,7 +275,7 @@ def sprite_sort_key(self):
 
 
 def make_map(map, moon=False):
-    primary_layer_only = False
+    PRIMARY_LAYER_ONLY = False
     map = State.map
     tw,th = map.tile_size
     mw,mh = map.map_size
@@ -286,11 +295,14 @@ def make_map(map, moon=False):
     if moon:
         pygame.draw.circle(
             layer.get_tile_at(4,1).image, Color(255,255,170), (128,128), 75)
-    if not primary_layer_only:
+    if not PRIMARY_LAYER_ONLY:
         map.layers.append(layer)
     ## Layer 1: Mountains.
+    MAKE_GRID = True
+    MAKE_LABELS = True
+    color = Color('brown')
     layer = MapLayer(map.tile_size, map.map_size, make_labels=True, make_grid=True)
-    layer.parallax = Vec2d(.55,.55)
+    layer.parallax = Vec2d(.5,.5)
     skyline = [(0,th-randrange(randrange(100,150),th-1))]
     for y in range(map.rect.top//th, map.rect.bottom//th):
         for x in range(map.rect.left//tw, map.rect.right//tw):
@@ -313,8 +325,15 @@ def make_map(map, moon=False):
                 pygame.draw.polygon(sprite.image, Color(18,5,5), skyline)
                 pygame.draw.lines(sprite.image, Color(25,22,18), False, skyline[2:], 6)
             sprite.rect = sprite.image.get_rect(topleft=(tw*x,th*y))
+            # Tile debugging.
+            if MAKE_LABELS:
+                font = gummworld2.ui.hud_font
+                tex = font.render(str(sprite.name), True, Color('yellow'))
+                sprite.image.blit(tex, (1,1))
+            if MAKE_GRID:
+                pygame.draw.rect(sprite.image, color, sprite.image.get_rect(), 1)
             layer.append(sprite)
-    if not primary_layer_only:
+    if not PRIMARY_LAYER_ONLY:
         map.layers.append(layer)
     ## Layer 2,3,4: Trees.
     tree_data = [
@@ -323,8 +342,8 @@ def make_map(map, moon=False):
         (Color(0,22,0), Vec2d(.8,.8), th*11/16,  75),
         (Color(0,33,0), Vec2d(1.,1.),   th*15/16, 50),
     ]
-    make_grid = True
-    make_labels = True
+    MAKE_GRID = False
+    MAKE_LABELS = False
     for color,parallax,treetops,numtrees in tree_data:
         layer = MapLayer(map.tile_size, map.map_size, make_labels=True, make_grid=True)
         layer.parallax = parallax
@@ -334,7 +353,7 @@ def make_map(map, moon=False):
             rx = []
             for x in range(map.rect.left//tw, map.rect.right//tw):
                 # Null tile if it is "in the sky" and tile debugging is off.
-                if y < mh-1 and not (make_grid or make_labels):
+                if y < mh-1 and not (MAKE_GRID or MAKE_LABELS):
                     layer.append(None)
                     continue
                 sprite = pygame.sprite.Sprite()
@@ -355,14 +374,14 @@ def make_map(map, moon=False):
                             ox.append((o[0]-tw, o[1]))
                             rx.append(r)
                 # Tile debugging.
-                if make_labels:
+                if MAKE_LABELS:
                     font = gummworld2.ui.hud_font
                     tex = font.render(str(sprite.name), True, Color('yellow'))
                     sprite.image.blit(tex, (1,1))
-                if make_grid:
+                if MAKE_GRID:
                     pygame.draw.rect(sprite.image, color, sprite.image.get_rect(), 1)
                 layer.append(sprite)
-        if not primary_layer_only:
+        if not PRIMARY_LAYER_ONLY:
             map.layers.append(layer)
         elif parallax == (1,1):
             map.layers.append(layer)
