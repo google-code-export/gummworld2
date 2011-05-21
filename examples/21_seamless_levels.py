@@ -65,8 +65,11 @@ class Level(Engine):
         map.rect.center = rect.center
         
         Engine.__init__(self,
-            map=map,
-            default_schedules=False, set_state=False)
+            map=map,                        # use my pre-made map
+            default_schedules=False,        # don't schedule world and camera
+            set_state=False,                # enter/resume doesn't modify State
+        )
+        self.view = State.screen.rect
         self.camera = None
         self.clock = None
         self.set_state()
@@ -129,7 +132,7 @@ class LevelManager(Engine):
         Engine.__init__(self,
             resolution=screen_size,
             camera_target=model.Object(),
-            frame_speed=0)
+            frame_speed=30)
         rect = pygame.Rect(-1,0,1,1)
         self.levels = [Level0(rect), Level1(rect)]
         self.current = 0        # current "primary" level has draw precedence
@@ -148,9 +151,11 @@ class LevelManager(Engine):
         self.move = Vec2d(0,0)
         State.speed = 10
         
+        self.hit_rect = self.screen.rect.inflate(State.speed,State.speed)
+        
         self.set_state()
         self.update(0)
-    
+        
         State.clock.schedule_interval(self.set_caption, 2.)
     
     def set_caption(self, dt):
@@ -162,6 +167,7 @@ class LevelManager(Engine):
         levels = self.levels
         level = levels[current]
         level.set_state()
+        cam = State.camera
         level.update(dt, self.move)
         # Switch current level if we've moved beyond its bounds.
         if not level.world.rect.collidepoint(State.camera.position):
@@ -170,13 +176,19 @@ class LevelManager(Engine):
                     self.current = current = i
                     break
         # If screen is straddling levels, add the other level to render.
-        cam_rect = State.camera.rect
-        world_rect = level.world.rect
-        self.on_screen[:] = [current]
-        if cam_rect.left < world_rect.left:
-            self.on_screen.insert(0,current-1)
-        elif cam_rect.right > world_rect.right:
-            self.on_screen.append(current+1)
+        CAM_RECT = State.camera.rect
+#        world_rect = level.world.rect
+#        self.on_screen[:] = [current]
+#        if cam_rect.left < world_rect.left:
+#            self.on_screen.insert(0,current-1)
+#        elif cam_rect.right > world_rect.right:
+#            self.on_screen.append(current+1)
+        del self.on_screen[:]
+        self.hit_rect.center = CAM_RECT.center
+        for leveli,level in enumerate(self.levels):
+            if self.hit_rect.colliderect(level.map.rect):
+                self.on_screen.append(leveli)
+#        print self.on_screen
         # Build the tile list to render.
         self.cam_rects.clear()
         self.tiles.clear()
@@ -195,6 +207,25 @@ class LevelManager(Engine):
                 # A tile can be None. Filter them.
                 self.tiles[KEY].extend(
                     [t for t in map.get_tiles(x1,y1,x2,y2, layeri) if t])
+#        if len(self.on_screen) > 1:
+#            ## Can we just use a large bounding rect (bigger than a tile) with
+#            ## blit()?
+#            ##
+#            # We have two visible levels. Make an exclusive subsurface for each
+#            # to control tile "spillover".
+#            #
+#            # We want to use the 1.0 layer (no parallax factor) to define our
+#            # bounding rect for drawing tiles.
+#            leveli = 0
+#            level = self.on_screen[leveli]
+#            layeri = len(level.map.layers) - 1
+#            KEY = leveli,layeri # reuse layeri from loop, which is set right
+#            topleft = State.camera.world_to_screen()
+#            r = Rect()
+#            level.view = View(subsurface_rect=r)
+#        else:
+#            # Use full screen.
+#            self.on_screen[0].view = State.screen
     
     def draw(self, dt):
         State.camera.interpolate()
