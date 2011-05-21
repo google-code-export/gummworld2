@@ -266,6 +266,7 @@ def sprite_sort_key(self):
 
 
 def make_map(map, moon=False):
+    primary_layer_only = False
     map = State.map
     tw,th = map.tile_size
     mw,mh = map.map_size
@@ -285,7 +286,8 @@ def make_map(map, moon=False):
     if moon:
         pygame.draw.circle(
             layer.get_tile_at(4,1).image, Color(255,255,170), (128,128), 75)
-    map.layers.append(layer)
+    if not primary_layer_only:
+        map.layers.append(layer)
     ## Layer 1: Mountains.
     layer = MapLayer(map.tile_size, map.map_size, make_labels=True, make_grid=True)
     layer.parallax = Vec2d(.55,.55)
@@ -312,7 +314,8 @@ def make_map(map, moon=False):
                 pygame.draw.lines(sprite.image, Color(25,22,18), False, skyline[2:], 6)
             sprite.rect = sprite.image.get_rect(topleft=(tw*x,th*y))
             layer.append(sprite)
-    map.layers.append(layer)
+    if not primary_layer_only:
+        map.layers.append(layer)
     ## Layer 2,3,4: Trees.
     tree_data = [
         # color         parallax      treetops numtrees
@@ -359,7 +362,10 @@ def make_map(map, moon=False):
                 if make_grid:
                     pygame.draw.rect(sprite.image, color, sprite.image.get_rect(), 1)
                 layer.append(sprite)
-        map.layers.append(layer)
+        if not primary_layer_only:
+            map.layers.append(layer)
+        elif parallax == (1,1):
+            map.layers.append(layer)
 
 
 if __name__ == '__main__':

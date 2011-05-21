@@ -865,18 +865,15 @@ def draw_parallax_tiles(layer, tiles, pax_rect, view=None):
     tile_size = layer.tile_size
     parallax_cam_center = Vec2d(pax_rect.center)
     parallax_cam_topleft = Vec2d(pax_rect.topleft)
-    if view:
-        blit = view.blit
-    else:
-        blit = State.camera.view.blit
+    if not view:
+        view = State.camera
+    blit = view.blit
+    abs_offset = Vec2d(view.abs_offset)
     for s in tiles:
         if s:
             r = pygame.Rect(s.rect)
-            # I have no idea why "- tile_size" fixes this...
-##This was the draw parallax bug:
-##            r.center -= parallax_cam_center - tile_size
             r.center -= parallax_cam_topleft
-            blit(s.image, r)
+            blit(s.image, r.topleft-abs_offset)
 
 
 ## EXPERIMENTAL: not working quite right
