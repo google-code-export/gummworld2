@@ -861,9 +861,8 @@ def draw_parallax_tile_range(layer, tile_range, pax_rect):
 
 
 ## EXPERIMENTAL: not working quite right
-def draw_parallax_tiles(layer, tiles, pax_rect, view=None):
-    tile_size = layer.tile_size
-    parallax_cam_center = Vec2d(pax_rect.center)
+def X_draw_parallax_tiles(layer, tiles, pax_rect, view=None):
+    ## DEPRECATED
     parallax_cam_topleft = Vec2d(pax_rect.topleft)
     if not view:
         view = State.camera
@@ -874,6 +873,41 @@ def draw_parallax_tiles(layer, tiles, pax_rect, view=None):
             r = pygame.Rect(s.rect)
             r.center -= parallax_cam_topleft
             blit(s.image, r.topleft-abs_offset)
+
+
+## EXPERIMENTAL: not working quite right
+def draw_parallax_tiles(maps, view):
+    """maps is a list of maps
+    
+    Assumptions:
+        1. Maps are in world coords.
+        2. Each map has the same number of layers.
+        3. Each map's corresponding layer has the same parallax value.
+        4. Each map layer has a parallax attribute: tuple of length 2.
+        5. Each map layer has a tile_range attribute: range of visible tiles.
+    """
+    for i in range(len(maps[0].layers)):
+        drawn = {}
+        for map in maps:
+            layer = map.layers[i]
+            tile_size = layer.tile_size
+            x1,y1,x2,y2 = layer.tile_range
+            pax_rect = layer.parallax_rect
+            parallax_cam_topleft = Vec2d(pax_rect.topleft)
+            blit = view.blit
+            abs_offset = Vec2d(view.abs_offset)
+            for y in range(y1,y2):
+                for x in range(x1,x2):
+                    tile = layer.get_tile_at(x,y)
+                    if not tile:
+                        continue
+                    r = pygame.Rect(tile.rect)
+                    r.center -= parallax_cam_topleft - abs_offset
+                    pos = tuple(r.topleft // tile_size)
+                    if pos in drawn:
+                        continue
+                    drawn[pos] = 1
+                    blit(tile.image, r.topleft)
 
 
 ## EXPERIMENTAL: not working quite right
