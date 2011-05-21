@@ -861,11 +861,14 @@ def draw_parallax_tile_range(layer, tile_range, pax_rect):
 
 
 ## EXPERIMENTAL: not working quite right
-def draw_parallax_tiles(layer, tiles, pax_rect):
+def draw_parallax_tiles(layer, tiles, pax_rect, view=None):
     tile_size = layer.tile_size
     parallax_cam_center = Vec2d(pax_rect.center)
     parallax_cam_topleft = Vec2d(pax_rect.topleft)
-    blit = State.camera.view.blit
+    if view:
+        blit = view.blit
+    else:
+        blit = State.camera.view.blit
     for s in tiles:
         if s:
             r = pygame.Rect(s.rect)

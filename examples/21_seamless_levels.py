@@ -69,7 +69,7 @@ class Level(Engine):
             default_schedules=False,        # don't schedule world and camera
             set_state=False,                # enter/resume doesn't modify State
         )
-        self.view = State.screen.rect
+        self.view = State.screen
         self.camera = None
         self.clock = None
         self.set_state()
@@ -177,23 +177,16 @@ class LevelManager(Engine):
                     break
         # If screen is straddling levels, add the other level to render.
         CAM_RECT = State.camera.rect
-#        world_rect = level.world.rect
-#        self.on_screen[:] = [current]
-#        if cam_rect.left < world_rect.left:
-#            self.on_screen.insert(0,current-1)
-#        elif cam_rect.right > world_rect.right:
-#            self.on_screen.append(current+1)
         del self.on_screen[:]
         self.hit_rect.center = CAM_RECT.center
-        for leveli,level in enumerate(self.levels):
+        for level in self.levels:
             if self.hit_rect.colliderect(level.map.rect):
-                self.on_screen.append(leveli)
+                self.on_screen.append(level)
 #        print self.on_screen
         # Build the tile list to render.
         self.cam_rects.clear()
         self.tiles.clear()
-        for leveli in self.on_screen:
-            level = self.levels[leveli]
+        for level in self.on_screen:
             map = level.map
             layers = map.layers
             for layeri,layer in enumerate(layers):
@@ -201,43 +194,52 @@ class LevelManager(Engine):
                 (x1,y1,x2,y2),cam_rect = toolkit.get_parallax_tile_range(
                     State.camera, map, layer, parallax)
                 # Save the tiles and camera rects used to render the tiles.
-                KEY = leveli,layeri
+                KEY = level,layeri
                 self.cam_rects[KEY] = cam_rect
                 if KEY not in self.tiles: self.tiles[KEY] = []
                 # A tile can be None. Filter them.
                 self.tiles[KEY].extend(
                     [t for t in map.get_tiles(x1,y1,x2,y2, layeri) if t])
-#        if len(self.on_screen) > 1:
-#            ## Can we just use a large bounding rect (bigger than a tile) with
-#            ## blit()?
-#            ##
-#            # We have two visible levels. Make an exclusive subsurface for each
-#            # to control tile "spillover".
-#            #
-#            # We want to use the 1.0 layer (no parallax factor) to define our
-#            # bounding rect for drawing tiles.
-#            leveli = 0
-#            level = self.on_screen[leveli]
-#            layeri = len(level.map.layers) - 1
-#            KEY = leveli,layeri # reuse layeri from loop, which is set right
-#            topleft = State.camera.world_to_screen()
-#            r = Rect()
-#            level.view = View(subsurface_rect=r)
-#        else:
-#            # Use full screen.
-#            self.on_screen[0].view = State.screen
+        if len(self.on_screen) > 1:
+            # We have two visible levels. Make an exclusive subsurface for each
+            # to control tile "spillover".
+            #
+            # We want to use the 1.0 layer (no parallax factor) to define our
+            # bounding rect for drawing tiles.
+            screen_rect = State.screen.rect
+            camera = State.camera
+            cam_rect = camera.rect
+            w2s = camera.world_to_screen
+            for leveli,level in enumerate(list(self.on_screen)):
+                map_rect = level.map.rect
+                x,y = w2s(map_rect.topleft)
+                if x < screen_rect.x: x = screen_rect.x
+                if y < screen_rect.y: y = screen_rect.y
+                right,bottom = w2s(map_rect.bottomright)
+                if right > screen_rect.right: right = screen_rect.right
+                if bottom > screen_rect.bottom: bottom = screen_rect.bottom
+                w = right - x
+                h = bottom - y
+                if w < 0 or h < 0:
+                    del self.on_screen[leveli]
+                else:
+                    r = Rect(x,y,w,h)
+                    level.view = View(subsurface_rect=r)
+        else:
+            # Use full screen.
+            self.on_screen[0].view = State.screen
     
     def draw(self, dt):
         State.camera.interpolate()
         State.screen.clear()
-        for leveli in self.on_screen:
-            level = self.levels[leveli]
+        for level in self.on_screen:
             layers = level.map.layers
             for layeri,layer in enumerate(layers):
-                KEY = leveli,layeri
+                KEY = level,layeri
                 tiles = self.tiles[KEY]
                 cam_rect = self.cam_rects[KEY]
-                toolkit.draw_parallax_tiles(layer, tiles, cam_rect)
+                view = level.view
+                toolkit.draw_parallax_tiles(layer, tiles, cam_rect, view)
         State.screen.flip()
     
     def on_key_down(self, unicode, key, mod):
