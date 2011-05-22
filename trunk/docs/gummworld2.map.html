@@ -6,7 +6,7 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.map</strong></big></big> (version $Id: map.py 254 2011-02-27 08:24:02Z stabbingfinger@gmail.com $)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.map</strong></big></big> (version $Id: map.py 286 2011-05-01 18:55:39Z stabbingfinger@gmail.com $)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/svn/gummworld2/gamelib/gummworld2/map.py">c:\cygwin\home\bw\devel\python\svn\gummworld2\gamelib\gummworld2\map.py</a></font></td></tr></table>
     <p><tt>map.py&nbsp;-&nbsp;<a href="#Map">Map</a>&nbsp;module&nbsp;for&nbsp;Gummworld2.<br>
@@ -125,6 +125,8 @@ The&nbsp;layer&nbsp;argument&nbsp;is&nbsp;an&nbsp;int&nbsp;representing&nbsp;the
 &nbsp;<br>
 If&nbsp;the&nbsp;layer&nbsp;is&nbsp;not&nbsp;visible,&nbsp;an&nbsp;empty&nbsp;<a href="__builtin__.html#list">list</a>&nbsp;is&nbsp;returned.</tt></dd></dl>
 
+<dl><dt><a name="Map-get_tiles_in_rect"><strong>get_tiles_in_rect</strong></a>(self, rect, layer<font color="#909090">=0</font>)</dt></dl>
+
 <hr>
 Data descriptors defined here:<br>
 <dl><dt><strong>__dict__</strong></dt>
@@ -189,6 +191,15 @@ select.</tt></dd></dl>
 
 <dl><dt><a name="MapLayer-get_tile_at"><strong>get_tile_at</strong></a>(self, x, y)</dt><dd><tt>Return&nbsp;the&nbsp;tile&nbsp;at&nbsp;grid&nbsp;location&nbsp;(x,y).&nbsp;If&nbsp;no&nbsp;tile&nbsp;exists&nbsp;at&nbsp;the<br>
 location,&nbsp;None&nbsp;is&nbsp;returned.</tt></dd></dl>
+
+<dl><dt><a name="MapLayer-get_tiles"><strong>get_tiles</strong></a>(self, x1, y1, x2, y2)</dt><dd><tt>Return&nbsp;the&nbsp;<a href="__builtin__.html#list">list</a>&nbsp;of&nbsp;tiles&nbsp;in&nbsp;range&nbsp;(x1,y1)&nbsp;through&nbsp;(x2,y2).<br>
+&nbsp;<br>
+The&nbsp;arguments&nbsp;x1,y1,x2,y2&nbsp;are&nbsp;ints&nbsp;representing&nbsp;the&nbsp;range&nbsp;of&nbsp;tiles&nbsp;to<br>
+select.<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;layer&nbsp;is&nbsp;not&nbsp;visible,&nbsp;an&nbsp;empty&nbsp;<a href="__builtin__.html#list">list</a>&nbsp;is&nbsp;returned.</tt></dd></dl>
+
+<dl><dt><a name="MapLayer-get_tiles_in_rect"><strong>get_tiles_in_rect</strong></a>(self, rect)</dt></dl>
 
 <dl><dt><a name="MapLayer-horizontal_grid_line"><strong>horizontal_grid_line</strong></a>(self, xy<font color="#909090">=None</font>, anchor<font color="#909090">='topleft'</font>)</dt><dd><tt>Return&nbsp;the&nbsp;horizontal&nbsp;grid&nbsp;sprite.&nbsp;If&nbsp;specified,&nbsp;the&nbsp;sprite.rect's<br>
 attribute&nbsp;specified&nbsp;by&nbsp;anchor&nbsp;is&nbsp;set&nbsp;to&nbsp;the&nbsp;value&nbsp;of&nbsp;xy.</tt></dd></dl>
@@ -310,7 +321,7 @@ Data and other attributes inherited from <a href="__builtin__.html#list">__built
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><strong>__author__</strong> = 'Gummbum, (c) 2011'<br>
-<strong>__version__</strong> = '$Id: map.py 254 2011-02-27 08:24:02Z stabbingfinger@gmail.com $'<br>
+<strong>__version__</strong> = '$Id: map.py 286 2011-05-01 18:55:39Z stabbingfinger@gmail.com $'<br>
 <strong>text_color</strong> = (255, 255, 0, 255)</td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#7799ee">

@@ -6,19 +6,12 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.tiledtmxloader</strong></big></big> (version 2.3.0.0)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.tiledtmxloader</strong></big></big> (version 2.3.1.1)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/svn/gummworld2/gamelib/gummworld2/tiledtmxloader.py">c:\cygwin\home\bw\devel\python\svn\gummworld2\gamelib\gummworld2\tiledtmxloader.py</a></font></td></tr></table>
     <p><tt><a href="#TileMap">TileMap</a>&nbsp;loader&nbsp;for&nbsp;python&nbsp;for&nbsp;Tiled,&nbsp;a&nbsp;generic&nbsp;tile&nbsp;map&nbsp;editor<br>
 from&nbsp;<a href="http://mapeditor.org/">http://mapeditor.org/</a>&nbsp;.<br>
-It&nbsp;loads&nbsp;the&nbsp;\*.tmx&nbsp;files&nbsp;produced&nbsp;by&nbsp;Tiled.<br>
-&nbsp;<br>
-&nbsp;<br>
-TODO:<br>
-&nbsp;-&nbsp;maybe&nbsp;use&nbsp;cStringIO&nbsp;instead&nbsp;of&nbsp;StringIO<br>
-&nbsp;-&nbsp;pyglet&nbsp;demo:&nbsp;better&nbsp;rendering<br>
-&nbsp;-&nbsp;pygame&nbsp;demo:&nbsp;better&nbsp;rendering<br>
-&nbsp;-&nbsp;test&nbsp;if&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;gid&nbsp;is&nbsp;already&nbsp;read&nbsp;in&nbsp;and&nbsp;resolved</tt></p>
+It&nbsp;loads&nbsp;the&nbsp;\*.tmx&nbsp;files&nbsp;produced&nbsp;by&nbsp;Tiled.</tt></p>
 <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#aa55cc">
@@ -51,6 +44,7 @@ TODO:<br>
 </dd>
 <dt><font face="helvetica, arial"><a href="gummworld2.tiledtmxloader.html#MapObject">MapObject</a>
 </font></dt><dt><font face="helvetica, arial"><a href="gummworld2.tiledtmxloader.html#MapObjectGroup">MapObjectGroup</a>
+</font></dt><dt><font face="helvetica, arial"><a href="gummworld2.tiledtmxloader.html#RendererPygame">RendererPygame</a>
 </font></dt><dt><font face="helvetica, arial"><a href="gummworld2.tiledtmxloader.html#Tile">Tile</a>
 </font></dt><dt><font face="helvetica, arial"><a href="gummworld2.tiledtmxloader.html#TileImage">TileImage</a>
 </font></dt><dt><font face="helvetica, arial"><a href="gummworld2.tiledtmxloader.html#TileLayer">TileLayer</a>
@@ -270,6 +264,30 @@ Data descriptors defined here:<br>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
 <dl><dt><a name="MapObjectGroup-__init__"><strong>__init__</strong></a>(self)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="RendererPygame">class <strong>RendererPygame</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="RendererPygame-__init__"><strong>__init__</strong></a>(self, world_map)</dt><dd><tt>#&nbsp;TODO:&nbsp;methods:&nbsp;add_sprite/remove_sprite<br>
+#&nbsp;TODO:&nbsp;collapse/uncollapse<br>
+#&nbsp;TODO:&nbsp;do&nbsp;calculations&nbsp;of&nbsp;set_camera_position&nbsp;per&nbsp;layer</tt></dd></dl>
+
+<dl><dt><a name="RendererPygame-render_layer"><strong>render_layer</strong></a>(self, surf, layer_id)</dt></dl>
+
+<dl><dt><a name="RendererPygame-set_camera_position"><strong>set_camera_position</strong></a>(self, offset_x, offset_y, width, height, margin<font color="#909090">=1</font>)</dt></dl>
 
 <hr>
 Data descriptors defined here:<br>
@@ -571,6 +589,7 @@ Data descriptors defined here:<br>
 &nbsp;<br>
 :returns:&nbsp;uncompressed&nbsp;string</tt></dd></dl>
  <dl><dt><a name="-demo_pygame"><strong>demo_pygame</strong></a>(file_name)</dt><dd><tt>#&nbsp;------------------------------------------------------------------------------</tt></dd></dl>
+ <dl><dt><a name="-demo_pygame_old"><strong>demo_pygame_old</strong></a>(file_name)</dt></dl>
  <dl><dt><a name="-demo_pyglet"><strong>demo_pyglet</strong></a>(file_name)</dt><dd><tt>Thanks&nbsp;to:&nbsp;HydroKirby&nbsp;from&nbsp;#pyglet&nbsp;on&nbsp;freenode.org<br>
 &nbsp;<br>
 Loads&nbsp;and&nbsp;views&nbsp;a&nbsp;map&nbsp;using&nbsp;pyglet.<br>
@@ -595,8 +614,8 @@ Maybe&nbsp;use&nbsp;this&nbsp;to&nbsp;put&nbsp;topleft&nbsp;as&nbsp;origin:<br>
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><strong>__author__</strong> = u'DR0ID_ @ 2009-2011'<br>
-<strong>__revision__</strong> = u'$Id: tiledtmxloader.py 248 2011-02-25 15:40:01Z stabbingfinger@gmail.com $'<br>
-<strong>__version__</strong> = '2.3.0.0'</td></tr></table><p>
+<strong>__revision__</strong> = u'$Id: tiledtmxloader.py 268 2011-03-11 05:15:37Z stabbingfinger@gmail.com $'<br>
+<strong>__version__</strong> = '2.3.1.1'</td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#7799ee">
 <td colspan=3 valign=bottom>&nbsp;<br>
