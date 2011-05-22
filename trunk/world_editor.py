@@ -785,6 +785,7 @@ class MapEditor(object):
         screen_size = Vec2d(800,600)
         
         # Set up the Gummworld2 state.
+        State.clock = GameClock(30, 30)
         State.screen = Screen(screen_size, RESIZABLE)
         State.map = Map(tile_size, map_size)
         State.camera = Camera(
@@ -793,7 +794,6 @@ class MapEditor(object):
         )
         self.world_grids = []
         self.make_world()
-        State.clock = GameClock(30, 30)
         pygame.display.set_caption('Gummworld2 World Editor')
         x,y = State.camera.view.rect.topleft
         w,h = Vec2d(screen_size) - (State.camera.view.rect.right,0)
@@ -828,6 +828,9 @@ class MapEditor(object):
         self.modal = None
         self.changes_unsaved = False
         self.make_gui()
+        # Scrollbar position sets camera pos. The following sets it absolutely,
+        # without waiting for events or interpolation. It's a cosmetic thing.
+        State.camera.init_position(State.camera.position)
         
         # Files.
         State.file_entities = None
@@ -868,7 +871,7 @@ class MapEditor(object):
         State.camera.update()
         self.update_shapes()
         if State.show_hud:
-            State.hud.update()
+            State.hud.update(State.clock.update_elapsed)
     
     def update_gui(self):
         """Update the GUI, then update the app from the GUI.
@@ -2096,7 +2099,7 @@ def make_hud():
     """
     State.hud = HUD()
     State.hud.x += 20
-    State.hud.i += 3
+    State.hud.top += State.hud.font_height * 2
     next_pos = State.hud.next_pos
     
 #    State.hud.add('FPS',
