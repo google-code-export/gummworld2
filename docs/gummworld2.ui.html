@@ -6,7 +6,7 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.ui</strong></big></big> (version $Id: ui.py 248 2011-02-25 15:40:01Z stabbingfinger@gmail.com $)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.ui</strong></big></big> (version $Id: ui.py 278 2011-04-25 05:15:29Z stabbingfinger@gmail.com $)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/svn/gummworld2/gamelib/gummworld2/ui.py">c:\cygwin\home\bw\devel\python\svn\gummworld2\gamelib\gummworld2\ui.py</a></font></td></tr></table>
     <p><tt>ui.py&nbsp;-&nbsp;User&nbsp;Interface&nbsp;module&nbsp;for&nbsp;Gummworld2.<br>
@@ -22,8 +22,7 @@ callback.</tt></p>
 <tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="gummworld2.data.html">gummworld2.data</a><br>
 </td><td width="25%" valign=top><a href="pygame.html">pygame</a><br>
-</td><td width="25%" valign=top><a href="time.html">time</a><br>
-</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ee77aa">
 <td colspan=3 valign=bottom>&nbsp;<br>
@@ -66,14 +65,18 @@ Methods defined here:<br>
 
 <dl><dt><a name="HUD-add"><strong>add</strong></a>(self, *args)</dt><dd><tt>args:&nbsp;name,&nbsp;stat</tt></dd></dl>
 
-<dl><dt><a name="HUD-draw"><strong>draw</strong></a>(self, surface<font color="#909090">=None</font>)</dt></dl>
+<dl><dt><a name="HUD-draw"><strong>draw</strong></a>(self, dt<font color="#909090">=0</font>, surface<font color="#909090">=None</font>)</dt></dl>
 
 <dl><dt><a name="HUD-next_pos"><strong>next_pos</strong></a>(self)</dt></dl>
 
 <dl><dt><a name="HUD-remove"><strong>remove</strong></a>(self, *sprites)</dt><dd><tt>remove&nbsp;sprites&nbsp;by&nbsp;name&nbsp;or&nbsp;sprite&nbsp;object</tt></dd></dl>
 
-<dl><dt><a name="HUD-update"><strong>update</strong></a>(self)</dt></dl>
+<dl><dt><a name="HUD-update"><strong>update</strong></a>(self, dt)</dt></dl>
 
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>bottom</strong></dt>
+</dl>
 <hr>
 Methods inherited from <a href="pygame.sprite.html#OrderedUpdates">pygame.sprite.OrderedUpdates</a>:<br>
 <dl><dt><a name="HUD-add_internal"><strong>add_internal</strong></a>(self, sprite)</dt></dl>
@@ -150,11 +153,11 @@ Data descriptors inherited from <a href="pygame.sprite.html#AbstractGroup">pygam
 </dl>
 <hr>
 Methods defined here:<br>
-<dl><dt><a name="Stat-__init__"><strong>__init__</strong></a>(self, pos, text<font color="#909090">=None</font>, callback<font color="#909090">=None</font>, interval<font color="#909090">=2000</font>)</dt></dl>
+<dl><dt><a name="Stat-__init__"><strong>__init__</strong></a>(self, pos, text<font color="#909090">=None</font>, callback<font color="#909090">=None</font>, interval<font color="#909090">=2.0</font>, font<font color="#909090">=&lt;pygame.font.Font object&gt;</font>)</dt></dl>
 
 <dl><dt><a name="Stat-set_value"><strong>set_value</strong></a>(self, text)</dt></dl>
 
-<dl><dt><a name="Stat-update"><strong>update</strong></a>(self, *args)</dt></dl>
+<dl><dt><a name="Stat-update"><strong>update</strong></a>(self, dt)</dt></dl>
 
 <hr>
 Methods inherited from <a href="pygame.sprite.html#Sprite">pygame.sprite.Sprite</a>:<br>
@@ -218,11 +221,11 @@ Data descriptors inherited from <a href="pygame.sprite.html#Sprite">pygame.sprit
 </dl>
 <hr>
 Methods defined here:<br>
-<dl><dt><a name="Statf-__init__"><strong>__init__</strong></a>(self, pos, fmt, value<font color="#909090">=None</font>, callback<font color="#909090">=None</font>, interval<font color="#909090">=2000</font>)</dt></dl>
+<dl><dt><a name="Statf-__init__"><strong>__init__</strong></a>(self, pos, fmt, value<font color="#909090">=None</font>, callback<font color="#909090">=None</font>, interval<font color="#909090">=2.0</font>, font<font color="#909090">=&lt;pygame.font.Font object&gt;</font>)</dt></dl>
 
 <dl><dt><a name="Statf-set_value"><strong>set_value</strong></a>(self, value)</dt></dl>
 
-<dl><dt><a name="Statf-update"><strong>update</strong></a>(self, *args)</dt></dl>
+<dl><dt><a name="Statf-update"><strong>update</strong></a>(self, dt)</dt></dl>
 
 <hr>
 Methods inherited from <a href="pygame.sprite.html#Sprite">pygame.sprite.Sprite</a>:<br>
@@ -279,7 +282,7 @@ Data descriptors inherited from <a href="pygame.sprite.html#Sprite">pygame.sprit
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><strong>RLEACCEL</strong> = 16384<br>
 <strong>__author__</strong> = 'Gummbum, (c) 2011'<br>
-<strong>__version__</strong> = '$Id: ui.py 248 2011-02-25 15:40:01Z stabbingfinger@gmail.com $'<br>
+<strong>__version__</strong> = '$Id: ui.py 278 2011-04-25 05:15:29Z stabbingfinger@gmail.com $'<br>
 <strong>hud_alpha</strong> = 208<br>
 <strong>hud_font</strong> = &lt;pygame.font.Font object&gt;<br>
 <strong>text_color</strong> = (255, 255, 0, 255)</td></tr></table><p>

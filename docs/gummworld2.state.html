@@ -6,7 +6,7 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.state</strong></big></big> (version $Id: state.py 248 2011-02-25 15:40:01Z stabbingfinger@gmail.com $)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.state</strong></big></big> (version $Id: state.py 280 2011-04-27 05:33:38Z stabbingfinger@gmail.com $)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/svn/gummworld2/gamelib/gummworld2/state.py">c:\cygwin\home\bw\devel\python\svn\gummworld2\gamelib\gummworld2\state.py</a></font></td></tr></table>
     <p><tt>state.py&nbsp;-&nbsp;A&nbsp;class&nbsp;for&nbsp;convenient&nbsp;global&nbsp;access&nbsp;to&nbsp;Gummworld2<br>
@@ -62,7 +62,7 @@ saved&nbsp;and&nbsp;restored&nbsp;by&nbsp;default&nbsp;when&nbsp;the&nbsp;static
 <a href="#State">State</a>.<a href="#State-restore">restore</a>()&nbsp;are&nbsp;called.&nbsp;Modify&nbsp;default_attrs&nbsp;as&nbsp;desired.<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Static methods defined here:<br>
-<dl><dt><a name="State-restore"><strong>restore</strong></a>(name, attrs<font color="#909090">=['camera', 'world', 'world_type', 'map']</font>)</dt><dd><tt>state.<a href="#State-restore">restore</a>()&nbsp;-&nbsp;restore&nbsp;a&nbsp;state&nbsp;context&nbsp;by&nbsp;name<br>
+<dl><dt><a name="State-restore"><strong>restore</strong></a>(name, attrs<font color="#909090">=['world', 'world_type', 'map', 'camera']</font>)</dt><dd><tt>state.<a href="#State-restore">restore</a>()&nbsp;-&nbsp;restore&nbsp;a&nbsp;state&nbsp;context&nbsp;by&nbsp;name<br>
 &nbsp;<br>
 <a href="#State">State</a>.name&nbsp;is&nbsp;set&nbsp;to&nbsp;the&nbsp;value&nbsp;of&nbsp;the&nbsp;name&nbsp;argument.<br>
 &nbsp;<br>
@@ -73,7 +73,7 @@ If&nbsp;an&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;that&nbsp;is&n
 be&nbsp;called.&nbsp;The&nbsp;method&nbsp;is&nbsp;intended&nbsp;to&nbsp;sync&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;other&nbsp;parts&nbsp;of<br>
 the&nbsp;game&nbsp;that&nbsp;may&nbsp;have&nbsp;updated&nbsp;while&nbsp;it&nbsp;was&nbsp;swapped&nbsp;out.</tt></dd></dl>
 
-<dl><dt><a name="State-save"><strong>save</strong></a>(name, attrs<font color="#909090">=['camera', 'world', 'world_type', 'map']</font>)</dt><dd><tt>state.<a href="#State-save">save</a>()&nbsp;-&nbsp;save&nbsp;a&nbsp;state&nbsp;context&nbsp;by&nbsp;name<br>
+<dl><dt><a name="State-save"><strong>save</strong></a>(name, attrs<font color="#909090">=['world', 'world_type', 'map', 'camera']</font>)</dt><dd><tt>state.<a href="#State-save">save</a>()&nbsp;-&nbsp;save&nbsp;a&nbsp;state&nbsp;context&nbsp;by&nbsp;name<br>
 &nbsp;<br>
 The&nbsp;attrs&nbsp;argument&nbsp;is&nbsp;a&nbsp;sequence&nbsp;of&nbsp;strings&nbsp;naming&nbsp;the&nbsp;<a href="#State">State</a>&nbsp;attributes<br>
 to&nbsp;save.&nbsp;If&nbsp;attrs&nbsp;is&nbsp;not&nbsp;specified&nbsp;then&nbsp;<a href="#State">State</a>.default_attrs&nbsp;is&nbsp;used.</tt></dd></dl>
@@ -90,11 +90,11 @@ Data descriptors defined here:<br>
 Data and other attributes defined here:<br>
 <dl><dt><strong>camera</strong> = None</dl>
 
+<dl><dt><strong>camera_target</strong> = None</dl>
+
 <dl><dt><strong>clock</strong> = None</dl>
 
-<dl><dt><strong>default_attrs</strong> = ['camera', 'world', 'world_type', 'map']</dl>
-
-<dl><dt><strong>dt</strong> = 0</dl>
+<dl><dt><strong>default_attrs</strong> = ['world', 'world_type', 'map', 'camera']</dl>
 
 <dl><dt><strong>init_attrs</strong> = ['screen', 'world', 'world_type', 'camera', 'map', 'clock', 'menu', 'running', 'speed', 'dt', 'show_grid', 'show_labels', 'show_hud']</dl>
 
@@ -103,8 +103,6 @@ Data and other attributes defined here:<br>
 <dl><dt><strong>menu</strong> = None</dl>
 
 <dl><dt><strong>name</strong> = 'init'</dl>
-
-<dl><dt><strong>running</strong> = False</dl>
 
 <dl><dt><strong>screen</strong> = None</dl>
 
@@ -128,8 +126,8 @@ Data and other attributes defined here:<br>
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><strong>__author__</strong> = 'Gummbum, (c) 2011'<br>
-<strong>__version__</strong> = '$Id: state.py 248 2011-02-25 15:40:01Z stabbingfinger@gmail.com $'<br>
-<strong>states</strong> = {'init': {'camera': None, 'clock': None, 'dt': 0, 'map': None, 'menu': None, 'running': False, 'screen': None, 'show_grid': False, 'show_hud': False, 'show_labels': False, ...}}</td></tr></table><p>
+<strong>__version__</strong> = '$Id: state.py 280 2011-04-27 05:33:38Z stabbingfinger@gmail.com $'<br>
+<strong>states</strong> = {'init': {'camera': None, 'clock': None, 'map': None, 'menu': None, 'screen': None, 'show_grid': False, 'show_hud': False, 'show_labels': False, 'speed': 4, 'world': None, ...}}</td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#7799ee">
 <td colspan=3 valign=bottom>&nbsp;<br>

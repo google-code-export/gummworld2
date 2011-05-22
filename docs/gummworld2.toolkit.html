@@ -6,7 +6,7 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.toolkit</strong></big></big> (version $Id: toolkit.py 258 2011-02-27 18:18:15Z stabbingfinger@gmail.com $)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.toolkit</strong></big></big> (version $Id: toolkit.py 305 2011-05-21 21:59:02Z stabbingfinger@gmail.com $)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/svn/gummworld2/gamelib/gummworld2/toolkit.py">c:\cygwin\home\bw\devel\python\svn\gummworld2\gamelib\gummworld2\toolkit.py</a></font></td></tr></table>
     <p><tt>toolkit.py&nbsp;-&nbsp;Some&nbsp;helper&nbsp;tools&nbsp;for&nbsp;Gummworld2.</tt></p>
@@ -101,7 +101,8 @@ Data descriptors defined here:<br>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
     
 <tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl><dt><a name="-collapse_map"><strong>collapse_map</strong></a>(map, num_tiles<font color="#909090">=(2, 2)</font>)</dt><dd><tt>Collapse&nbsp;all&nbsp;layers&nbsp;in&nbsp;a&nbsp;map&nbsp;by&nbsp;combining&nbsp;num_tiles&nbsp;into&nbsp;one&nbsp;tile.<br>
+<td width="100%"><dl><dt><a name="-X_draw_parallax_tiles"><strong>X_draw_parallax_tiles</strong></a>(layer, tiles, pax_rect, view<font color="#909090">=None</font>)</dt><dd><tt>##&nbsp;EXPERIMENTAL:&nbsp;not&nbsp;working&nbsp;quite&nbsp;right</tt></dd></dl>
+ <dl><dt><a name="-collapse_map"><strong>collapse_map</strong></a>(map, num_tiles<font color="#909090">=(2, 2)</font>, layers<font color="#909090">=None</font>)</dt><dd><tt>Collapse&nbsp;all&nbsp;layers&nbsp;in&nbsp;a&nbsp;map&nbsp;by&nbsp;combining&nbsp;num_tiles&nbsp;into&nbsp;one&nbsp;tile.<br>
 Returns&nbsp;a&nbsp;new&nbsp;map.<br>
 &nbsp;<br>
 The&nbsp;map&nbsp;argument&nbsp;is&nbsp;the&nbsp;source&nbsp;map.&nbsp;It&nbsp;must&nbsp;be&nbsp;an&nbsp;instance&nbsp;of&nbsp;Map.<br>
@@ -127,8 +128,21 @@ Labels&nbsp;for&nbsp;the&nbsp;specified&nbsp;layer&nbsp;are&nbsp;blitted&nbsp;to
 layer&nbsp;has&nbsp;been&nbsp;collapsed&nbsp;with&nbsp;the&nbsp;<a href="#-collapse_map_layer">collapse_map_layer</a>()&nbsp;function&nbsp;so&nbsp;that<br>
 the&nbsp;layer's&nbsp;tile&nbsp;size&nbsp;differs&nbsp;from&nbsp;the&nbsp;grid&nbsp;label&nbsp;sprites,&nbsp;this&nbsp;will&nbsp;look<br>
 weird.</tt></dd></dl>
+ <dl><dt><a name="-draw_parallax_tile_range"><strong>draw_parallax_tile_range</strong></a>(layer, tile_range, pax_rect)</dt><dd><tt>##&nbsp;EXPERIMENTAL:&nbsp;not&nbsp;working&nbsp;quite&nbsp;right</tt></dd></dl>
+ <dl><dt><a name="-draw_parallax_tiles"><strong>draw_parallax_tiles</strong></a>(maps, view)</dt><dd><tt>maps&nbsp;is&nbsp;a&nbsp;list&nbsp;of&nbsp;maps<br>
+&nbsp;<br>
+Assumptions:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;1.&nbsp;Maps&nbsp;are&nbsp;in&nbsp;world&nbsp;coords.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;2.&nbsp;Each&nbsp;map&nbsp;has&nbsp;the&nbsp;same&nbsp;number&nbsp;of&nbsp;layers.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;3.&nbsp;Each&nbsp;map's&nbsp;corresponding&nbsp;layer&nbsp;has&nbsp;the&nbsp;same&nbsp;parallax&nbsp;value.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;4.&nbsp;Each&nbsp;map&nbsp;layer&nbsp;has&nbsp;a&nbsp;parallax&nbsp;attribute:&nbsp;tuple&nbsp;of&nbsp;length&nbsp;2.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;5.&nbsp;Each&nbsp;map&nbsp;layer&nbsp;has&nbsp;a&nbsp;tile_range&nbsp;attribute:&nbsp;range&nbsp;of&nbsp;visible&nbsp;tiles.</tt></dd></dl>
+ <dl><dt><a name="-draw_parallax_tiles_of_layer"><strong>draw_parallax_tiles_of_layer</strong></a>(cam, map, layer, parallax<font color="#909090">=(1.0, 1.0)</font>)</dt><dd><tt>##&nbsp;EXPERIMENTAL:&nbsp;not&nbsp;working&nbsp;quite&nbsp;right</tt></dd></dl>
  <dl><dt><a name="-draw_sprite"><strong>draw_sprite</strong></a>(s, blit_flags<font color="#909090">=0</font>)</dt><dd><tt>Draw&nbsp;a&nbsp;sprite&nbsp;on&nbsp;the&nbsp;camera's&nbsp;surface&nbsp;using&nbsp;world-to-screen&nbsp;conversion.</tt></dd></dl>
  <dl><dt><a name="-draw_tiles"><strong>draw_tiles</strong></a>()</dt><dd><tt>Draw&nbsp;visible&nbsp;tiles.<br>
+&nbsp;<br>
+This&nbsp;function&nbsp;assumes&nbsp;that&nbsp;the&nbsp;tiles&nbsp;stored&nbsp;in&nbsp;the&nbsp;map&nbsp;are&nbsp;sprites.</tt></dd></dl>
+ <dl><dt><a name="-draw_tiles_of_layer"><strong>draw_tiles_of_layer</strong></a>(layeri, pallax_factor_x<font color="#909090">=1.0</font>, pallax_factor_y<font color="#909090">=1.0</font>)</dt><dd><tt>Draw&nbsp;visible&nbsp;tiles.<br>
 &nbsp;<br>
 This&nbsp;function&nbsp;assumes&nbsp;that&nbsp;the&nbsp;tiles&nbsp;stored&nbsp;in&nbsp;the&nbsp;map&nbsp;are&nbsp;sprites.</tt></dd></dl>
  <dl><dt><a name="-export_world_quadtree"><strong>export_world_quadtree</strong></a>(fh, entities)</dt><dd><tt>A&nbsp;quadtree-to-text&nbsp;exporter.<br>
@@ -141,6 +155,8 @@ PolyGeometry.<br>
 &nbsp;<br>
 The&nbsp;values&nbsp;saved&nbsp;are&nbsp;those&nbsp;needed&nbsp;for&nbsp;each&nbsp;shape-class's&nbsp;constructor,&nbsp;plus&nbsp;a<br>
 block&nbsp;of&nbsp;arbitrary&nbsp;user&nbsp;data.&nbsp;The&nbsp;user&nbsp;data&nbsp;is&nbsp;url-encoded.</tt></dd></dl>
+ <dl><dt><a name="-get_parallax_tile_range"><strong>get_parallax_tile_range</strong></a>(cam, map, layer, parallax, orig<font color="#909090">='center'</font>)</dt><dd><tt>##&nbsp;EXPERIMENTAL:&nbsp;not&nbsp;working&nbsp;quite&nbsp;right<br>
+#def&nbsp;<a href="#-get_parallax_tile_range">get_parallax_tile_range</a>(cam,&nbsp;map,&nbsp;layer,&nbsp;parallax,&nbsp;orig='bottomleft'):</tt></dd></dl>
  <dl><dt><a name="-get_tilesheet_info"><strong>get_tilesheet_info</strong></a>(tilesheet_path)</dt><dd><tt>Get&nbsp;the&nbsp;tilesheet&nbsp;meta&nbsp;data&nbsp;from&nbsp;file&nbsp;if&nbsp;it&nbsp;exists.</tt></dd></dl>
  <dl><dt><a name="-import_world_quadtree"><strong>import_world_quadtree</strong></a>(fh, rect_cls, poly_cls, circle_cls)</dt><dd><tt>A&nbsp;world&nbsp;entity&nbsp;importer&nbsp;compatible&nbsp;with&nbsp;QuadTree.<br>
 &nbsp;<br>
@@ -188,7 +204,7 @@ manner&nbsp;must&nbsp;have&nbsp;constructors&nbsp;that&nbsp;are&nbsp;compatible&
  <dl><dt><a name="-load_tiled_tmx_map"><strong>load_tiled_tmx_map</strong></a>(map_file_name, load_invisible<font color="#909090">=False</font>, convert_alpha<font color="#909090">=False</font>)</dt><dd><tt>Load&nbsp;an&nbsp;orthogonal&nbsp;TMX&nbsp;map&nbsp;file&nbsp;that&nbsp;was&nbsp;created&nbsp;by&nbsp;the&nbsp;Tiled&nbsp;Map&nbsp;Editor.<br>
 &nbsp;<br>
 Note:&nbsp;convert_alpha&nbsp;is&nbsp;experimental.&nbsp;It&nbsp;can&nbsp;lower&nbsp;performance&nbsp;when&nbsp;used<br>
-with&nbsp;some&nbsp;images.&nbsp;Do&nbsp;it&nbsp;only&nbsp;if&nbsp;there's&nbsp;a&nbsp;need.)<br>
+with&nbsp;some&nbsp;images.&nbsp;Do&nbsp;it&nbsp;only&nbsp;if&nbsp;there's&nbsp;a&nbsp;need.<br>
 &nbsp;<br>
 Thanks&nbsp;to&nbsp;DR0ID&nbsp;for&nbsp;his&nbsp;nice&nbsp;tiledtmxloader&nbsp;module:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="http://www.pygame.org/project-map+loader+for+%27tiled%27-1158-2951.html">http://www.pygame.org/project-map+loader+for+%27tiled%27-1158-2951.html</a><br>
@@ -202,7 +218,7 @@ The&nbsp;file_path&nbsp;argument&nbsp;is&nbsp;the&nbsp;path&nbsp;to&nbsp;the&nbs
 relative&nbsp;path,&nbsp;it&nbsp;must&nbsp;exist&nbsp;relative&nbsp;to&nbsp;data.data_dir&nbsp;(see&nbsp;the<br>
 gummworld2.data&nbsp;module).&nbsp;If&nbsp;file_path.tilesheet&nbsp;exists&nbsp;it&nbsp;will&nbsp;be&nbsp;used&nbsp;to<br>
 size&nbsp;the&nbsp;tiles;&nbsp;otherwise&nbsp;the&nbsp;defaults&nbsp;(0,0,32,32,0,0)&nbsp;will&nbsp;be&nbsp;used.</tt></dd></dl>
- <dl><dt><a name="-make_hud"><strong>make_hud</strong></a>(caption<font color="#909090">=None</font>)</dt><dd><tt>Create&nbsp;a&nbsp;HUD&nbsp;with&nbsp;dynamic&nbsp;items.&nbsp;This&nbsp;creates&nbsp;a&nbsp;default&nbsp;hud&nbsp;to&nbsp;serve<br>
+ <dl><dt><a name="-make_hud"><strong>make_hud</strong></a>(caption<font color="#909090">=None</font>, visible<font color="#909090">=True</font>)</dt><dd><tt>Create&nbsp;a&nbsp;HUD&nbsp;with&nbsp;dynamic&nbsp;items.&nbsp;This&nbsp;creates&nbsp;a&nbsp;default&nbsp;hud&nbsp;to&nbsp;serve<br>
 both&nbsp;as&nbsp;an&nbsp;example,&nbsp;and&nbsp;for&nbsp;an&nbsp;early&nbsp;design&nbsp;and&nbsp;debugging&nbsp;convenience.</tt></dd></dl>
  <dl><dt><a name="-make_tiles"><strong>make_tiles</strong></a>()</dt><dd><tt>Create&nbsp;tiles&nbsp;to&nbsp;fill&nbsp;the&nbsp;current&nbsp;map.&nbsp;This&nbsp;is&nbsp;a&nbsp;utility&nbsp;for&nbsp;easily&nbsp;making<br>
 visible&nbsp;content&nbsp;to&nbsp;aid&nbsp;early&nbsp;game&nbsp;design&nbsp;or&nbsp;debugging.<br>
@@ -257,11 +273,13 @@ Combo&nbsp;example:<br>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><strong>IMAGE_FILE_EXTENSIONS</strong> = ('gif', 'png', 'jpg', 'jpeg', 'bmp', 'pcx', 'tga', 'tif', 'lbm', 'pbm', 'pgm', 'xpm')<br>
+<td width="100%"><strong>BLEND_RGBA_ADD</strong> = 6<br>
+<strong>IMAGE_FILE_EXTENSIONS</strong> = ('gif', 'png', 'jpg', 'jpeg', 'bmp', 'pcx', 'tga', 'tif', 'lbm', 'pbm', 'pgm', 'xpm')<br>
 <strong>RLEACCEL</strong> = 16384<br>
 <strong>SRCALPHA</strong> = 65536<br>
 <strong>__author__</strong> = 'Gummbum, (c) 2011'<br>
-<strong>__version__</strong> = '$Id: toolkit.py 258 2011-02-27 18:18:15Z stabbingfinger@gmail.com $'<br>
+<strong>__version__</strong> = '$Id: toolkit.py 305 2011-05-21 21:59:02Z stabbingfinger@gmail.com $'<br>
+<strong>haspygame19</strong> = True<br>
 <strong>hud_font</strong> = &lt;pygame.font.Font object&gt;</td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#7799ee">

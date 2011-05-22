@@ -6,7 +6,7 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.model</strong></big></big> (version $Id: model.py 258 2011-02-27 18:18:15Z stabbingfinger@gmail.com $)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.model</strong></big></big> (version $Id: model.py 273 2011-04-23 08:06:10Z stabbingfinger@gmail.com $)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/svn/gummworld2/gamelib/gummworld2/model.py">c:\cygwin\home\bw\devel\python\svn\gummworld2\gamelib\gummworld2\model.py</a></font></td></tr></table>
     <p><tt>model.py&nbsp;-&nbsp;Physics&nbsp;model&nbsp;for&nbsp;Gummworld2.<br>
@@ -233,7 +233,7 @@ is&nbsp;called&nbsp;each&nbsp;time&nbsp;step,&nbsp;and&nbsp;can&nbsp;be&nbsp;use
 
 <dl><dt><a name="NoWorld-add"><strong>add</strong></a>(self, *args)</dt></dl>
 
-<dl><dt><a name="NoWorld-step"><strong>step</strong></a>(self)</dt></dl>
+<dl><dt><a name="NoWorld-step"><strong>step</strong></a>(self, dt)</dt></dl>
 
 <hr>
 Data descriptors defined here:<br>
@@ -335,7 +335,7 @@ Returns&nbsp;the&nbsp;number&nbsp;of&nbsp;sprites&nbsp;contained&nbsp;in&nbsp;th
 
 <dl><dt><a name="World-remove"><strong>remove</strong></a>(self, *objs)</dt></dl>
 
-<dl><dt><a name="World-step"><strong>step</strong></a>(self)</dt></dl>
+<dl><dt><a name="World-step"><strong>step</strong></a>(self, dt)</dt></dl>
 
 <hr>
 Data descriptors defined here:<br>
@@ -364,7 +364,7 @@ the&nbsp;pymunk&nbsp;space,&nbsp;and&nbsp;abstracts&nbsp;the&nbsp;<a href="#Worl
 Methods defined here:<br>
 <dl><dt><a name="WorldPymunk-__init__"><strong>__init__</strong></a>(self, rect)</dt><dd><tt>left,&nbsp;bottom,&nbsp;right,&nbsp;top&nbsp;are&nbsp;bounding&nbsp;box&nbsp;edges&nbsp;in&nbsp;pygame&nbsp;space</tt></dd></dl>
 
-<dl><dt><a name="WorldPymunk-step"><strong>step</strong></a>(self)</dt></dl>
+<dl><dt><a name="WorldPymunk-step"><strong>step</strong></a>(self, dt)</dt></dl>
 
 <hr>
 Methods inherited from <a href="pymunk.html#Space">pymunk.Space</a>:<br>
@@ -610,7 +610,7 @@ Data descriptors inherited from <a href="pymunk.html#Space">pymunk.Space</a>:<br
 </dl>
 <hr>
 Methods defined here:<br>
-<dl><dt><a name="WorldQuadTree-step"><strong>step</strong></a>(self)</dt></dl>
+<dl><dt><a name="WorldQuadTree-step"><strong>step</strong></a>(self, dt)</dt></dl>
 
 <hr>
 Methods inherited from <a href="gummworld2.quad_tree.html#QuadTree">gummworld2.quad_tree.QuadTree</a>:<br>
@@ -741,7 +741,7 @@ to&nbsp;this&nbsp;branch.&nbsp;This&nbsp;is&nbsp;a&nbsp;debugging/tuning&nbsp;ai
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><strong>__author__</strong> = 'Gummbum, (c) 2011'<br>
-<strong>__version__</strong> = '$Id: model.py 258 2011-02-27 18:18:15Z stabbingfinger@gmail.com $'</td></tr></table><p>
+<strong>__version__</strong> = '$Id: model.py 273 2011-04-23 08:06:10Z stabbingfinger@gmail.com $'</td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#7799ee">
 <td colspan=3 valign=bottom>&nbsp;<br>
