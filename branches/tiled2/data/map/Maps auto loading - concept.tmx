@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="40" height="30" tilewidth="20" tileheight="20">
+ <layer name="Tile Layer 1" width="40" height="30">
+  <data encoding="base64" compression="zlib">
+   eJztwTEBAAAAwqD1T20ND6AAAAAA4NcAEsAAAQ==
+  </data>
+ </layer>
+ <objectgroup color="#ffaaff" name="Maps" width="40" height="30">
+  <object name="Map 0,0" x="280" y="200" width="260" height="200"/>
+  <object name="Map 0,-1" x="280" y="0" width="260" height="200"/>
+  <object name="Map -1,-1" x="0" y="0" width="280" height="200"/>
+  <object name="Map -1,0" x="0" y="200" width="280" height="200"/>
+  <object name="Map -1,1" x="0" y="400" width="280" height="200"/>
+  <object name="Map 0,1" x="280" y="400" width="260" height="200"/>
+  <object name="Map 1,1" x="540" y="400" width="260" height="200"/>
+  <object name="Map 1,0" x="540" y="200" width="260" height="200"/>
+  <object name="Map 1,-1" x="540" y="0" width="260" height="200"/>
+ </objectgroup>
+ <objectgroup color="#55ffff" name="Camera" width="40" height="30">
+  <object name="Camera" x="380" y="280" width="60" height="40"/>
+ </objectgroup>
+ <objectgroup color="#aa0000" name="MapTriggersHoriz" width="40" height="30">
+  <object x="280" y="180" width="260" height="40"/>
+  <object x="280" y="380" width="260" height="40"/>
+  <object x="540" y="180" width="260" height="40"/>
+  <object x="540" y="380" width="260" height="40"/>
+  <object x="0" y="380" width="280" height="40"/>
+  <object x="0" y="180" width="280" height="40"/>
+ </objectgroup>
+ <objectgroup color="#aa0000" name="MapTriggersVert" width="40" height="30">
+  <object x="260" y="0" width="40" height="200"/>
+  <object x="260" y="200" width="40" height="200"/>
+  <object x="260" y="400" width="40" height="200"/>
+  <object x="520" y="0" width="40" height="200"/>
+  <object x="520" y="200" width="40" height="200"/>
+  <object x="520" y="400" width="40" height="200"/>
+ </objectgroup>
+ <objectgroup color="#ff5500" name="MapTriggersDiag" width="40" height="30">
+  <object x="240" y="160" width="80" height="80"/>
+  <object x="500" y="160" width="80" height="80"/>
+  <object x="500" y="360" width="80" height="80"/>
+  <object x="240" y="360" width="80" height="80"/>
+ </objectgroup>
+</map>
