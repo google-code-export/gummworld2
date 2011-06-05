@@ -120,27 +120,41 @@ class Map(object):
         """
         del self.layers[:]
     
-    def get_tile_at(self, x, y, layer=0):
+    def get_layer(self, layeri=0):
+        return self.layers[layeri]
+    
+    def get_tile_at(self, x, y, layeri=0):
         """Return the tile at grid location (x,y) in the specified layer. If no
         tile exists at the location, None is returned.
         """
-        return self.layers[layer].get_tile_at(x, y)
+        return self.layers[layeri].get_tile_at(x, y)
 
-    def get_tiles(self, x1, y1, x2, y2, layer=0):
-        """Return the list of tiles at the specified layer in range (x1,y1)
-        through (x2,y2).
+    def get_tiles(self, tile_range):
+        """Return the list of tiles in the specified range for all layers.
         
-        The arguments x1,y1,x2,y2 are ints representing the range of tiles to
-        select.
+        The argument tile_range is a list of ranges per layer, like that
+        returned by Map.get_tile_range_in_rect().
         
-        The layer argument is an int representing the tile layer to select.
-        
-        If the layer is not visible, an empty list is returned.
+        If the layer is not visible, an empty list is included for that layer.
         """
-        return self.layers[layer].get_tiles(x1,y1,x2,y2)
+        tiles_per_layer = []
+        for layeri,layer in enumerate(State.map.layers):
+            tile_size,map_size,visible = layer.tile_size, layer.map_size, layer.visible
+            new_layer = MapLayer(tile_size,map_size,visible)
+            if visible:
+                tiles = get_tiles(*tile_range[layeri], layer=layeri)
+                new_layer.update([(tile.name,tile) for tile in tiles])
+            tiles_per_layer.append(new_layer)
+        return tiles_per_layer
     
-    def get_tiles_in_rect(self, rect, layer=0):
+    def get_tiles_in_rect(self, rect, layeri=0):
         return self.layers[layeri].get_tiles_in_rect(rect)
+    
+    def get_tile_range_in_rect(self, rect):
+        tile_ranges = []
+        for layeri,layer in enumerate(self.layers):
+            tile_ranges.append(layer.get_tile_range_in_rect(rect))
+        return tile_ranges
     
 
 class MapLayer(list):
@@ -269,6 +283,17 @@ class MapLayer(list):
         bottom = int(round(float(b) / tile_y))
         tiles = self.get_tiles(left, top, right, bottom)
         return tiles
+    
+    def get_tile_range_in_rect(self, rect):
+        tile_x,tile_y = self.tile_size
+        l,t,w,h = rect
+        r = l+w-1
+        b = t+h-1
+        left = int(round(float(l) / tile_x)) - 1
+        right = int(round(float(r) / tile_x)) + 1
+        top = int(round(float(t) / tile_y)) - 1
+        bottom = int(round(float(b) / tile_y)) + 1
+        return left,top,right,bottom
     
     def index_of(self, x, y):
         """Return the array index relating to grid location (x,y).

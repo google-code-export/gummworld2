@@ -36,7 +36,8 @@ from pygame.sprite import Sprite
 from gummworld2 import data, State, Map, MapLayer, Vec2d
 from gummworld2.geometry import RectGeometry, PolyGeometry, CircleGeometry
 from gummworld2.ui import HUD, Stat, Statf, hud_font
-from tiledtmxloader import TileMapParser, ImageLoaderPygame
+from tiledtmxloader.tiledtmxloader import TileMapParser
+from tiledtmxloader.helperspygame import ResourceLoaderPygame
 
 # HACK by Cosmo to get pygame 1.8 working
 haspygame19 = pygame.version.vernum >= (1, 9)
@@ -436,12 +437,16 @@ def load_tiled_tmx_map(map_file_name, load_invisible=False, convert_alpha=False)
     # The tiledtmxloader.TileMap object is stored in the returned
     # gamelib.Map object in attribute 'tiled_map'.
     
-    world_map = TileMapParser().parse_decode_load(
-        map_file_name, ImageLoaderPygame())
+    world_map = TileMapParser().parse_decode(map_file_name)
+    resource = ResourceLoaderPygame()
+    resource.load(world_map)
+    world_map.resource = resource
     tile_size = (world_map.tilewidth, world_map.tileheight)
+    
     map_size = (world_map.width, world_map.height)
     gummworld_map = Map(tile_size, map_size)
     gummworld_map.tiled_map = world_map
+    
     for layeri,layer in enumerate(world_map.layers):
         gummworld_map.layers.append(MapLayer(
             tile_size, map_size, layer.visible, True, True, name=str(layeri)))
@@ -456,7 +461,7 @@ def load_tiled_tmx_map(map_file_name, load_invisible=False, convert_alpha=False)
                     gummworld_map.add(None, layer=layeri)
                     continue
                 try:
-                    offx, offy, tile_img = world_map.indexed_tiles[img_idx]
+                    offx, offy, tile_img = world_map.resource.indexed_tiles[img_idx]
                     screen_img = tile_img.copy()  #convert(tile_img)
                 except KeyError:
                     print 'KeyError',img_idx,(xpos,ypos)

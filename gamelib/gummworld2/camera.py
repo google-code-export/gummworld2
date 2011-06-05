@@ -27,7 +27,7 @@ camera.py - Camera module for Gummworld2.
 
 import pygame
 
-from gummworld2 import State, MapLayer, Vec2d, geometry
+from gummworld2 import State, Map, MapLayer, TiledMap, SuperMap, Vec2d, geometry
 
 
 class Camera(object):
@@ -266,13 +266,17 @@ class Camera(object):
     def world_to_screen(self, xy):
         """Convert coordinates from world space to screen space.
         """
-        world = Vec2d(self.rect.center) - xy
-        return self.abs_screen_center - world
+#        world = Vec2d(self.rect.center) - xy
+#        return self.abs_screen_center - world
+        cx,cy = self.rect.topleft
+        x,y = xy
+        return Vec2d(x-cx, y-cy)
         
     def screen_to_world(self, xy):
         """Convert coordinates from screen space to world space.
         """
         camera = self.target.position
+        ## ?? this should be relative to subsurface ??
         return xy + camera - self.abs_screen_center
         
     @property
@@ -285,38 +289,14 @@ class Camera(object):
         return self._visible_tile_range
     
     def _get_visible_tile_range(self):
-        range_per_layer = self._visible_tile_range
-        del range_per_layer[:]
-        for layeri,layer in enumerate(State.map.layers):
-            tile_x,tile_y = layer.tile_size
-            l,t,w,h = self.rect
-            r = l+w-1
-            b = t+h-1
-            left = int(round(float(l) / tile_x)) - 1
-            right = int(round(float(r) / tile_x)) + 1 #2
-            top = int(round(float(t) / tile_y)) - 1
-            bottom = int(round(float(b) / tile_y)) + 1 #2
-            range_per_layer.append((left,top,right,bottom))
-        
+        self._visible_tile_range = State.map.get_tile_range_in_rect(self.rect)
+    
     @property
     def visible_tiles(self):
         """A list of MapLayer objects that would be visible on the display
         surface.
         """
-        tile_per_layer = []
-        tile_range = self.visible_tile_range
-        map = State.map
-        get_tiles = map.get_tiles
-        for layeri,layer in enumerate(State.map.layers):
-            tile_size,map_size,visible = layer.tile_size, layer.map_size, layer.visible
-            new_layer = MapLayer(tile_size,map_size,visible)
-            if visible:
-                tiles = get_tiles(*tile_range[layeri], layer=layeri)
-                new_layer.update([(tile.name,tile)
-                    for tile in get_tiles(*tile_range[layeri], layer=layeri)
-                ])
-            tile_per_layer.append(new_layer)
-        return tile_per_layer
+        return State.map.get_tiles(self.visible_tile_range)
     
     def state_restored(self, prev):
         """Sync a stale camera after swapping it in.

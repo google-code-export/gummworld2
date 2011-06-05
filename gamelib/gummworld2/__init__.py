@@ -49,8 +49,15 @@ from state import State
 from context import Context
 from subpixel import SubPixelSurface
 
+# the following creates a separate namespace, don't do it.
+#from tiledtmxloader.tiledtmxloader import TileMap, TileMapParser
+#from tiledtmxloader.helperspygame import ResourceLoaderPygame, RendererPygame
+
 from screen import Screen, View
 from map import Map, MapLayer
+from tiledmap import TiledMap
+from quadtree import QuadTree
+from supermap import SuperMap, MapHandler
 from camera import Camera
 from gameclock import GameClock
 from popup_menu import PopupMenu
@@ -71,5 +78,7 @@ import popup_menu
 import state
 import ui
 import toolkit
+import quadtree
+import supermap
 
 if __debug__: print 'gummworld2 v%s loaded' % version.version

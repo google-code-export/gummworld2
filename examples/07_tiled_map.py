@@ -35,6 +35,8 @@ Thanks to dr0id for his nice tiledtmxloader module:
 """
 
 
+import cProfile, pstats
+
 import pygame
 from pygame.sprite import Sprite
 from pygame.locals import *
@@ -175,6 +177,15 @@ class App(Engine):
         context.pop()
 
 
-if __name__ == '__main__':
+def main():
     app = App()
     gummworld2.run(app)
+
+
+if __name__ == '__main__':
+    if False:
+        cProfile.run('main()', 'prof.dat')
+        p = pstats.Stats('prof.dat')
+        p.sort_stats('time').print_stats()
+    else:
+        main()

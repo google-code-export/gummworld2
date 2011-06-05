@@ -33,12 +33,8 @@ try:
 except:
     pymunk = None
 
-try:
-    from gummworld2 import quad_tree
-    from gummworld2.geometry import RectGeometry, CircleGeometry, PolyGeometry
-except:
-    quad_tree = None
-
+from gummworld2.quadtree import QuadTree
+from gummworld2.geometry import RectGeometry, CircleGeometry, PolyGeometry
 from gummworld2 import State, Vec2d, data
 
 
@@ -143,31 +139,29 @@ class World(object):
         return "<%s(%d objects)>" % (self.__class__.__name__, len(self))
 
 
-if quad_tree is not None:
+class QuadTreeObject(object):
+    """An object model suitable for use as a Camera target or an autonomous
+    object in QuadTreeWorld.
+    """
     
-    class QuadTreeObject(object):
-        """An object model suitable for use as a Camera target or an autonomous
-        object in QuadTreeWorld.
-        """
-        
-        def __init__(self, rect, position=(0,0)):
-            self.rect = pygame.Rect(rect)
-            self._position = Vec2d(position)
-        
-        @property
-        def position(self):
-            return self._position
-        @position.setter
-        def position(self, val):
-            p = self._position
-            p.x,p.y = val
-            self.rect.center = round(p.x), round(p.y)
+    def __init__(self, rect, position=(0,0)):
+        self.rect = pygame.Rect(rect)
+        self._position = Vec2d(position)
+    
+    @property
+    def position(self):
+        return self._position
+    @position.setter
+    def position(self, val):
+        p = self._position
+        p.x,p.y = val
+        self.rect.center = round(p.x), round(p.y)
 
 
-    class WorldQuadTree(quad_tree.QuadTree):
-        
-        def step(self, dt):
-            pass
+class WorldQuadTree(QuadTree):
+    
+    def step(self, dt):
+        pass
 
 
 if pymunk is not None:
