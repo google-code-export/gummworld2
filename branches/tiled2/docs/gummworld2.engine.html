@@ -1,0 +1,316 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module gummworld2.engine</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.engine</strong></big></big> (version $Id: engine.py 287 2011-05-01 19:26:45Z stabbingfinger@gmail.com $)</font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/svn/gummworld2/gamelib/gummworld2/engine.py">c:\cygwin\home\bw\devel\python\svn\gummworld2\gamelib\gummworld2\engine.py</a></font></td></tr></table>
+    <p><tt>engine.py&nbsp;-&nbsp;A&nbsp;sample&nbsp;engine&nbsp;for&nbsp;Gummworld2.<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;provides&nbsp;an&nbsp;<a href="#Engine">Engine</a>&nbsp;class&nbsp;that&nbsp;can&nbsp;be&nbsp;subclassed&nbsp;for&nbsp;an&nbsp;application<br>
+framework&nbsp;that's&nbsp;easy&nbsp;to&nbsp;use.<br>
+&nbsp;<br>
+The&nbsp;run&nbsp;loop&nbsp;keeps&nbsp;time&nbsp;via&nbsp;the&nbsp;game&nbsp;clock.&nbsp;update()&nbsp;and&nbsp;event&nbsp;handlers&nbsp;are<br>
+called&nbsp;every&nbsp;time&nbsp;an&nbsp;update&nbsp;cycle&nbsp;is&nbsp;ready.&nbsp;draw()&nbsp;is&nbsp;called&nbsp;every&nbsp;time&nbsp;a&nbsp;frame<br>
+cycle&nbsp;is&nbsp;ready.<br>
+&nbsp;<br>
+The&nbsp;subclass&nbsp;should&nbsp;override&nbsp;update()&nbsp;and&nbsp;draw()&nbsp;for&nbsp;its&nbsp;own&nbsp;purposes.&nbsp;If&nbsp;the<br>
+subclass&nbsp;wants&nbsp;to&nbsp;get&nbsp;events&nbsp;for&nbsp;a&nbsp;particular&nbsp;type,&nbsp;all&nbsp;it&nbsp;needs&nbsp;to&nbsp;do&nbsp;is<br>
+override&nbsp;the&nbsp;event&nbsp;handler&nbsp;for&nbsp;that&nbsp;type.<br>
+&nbsp;<br>
+If&nbsp;you&nbsp;want&nbsp;to&nbsp;write&nbsp;your&nbsp;own&nbsp;framework&nbsp;instead&nbsp;of&nbsp;using&nbsp;this&nbsp;one,&nbsp;then&nbsp;in<br>
+general&nbsp;you&nbsp;will&nbsp;still&nbsp;want&nbsp;to&nbsp;initialize&nbsp;yours&nbsp;in&nbsp;the&nbsp;same&nbsp;order&nbsp;as&nbsp;this&nbsp;class,<br>
+though&nbsp;not&nbsp;everything&nbsp;created&nbsp;in&nbsp;the&nbsp;constructor&nbsp;is&nbsp;required.&nbsp;See<br>
+<a href="#Engine">Engine</a>.__init__(),&nbsp;<a href="#Engine">Engine</a>.<a href="#-run">run</a>(),&nbsp;and&nbsp;examples/00_minimum.py&nbsp;for&nbsp;helpful&nbsp;clues.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="gummworld2.context.html">gummworld2.context</a><br>
+<a href="gummworld2.model.html">gummworld2.model</a><br>
+</td><td width="25%" valign=top><a href="pygame.html">pygame</a><br>
+<a href="gummworld2.pygame_utils.html">gummworld2.pygame_utils</a><br>
+</td><td width="25%" valign=top><a href="pymunk.html">pymunk</a><br>
+<a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="gummworld2.context.html#Context">gummworld2.context.Context</a>(<a href="__builtin__.html#object">__builtin__.object</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="gummworld2.engine.html#Engine">Engine</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Engine">class <strong>Engine</strong></a>(<a href="gummworld2.context.html#Context">gummworld2.context.Context</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="gummworld2.engine.html#Engine">Engine</a></dd>
+<dd><a href="gummworld2.context.html#Context">gummworld2.context.Context</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="Engine-__init__"><strong>__init__</strong></a>(self, screen_surface<font color="#909090">=None</font>, resolution<font color="#909090">=None</font>, display_flags<font color="#909090">=0</font>, caption<font color="#909090">=None</font>, camera_target<font color="#909090">=None</font>, camera_view<font color="#909090">=None</font>, camera_view_rect<font color="#909090">=None</font>, map<font color="#909090">=None</font>, tile_size<font color="#909090">=None</font>, map_size<font color="#909090">=None</font>, update_speed<font color="#909090">=30</font>, frame_speed<font color="#909090">=30</font>, default_schedules<font color="#909090">=True</font>, world_type<font color="#909090">=0</font>, world_args<font color="#909090">={}</font>, set_state<font color="#909090">=True</font>)</dt><dd><tt>Construct&nbsp;an&nbsp;instance&nbsp;of&nbsp;<a href="#Engine">Engine</a>.<br>
+&nbsp;<br>
+This&nbsp;constructor&nbsp;does&nbsp;the&nbsp;following:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;pygame&nbsp;display&nbsp;is&nbsp;initialized&nbsp;with&nbsp;an&nbsp;optional&nbsp;caption,&nbsp;and&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;resulting&nbsp;screen.Screen&nbsp;object&nbsp;is&nbsp;placed&nbsp;in&nbsp;State.screen.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;empty&nbsp;map.Map&nbsp;object&nbsp;is&nbsp;created&nbsp;and&nbsp;placed&nbsp;in&nbsp;State.map.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;empty&nbsp;model.World*&nbsp;object&nbsp;is&nbsp;created&nbsp;and&nbsp;placed&nbsp;in&nbsp;State.world.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;State.world_type&nbsp;is&nbsp;set&nbsp;to&nbsp;one&nbsp;of&nbsp;the&nbsp;engine.*_WORLD&nbsp;values<br>
+&nbsp;&nbsp;&nbsp;&nbsp;corresponding&nbsp;to&nbsp;the&nbsp;world&nbsp;object&nbsp;in&nbsp;State.world.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;camera.Camera&nbsp;object&nbsp;is&nbsp;created&nbsp;and&nbsp;placed&nbsp;in&nbsp;State.camera.&nbsp;The<br>
+&nbsp;&nbsp;&nbsp;&nbsp;camera&nbsp;target&nbsp;is&nbsp;either&nbsp;taken&nbsp;from&nbsp;the&nbsp;camera_target&nbsp;argument,&nbsp;or&nbsp;an<br>
+&nbsp;&nbsp;&nbsp;&nbsp;appropriate&nbsp;target&nbsp;for&nbsp;world&nbsp;type&nbsp;is&nbsp;created.&nbsp;The&nbsp;target&nbsp;is&nbsp;*NOT*<br>
+&nbsp;&nbsp;&nbsp;&nbsp;added&nbsp;to&nbsp;the&nbsp;world,&nbsp;as&nbsp;the&nbsp;target&nbsp;does&nbsp;not&nbsp;need&nbsp;to&nbsp;be&nbsp;an&nbsp;object<br>
+&nbsp;&nbsp;&nbsp;&nbsp;subject&nbsp;to&nbsp;game&nbsp;rules.&nbsp;If&nbsp;target&nbsp;happens&nbsp;to&nbsp;be&nbsp;an&nbsp;avatar-type&nbsp;object<br>
+&nbsp;&nbsp;&nbsp;&nbsp;then&nbsp;add&nbsp;it&nbsp;manually&nbsp;to&nbsp;world&nbsp;with&nbsp;the&nbsp;rest&nbsp;of&nbsp;the&nbsp;world&nbsp;entities.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;game_clock.GameClock&nbsp;object&nbsp;is&nbsp;created&nbsp;and&nbsp;placed&nbsp;in&nbsp;State.clock.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Joystick&nbsp;objects&nbsp;are&nbsp;created&nbsp;for&nbsp;connected&nbsp;controllers.<br>
+&nbsp;<br>
+The&nbsp;following&nbsp;arguments&nbsp;are&nbsp;used&nbsp;to&nbsp;initialize&nbsp;a&nbsp;Screen&nbsp;object:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;screen_surface&nbsp;argument&nbsp;specifies&nbsp;the&nbsp;pygame&nbsp;top&nbsp;level&nbsp;surface<br>
+&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;use&nbsp;for&nbsp;creating&nbsp;the&nbsp;State.screen&nbsp;object.&nbsp;The&nbsp;presence&nbsp;of&nbsp;this<br>
+&nbsp;&nbsp;&nbsp;&nbsp;argument&nbsp;overrides&nbsp;initialization&nbsp;of&nbsp;the&nbsp;pygame&nbsp;display,&nbsp;and<br>
+&nbsp;&nbsp;&nbsp;&nbsp;resolution&nbsp;and&nbsp;display_flags&nbsp;arguments&nbsp;are&nbsp;ignored.&nbsp;Use&nbsp;this&nbsp;if<br>
+&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;pygame&nbsp;display&nbsp;has&nbsp;already&nbsp;been&nbsp;initialized&nbsp;in&nbsp;the&nbsp;calling<br>
+&nbsp;&nbsp;&nbsp;&nbsp;program.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;resolution&nbsp;argument&nbsp;specifies&nbsp;the&nbsp;width&nbsp;and&nbsp;height&nbsp;of&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;display.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;display_flags&nbsp;argument&nbsp;specifies&nbsp;the&nbsp;pygame&nbsp;display&nbsp;flags&nbsp;to<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pass&nbsp;to&nbsp;the&nbsp;display&nbsp;initializer.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;caption&nbsp;argument&nbsp;is&nbsp;a&nbsp;string&nbsp;to&nbsp;use&nbsp;as&nbsp;the&nbsp;window&nbsp;caption.<br>
+&nbsp;<br>
+The&nbsp;following&nbsp;arguments&nbsp;are&nbsp;used&nbsp;to&nbsp;initialize&nbsp;a&nbsp;Camera&nbsp;object:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;camera_target&nbsp;argument&nbsp;is&nbsp;the&nbsp;target&nbsp;that&nbsp;the&nbsp;camera&nbsp;will&nbsp;track.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;camera_target&nbsp;is&nbsp;None,&nbsp;<a href="#Engine">Engine</a>&nbsp;will&nbsp;create&nbsp;a&nbsp;default&nbsp;target<br>
+&nbsp;&nbsp;&nbsp;&nbsp;appropriate&nbsp;for&nbsp;the&nbsp;world&nbsp;type.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;camera_view&nbsp;argument&nbsp;is&nbsp;a&nbsp;screen.View&nbsp;object&nbsp;to&nbsp;use&nbsp;as&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;camera's&nbsp;view.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;camera_view_rect&nbsp;argument&nbsp;specifies&nbsp;the&nbsp;pygame&nbsp;Rect&nbsp;from&nbsp;which<br>
+&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;create&nbsp;a&nbsp;screen.View&nbsp;object&nbsp;for&nbsp;the&nbsp;camera's&nbsp;view.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;State.screen.surface&nbsp;is&nbsp;used&nbsp;as&nbsp;the&nbsp;source&nbsp;surface.&nbsp;This&nbsp;argument&nbsp;is<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ignored&nbsp;if&nbsp;camera_view&nbsp;is&nbsp;not&nbsp;None.<br>
+&nbsp;<br>
+The&nbsp;following&nbsp;arguments&nbsp;are&nbsp;used&nbsp;to&nbsp;initialize&nbsp;a&nbsp;Map&nbsp;object:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;tile_size&nbsp;and&nbsp;map_size&nbsp;arguments&nbsp;specify&nbsp;the&nbsp;width&nbsp;and&nbsp;height&nbsp;of<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;map&nbsp;tile,&nbsp;and&nbsp;width&nbsp;and&nbsp;height&nbsp;of&nbsp;a&nbsp;map&nbsp;in&nbsp;tiles,&nbsp;respectively.<br>
+&nbsp;<br>
+The&nbsp;following&nbsp;arguments&nbsp;are&nbsp;used&nbsp;to&nbsp;initialize&nbsp;a&nbsp;model.World*&nbsp;object:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;world_type&nbsp;argument&nbsp;specifies&nbsp;which&nbsp;of&nbsp;the&nbsp;world&nbsp;classes&nbsp;to<br>
+&nbsp;&nbsp;&nbsp;&nbsp;create.&nbsp;It&nbsp;must&nbsp;be&nbsp;one&nbsp;of&nbsp;engine.NO_WORLD,&nbsp;engine.SIMPLE_WORLD,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;engine.QUADTREE_WORLD,&nbsp;engine.PYMUNK_WORLD.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;world_args&nbsp;argument&nbsp;is&nbsp;a&nbsp;dict&nbsp;that&nbsp;can&nbsp;be&nbsp;passed&nbsp;verbatim&nbsp;to<br>
+&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;world&nbsp;constructor&nbsp;(see&nbsp;the&nbsp;World*&nbsp;classes&nbsp;in&nbsp;the&nbsp;model&nbsp;module)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;like&nbsp;so:&nbsp;World(**world_args).<br>
+&nbsp;<br>
+The&nbsp;following&nbsp;arguments&nbsp;are&nbsp;used&nbsp;to&nbsp;initialize&nbsp;a&nbsp;Clock&nbsp;object:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;update_speed&nbsp;specifies&nbsp;the&nbsp;maximum&nbsp;updates&nbsp;that&nbsp;can&nbsp;occur&nbsp;per<br>
+&nbsp;&nbsp;&nbsp;&nbsp;second.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;frame_speed&nbsp;specifies&nbsp;the&nbsp;maximum&nbsp;frames&nbsp;that&nbsp;can&nbsp;occur&nbsp;per&nbsp;second.<br>
+&nbsp;<br>
+The&nbsp;clock&nbsp;sacrifices&nbsp;frames&nbsp;per&nbsp;second&nbsp;in&nbsp;order&nbsp;to&nbsp;achieve&nbsp;the&nbsp;desired<br>
+updates&nbsp;per&nbsp;second.&nbsp;If&nbsp;frame_speed&nbsp;is&nbsp;0&nbsp;the&nbsp;frame&nbsp;rate&nbsp;is&nbsp;uncapped.<br>
+&nbsp;<br>
+<a href="#Engine">Engine</a>.<a href="#Engine-update">update</a>()&nbsp;and&nbsp;<a href="#Engine">Engine</a>.<a href="#Engine-draw">draw</a>()&nbsp;are&nbsp;registered&nbsp;as&nbsp;callbacks&nbsp;in&nbsp;the<br>
+clock.<br>
+&nbsp;<br>
+By&nbsp;default&nbsp;the&nbsp;<a href="#Engine">Engine</a>&nbsp;class&nbsp;schedules&nbsp;these&nbsp;additional&nbsp;items:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;clock.schedule_update_priority(self.<strong>_get_event</strong>,&nbsp;-2.0)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;clock.schedule_update_priority(State.world.step,&nbsp;-1.0)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;clock.schedule_update_priority(State.camera.update,&nbsp;1.0)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;clock.schedule_frame_priority(State.camera.interpolate,&nbsp;-1.0)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+The&nbsp;first&nbsp;three&nbsp;items&nbsp;coincide&nbsp;with&nbsp;the&nbsp;clock's&nbsp;callback&nbsp;to<br>
+<a href="#Engine">Engine</a>.<a href="#Engine-update">update</a>().&nbsp;The&nbsp;last&nbsp;item&nbsp;coincides&nbsp;with&nbsp;<a href="#Engine">Engine</a>.<a href="#Engine-draw">draw</a>().<br>
+&nbsp;<br>
+The&nbsp;use&nbsp;of&nbsp;priorities&nbsp;allows&nbsp;user&nbsp;items&nbsp;to&nbsp;be&nbsp;scheduled&nbsp;in&nbsp;between&nbsp;these<br>
+default&nbsp;items&nbsp;by&nbsp;using&nbsp;an&nbsp;appropriate&nbsp;float&nbsp;value:&nbsp;lower&nbsp;priorities&nbsp;will<br>
+be&nbsp;run&nbsp;first.&nbsp;See&nbsp;gameclock.GameClock.schedule_*_priority().<br>
+&nbsp;<br>
+To&nbsp;prevent&nbsp;scheduling&nbsp;the&nbsp;world&nbsp;and&nbsp;camera&nbsp;items,&nbsp;pass&nbsp;the&nbsp;constructor<br>
+argument&nbsp;default_schedules=False.&nbsp;If&nbsp;these&nbsp;are&nbsp;not&nbsp;scheduled&nbsp;by&nbsp;<a href="#Engine">Engine</a>,<br>
+the&nbsp;using&nbsp;program&nbsp;will&nbsp;either&nbsp;need&nbsp;to&nbsp;schedule&nbsp;them&nbsp;or&nbsp;place&nbsp;them<br>
+directly&nbsp;in&nbsp;the&nbsp;overridden&nbsp;<a href="#Engine-update">update</a>()&nbsp;and&nbsp;<a href="#Engine-draw">draw</a>()&nbsp;methods,&nbsp;as&nbsp;appropriate.</tt></dd></dl>
+
+<dl><dt><a name="Engine-draw"><strong>draw</strong></a>(self, dt)</dt><dd><tt>Override&nbsp;this&nbsp;method.&nbsp;Called&nbsp;by&nbsp;<a href="#-run">run</a>()&nbsp;when&nbsp;the&nbsp;clock&nbsp;signals&nbsp;a<br>
+frame&nbsp;cycle&nbsp;is&nbsp;ready.<br>
+&nbsp;<br>
+Suggestion:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;State.screen.clear()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;State.camera.interpolate()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;...&nbsp;custom&nbsp;draw&nbsp;the&nbsp;screen&nbsp;...<br>
+&nbsp;&nbsp;&nbsp;&nbsp;State.screen.flip()</tt></dd></dl>
+
+<dl><dt><a name="Engine-enter"><strong>enter</strong></a>(self)</dt><dd><tt>Called&nbsp;when&nbsp;the&nbsp;context&nbsp;is&nbsp;entered.<br>
+&nbsp;<br>
+If&nbsp;you&nbsp;override&nbsp;this,&nbsp;make&nbsp;sure&nbsp;you&nbsp;call&nbsp;the&nbsp;super.</tt></dd></dl>
+
+<dl><dt><a name="Engine-on_active_event"><strong>on_active_event</strong></a>(self, gain, state)</dt><dd><tt>##&nbsp;Override&nbsp;an&nbsp;event&nbsp;handler&nbsp;to&nbsp;get&nbsp;specific&nbsp;events.</tt></dd></dl>
+
+<dl><dt><a name="Engine-on_joy_axis_motion"><strong>on_joy_axis_motion</strong></a>(self, joy, axis, value)</dt></dl>
+
+<dl><dt><a name="Engine-on_joy_ball_motion"><strong>on_joy_ball_motion</strong></a>(self, joy, ball, rel)</dt></dl>
+
+<dl><dt><a name="Engine-on_joy_button_down"><strong>on_joy_button_down</strong></a>(self, joy, button)</dt></dl>
+
+<dl><dt><a name="Engine-on_joy_button_up"><strong>on_joy_button_up</strong></a>(self, joy, button)</dt></dl>
+
+<dl><dt><a name="Engine-on_joy_hat_motion"><strong>on_joy_hat_motion</strong></a>(self, joy, hat, value)</dt></dl>
+
+<dl><dt><a name="Engine-on_key_down"><strong>on_key_down</strong></a>(self, unicode, key, mod)</dt></dl>
+
+<dl><dt><a name="Engine-on_key_up"><strong>on_key_up</strong></a>(self, key, mod)</dt></dl>
+
+<dl><dt><a name="Engine-on_mouse_button_down"><strong>on_mouse_button_down</strong></a>(self, pos, button)</dt></dl>
+
+<dl><dt><a name="Engine-on_mouse_button_up"><strong>on_mouse_button_up</strong></a>(self, pos, button)</dt></dl>
+
+<dl><dt><a name="Engine-on_mouse_motion"><strong>on_mouse_motion</strong></a>(self, pos, rel, buttons)</dt></dl>
+
+<dl><dt><a name="Engine-on_quit"><strong>on_quit</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Engine-on_user_event"><strong>on_user_event</strong></a>(self, e)</dt></dl>
+
+<dl><dt><a name="Engine-on_video_expose"><strong>on_video_expose</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Engine-on_video_resize"><strong>on_video_resize</strong></a>(self, size, w, h)</dt></dl>
+
+<dl><dt><a name="Engine-resume"><strong>resume</strong></a>(self)</dt><dd><tt>Called&nbsp;when&nbsp;the&nbsp;context&nbsp;is&nbsp;resumed.<br>
+&nbsp;<br>
+If&nbsp;you&nbsp;override&nbsp;this,&nbsp;make&nbsp;sure&nbsp;you&nbsp;call&nbsp;the&nbsp;super.</tt></dd></dl>
+
+<dl><dt><a name="Engine-schedule_default"><strong>schedule_default</strong></a>(self)</dt><dd><tt>Schedule&nbsp;default&nbsp;items.<br>
+&nbsp;<br>
+Note:&nbsp;These&nbsp;are&nbsp;not&nbsp;tracked.&nbsp;If&nbsp;you&nbsp;intend&nbsp;to&nbsp;manually&nbsp;replace<br>
+State.world&nbsp;or&nbsp;State.camera&nbsp;after&nbsp;constructing&nbsp;the&nbsp;<a href="#Engine">Engine</a>&nbsp;object,<br>
+you'll&nbsp;likely&nbsp;want&nbsp;to&nbsp;unschedule&nbsp;some&nbsp;or&nbsp;all&nbsp;of&nbsp;these&nbsp;and&nbsp;manage&nbsp;the<br>
+schedules&nbsp;yourself.&nbsp;If&nbsp;you&nbsp;replace&nbsp;the&nbsp;objects&nbsp;without&nbsp;unscheduling<br>
+their&nbsp;callbacks,&nbsp;the&nbsp;lost&nbsp;references&nbsp;will&nbsp;result&nbsp;in&nbsp;memory&nbsp;and&nbsp;CPU<br>
+leaks.</tt></dd></dl>
+
+<dl><dt><a name="Engine-set_state"><strong>set_state</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Engine-unschedule_default"><strong>unschedule_default</strong></a>(self)</dt><dd><tt>Unschedule&nbsp;default&nbsp;items.</tt></dd></dl>
+
+<dl><dt><a name="Engine-update"><strong>update</strong></a>(self, dt)</dt><dd><tt>Override&nbsp;this&nbsp;method.&nbsp;Called&nbsp;by&nbsp;<a href="#-run">run</a>()&nbsp;when&nbsp;the&nbsp;clock&nbsp;signals&nbsp;an<br>
+update&nbsp;cycle&nbsp;is&nbsp;ready.<br>
+&nbsp;<br>
+Suggestion:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;move_camera()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;State.camera.<a href="#Engine-update">update</a>()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;...&nbsp;custom&nbsp;update&nbsp;the&nbsp;rest&nbsp;of&nbsp;the&nbsp;game&nbsp;...</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>joysticks</strong></dt>
+<dd><tt>List&nbsp;of&nbsp;initialized&nbsp;joysticks.</tt></dd>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>NO_WORLD</strong> = 0</dl>
+
+<dl><dt><strong>PYMUNK_WORLD</strong> = 3</dl>
+
+<dl><dt><strong>QUADTREE_WORLD</strong> = 2</dl>
+
+<dl><dt><strong>SIMPLE_WORLD</strong> = 1</dl>
+
+<hr>
+Methods inherited from <a href="gummworld2.context.html#Context">gummworld2.context.Context</a>:<br>
+<dl><dt><a name="Engine-exit"><strong>exit</strong></a>(self)</dt><dd><tt>Called&nbsp;when&nbsp;this&nbsp;context&nbsp;is&nbsp;popped&nbsp;off&nbsp;the&nbsp;stack.</tt></dd></dl>
+
+<dl><dt><a name="Engine-suspend"><strong>suspend</strong></a>(self)</dt><dd><tt>Called&nbsp;when&nbsp;another&nbsp;context&nbsp;is&nbsp;pushed&nbsp;on&nbsp;top&nbsp;of&nbsp;this&nbsp;one.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="gummworld2.context.html#Context">gummworld2.context.Context</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-run"><strong>run</strong></a>(app)</dt><dd><tt>Push&nbsp;app&nbsp;onto&nbsp;the&nbsp;context&nbsp;stack&nbsp;and&nbsp;start&nbsp;the&nbsp;run&nbsp;loop.<br>
+&nbsp;<br>
+To&nbsp;exit&nbsp;the&nbsp;run&nbsp;loop&nbsp;gracefully,&nbsp;call&nbsp;context.pop().</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>ACTIVEEVENT</strong> = 1<br>
+<strong>JOYAXISMOTION</strong> = 7<br>
+<strong>JOYBALLMOTION</strong> = 8<br>
+<strong>JOYBUTTONDOWN</strong> = 10<br>
+<strong>JOYBUTTONUP</strong> = 11<br>
+<strong>JOYHATMOTION</strong> = 9<br>
+<strong>KEYDOWN</strong> = 2<br>
+<strong>KEYUP</strong> = 3<br>
+<strong>MOUSEBUTTONDOWN</strong> = 5<br>
+<strong>MOUSEBUTTONUP</strong> = 6<br>
+<strong>MOUSEMOTION</strong> = 4<br>
+<strong>NO_WORLD</strong> = 0<br>
+<strong>PYMUNK_WORLD</strong> = 3<br>
+<strong>QUADTREE_WORLD</strong> = 2<br>
+<strong>QUIT</strong> = 12<br>
+<strong>SIMPLE_WORLD</strong> = 1<br>
+<strong>USEREVENT</strong> = 24<br>
+<strong>VIDEOEXPOSE</strong> = 17<br>
+<strong>VIDEORESIZE</strong> = 16<br>
+<strong>__author__</strong> = 'Gummbum, (c) 2011'<br>
+<strong>__version__</strong> = '$Id: engine.py 287 2011-05-01 19:26:45Z stabbingfinger@gmail.com $'</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#7799ee">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Author</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#7799ee"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Gummbum,&nbsp;(c)&nbsp;2011</td></tr></table>
+</body></html>

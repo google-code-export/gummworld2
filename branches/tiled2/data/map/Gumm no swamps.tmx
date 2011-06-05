@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE map SYSTEM "http://mapeditor.org/dtd/1.0/map.dtd">
+<map version="1.0" orientation="orthogonal" width="64" height="64" tilewidth="32" tileheight="32">
+ <tileset name="Desert Tileset" firstgid="1" tilewidth="32" tileheight="32" spacing="1" margin="1">
+  <image source="tmw_desert_spacing.png"/>
+ </tileset>
+ <layer name="Layer 0" width="64" height="64">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAAO2ZaU/DMAxAw4ANxo0EjGvrQNrG/f//HanUSpmVxjncxm394UmT2jV5qRO7yVIptSSiIHyWIPSFA82k4pBBfygpPO451cwrzjzun2pmFScMHFMJ9b/UXFVcM+i/+Ofzn1no25xI8beRMyY2EdeG4r9B/G1j8Bvhf695ABxn8p8Q8Broj8VEl/5zYqD/1tG2WQdcDNDf5Q7fea75f0vAncPfNQYc/H1YIddD178acx3Mtf6VFIn/j/VvioVzlacumjradY0RtX+uuiB2PkL/v4i2bTUBnBtmXHTpX7Zrxl6B+HfRrzZiwRWD5tjDeTgUf6wubWrb5h8zB7B+5cgRPmNP/f6b5niOGtmWo13+L2p/HzA0Dlx5MFeNDMdiAdxM/y7yILcacez+N8r9HRCKbe09Uvvr8iLh+V3EAcU62Ld9UvEflz/MbZT+5bdY7nyHuW+N35h/Sh3A0d+Gyx/bCxuaP6wDQ+PA9C9zH4d8h53bUtRBdRsc5z62HlP4d/Wt24Y/RR0I455Treebj1PyIOecP0b/pjOq+tscroM7i/+ux/4xZ9VDev+h/qnv39xv4rDuNZ1RteXPGZ/cvLL4Y+eHfcG2Pw5jdMj+LnYVTf719dz9bINHzZPBj+at4htce2bQX2rWhi/GO4P+ir/4i7/4i7/4i7/4p/Kh+fTki0F/BUEQBGHs/AM+qilzAEAAAA==
+  </data>
+ </layer>
+</map>
