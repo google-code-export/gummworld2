@@ -186,14 +186,22 @@ class RendererPygame(object):
 
             if level != self._level:
                 self._level = level
+                self._sprite_cache_hits = 0
 
                 layer = self.world_map.layers[self._layer_id]
                 if not layer.is_object_group:
 
                     new_tilewidth = self.world_map.tilewidth * level
                     new_tileheight = self.world_map.tileheight * level
-                    new_width = int(self.world_map.width / level + 0.5)
-                    new_height = int(self.world_map.height / level + 0.5)
+## BUG: 0.5 allows cases where new_width or new_height are smaller than
+## original. This caused the bottom and right edge tiles to be lost in some
+## cases. - Gumm
+##                    new_width = int(self.world_map.width / level + 0.5)
+##                    new_height = int(self.world_map.height / level + 0.5)
+                    new_width = int(self.world_map.width / level)
+                    new_height = int(self.world_map.height / level)
+                    if new_width * level < self.world_map.width: new_width += 1
+                    if new_height * level < self.world_map.height: new_height += 1
 
                     # print "old size", self.world_map.width, self.world_map.height
                     # print "new size", new_width, new_height
@@ -222,10 +230,12 @@ class RendererPygame(object):
                     self.num_tiles_x = new_width
                     self.num_tiles_y = new_height
                     
-            # if __debug__: 
+            if __debug__: 
                 # num_tiles = self.num_tiles_x * self.num_tiles_y
                 # print '?? img_cache efficiency:', (num_tiles - len(_img_cache) + 1.0) / num_tiles
-
+                print '%s: Sprite Cache hits: %d' % (
+                    self.__class__.__name__, self._sprite_cache_hits
+                )
 
         @staticmethod
         def _get_list_of_neighbour_coord(xpos_new, ypos_new, level, num_tiles_x, num_tiles_y):
@@ -246,6 +256,7 @@ class RendererPygame(object):
             # if __debug__: print "get sprite from"
             sprites = []
             key = []
+            cx,cy = coords[0]
             for xpos, ypos in coords:
                 if xpos >= len(layer.content2D) or ypos >= len(layer.content2D[xpos]):
                     # print "CONTINUE", xpos, ypos
@@ -263,7 +274,21 @@ class RendererPygame(object):
                         rect = pygame.Rect(world_x, world_y, w, h)
                         sprite = RendererPygame.Sprite(img, rect)
                     sprites.append(sprite)
-                    key.append(idx)
+## BUG: Keeping idx only when it does not equal None produces identical keys in
+## some tiles configurations that differ. Keeping idx when it is None fixes this
+## issue. The slightly more elaborate removal of trailing None values enables a
+## case where edge tiles could benefit from additional cache hits. - Gumm
+##                    key.append(idx)
+                key.append((xpos-cx,ypos-cy,idx))
+                key.reverse()
+                more = True
+                while more:
+                    if key[0][2] is None:
+                        key.pop(0)
+                    else:
+                        more = False
+                key.reverse()
+                
             if sprites:
                 # dont copy to a new image if only one sprite is in sprites (reduce memory usage)
                 if len(sprites) == 1:
@@ -275,6 +300,7 @@ class RendererPygame(object):
                 key = tuple(key)
                 if key in _img_cache:
                     image = _img_cache[key]
+                    self._sprite_cache_hits += 1
                 else:
                     image = pygame.Surface(rect.size, pygame.SRCALPHA | pygame.RLEACCEL)
                     image.fill((0, 0, 0, 0))
@@ -283,9 +309,9 @@ class RendererPygame(object):
                         image.blit(spr.image, spr.rect.move(-x, -y))
                     _img_cache[key] = image
 
-                    if __debug__:
-                        # draw red border for debugging
-                        pygame.draw.rect(image, (255, 0, 0), rect.move(-x, -y), 1)
+#                    if __debug__:
+#                        # draw red border for debugging
+#                        pygame.draw.rect(image, (255, 0, 0), rect.move(-x, -y), 1)
 
                 del sprites
                 return RendererPygame.Sprite(image, rect)
