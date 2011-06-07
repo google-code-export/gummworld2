@@ -133,7 +133,7 @@ class RendererPygame(object):
                 return self.rect.bottom
 
     class _SpriteLayer(object):
-        def __init__(self, layer_id, resource_loader):
+        def __init__(self, layer_id, resource_loader, collapse_level=1):
             self._resource_loader = resource_loader
             self.world_map = self._resource_loader.world_map
             self._layer_id = layer_id
@@ -151,7 +151,7 @@ class RendererPygame(object):
             self.x = self.world_map.layers[self._layer_id].x
             self.y = self.world_map.layers[self._layer_id].y
 
-            self.collapse(1)
+            self.collapse(collapse_level)
 
         # TODO: implement scale
         @staticmethod
@@ -230,7 +230,7 @@ class RendererPygame(object):
                     self.num_tiles_x = new_width
                     self.num_tiles_y = new_height
                     
-            if __debug__: 
+            if __debug__ and level > 1: 
                 # num_tiles = self.num_tiles_x * self.num_tiles_y
                 # print '?? img_cache efficiency:', (num_tiles - len(_img_cache) + 1.0) / num_tiles
                 print '%s: Sprite Cache hits: %d' % (
@@ -350,7 +350,7 @@ class RendererPygame(object):
         def get_layer_paralax_factor_y(self):
             return self.paralax_factor_y
 
-    def __init__(self, resource_loader):
+    def __init__(self, resource_loader, collapse_level=1):
         self._world_map = resource_loader.world_map
         self._cam_world_pos_x = 0
         self._cam_world_pos_y = 0
@@ -358,7 +358,7 @@ class RendererPygame(object):
         self._cam_height = 10
         self._layers = {} # {world_layer:_layer}
         for idx, layer in enumerate(self._world_map.layers):
-            self._layers[layer] = self._SpriteLayer(idx, resource_loader)
+            self._layers[layer] = self._SpriteLayer(idx, resource_loader, collapse_level)
 
         self._layer_sprites = {} # {layer_id:[sprites]}
 
