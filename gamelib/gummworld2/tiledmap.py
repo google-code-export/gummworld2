@@ -14,27 +14,50 @@ def sortkey_y(tile):
 
 class TiledMap(TileMap):
     
-    def __init__(self, tmx_file, (x,y)=(0,0), collapse_level=1, sortkey=sortkey_y):
+    def __init__(self, tmx_file, collapse_level=1, sortkey=None):
+        """Construct a TiledMap object.
+        
+        This is a map based closely on tiledtmxloader.TileMap. It exposes the
+        basic features of the TileMap and RendererPygame classes. It has a
+        TileMap and RendererPygame object in public attributes for complete
+        access to the objects.
+        
+        tmx_file is the path and filename of the TMX map file.
+        
+        collapse_level is the starting collapse level of all the layers. Note
+        that if you don't want every layer collapsed, or different collapse
+        levels per layer, leave this at the default of 1 and pick individual
+        tile layers to collapse (TiledMap.get_tile_layer()).
+        
+        sortkey is the function to pass to sort(key=func) when a
+        TiledMap.get_tiles() or TiledMap.get_tiles_in_rect() is called. The
+        default value of None results in an unsorted layer. A couple common
+        functions are provided in the module: sortkey_x() sortkey_y().
+        """
         map = TileMapParser().parse_decode(tmx_file)
         resources = ResourceLoaderPygame()
         resources.load(map)
         self.tiled_map = map
         self.renderer = RendererPygame(resources, collapse_level)
-#        if collapse_level:
-#            for layeri,layer in enumerate(self.get_tile_layers()):
-#                self.collapse(collapse_level, layeri)
         
         self.sortkey = sortkey
         
         tw,th = map.tilewidth, map.tileheight
         mw,mh = map.width, map.height
-        self.rect = pygame.Rect(x,y,tw*mw,th*mh)
+        self.rect = pygame.Rect(0,0,tw*mw,th*mh)
     
     def get_layer(self, layeri):
+        """Return the layer indexed by layeri.
+        
+        This method can return a tile layer or an object layer. The layer type
+        can be detected via the attribute layer.is_object_group.
+        """
         idx = self.tiled_map.layers[layeri]
         return self.renderer._layers[idx]
     
     def get_tile_layer(self, layeri):
+        """Return the tile layer indexed by layeri.
+        """
         return self.get_tile_layers(layeri)
     
     def get_tile_layers(self):
@@ -69,7 +92,8 @@ class TiledMap(TileMap):
         x1,y1,x2,y2 = self.rect_to_range(rect, layeri)
         for column in content2D[x1:x2+1]:
             tiles.extend(column[y1:y2+1])
-        tiles.sort(key=self.sortkey)
+        if self.sortkey:
+            tiles.sort(key=self.sortkey)
         return tiles
     
     def get_tile_range_in_rect(self, rect):
@@ -106,7 +130,8 @@ class TiledMap(TileMap):
                         [c2d[x][y] for y in range(y1,y2) for x in range(x1,x2)]
                         if t
                     ]
-                    tiles.sort(key=lambda t:(t.rect.y,t.rect.x))
+                    if self.sortkey:
+                        tiles.sort(key=self.sortkey)
                 tiles_per_layer.append(tiles)
         return tiles_per_layer
     
