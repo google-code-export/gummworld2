@@ -14,15 +14,15 @@ def sortkey_y(tile):
 
 class TiledMap(TileMap):
     
-    def __init__(self, tmx_file, (x,y)=(0,0), collapse_level=None, sortkey=sortkey_y):
+    def __init__(self, tmx_file, (x,y)=(0,0), collapse_level=1, sortkey=sortkey_y):
         map = TileMapParser().parse_decode(tmx_file)
         resources = ResourceLoaderPygame()
         resources.load(map)
         self.tiled_map = map
-        self.renderer = RendererPygame(resources)
-        if collapse_level:
-            for layeri,layer in enumerate(self.get_tile_layers()):
-                self.collapse(collapse_level, layeri)
+        self.renderer = RendererPygame(resources, collapse_level)
+#        if collapse_level:
+#            for layeri,layer in enumerate(self.get_tile_layers()):
+#                self.collapse(collapse_level, layeri)
         
         self.sortkey = sortkey
         
@@ -119,6 +119,10 @@ class TiledMap(TileMap):
                 objects.extend(group)
         return objects
     
-    def collapse(self, collapse_level, layeri=0):
-        layer = self.get_layer(layeri)
-        layer.collapse(collapse_level)
+    def collapse(self, collapse_level, layeri=None):
+        if layeri is None:
+            layers = self.get_tile_layers()
+        else:
+            layers = [self.get_layer(layeri)]
+        for layer in layers:
+            layer.collapse(collapse_level)

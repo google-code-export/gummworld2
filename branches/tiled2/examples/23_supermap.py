@@ -76,19 +76,21 @@ class App(Engine):
 
 class TiledMapHandler(MapHandler):
     
-    # 7 gives the best FPS at resolution 320x320, but loading causes hiccup
+    # 4 gives better FPS at resolution 320x320, but can cause loading hiccups
     # 2 gives smoothest loading, highest cache hits
     collapse_level = 2
     
     def load(self):
-        self.map = TiledMap(data.filepath('map',self.map_file))
-        self.collapse(self.collapse_level)
+        self.map = TiledMap(data.filepath('map',self.map_file), collapse_level=self.collapse_level)
+#        self.collapse(self.collapse_level)
     
     def collapse(self, clevel):
-        self.collapse_level = clevel
-        if self.map:
-            for layer in self.map.get_tile_layers():
-                layer.collapse(clevel)
+        if clevel > 0:
+            self.collapse_level = clevel
+            # self.map could be None if the map isn't loaded or has been
+            # unloaded.
+            if self.map:
+                self.map.collapse(clevel)
 
 
 def make_supermap(app):
