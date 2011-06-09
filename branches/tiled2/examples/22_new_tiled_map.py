@@ -44,7 +44,7 @@ class App(Engine):
         map = State.map
         renderer = map.renderer
         cam = State.camera
-        camx,camy = cam.position
+        camx,camy = cam.rect.center
         w,h = State.screen.size
         renderer.set_camera_position(camx, camy, w, h, 3)
         surf = cam.surface

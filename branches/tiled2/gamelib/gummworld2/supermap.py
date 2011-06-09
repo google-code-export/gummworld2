@@ -197,7 +197,8 @@ class MapHandler(object):
         
         This conversion is needed to translate maps, which use local space.
         """
-        return Vec2d(xy) + self.rect.topleft
+#        return Vec2d(xy) + self.rect.topleft
+        return vadd(xy, self.rect.topleft)
     
     def run_triggers(self, triggering_rect):
         """Run all triggers in this map versus the triggering_rect.
@@ -438,12 +439,10 @@ class SuperMap(object):
     
     def get_tiles(self, supermap_range):
         tiles_per_handler = {}
-        for name,map_handler in self.handlers.items():
+        for name,tile_range in supermap_range.items():
+            map_handler = self.get_handler(name)
             if map_handler.map:
-                tile_range = supermap_range[name]
                 tiles_per_handler[name] = map_handler.get_tiles(tile_range)
-            else:
-                tiles_per_handler[name] = []
         return tiles_per_handler
     
     def get_tiles_in_rect(self, rect):
@@ -454,11 +453,8 @@ class SuperMap(object):
         """rect must be in world space.
         """
         range_per_handler = {}
-        for map_handler in self.handlers.values():
-            if map_handler.map:
-                range_per_handler[map_handler.name] = map_handler.get_tile_range_in_rect(rect)
-            else:
-                range_per_handler[map_handler.name] = []
+        for map_handler in self.visible_maps:
+            range_per_handler[map_handler.name] = map_handler.get_tile_range_in_rect(rect)
         return range_per_handler
     
     def update(self, dt, *args):
@@ -506,19 +502,21 @@ class SuperMap(object):
                     map_handler._unload()
     
     def draw(self):
-        map_ = State.map
         camera = State.camera
-        get_handler = map_.get_handler
+        get_handler = self.get_handler
         world_to_screen = camera.world_to_screen
-        blit = State.camera.view.blit
+        blit = camera.view.blit
         visible_tiles = State.camera.visible_tiles
+        cam_pos = camera.rect.topleft
         if isinstance(visible_tiles, dict):
             for name,tile_layers in visible_tiles.items():
+                if not tile_layers:
+                    continue
                 local_to_world = get_handler(name).local_to_world
                 for tiles in tile_layers:
                     for tile in tiles:
                         pos = local_to_world(tile.rect.topleft)
-                        pos = world_to_screen(pos)
+                        pos = vsub(pos, cam_pos)
                         blit(tile.image, pos, tile.source_rect, tile.flags)
         else:
             ## UNTESTED
