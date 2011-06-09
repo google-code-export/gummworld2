@@ -39,6 +39,8 @@ class App(Engine):
         State.hud.add('Collapse Level', Statf(State.hud.next_pos(),
             'Collapse Level %s', callback=lambda:'%d'%State.map.current.collapse_level, interval=.5))
         State.clock.schedule_update_priority(State.hud.update, 1.0)
+        
+        State.speed = 3.33
     
     def update(self, dt):
         if self.movex or self.movey:
@@ -50,7 +52,7 @@ class App(Engine):
     def draw(self, dt):
         State.screen.clear()
         State.map.draw()
-        State.hud.draw()
+        #State.hud.draw()
         State.screen.flip()
     
     def on_key_down(self, unicode, key, mod):
@@ -78,11 +80,10 @@ class TiledMapHandler(MapHandler):
     
     # 4 gives better FPS at resolution 320x320, but can cause loading hiccups
     # 2 gives smoothest loading, highest cache hits
-    collapse_level = 2
+    collapse_level = 1
     
     def load(self):
         self.map = TiledMap(data.filepath('map',self.map_file), collapse_level=self.collapse_level)
-#        self.collapse(self.collapse_level)
     
     def collapse(self, clevel):
         if clevel > 0:

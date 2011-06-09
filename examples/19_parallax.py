@@ -86,8 +86,8 @@ class App(Engine):
         map = State.map
         for layeri,layer in enumerate(State.map.layers):
             parallax = layer.parallax
-            #draw(camera, map, layer, parallax)
-            toolkit.draw_tiles_of_layer(layeri, parallax.x, parallax.y)
+            draw(camera, map, layer, parallax)
+            #toolkit.draw_tiles_of_layer(layeri, parallax.x, parallax.y)
     
     def on_key_down(self, unicode, key, mod):
         if key == K_DOWN: self.move.y += State.speed
