@@ -15,7 +15,8 @@ COLLAPSE_KEYS = range(K_1, K_9+1)
 class App(Engine):
     
     def __init__(self):
-        resolution = 320,320
+        #resolution = 320,320
+        resolution = 800,600
         self.movex = 0
         self.movey = 0
         self.visible_tiles = {}
@@ -32,6 +33,8 @@ class App(Engine):
         
         # Show me da goods.
         toolkit.make_hud()
+        State.hud.add('Current', Statf(State.hud.next_pos(),
+            'Current Map %s', callback=lambda:'%s'%str(State.map.current.name), interval=.5))
         State.hud.add('Visible', Statf(State.hud.next_pos(),
             'Visible %s', callback=lambda:str(len(State.map.visible_maps)), interval=.5))
         State.hud.add('History', Statf(State.hud.next_pos(),
@@ -52,7 +55,7 @@ class App(Engine):
     def draw(self, dt):
         State.screen.clear()
         State.map.draw()
-        #State.hud.draw()
+        State.hud.draw()
         State.screen.flip()
     
     def on_key_down(self, unicode, key, mod):
@@ -96,9 +99,11 @@ class TiledMapHandler(MapHandler):
 
 def make_supermap(app):
     # Make a 9x9 supermap, using the same map file for each.
+    #map_filename = 'Gumm multi layer.tmx'
+    map_filename = 'Gumm super desert.tmx'
     app.map = State.map = SuperMap()
     for n in ((0,0),) + supermap.NEIGHBORS:
-        app.map.add_handler(TiledMapHandler(n, 'Gumm multi layer.tmx'))
+        app.map.add_handler(TiledMapHandler(n, map_filename))
     app.world = State.world = model.NoWorld(app.map.rect)
 
 
