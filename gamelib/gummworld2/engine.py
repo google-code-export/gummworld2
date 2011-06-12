@@ -350,7 +350,7 @@ class Engine(Context):
         their callbacks, the lost references will result in memory and CPU
         leaks.
         """
-        if self.world:
+        if self.world and isinstance(model.WorldPymunk):
             self.clock.schedule_update_priority(self.world.step, -1.0)
         if self.camera:
             self.clock.schedule_update_priority(self.camera.update, 1.0)
