@@ -113,7 +113,7 @@ class Thing(model.Object):
     def __init__(self, position):
         model.Object.__init__(self)
         
-        self.rect = pygame.Rect(0,0,20,20)
+        self.rect = pygame.Rect(0,0,11,11)
         
         self.image_green = pygame.surface.Surface(self.rect.size)
         self.image_green.fill(Color('green'))
@@ -171,7 +171,7 @@ class App(Engine):
 
         self.tile_size = 60,60
         self.map_size = 10,10
-        self.min_size = 128,128
+        self.min_size = 32,32
         self.worst_case = 0
         self.num_sprites = 100
 
