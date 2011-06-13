@@ -24,18 +24,18 @@ class SpatialHash(object):
         return self.cell_ids.keys()
     
     def add(self, obj):
-        ## TODO: must handle case where obj is outside world rect.
-        """Add or re-add obj.
+        """Add or re-add obj. Return True if in bounds, else return False.
         
         If obj changes its position, you must add it. obj will first be removed
         if it is already in the spatial hash.
         """
         self.remove(obj)
         buckets = self.buckets
-        cell_ids = self.get_cell_ids_in_rect(obj.rect)
+        cell_ids = self.intersect(obj.rect)
         for idx in cell_ids:
             buckets[idx].append(obj)
         self.cell_ids[obj] = cell_ids
+        return cell_ids == True
     
     def remove(self, obj):
         """Remove obj.
@@ -79,19 +79,20 @@ class SpatialHash(object):
         cols = self.cols
         return ((x-left)//cell_size) + ((y-top)//cell_size) * cols
     
-    def get_cell_ids_in_rect(self, rect):
+    def intersect(self, rect):
+        """Return list of cell ids that intersect rect.
+        """
         cell_ids = []
+        crect = self.rect.clip(rect)
         cell_size = self.cell_size
-#        cmin = 0
-#        cmax = len(self.buckets)-1
-        top = rect.top
-        bottom = cell_size * int(ceil(rect.bottom/float(cell_size)))
-        left = rect.left
-        right = cell_size * int(ceil(rect.right/float(cell_size)))
+        top = crect.top
+        bottom = cell_size * int(ceil(crect.bottom/float(cell_size)))
+        left = crect.left
+        right = cell_size * int(ceil(crect.right/float(cell_size)))
         for x in range(left, right, cell_size):
             for y in range(top, bottom, cell_size):
                 cell_id = self.get_cell_id_at(x,y)
-                if cell_id not in cell_ids: # and cmin<cell_id<cmax:
+                if cell_id not in cell_ids:
                     cell_ids.append(cell_id)
         return cell_ids
     
@@ -104,6 +105,18 @@ class SpatialHash(object):
         y = cell_id // cols
         x = cell_id - y * cols
         return x*cell_size, y*cell_size
+    
+    def collideany(self, obj):
+        """Return True if obj collides with any other object, else False.
+        """
+        collided = extended_collided
+        for cell in self.get_nearby(obj):
+            for other in cell:
+                if other is obj:
+                    continue
+                if collided(obj, other):
+                    return True
+        return False
     
     def collidealldict(self):
         """Return dict of all collisions.
@@ -235,5 +248,5 @@ if __name__ == '__main__':
     print shash.collide(o)
     print shash.collidealldict()
     print shash.collidealllist()
-    print shash.get_cell_ids_in_rect(Rect(0,0,cell_size,cell_size))
-    print shash.get_cell_ids_in_rect(Rect(0,30,cell_size,cell_size))
+    print shash.intersect(Rect(0,0,cell_size,cell_size))
+    print shash.intersect(Rect(0,30,cell_size,cell_size))
