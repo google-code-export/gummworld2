@@ -1,3 +1,14 @@
+__doc__ = """spatialhash.py - High performance spatial hash for spatial
+partitioning and fast collision detection.
+
+Objects must have a pygame Rect attribute. Optionally, objects may have a
+collide static method attribute for lower-level collision detection (see the
+gummworld2.geometry module).
+
+This module is derived from the article and source code written by Conkerjo at
+http://conkerjo.wordpress.com/2009/06/13/spatial-hashing-implementation-for-fast-2d-collisions/.
+"""
+
 from math import ceil
 from weakref import WeakKeyDictionary
 
@@ -117,15 +128,34 @@ class SpatialHash(object):
                 return True
         return False
     
-    def collidealldict(self):
+    def collide(self, obj):
+        """Return list of objects that collide with obj.
+        """
+        collisions = []
+        collided = extended_collided
+        for other in self.get_nearby(obj):
+            if other is obj:
+                continue
+            if collided(obj, other):
+                collisions.append(other)
+        return collisions
+    
+    def collidealldict(self, rect=None):
         """Return dict of all collisions.
         
-        {obj : [other1,other2,...],...}
+        If rect is specified, only the cells that intersect rect will be
+        checked.
+        
+        The contents of the returned dict are: {obj : [other1,other2,...],...}
         """
         collisions = {}
         self.coll_tests = 0
         collided = extended_collided
-        for cell in self.buckets:
+        if rect:
+            cells = [self.get_cell(i) for i in self.intersect(rect)]
+        else:
+            cells = self.buckets
+        for cell in cells:
             for obj in cell:
                 for other in cell:
                     if other is obj:
@@ -137,15 +167,22 @@ class SpatialHash(object):
                         collisions[obj].append(other)
         return collisions
     
-    def collidealllist(self):
+    def collidealllist(self, rect=None):
         """Return list of all collisions.
         
-        [(obj,other),...]
+        If rect is specified, only the cells that intersect rect will be
+        checked.
+        
+        The contents of the returned list are: [(obj,other),...]
         """
         collisions = set()
         self.coll_tests = 0
         collided = extended_collided
-        for cell in self.buckets:
+        if rect:
+            cells = [self.get_cell(i) for i in self.intersect(rect)]
+        else:
+            cells = self.buckets
+        for cell in cells:
             for obj in cell:
                 for other in cell:
                     if other is obj:
@@ -157,19 +194,6 @@ class SpatialHash(object):
                         collisions.add(c1)
                         collisions.add(c2)
         return list(collisions)
-    
-    def collide(self, obj):
-        """Return list of collisions with obj.
-        """
-        collisions = []
-        collided = extended_collided
-        for other in self.get_nearby(obj):
-            if other is obj:
-                continue
-            if collided(obj, other):
-                collisions.append(other)
-        return collisions
-            
     
     def clear(self):
         """Clear all objects.

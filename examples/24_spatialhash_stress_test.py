@@ -82,7 +82,7 @@ class App(Engine):
         self.tune_history = ''
         
         Engine.__init__(self,
-            caption='24 SpatialHash Stress Test - [+/-]: Cells | Space/Bkspc: Things | G: Grid',
+            caption='24 SpatialHash - [+/-]: Cells | Space/Bkspc: Things | G: Grid | Mouse Focus: Filter Rect',
             resolution=self.resolution,
             tile_size=self.tile_size, map_size=self.map_size,
             update_speed=30, frame_speed=0,
@@ -98,7 +98,9 @@ class App(Engine):
         for x in xrange(sprites_per_axis):
             for y in xrange(sprites_per_axis):
                 self.things.append(Thing((x*sizex+5,y*sizey+5)))
-        self.mouse_thing = Thing((300,300))
+        #self.mouse_thing = Thing((300,300))
+        self.filter = False
+        self.filter_rect = Rect(0,0,250,250)
         self.make_space()
         
         self.show_grid = True
@@ -178,27 +180,8 @@ class App(Engine):
     def auto_tune(self, dt):
         prev_fps = 0
         history = self.tune_fps_history
-#        num_hist = len(history)
-#        if num_hist:
-#            prev_fps = sum(history) / float(num_hist)
-#            if num_hist > 1:
-#                history.pop(0)
-#        history.append(self.clock.fps)
-        
-#        current_fps = 0
-#        num_hist = len(history)
-#        if num_hist:
-#            current_fps = sum(history) / float(num_hist)
         current_fps = self.clock.fps
         
-        #print 'FPS current=%d prev=%d num_cells=%d tune_count=%d things=%d' % (
-        #    current_fps,prev_fps,self.num_cells,self.tune_count,len(self.things),
-        #)
-        
-#        if current_fps > prev_fps+1:
-#            print 'resetting tune_count'
-#            self.tune_num_cells = self.num_cells
-#            self.tune_count = 0
         if self.tune_count > 5:
             print '\nfinished auto tuning'
             self.num_cells = self.tune_num_cells
@@ -208,14 +191,12 @@ class App(Engine):
         else:
             operation = ''
             if current_fps > self.tune_target_fps:
-                #print 'adding things'
                 operation = '+'
                 self.tune_num_cells = self.num_cells
                 self.tune_count = 0
                 self.inc_things()
             else:
                 self.inc_cells()
-                #print 'adding a cell'
                 operation = '|'
                 self.tune_count += 1
             sys.stdout.write(operation)
@@ -240,13 +221,18 @@ class App(Engine):
             add(thing)
     
     def update_collisions(self):
-        for c in State.world.collidealllist():
+        filter_rect = None
+        if self.filter and not self.tune_running:
+            filter_rect = self.filter_rect
+            self.filter_rect.center = pygame.mouse.get_pos()
+        for c in State.world.collidealllist(filter_rect):
             c[0].hit = True
     
     def draw(self, dt):
         State.screen.clear()
         self.draw_world()
         self.draw_grid()
+        self.draw_filter()
         State.screen.flip()
     
     def draw_world(self):
@@ -284,6 +270,11 @@ class App(Engine):
                 p2 = right,y
                 draw_line(surf, color, p1, p2)
     
+    def draw_filter(self):
+        if self.filter and not self.tune_running:
+            surf = State.camera.view.surface
+            pygame.draw.rect(surf, (150,0,0), self.filter_rect, 1)
+    
     def on_key_down(self, unicode, key, mod):
         if key == K_g:
             # Toggle grid.
@@ -306,9 +297,17 @@ class App(Engine):
     def on_quit(self):
         context.pop()
     
-    def on_mouse_motion(self, pos, rel, buttons):
-        self.mouse_thing.position = State.camera.screen_to_world(pos)
-        State.world.add(self.mouse_thing)
+    def on_active_event(self, gain, state):
+        if self.tune_running:
+            return
+        if state != 1:
+            return
+        if gain == 1:
+            print 'filter on'
+            self.filter = True
+        else:
+            print 'filter off'
+            self.filter = False
 
 
 def calc_cell_size(resolution, num_cells):
