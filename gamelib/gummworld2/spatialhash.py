@@ -50,7 +50,7 @@ class SpatialHash(object):
         """Return list of objects that share the same cells as obj.
         """
         nearby_objs = []
-        cell_ids = self._ids_for_object(obj)
+        cell_ids = self.intersect(obj.rect)
         buckets = self.buckets
         for cell_id in cell_ids:
             nearby_objs.extend(buckets[cell_id])
@@ -110,12 +110,11 @@ class SpatialHash(object):
         """Return True if obj collides with any other object, else False.
         """
         collided = extended_collided
-        for cell in self.get_nearby(obj):
-            for other in cell:
-                if other is obj:
-                    continue
-                if collided(obj, other):
-                    return True
+        for other in self.get_nearby(obj):
+            if other is obj:
+                continue
+            if collided(obj, other):
+                return True
         return False
     
     def collidealldict(self):
@@ -240,11 +239,13 @@ if __name__ == '__main__':
     o = Obj(15,15)
     shash.add(o)
     assert o in shash
+    assert shash.collideany(o) == False
     shash.add(Obj(16,15))
     shash.add(Obj(25,15))
     shash.add(Obj(30,15))
     shash.add(Obj(40,15))
     shash.add(Obj(15,40))
+    assert shash.collideany(o)
     print shash.collide(o)
     print shash.collidealldict()
     print shash.collidealllist()
