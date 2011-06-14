@@ -2,7 +2,7 @@ __doc__ = """spatialhash.py - High performance spatial hash for spatial
 partitioning and fast collision detection.
 
 Objects must have a pygame Rect attribute. Optionally, objects may have a
-collide static method attribute for lower-level collision detection (see the
+collided static method attribute for lower-level collision detection (see the
 gummworld2.geometry module).
 
 This module is derived from the article and source code written by Conkerjo at
