@@ -72,17 +72,15 @@ class App(Engine):
         self.map_size = 10,10
         self.num_cells = 1
         self.num_sprites = 50
-        self.add_sprites = 10
         
-        self.tune_target_fps = 30
+        self.tune_target_fps = 25
         self.tune_fps_history = []
         self.tune_num_cells = self.num_cells
         self.tune_count = 0
-        self.tune_running = True
-        self.tune_history = ''
+        self.tune_run = True
         
         Engine.__init__(self,
-            caption='24 SpatialHash - [+/-]: Cells | Space/Bkspc: Things | G: Grid | Mouse Focus: Filter Rect',
+            caption='24 SpatialHash Stress Test - [+/-]: Cells | G: Grid',
             resolution=self.resolution,
             tile_size=self.tile_size, map_size=self.map_size,
             update_speed=30, frame_speed=0,
@@ -110,8 +108,47 @@ class App(Engine):
         self.make_hud()
         State.show_hud = True
         
-        if self.tune_running:
-            self.clock.schedule_interval(self.auto_tune, 1.1)
+        if self.tune_run:
+            self.clock.schedule_interval(self.auto_tune, 2.)
+    
+    def make_space(self):
+        cell_size = calc_cell_size(self.resolution, self.num_cells)
+        State.world = self.world = spatialhash.SpatialHash(State.map.rect, cell_size)
+        print State.world
+        for thing in self.things:
+            State.world.add(thing)
+    
+    def inc_cells(self):
+        num_cells = self.num_cells + 1
+        cell_size = calc_cell_size(self.resolution, num_cells)
+        if cell_size < max(*Thing.size):
+            num_cells += 1
+        self.num_cells = num_cells
+        self.make_space()
+    
+    def dec_cells(self):
+        num_cells = self.num_cells - 1
+        if num_cells < 1:
+            num_cells = 1
+        self.num_cells = num_cells
+        self.make_space()
+    
+    def inc_things(self):
+        world_rect = State.world.rect
+        sprites_per_axis = int(self.num_sprites ** 0.5)
+        sizex,sizey = world_rect.w/sprites_per_axis, world_rect.h/sprites_per_axis
+        for n in xrange(50):
+            x = randrange(sprites_per_axis)
+            y = randrange(sprites_per_axis)
+            thing = Thing((x*sizex+5,y*sizey+5))
+            self.things.append(thing)
+            self.world.add(thing)
+    
+    def dec_things(self):
+        for n in xrange(50):
+            thing = randchoice(self.things)
+            self.world.remove(thing)
+            self.things.remove(thing)
     
     def make_hud(self):
         State.hud = HUD()
@@ -228,6 +265,42 @@ class App(Engine):
         for c in State.world.collidealllist(filter_rect):
             c[0].hit = True
     
+    def auto_tune(self, dt):
+        pygame.display.set_caption('Auto tuning...')
+        
+        prev_fps = 0
+        history = self.tune_fps_history
+        num_hist = len(history)
+        if num_hist:
+            prev_fps = sum(history) / float(num_hist)
+            if num_hist > 5:
+                history.pop(0)
+        
+        current_fps = 0
+        history.append(self.clock.fps)
+        num_hist = len(history)
+        if num_hist:
+            current_fps = sum(history) / float(num_hist)
+        
+        if current_fps > prev_fps+3:
+            print 'resetting tune_count: %0.1f > %0.1f1' % (current_fps,prev_fps)
+            self.tune_num_cells = self.num_cells
+            self.tune_count = 0
+        if current_fps > self.tune_target_fps:
+            print 'adding things: fps=%0.1f' % (current_fps,)
+            self.tune_num_cells = self.num_cells
+            self.inc_things()
+        elif self.tune_count > 5:
+            print 'finished auto tuning'
+            self.num_cells = self.tune_num_cells
+            self.make_space()
+            self.tune_run = False
+            self.clock.unschedule(self.auto_tune)
+        else:
+            self.inc_cells()
+            print 'adding a cell:', self.num_cells
+            self.tune_count += 1
+    
     def draw(self, dt):
         State.screen.clear()
         self.draw_world()
@@ -283,12 +356,8 @@ class App(Engine):
             context.pop()
         elif key in (K_PLUS,K_EQUALS):
             self.inc_cells()
-            print State.world
-            self.stop_auto_tune()
         elif key == K_MINUS:
             self.dec_cells()
-            print State.world
-            self.stop_auto_tune()
         elif key == K_SPACE:
             self.inc_things()
         elif key == K_BACKSPACE:
@@ -297,18 +366,9 @@ class App(Engine):
     def on_quit(self):
         context.pop()
     
-    def on_active_event(self, gain, state):
-        if self.tune_running:
-            return
-        if state != 1:
-            return
-        if gain == 1:
-            print 'filter on'
-            self.filter = True
-        else:
-            print 'filter off'
-            self.filter = False
 
+def calc_cell_size(resolution, num_cells):
+    return int(ceil(resolution[0] / float(num_cells)))
 
 def calc_cell_size(resolution, num_cells):
     return int(ceil(resolution[0] / float(num_cells)))

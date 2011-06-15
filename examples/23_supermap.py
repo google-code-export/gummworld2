@@ -87,6 +87,7 @@ class TiledMapHandler(MapHandler):
     
     def load(self):
         self.map = TiledMap(data.filepath('map',self.map_file), collapse_level=self.collapse_level)
+#        self.collapse(self.collapse_level)
     
     def collapse(self, clevel):
         if clevel > 0:
