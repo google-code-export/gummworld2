@@ -37,8 +37,12 @@ class SpatialHash(object):
     def add(self, obj):
         """Add or re-add obj. Return True if in bounds, else return False.
         
-        If obj changes its position, you must add it. obj will first be removed
-        if it is already in the spatial hash.
+        If this method returns False then the object is completely out of
+        bounds and cannot be stored in this space.
+        
+        Note that when obj changes its position, you must add it again so that
+        its cell membership is updated. This method automatically removes the
+        object if it is already in the spatial hash.
         """
         self.remove(obj)
         buckets = self.buckets
