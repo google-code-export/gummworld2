@@ -32,6 +32,8 @@ class SpatialHash(object):
     
     @property
     def objects(self):
+        """Return the entire list of objects.
+        """
         return self.cell_ids.keys()
     
     def add(self, obj):
@@ -41,8 +43,8 @@ class SpatialHash(object):
         bounds and cannot be stored in this space.
         
         Note that when obj changes its position, you must add it again so that
-        its cell membership is updated. This method automatically removes the
-        object if it is already in the spatial hash.
+        its cell membership is updated. This method first removes the object if
+        it is already in the spatial hash.
         """
         self.remove(obj)
         buckets = self.buckets
@@ -62,7 +64,7 @@ class SpatialHash(object):
                 buckets[cell_id].remove(obj)
     
     def get_nearby(self, obj):
-        """Return list of objects that share the same cells as obj.
+        """Return a list of objects that share the same cells as obj.
         """
         nearby_objs = []
         cell_ids = self.intersect(obj.rect)
@@ -72,9 +74,13 @@ class SpatialHash(object):
         return nearby_objs
     
     def get_cell(self, cell_id):
+        """Return the cell stored at bucket index cell_id.
+        
+        The returned cell is a list of objects.
+        """
         return self.buckets[cell_id]
     
-    def get_cell_id(self, cell):
+    def index(self, cell):
         """Return the bucket index of cell.
         
         Returns None if cell does not exist in buckets.
@@ -86,9 +92,13 @@ class SpatialHash(object):
             if c is cell:
                 return i
     
-    def get_cell_id_at(self, x, y):
-        """Return the id of the cell that contains point (x,y).
+    def index_at(self, x, y):
+        """Return the cell_id of the cell that contains point (x,y).
+        
+        None is returned if point (x,y) is not in bounds.
         """
+        if not self.rect.collidepoint((x,y)):
+            return None
         cell_size = self.cell_size
         left,top = self.rect.topleft
         cols = self.cols
@@ -106,7 +116,7 @@ class SpatialHash(object):
         right = cell_size * int(ceil(crect.right/float(cell_size)))
         for x in range(left, right, cell_size):
             for y in range(top, bottom, cell_size):
-                cell_id = self.get_cell_id_at(x,y)
+                cell_id = self.index_at(x,y)
                 if cell_id not in cell_ids:
                     cell_ids.append(cell_id)
         return cell_ids
@@ -210,8 +220,11 @@ class SpatialHash(object):
     
     def iterobjects(self):
         """Returns a generator that iterates over all objects.
+        
+        Invoking a SpatialHash object as an iterator produces the same behavior
+        as iterobjects().
         """
-        for obj in self.objects:
+        for obj in self.cell_ids:
             yield obj
     
     def itercells(self):
@@ -221,7 +234,7 @@ class SpatialHash(object):
             yield cell
     
     def __iter__(self):
-        for obj in self.objects:
+        for obj in self.cell_ids:
             yield obj
     
     def __len__(self):
@@ -279,3 +292,12 @@ if __name__ == '__main__':
     print shash.collidealllist()
     print shash.intersect(Rect(0,0,cell_size,cell_size))
     print shash.intersect(Rect(0,30,cell_size,cell_size))
+    print 'Objects 1:'
+    for obj in shash:
+        print obj
+    print 'Objects 2:'
+    for obj in shash.iterobjects():
+        print obj
+    print 'Objects 3:'
+    for obj in shash.objects:
+        print obj
