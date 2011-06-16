@@ -117,7 +117,7 @@ class App(Engine):
         self.map_size = 10,10
         self.cell_size = self.map_size[0] * self.tile_size[0]
         self.worst_case = 0
-        self.num_sprites = 400
+        self.num_sprites = 640
         
         Engine.__init__(self,
             caption='24 SpatialHash Stress Test - [+/-]: Cells | G: Grid',
