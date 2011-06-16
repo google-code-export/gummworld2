@@ -201,7 +201,7 @@ class LevelManager(Engine):
                 layer.parallax_rect = pax_rect
     
     def draw(self, dt):
-        #State.camera.interpolate()
+        State.camera.interpolate()
         State.screen.clear()
         maps = [l.map for l in self.levels]
         toolkit.draw_parallax_tiles(maps, State.screen)

@@ -14,15 +14,31 @@ def sortkey_y(tile):
 
 class TiledMap(TileMap):
     
-    def __init__(self, tmx_file, (x,y)=(0,0), collapse_level=1, sortkey=sortkey_y):
+    def __init__(self, tmx_file, collapse_level=1, sortkey=None):
+        """Construct a TiledMap object.
+        
+        This is a map based closely on tiledtmxloader.TileMap. It exposes the
+        basic features of the TileMap and RendererPygame classes. It has a
+        TileMap and RendererPygame object in public attributes for complete
+        access to the objects.
+        
+        tmx_file is the path and filename of the TMX map file.
+        
+        collapse_level is the starting collapse level of all the layers. Note
+        that if you don't want every layer collapsed, or different collapse
+        levels per layer, leave this at the default of 1 and pick individual
+        tile layers to collapse (TiledMap.get_tile_layer()).
+        
+        sortkey is the function to pass to sort(key=func) when a
+        TiledMap.get_tiles() or TiledMap.get_tiles_in_rect() is called. The
+        default value of None results in an unsorted layer. A couple common
+        functions are provided in the module: sortkey_x() sortkey_y().
+        """
         map = TileMapParser().parse_decode(tmx_file)
         resources = ResourceLoaderPygame()
         resources.load(map)
         self.tiled_map = map
         self.renderer = RendererPygame(resources, collapse_level)
-#        if collapse_level:
-#            for layeri,layer in enumerate(self.get_tile_layers()):
-#                self.collapse(collapse_level, layeri)
         
         self.sortkey = sortkey
         
