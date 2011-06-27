@@ -20,11 +20,10 @@ class SpatialHash(object):
     
     def __init__(self, world_rect, cell_size):
         self.rect = Rect(world_rect)
-        self.cell_size = cell_size
+        self.cell_size = int(cell_size)
         
-        ## TODO: should raise exception if rows or cols == 0.
-        self.rows = int(ceil(world_rect.w / float(cell_size)))
-        self.cols = int(ceil(world_rect.h / float(cell_size)))
+        self.rows = int(ceil(world_rect.h / float(cell_size)))
+        self.cols = int(ceil(world_rect.w / float(cell_size)))
         self.buckets = [[] for i in range(self.rows*self.cols)]
         self.cell_ids = WeakKeyDictionary()
         
@@ -48,7 +47,7 @@ class SpatialHash(object):
         """
         self.remove(obj)
         buckets = self.buckets
-        cell_ids = self.intersect(obj.rect)
+        cell_ids = self.intersect_indices(obj.rect)
         for idx in cell_ids:
             buckets[idx].append(obj)
         self.cell_ids[obj] = cell_ids
@@ -63,15 +62,15 @@ class SpatialHash(object):
             for cell_id in cell_ids[obj]:
                 buckets[cell_id].remove(obj)
     
-    def get_nearby(self, obj):
+    def get_nearby_objects(self, obj):
         """Return a list of objects that share the same cells as obj.
         """
         nearby_objs = []
-        cell_ids = self.intersect(obj.rect)
+        cell_ids = self.intersect_indices(obj.rect)
         buckets = self.buckets
         for cell_id in cell_ids:
             nearby_objs.extend(buckets[cell_id])
-        return nearby_objs
+        return list(set(nearby_objs))
     
     def get_cell(self, cell_id):
         """Return the cell stored at bucket index cell_id.
@@ -97,45 +96,60 @@ class SpatialHash(object):
         
         None is returned if point (x,y) is not in bounds.
         """
-        if not self.rect.collidepoint((x,y)):
-            return None
         cell_size = self.cell_size
-        left,top = self.rect.topleft
-        cols = self.cols
-        return ((x-left)//cell_size) + ((y-top)//cell_size) * cols
+        rect = self.rect
+        idx = ((x-rect.left)//cell_size) + ((y-rect.top)//cell_size) * self.cols
+        return idx if -1<idx<len(self.buckets) else None
     
-    def intersect(self, rect):
+    def intersect_indices(self, rect):
         """Return list of cell ids that intersect rect.
         """
         cell_ids = []
-        crect = self.rect.clip(rect)
+        crect = rect.clip(self.rect)
         cell_size = self.cell_size
         top = crect.top
-        bottom = cell_size * int(ceil(crect.bottom/float(cell_size)))
+        bottom = crect.bottom + cell_size
         left = crect.left
-        right = cell_size * int(ceil(crect.right/float(cell_size)))
+        right = crect.right + cell_size
+        len_buckets = len(self.buckets)
         for x in range(left, right, cell_size):
             for y in range(top, bottom, cell_size):
                 cell_id = self.index_at(x,y)
-                if cell_id not in cell_ids:
+                if cell_id is not None and cell_id not in cell_ids:
                     cell_ids.append(cell_id)
         return cell_ids
+    
+    def intersect_objects(self, rect):
+        """Return list of objects whose rects intersect rect.
+        """
+        objs = {}
+        for cell_ids in self.intersect_indices(rect):
+            for o in self.get_cell(cell_ids):
+                objs[o] = 1
+        return objs.keys()
+    
+    def get_cell_grid(self, cell_id):
+        """Return the (col,row) coordinate for cell id.
+        """
+        cell_size = self.cell_size
+        cols = self.cols
+        y = cell_id // cols
+        x = cell_id - y * cols
+        return x,y
     
     def get_cell_pos(self, cell_id):
         """Return the world coordinates for topleft corner of cell.
         """
+        x,y = self.get_cell_grid(cell_id)
         cell_size = self.cell_size
-        left,top = self.rect.topleft
-        cols = self.cols
-        y = cell_id // cols
-        x = cell_id - y * cols
-        return x*cell_size, y*cell_size
+        rect = self.rect
+        return x*cell_size+rect.left, y*cell_size+rect.top
     
     def collideany(self, obj):
         """Return True if obj collides with any other object, else False.
         """
-        collided = extended_collided
-        for other in self.get_nearby(obj):
+        collided = self._extended_collided
+        for other in self.get_nearby_objects(obj):
             if other is obj:
                 continue
             if collided(obj, other):
@@ -146,8 +160,8 @@ class SpatialHash(object):
         """Return list of objects that collide with obj.
         """
         collisions = []
-        collided = extended_collided
-        for other in self.get_nearby(obj):
+        collided = self._extended_collided
+        for other in self.get_nearby_objects(obj):
             if other is obj:
                 continue
             if collided(obj, other):
@@ -164,9 +178,9 @@ class SpatialHash(object):
         """
         collisions = {}
         self.coll_tests = 0
-        collided = extended_collided
+        collided = self._extended_collided
         if rect:
-            cells = [self.get_cell(i) for i in self.intersect(rect)]
+            cells = [self.get_cell(i) for i in self.intersect_indices(rect)]
         else:
             cells = self.buckets
         for cell in cells:
@@ -191,9 +205,9 @@ class SpatialHash(object):
         """
         collisions = set()
         self.coll_tests = 0
-        collided = extended_collided
+        collided = self._extended_collided
         if rect:
-            cells = [self.get_cell(i) for i in self.intersect(rect)]
+            cells = [self.get_cell(i) for i in self.intersect_indices(rect)]
         else:
             cells = self.buckets
         for cell in cells:
@@ -208,6 +222,16 @@ class SpatialHash(object):
                         collisions.add(c1)
                         collisions.add(c2)
         return list(collisions)
+    
+    @staticmethod
+    def _extended_collided(obj, other):
+        if obj.rect.colliderect(other.rect):
+            if hasattr(obj, 'collided') and hasattr(other, 'collided'):
+                return obj.collided(obj, other)
+            else:
+                return True
+        else:
+            return False
     
     def clear(self):
         """Clear all objects.
@@ -251,16 +275,6 @@ class SpatialHash(object):
         return self.__str__()
 
 
-def extended_collided(obj, other):
-    if obj.rect.colliderect(other.rect):
-        if hasattr(obj, 'collided') and hasattr(other, 'collided'):
-            return obj.collided(obj, other)
-        else:
-            return True
-    else:
-        return False
-
-
 if __name__ == '__main__':
     class Obj(object):
         def __init__(self, x, y):
@@ -274,9 +288,12 @@ if __name__ == '__main__':
         def __repr__(self):
             return self.__str__()
     pygame.init()
-    world_rect = Rect(0,0,100,100)
-    cell_size = 32
+    world_rect = Rect(0,0,60,90)
+    print 'World rect:',world_rect
+    cell_size = 30
     shash = SpatialHash(world_rect, cell_size)
+    print 'SpatialHash:',shash,'rows',shash.rows,'cols',shash.cols
+    print shash.rows,shash.cols,len(shash.buckets)
     o = Obj(15,15)
     shash.add(o)
     assert o in shash
@@ -290,14 +307,21 @@ if __name__ == '__main__':
     print shash.collide(o)
     print shash.collidealldict()
     print shash.collidealllist()
-    print shash.intersect(Rect(0,0,cell_size,cell_size))
-    print shash.intersect(Rect(0,30,cell_size,cell_size))
-    print 'Objects 1:'
+    print shash.intersect_indices(Rect(0,0,cell_size,cell_size))
+    print shash.intersect_indices(Rect(0,30,cell_size,cell_size))
+    print 'Objects 1 (__iter__):'
     for obj in shash:
         print obj
-    print 'Objects 2:'
+    print 'Objects 2 (interobjects):'
     for obj in shash.iterobjects():
         print obj
-    print 'Objects 3:'
+    print 'Objects 3 (objects):'
     for obj in shash.objects:
         print obj
+    print 'Cell position:'
+    for i in range(len(shash.buckets)):
+        print i,shash.get_cell_grid(i),shash.get_cell_pos(i)
+    print 'Nearby objects:'
+    print '  Reference:', o,shash.cell_ids[o]
+    for obj in shash.get_nearby_objects(o):
+        print '  nearby:',obj,shash.cell_ids[obj]

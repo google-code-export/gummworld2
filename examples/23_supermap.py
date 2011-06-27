@@ -23,7 +23,7 @@ class App(Engine):
         
         # Init Engine, no map or world.
         Engine.__init__(self,
-            resolution=resolution,
+            resolution=resolution, #display_flags=DOUBLEBUF,
             camera_target=model.Object(),
             frame_speed=0,
         )

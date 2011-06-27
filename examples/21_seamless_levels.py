@@ -76,6 +76,7 @@ class Level(Engine):
         map.rect.center = rect.center
         
         Engine.__init__(self,
+            display_flags=DOUBLEBUF,
             map=map,                        # use my pre-made map
             default_schedules=False,        # don't schedule world and camera
             set_state=False,                # enter/resume doesn't modify State
