@@ -221,12 +221,14 @@ class App(Engine):
             add(thing)
     
     def update_collisions(self):
-        filter_rect = None
         if self.filter and not self.tune_running:
             filter_rect = self.filter_rect
-            self.filter_rect.center = pygame.mouse.get_pos()
-        for c in State.world.collidealllist(filter_rect):
-            c[0].hit = True
+            filter_rect.center = pygame.mouse.get_pos()
+            for o in State.world.intersect_objects(filter_rect):
+                o.hit = True
+        else:
+            for c in State.world.collidealllist():
+                c[0].hit = True
     
     def draw(self, dt):
         State.screen.clear()
