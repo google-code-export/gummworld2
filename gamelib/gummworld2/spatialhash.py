@@ -108,16 +108,17 @@ class SpatialHash(object):
         crect = rect.clip(self.rect)
         cell_size = self.cell_size
         top = crect.top
-        bottom = crect.bottom + cell_size
+        bottom = crect.bottom
         left = crect.left
-        right = crect.right + cell_size
+        right = crect.right
         len_buckets = len(self.buckets)
-        for x in range(left, right, cell_size):
-            for y in range(top, bottom, cell_size):
+        ## TODO: range() + [value] may not be economical. Must be a better way.
+        for x in range(left, right, cell_size) + [right]:
+            for y in range(top, bottom, cell_size) + [bottom]:
                 cell_id = self.index_at(x,y)
-                if cell_id is not None and cell_id not in cell_ids:
+                if cell_id is not None:
                     cell_ids.append(cell_id)
-        return cell_ids
+        return list(set(cell_ids))
     
     def intersect_objects(self, rect):
         """Return list of objects whose rects intersect rect.
@@ -133,8 +134,8 @@ class SpatialHash(object):
         """
         cell_size = self.cell_size
         cols = self.cols
-        y = cell_id // cols
-        x = cell_id - y * cols
+        x = cell_id // cols
+        y = cell_id - x * cols
         return x,y
     
     def get_cell_pos(self, cell_id):
@@ -288,7 +289,7 @@ if __name__ == '__main__':
         def __repr__(self):
             return self.__str__()
     pygame.init()
-    world_rect = Rect(0,0,60,90)
+    world_rect = Rect(0,0,180,180)
     print 'World rect:',world_rect
     cell_size = 30
     shash = SpatialHash(world_rect, cell_size)
@@ -325,3 +326,34 @@ if __name__ == '__main__':
     print '  Reference:', o,shash.cell_ids[o]
     for obj in shash.get_nearby_objects(o):
         print '  nearby:',obj,shash.cell_ids[obj]
+    
+    screen = pygame.display.set_mode(world_rect.size)
+    draw_line = pygame.draw.line
+    draw_rect = pygame.draw.rect
+    color = pygame.Color('darkgrey')
+    left,right,top,bottom = world_rect.left,world_rect.right,world_rect.top,world_rect.bottom
+    fill_rect = Rect(0,0,shash.cell_size,shash.cell_size)
+    while 1:
+        pygame.event.clear()
+        screen.fill((0,0,0))
+        minx = -1
+        miny = -1
+        for cell_id,cell in enumerate(shash.itercells()):
+            x,y = shash.get_cell_pos(cell_id)
+            if x > minx:
+                minx = x
+                p1 = x,top
+                p2 = x,bottom
+                draw_line(screen, color, p1, p2)
+            if y > miny:
+                miny = y
+                p1 = left,y
+                p2 = right,y
+                draw_line(screen, color, p1, p2)
+        x,y = pygame.mouse.get_pos()
+        row,col = shash.get_cell_grid(shash.index_at(x,y))
+        fill_rect.topleft = col*shash.cell_size,row*shash.cell_size
+        screen.fill((0,255,255), fill_rect)
+        for o in shash.objects:
+            draw_rect(screen, (0,0,255), o.rect)
+        pygame.display.flip()
