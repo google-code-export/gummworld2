@@ -240,9 +240,6 @@ class SpatialHash(object):
         for cell in self.buckets.values():
             del cell[:]
     
-    def __contains__(self, obj):
-        return obj in self.cell_ids
-    
     def iterobjects(self):
         """Returns a generator that iterates over all objects.
         
@@ -261,6 +258,9 @@ class SpatialHash(object):
     def __iter__(self):
         for obj in self.cell_ids:
             yield obj
+    
+    def __contains__(self, obj):
+        return obj in self.cell_ids
     
     def __len__(self):
         return len(self.objects)
