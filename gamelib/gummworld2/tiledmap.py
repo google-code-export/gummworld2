@@ -58,7 +58,7 @@ class TiledMap(TileMap):
     def get_tile_layer(self, layeri):
         """Return the tile layer indexed by layeri.
         """
-        return self.get_tile_layers(layeri)
+        return self.get_tile_layers()[layeri]
     
     def get_tile_layers(self):
         rl = self.renderer._layers
