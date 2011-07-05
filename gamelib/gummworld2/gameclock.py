@@ -220,6 +220,7 @@ class GameClock(object):
         self.update_callback = update_callback
         self.frame_callback = frame_callback
         self.dilation = 1.0
+        self.paused = 0
         
         # counters
         self._elapsed = 0.0
@@ -301,6 +302,9 @@ class GameClock(object):
         After calling, check the update_ready() and frame_ready() methods.
         Sleep cycles are injected if use_wait=True. Returns the number of
         milliseconds that have elapsed since the last call to tick()."""
+        
+        if self.paused:
+            return
         
         TIME = self._get_ticks()
         DT = self._ticks = (TIME - self.time) / self.dilation
@@ -435,6 +439,28 @@ class GameClock(object):
         """Return updates per second during the previous second."""
         return self.ups
 
+    def pause(self):
+        """Pause the clock so that time does not elapse.
+        
+        While the clock is paused, no schedules will fire and tick() returns
+        immediately without progressing internal counters. Game loops that
+        completely rely on the clock will need to take over timekeeping and
+        handling events; otherwise, the game will appear to deadlock. There are
+        many ways to solve this scenario. For instance, another clock can be
+        created and used temporarily, and the original swapped back in and
+        resumed when needed.
+        """
+        self.paused = self._get_ticks()
+    
+    def resume(self):
+        """Resume the clock from the point that it was paused."""
+        t = self._get_ticks()
+        for item in self.interval_schedules:
+            dt = self.paused - item.lasttime
+            item.lasttime = t - dt
+        self.paused = 0
+        self.time = t
+    
     def schedule(self, func, *args, **kwargs):
         """Schedule an item to be called back each time tick() is called."""
         self.unschedule(func)
