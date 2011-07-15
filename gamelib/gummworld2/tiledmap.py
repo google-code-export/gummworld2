@@ -46,6 +46,31 @@ class TiledMap(TileMap):
         mw,mh = map.width, map.height
         self.rect = pygame.Rect(0,0,tw*mw,th*mh)
     
+    @property
+    def width(self):
+        return self.tiled_map.width
+    @property
+    def height(self):
+        return self.tiled_map.width
+    @property
+    def size(self):
+        return self.width,self.height
+    @property
+    def tile_width(self):
+        return self.tiled_map.tilewidth
+    @property
+    def tile_height(self):
+        return self.tiled_map.tileheight
+    @property
+    def tile_size(self):
+        return self.tile_width,self.tile_height
+    @property
+    def pixel_width(self):
+        return self.tiled_map.pixel_width
+    @property
+    def pixel_height(self):
+        return self.tiled_map.pixel_height
+    
     def get_layer(self, layeri):
         """Return the layer indexed by layeri.
         
@@ -65,7 +90,7 @@ class TiledMap(TileMap):
         return [rl[i] for i in self.tiled_map.layers if not i.is_object_group]
     
     def get_object_group(self, groupi):
-        return self.get_object_groups(groupi)
+        return self.get_object_groups()[groupi]
     
     def get_object_groups(self):
         return [i for i in self.tiled_map.layers if i.is_object_group]
