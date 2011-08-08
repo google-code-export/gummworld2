@@ -118,7 +118,7 @@ class TiledMap(TileMap):
         content2D = self.get_layer(layeri).content2D
         x1,y1,x2,y2 = self.rect_to_range(rect, layeri)
         for column in content2D[x1:x2+1]:
-            tiles.extend(column[y1:y2+1])
+            tiles.extend([t for t in column[y1:y2+1] if t])
         if self.sortkey:
             tiles.sort(key=self.sortkey)
         return tiles
