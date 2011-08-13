@@ -27,6 +27,8 @@ class SpatialHash(object):
         self.buckets = [[] for i in range(self.rows*self.cols)]
         self.cell_ids = WeakKeyDictionary()
         
+        self.num_buckets = len(self.buckets)
+        
         self.coll_tests = 0
     
     @property
@@ -98,27 +100,40 @@ class SpatialHash(object):
         """
         cell_size = self.cell_size
         rect = self.rect
-        idx = ((x-rect.left)//cell_size) + ((y-rect.top)//cell_size) * self.cols
-        return idx if -1<idx<len(self.buckets) else None
+        idx = ((x-rect[0])//cell_size) + ((y-rect[1])//cell_size) * self.cols
+        return idx if -1<idx<self.num_buckets else None
     
     def intersect_indices(self, rect):
         """Return list of cell ids that intersect rect.
         """
-        cell_ids = []
-        crect = rect.clip(self.rect)
+        # Not pretty, but these ugly optimizations shaved 40% off run-time.
+        # return value
+        cell_ids = set()
+        # pre-calculate bounds
+        self_rect = self.rect
+        crect = rect.clip(self_rect)
+        left = crect[0]
+        top = crect[1]
+        right = left + crect[2]
+        bottom = top + crect[3]
         cell_size = self.cell_size
-        top = crect.top
-        bottom = crect.bottom
-        left = crect.left
-        right = crect.right
-        len_buckets = len(self.buckets)
-        ## TODO: range() + [value] may not be economical. Must be a better way.
-        for x in range(left, right, cell_size) + [right]:
-            for y in range(top, bottom, cell_size) + [bottom]:
-                cell_id = self.index_at(x,y)
-                if cell_id is not None:
-                    cell_ids.append(cell_id)
-        return list(set(cell_ids))
+        # pre-calculate loop ranges
+        rect_left = self_rect[0]
+        rect_top = self_rect[1]
+        x_range = range(left-rect_left, right-rect_left, cell_size)
+        x_range.append(right-rect_left)
+        y_range = range(top-rect_top, bottom-rect_top, cell_size)
+        y_range.append(bottom-rect_top)
+        # misc speedups
+        cols = self.cols
+        num_buckets = self.num_buckets
+        cell_ids_add = cell_ids.add
+        for x in x_range:
+            for y in y_range:
+                cell_id = x//cell_size + y//cell_size * cols
+                if -1 < cell_id < num_buckets:
+                    cell_ids_add(cell_id)
+        return list(cell_ids)
     
     def intersect_objects(self, rect):
         """Return list of objects whose rects intersect rect.
