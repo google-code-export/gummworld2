@@ -242,8 +242,10 @@ class SpatialHash(object):
     @staticmethod
     def _extended_collided(obj, other):
         if obj.rect.colliderect(other.rect):
-            if hasattr(obj, 'collided') and hasattr(other, 'collided'):
-                return obj.collided(obj, other)
+            if hasattr(obj, 'collided'):
+                return obj.collided(obj, other, True)
+            elif hasattr(other, 'collided'):
+                return other.collided(other, obj, True)
             else:
                 return True
         else:
