@@ -9,6 +9,7 @@ This module is derived from the article and source code written by Conkerjo at
 http://conkerjo.wordpress.com/2009/06/13/spatial-hashing-implementation-for-fast-2d-collisions/.
 """
 
+import time
 from math import ceil
 from weakref import WeakKeyDictionary
 
@@ -61,8 +62,16 @@ class SpatialHash(object):
         buckets = self.buckets
         cell_ids = self.cell_ids
         if obj in cell_ids:
-            for cell_id in cell_ids[obj]:
+            for cell_id in cell_ids[obj][:]:
+## FIXED ... =P  problem was this line ^^^^ remove while iterating.
+##
+##  File "C:\cygwin\home\bw\devel\python\multifac\pyweek13\gamelib\gummworld2\spatialhash.py", line 67, in remove
+##    if cell_id: buckets[cell_id].remove(obj)
+##ValueError: list.remove(x): x not in list
                 buckets[cell_id].remove(obj)
+                cell_ids[obj].remove(cell_id)
+            if len(cell_ids[obj]) == 0:
+                del cell_ids[obj]
     
     def get_nearby_objects(self, obj):
         """Return a list of objects that share the same cells as obj.
