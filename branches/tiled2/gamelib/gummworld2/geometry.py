@@ -237,6 +237,26 @@ def point_on_circumference(center, radius, degrees_):
     return x,y
 
 
+def step_toward_point((x1,y1), (x2,y2), distance):
+    """Calculate the point at a given distance along the line with end points
+    (x1,y1) and (x2,y2).
+    
+    This function is about twice as fast as the combination angle_of() and
+    point_on_circumference().
+    
+    The (x1,y1) argument is the origin.
+    
+    The (x2,y2) argument is the destination.
+    
+    The distance argument is the size of the step, or speed.
+    """
+    line = sqrt((x2-x1)**2+(y2-y1)**2)
+    step = line / distance
+    new_x = x1 + (x2-x1) / step
+    new_y = y1 + (y2-y1) / step
+    return new_x,new_y
+
+
 def point_in_poly(point, poly):
     """Point vs polygon collision test.
     
