@@ -21,6 +21,12 @@ class SpatialHash(object):
     
     def __init__(self, world_rect, cell_size):
         self.rect = Rect(world_rect)
+        self.bounds = (
+            world_rect[0],
+            world_rect[1],
+            world_rect[0] + world_rect[2],
+            world_rect[1] + world_rect[3],
+        )
         self.cell_size = int(cell_size)
         
         self.rows = int(ceil(world_rect.h / float(cell_size)))
@@ -48,9 +54,11 @@ class SpatialHash(object):
         its cell membership is updated. This method first removes the object if
         it is already in the spatial hash.
         """
+        cell_ids = self.intersect_indices(obj.rect)
+        if obj in self.cell_ids and cell_ids == self.cell_ids[obj]:
+            return cell_ids == True
         self.remove(obj)
         buckets = self.buckets
-        cell_ids = self.intersect_indices(obj.rect)
         for idx in cell_ids:
             buckets[idx].append(obj)
         self.cell_ids[obj] = cell_ids
@@ -69,9 +77,11 @@ class SpatialHash(object):
 ##    if cell_id: buckets[cell_id].remove(obj)
 ##ValueError: list.remove(x): x not in list
                 buckets[cell_id].remove(obj)
-                cell_ids[obj].remove(cell_id)
-            if len(cell_ids[obj]) == 0:
-                del cell_ids[obj]
+##superfluous...
+##                cell_ids[obj].remove(cell_id)
+##            if len(cell_ids[obj]) == 0:
+##                del cell_ids[obj]
+            del cell_ids[obj]
     
     def get_nearby_objects(self, obj):
         """Return a list of objects that share the same cells as obj.
@@ -115,33 +125,39 @@ class SpatialHash(object):
     def intersect_indices(self, rect):
         """Return list of cell ids that intersect rect.
         """
-        # Not pretty, but these ugly optimizations shaved 40% off run-time.
+        # Not pretty, but these ugly optimizations shave 50% off run-time
+        # versus function calls and attributes. This is called by add(),
+        # which gets called whenever an object moves.
+        
         # return value
         cell_ids = set()
+        
         # pre-calculate bounds
-        self_rect = self.rect
-        crect = rect.clip(self_rect)
-        left = crect[0]
-        top = crect[1]
-        right = left + crect[2]
-        bottom = top + crect[3]
+        left = rect[0]
+        top = rect[1]
+        right = left + rect[2]
+        bottom = top + rect[3]
+        wl,wt,wr,wb = self.bounds
+        if left < wl: left = wl
+        if top < wt: top = wt
+        if right > wr: right = wr
+        if bottom > wb: bottom = wb
         cell_size = self.cell_size
+        
         # pre-calculate loop ranges
-        rect_left = self_rect[0]
-        rect_top = self_rect[1]
-        x_range = range(left-rect_left, right-rect_left, cell_size)
-        x_range.append(right-rect_left)
-        y_range = range(top-rect_top, bottom-rect_top, cell_size)
-        y_range.append(bottom-rect_top)
+        lrange = range
+        x_range = lrange(left, right, cell_size) + [right]
+        y_range = lrange(top, bottom, cell_size) + [bottom]
+        
         # misc speedups
         cols = self.cols
-        num_buckets = self.num_buckets
         cell_ids_add = cell_ids.add
+        
         for x in x_range:
             for y in y_range:
                 cell_id = x//cell_size + y//cell_size * cols
-                if -1 < cell_id < num_buckets:
-                    cell_ids_add(cell_id)
+                cell_ids_add(cell_id)
+        
         return list(cell_ids)
     
     def intersect_objects(self, rect):
@@ -185,12 +201,13 @@ class SpatialHash(object):
         """Return list of objects that collide with obj.
         """
         collisions = []
+        append = collisions.append
         collided = self._extended_collided
         for other in self.get_nearby_objects(obj):
             if other is obj:
                 continue
             if collided(obj, other):
-                collisions.append(other)
+                append(other)
         return collisions
     
     def collidealldict(self, rect=None):
@@ -205,19 +222,22 @@ class SpatialHash(object):
         self.coll_tests = 0
         collided = self._extended_collided
         if rect:
-            cells = [self.get_cell(i) for i in self.intersect_indices(rect)]
+            buckets = self.buckets
+            cells = [buckets[i] for i in self.intersect_indices(rect)]
         else:
             cells = self.buckets
+        tests = 0
         for cell in cells:
+            i = 0
             for obj in cell:
-                for other in cell:
-                    if other is obj:
-                        continue
-                    self.coll_tests += 1
+                i += 1
+                for other in cell[i:]:
+                    tests += 1
                     if collided(obj, other):
                         if obj not in collisions:
                             collisions[obj] = []
                         collisions[obj].append(other)
+        self.coll_tests = tests
         return collisions
     
     def collidealllist(self, rect=None):
@@ -229,23 +249,24 @@ class SpatialHash(object):
         The contents of the returned list are: [(obj,other),...]
         """
         collisions = set()
-        self.coll_tests = 0
+        cadd = collisions.add
         collided = self._extended_collided
         if rect:
-            cells = [self.get_cell(i) for i in self.intersect_indices(rect)]
+            buckets = self.buckets
+            cells = [buckets[i] for i in self.intersect_indices(rect)]
         else:
             cells = self.buckets
+        tests = 0
         for cell in cells:
+            i = 0
             for obj in cell:
-                for other in cell:
-                    if other is obj:
-                        continue
-                    self.coll_tests += 1
+                i += 1
+                for other in cell[i:]:
+                    tests += 1
                     if collided(obj, other):
-                        c1 = (obj,other)
-                        c2 = (other,obj)
-                        collisions.add(c1)
-                        collisions.add(c2)
+                        cadd((obj,other))
+                        cadd((other,obj))
+        self.coll_tests = tests
         return list(collisions)
     
     @staticmethod
@@ -339,7 +360,7 @@ if __name__ == '__main__':
     print 'Objects 1 (__iter__):'
     for obj in shash:
         print obj
-    print 'Objects 2 (interobjects):'
+    print 'Objects 2 (iterobjects):'
     for obj in shash.iterobjects():
         print obj
     print 'Objects 3 (objects):'
