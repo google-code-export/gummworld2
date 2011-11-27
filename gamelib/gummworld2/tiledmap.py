@@ -5,7 +5,7 @@ from tiledtmxloader.tiledtmxloader import TileMap, TileMapParser
 from tiledtmxloader.helperspygame import ResourceLoaderPygame, RendererPygame
 
 from gummworld2 import spatialhash
-from gummworld2.basicmap import BasicMap, BasicLayer, collapse_layer
+from gummworld2.basicmap import BasicMap, BasicLayer, collapse_layer, blit_layer
 
 
 class TiledMap(BasicMap):
@@ -43,7 +43,6 @@ class TiledMap(BasicMap):
         self.named_layers = self.raw_map.named_layers
         
         if collapse > (1,1):
-#            collapse_map(self, collapse, collapse_layers)
             self.collapse(collapse, collapse_layers)
     
     def get_layer_by_name(self, layer_name):
@@ -103,6 +102,20 @@ class TiledLayer(object):
         new_layer = TiledLayer(self.parent_map, self, self.layeri)
         collapse_layer(self, new_layer, collapse)
         self.parent_map.layers[self.layeri] = new_layer
+    
+    def blit_layer(self, src_layer):
+        for dest_sprite in self:
+            dimage = dest_sprite.image.copy()
+            drect = dest_sprite.rect
+            for src_sprite in src_layer:
+                simage = src_sprite.image
+                srect = src_sprite.rect
+                dx = drect.x - srect.x
+                dy = drect.y - srect.y
+                dimage.blit(src_sprite.image, (0,0), src_sprite.rect.move(dx,dy))
+    
+    def blit_layer(self, src_layer):
+        blit_layer(self, src_layer)
     
     def __iter__(self):
         return iter(self.objects)
