@@ -611,6 +611,70 @@ def get_objects_in_cell_ids(map_, cell_ids_per_layer):
     return objects_per_layer
 
 
+def get_object_array():
+    visible_cell_ids = get_visible_cell_ids(State.camera, State.map)
+    return get_objects_in_cell_ids(State.map, visible_cell_ids)
+
+
+def draw_object_array(object_array):
+    """Draw a layered array of objects.
+    
+    For best performance:
+        
+    def update(self, dt):
+        self.visible_objects = toolkit.get_object_array()
+    def draw(self, dt):
+        ...
+        toolkit.draw_object_array(self.visible_objects)
+    """
+    cam = State.camera
+    blit = cam.view.blit
+    cx,cy = cam.rect.topleft
+    for sprites in object_array:
+        for sprite in sprites:
+            rect = sprite.rect
+            sx,sy = rect.topleft
+            blit(sprite.image, (sx-cx,sy-cy))
+
+
+def draw_sprite(s, blit_flags=0):
+    """Draw a sprite on the camera's surface using world-to-screen conversion.
+    """
+    camera = State.camera
+    cx,cy = camera.rect.topleft
+    sx,sy = s.rect.topleft
+    if haspygame19:
+        camera.surface.blit(s.image, (sx-cx, sy-cy), special_flags=blit_flags)
+    else:
+        camera.surface.blit(s.image, (sx-cx, sy-cy))
+
+# draw_sprite
+
+
+def draw_tiles():
+    """Draw visible tiles.
+    
+    Quick and dirty draw function, handles getting the objects and drawing
+    them. This is a bit more expensive than getting tiles during the update
+    cycle and reusing the object array for the draw cycles. However, it is
+    less hassle, and one might want to use this tactic if panning more than
+    one tile span per tick.
+    """
+    map_ = State.map
+    camera = State.camera
+    blit = camera.surface.blit
+    cx,cy = camera.rect.topleft
+    visible_cell_ids = get_visible_cell_ids(camera, map_)
+    visible_objects = get_objects_in_cell_ids(map_, visible_cell_ids)
+    for sprites in visible_objects:
+        for sprite in sprites:
+            rect = sprite.rect
+            sx,sy = rect.topleft
+            blit(sprite.image, (sx-cx,sy-cy))
+
+# draw_tiles
+
+
 def interpolated_step(pos, step, interp):
     """Returns (float,float).
     
@@ -639,40 +703,6 @@ def interpolated_step(pos, step, interp):
     return pos - step + interp_step
 
 # interpolated_step
-
-
-def draw_sprite(s, blit_flags=0):
-    """Draw a sprite on the camera's surface using world-to-screen conversion.
-    """
-    camera = State.camera
-    cx,cy = camera.rect.topleft
-    sx,sy = s.rect.topleft
-    if haspygame19:
-        camera.surface.blit(s.image, (sx-cx, sy-cy), special_flags=blit_flags)
-    else:
-        camera.surface.blit(s.image, (sx-cx, sy-cy))
-
-# draw_sprite
-
-
-def draw_tiles():
-    """Draw visible tiles.
-    
-    This function assumes that the tiles stored in the map are sprites.
-    """
-    map_ = State.map
-    camera = State.camera
-    blit = camera.surface.blit
-    cx,cy = camera.rect.topleft
-    visible_cell_ids = get_visible_cell_ids(camera, map_)
-    visible_objects = get_objects_in_cell_ids(map_, visible_cell_ids)
-    for sprites in visible_objects:
-        for sprite in sprites:
-            rect = sprite.rect
-            sx,sy = rect.topleft
-            blit(sprite.image, (sx-cx,sy-cy))
-
-# draw_tiles
 
 
 ## EXPERIMENTAL: not working quite right
@@ -879,7 +909,7 @@ label_font = None
 # draw_labels
 
 
-def draw_grid(grid_lines, layeri=0, color=pygame.Color('blue'), alpha=33):
+def draw_grid(grid_cache, layeri=0, color=pygame.Color('blue'), alpha=33):
     """Draw a grid over the camera view.
     
     The grid_lines argument is a list of length two containing a cached
@@ -900,19 +930,17 @@ def draw_grid(grid_lines, layeri=0, color=pygame.Color('blue'), alpha=33):
     cam_rect = State.camera.rect
     blit = camera.surface.blit
     left,top,width,height = cam_rect
-    vline,hline = grid_lines
-    if not vline:
-        vline = pygame.Surface((1,height))
-        vline.fill(color)
-        if alpha is not None:
-            vline.set_alpha(alpha)
-        grid_lines[0] = vline
-    if not hline:
-        hline = pygame.Surface((width,1))
-        hline.fill(color)
-        if alpha is not None:
-            hline.set_alpha(alpha)
-        grid_lines[1] = hline
+    #
+    if not grid_cache:
+        for name,size in (('vline',(1,height)), ('hline',(width,1))):
+            surf = pygame.Surface(size)
+            surf.fill(color)
+            if alpha is not None:
+                surf.set_alpha(alpha)
+            grid_cache[name] = surf
+    vline = grid_cache.get('vline', None)
+    hline = grid_cache.get('hline', None)
+    #
     layer = State.map.layers[layeri]
     x1 = layer.tile_width - (left - left // layer.tile_width * layer.tile_width)
     for x in xrange(x1, width, layer.tile_width):
