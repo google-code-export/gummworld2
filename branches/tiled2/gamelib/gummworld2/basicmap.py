@@ -132,9 +132,21 @@ class BasicMap(object):
         for layeri in which_layers:
             self.layers[layeri].collapse(collapse)
     
-    def merge(self, which_layers=None):
+    def merge_layers(self, which_layers=None):
         if which_layers is None:
-            which_layers = self.get_tile_layers()
+            which_layers = range(len(self.layers))
+        if len(which_layers) < 2:
+            return
+        dest_layer = self.layers[which_layers[0]]
+        del_layers = []
+        for layeri in which_layers[1:]:
+##            print 'blit_layer'
+            src_layer = self.layers[layeri]
+            dest_layer.blit_layer(src_layer)
+            del_layers.append(src_layer)
+        for layer in del_layers:
+##            print 'del layer'
+            self.layers.remove(layer)
 
 
 class BasicLayer(object):
@@ -158,7 +170,7 @@ class BasicLayer(object):
     def add(self, tile):
         self.objects.add(tile)
     
-    def get_tiles_in_rect(self, rect):
+    def get_objects_in_rect(self, rect):
         return self.objects.intersect_rect(rect)
     
     def collapse(self, collapse=(1,1)):
@@ -167,6 +179,12 @@ class BasicLayer(object):
         new_layer = BasicLayer(self.parent_map, self.layeri)
         collapse_layer(self, new_layer, collapse)
         self.parent_map.layers[self.layeri] = new_layer
+    
+    def blit_layer(self, src_layer):
+        blit_layer(self, src_layer)
+    
+    def __iter__(self):
+        return iter(self.objects)
 
 
 def collapse_layer(old_layer, new_layer, num_tiles=(2,2)):
@@ -211,11 +229,10 @@ def collapse_layer(old_layer, new_layer, num_tiles=(2,2)):
     for y in range(0, mh*th, th):
         for x in range(0, mw*tw, tw):
             query_rect.topleft = x,y
-##            print '----\n',query_rect
             sprites = old_layer.objects.intersect_objects(query_rect)
-##            print [s.rect.topleft for s in sprites]
             if len(sprites) != num_tiles.x * num_tiles.y:
-##                print 'not enough sprites:',len(sprites)
+                for s in sprites:
+                    new_layer.add(s)
                 continue
             # If sprite images have different characteristics, they cannot be
             # reliably collapsed. In which case, keep them as-is.
@@ -252,7 +269,19 @@ def collapse_layer(old_layer, new_layer, num_tiles=(2,2)):
             top = reduce(min, [s.rect.y for s in sprites])
             for sprite in sprites:
                 p = sprite.rect.x - left, sprite.rect.y - top
-##                print sprite.rect.topleft,p
                 new_sprite.image.blit(sprite.image.convert(depth, flags), p)
             new_layer.add(new_sprite)
     return new_layer
+
+
+def blit_layer(dest_layer, src_layer):
+    for dest_sprite in dest_layer:
+        dimage = dest_sprite.image.copy()
+        drect = dest_sprite.rect
+        for src_sprite in src_layer:
+            simage = src_sprite.image
+            srect = src_sprite.rect
+            x = srect.x - drect.x
+            y = srect.y - drect.y
+            dimage.blit(src_sprite.image, (x,y))
+        dest_sprite.image = dimage
