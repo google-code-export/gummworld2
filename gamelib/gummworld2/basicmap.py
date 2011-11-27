@@ -166,12 +166,13 @@ class BasicLayer(object):
         self.objects = spatialhash.SpatialHash(self.rect, cell_size)
         
         self.layeri = layer_index
+        self.visible = True
     
     def add(self, tile):
         self.objects.add(tile)
     
     def get_objects_in_rect(self, rect):
-        return self.objects.intersect_rect(rect)
+        return self.objects.intersect_objects(rect)
     
     def collapse(self, collapse=(1,1)):
         if collapse <= (1,1):
