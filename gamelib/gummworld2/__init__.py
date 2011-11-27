@@ -48,6 +48,7 @@ from vec2d import Vec2d
 from state import State
 from context import Context
 from subpixel import SubPixelSurface
+from spatialhash import SpatialHash
 
 # the following creates a separate namespace, don't do it.
 #from tiledtmxloader.tiledtmxloader import TileMap, TileMapParser
@@ -58,7 +59,6 @@ from screen import Screen, View
 from map import Map, MapLayer
 from basicmap import BasicMap, BasicLayer
 from tiledmap import TiledMap
-from quadtree import QuadTree
 from supermap import SuperMap, MapHandler
 from camera import Camera
 from gameclock import GameClock
@@ -80,7 +80,6 @@ import popup_menu
 import state
 import ui
 import toolkit
-import quadtree
 import supermap
 
 if __debug__: print 'gummworld2 v%s loaded' % version.version
