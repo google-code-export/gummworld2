@@ -157,7 +157,7 @@ class MapHandler(object):
                 self.triggers.append(t)
                 if __debug__: print '%s: new trigger %s: %s' % (self.__class__.__name__, BORDERS[border], t)
     
-    def get_tiles(self, map_range):
+    def get_objects(self, map_range):
         """Return a dict of tiles in the specified bounds.
         
         supermap_range is a dict of range specifications, such as returned by
@@ -165,8 +165,8 @@ class MapHandler(object):
         """
         return get_objects_in_cell_ids(self.map, map_range)
     
-    def get_tiles_in_rect(self, rect):
-        """Return a dict of tiles that intersect rect.
+    def get_objects_in_rect(self, rect):
+        """Return a dict of objects that intersect rect.
         
         rect is a pygame.Rect expressed in world coordinates.
         """
@@ -438,17 +438,17 @@ class SuperMap(object):
         """
         return self.handlers.get(name, None)
     
-    def get_tiles(self, supermap_range):
+    def get_objects(self, supermap_range):
         tiles_per_handler = {}
         for name,tile_range in supermap_range.items():
             map_handler = self.get_handler(name)
             if map_handler.map:
-                tiles_per_handler[name] = map_handler.get_tiles(tile_range)
+                tiles_per_handler[name] = map_handler.get_objects(tile_range)
         return tiles_per_handler
     
-    def get_tiles_in_rect(self, rect):
+    def get_objects_in_rect(self, rect):
         tile_range = self.get_tile_range_in_rect(rect)
-        return self.get_tiles(tile_range)
+        return self.get_objects(tile_range)
     
     def get_tile_range_in_rect(self, rect):
         """rect must be in world space.
@@ -502,7 +502,7 @@ class SuperMap(object):
                     history.remove(map_handler)
                     map_handler._unload()
         
-        self.visible_objects = self.get_tiles_in_rect(State.camera.rect)
+        self.visible_objects = self.get_objects_in_rect(State.camera.rect)
     
     def draw(self):
         camera = State.camera
