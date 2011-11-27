@@ -1,11 +1,25 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-u"""
-TileMap loader for python for Tiled, a generic tile map editor
-from http://mapeditor.org/ .
-It loads the \*.tmx files produced by Tiled.
+"""
+> Overview
+This program contains a sample implementation for loading a map produced
+by Tiled in pyglet. The script can be run on its own to demonstrate its
+capabilities, or the script can be imported to use its functionality. Users
+will hopefully use the ResourceLoaderPyglet already provided in this.
+Tiled may be found at http://mapeditor.org/
 
+> Demo Controls
+Holding the arrow keys scrolls the map.
+Holding the left shift key makes you scroll faster.
+Pressing the Esc key closes the program.
+
+> Demo Features
+The map is fully viewable by scrolling.
+You can scroll outside of the bounds of the map.
+All visible layers are loaded and displayed.
+Transparency is supported. (Nothing needed to be done for this.)
+Minimal OpenGL used. (Less of a learning curve.)
 
 """
 
@@ -32,12 +46,6 @@ __revision__ = "$Rev$"
 __version__ = "3.0.0." + __revision__[6:-2]
 __author__ = u'DR0ID @ 2009-2011'
 
-if __debug__:
-    print __version__
-    import sys
-    sys.stdout.write(u'%s loading ... \n' % (__name__))
-    import time
-    _start_time = time.time()
 
 #  -----------------------------------------------------------------------------
 
@@ -49,61 +57,120 @@ import os.path
 
 import pyglet
 
+import copy
 import tiledtmxloader
 
 #  -----------------------------------------------------------------------------
+
+# [20:31]	bjorn: Of course, for fastest rendering, you would combine the used 
+# tiles into a single texture and set up arrays of vertex and texture coordinates.
+# .. so that the video card can dump the map to the screen without having to 
+# analyze the tile data again and again.
+
 class ResourceLoaderPyglet(tiledtmxloader.AbstractResourceLoader):
+    """Loads all tile images and lays them out on a grid.
 
-    def __init__(self):
-        tiledtmxloader.AbstractResourceLoader.__init__(self)
+    Unlike the AbstractResourceLoader this class derives from, no overridden
+    methods use a colorkey parameter. A colorkey is only useful for pygame.
+    This loader adds its own pyglet-specific parameter to deal with
+    pyglet.image.load's capability to work with file-like objects.
+    
+    """
 
-    def _load_image(self, filename, colorkey=None, fileobj=None):
+    def load(self, tile_map):
+        tiledtmxloader.AbstractResourceLoader.load(self, tile_map)
+        # ISSUE 17: flipped tiles
+        for layer in self.world_map.layers:
+            for gid in layer.decoded_content:
+                if gid not in self.indexed_tiles:
+                    if gid & self.FLIP_X or gid & self.FLIP_Y:
+                        image_gid = gid & ~(self.FLIP_X | self.FLIP_Y)
+                        offx, offy, img = self.indexed_tiles[image_gid]
+                        # TODO: how to flip it? this does mix textures and image classes
+                        img = copy.deepcopy(img)
+                        tex = img.get_texture()
+                        tex.anchor_x = tex.width // 2
+                        tex.anchor_y = tex.height // 2
+                        tex2 = tex.get_transform(bool(gid & self.FLIP_X), bool(gid & self.FLIP_Y))
+                        # img2 = pyglet.image.ImageDataRegion(img.x, img.y, tex2.width, tex2.height, tex2.image_data))
+                        tex.anchor_x = 0
+                        tex.anchor_y = 0
+                        self.indexed_tiles[gid] = (offx, offy, tex2)
+
+    def _load_image(self, filename, fileobj=None):
+        """Load a single image.
+
+        Images are loaded only once. Subsequence loads call upon a cache.
+
+        :Parameters:
+            filename : string
+                Path to the file to be loaded.
+            fileobj : file
+                A file-like object which pyglet can decode.
+
+        :rtype: A subclass of AbstractImage.
+
+        """
         img = self._img_cache.get(filename, None)
         if img is None:
             if fileobj:
-                img = pyglet.image.load(filename, fileobj, pyglet.image.codecs.get_decoders("*.png")[0])
+                img = pyglet.image.load(filename, fileobj,
+                    pyglet.image.codecs.get_decoders("*.png")[0])
             else:
                 img = pyglet.image.load(filename)
             self._img_cache[filename] = img
         return img
 
-    def _load_image_part(self, filename, x, y, w, h, colorkey=None):
-        image = self._load_image(filename, colorkey)
-        img_part = image.get_region(x, y, w, h)
-        return img_part
+    def _load_image_part(self, filename, x, y, w, h):
+        """Load a section of an image and returns its ImageDataRegion."""
+        return self._load_image(filename).get_region(x, y, w, h)
 
-    def _load_image_parts(self, filename, margin, spacing, tile_width, tile_height, colorkey=None): #-> [images]
-        source_img = self._load_image(filename, colorkey)
+    def _load_image_parts(self, filename, margin, spacing, tile_width, tile_height, colorkey=None):
+        """Load different tile images from one source image.
+
+        :Parameters:
+            filename : string
+                Path to image to be loaded.
+            margin : int
+                The margin around the image.
+            spacing : int
+                The space between the tile images.
+            tilewidth : int
+                The width of a single tile.
+            tileheight : int
+                The height of a single tile.
+            colorkey : ???
+                Unused. (Intended for pygame.)
+
+        :rtype: A list of images.
+        
+        """
+        source_img = self._load_image(filename)
+        # ISSUE 16 fixed wrong sized tilesets
+        height = (source_img.height // tile_height) * tile_height
+        width = (source_img.width // tile_width) * tile_width
         images = []
         # Reverse the map column reading to compensate for pyglet's y-origin.
-        for y in range(source_img.height - tile_height, margin - tile_height,
-            -tile_height - spacing):
-            for x in range(margin, source_img.width, tile_width + spacing):
+        for y in range(height - tile_height, margin - tile_height, -tile_height - spacing):
+            for x in range(margin, width, tile_width + spacing):
                 img_part = self._load_image_part(filename, x, y - spacing, tile_width, tile_height)
                 images.append(img_part)
         return images
 
-    def _load_image_file_like(self, file_like_obj, colorkey=None): # -> image
-        # pyglet.image.load can load from a path and from a file-like object
-        # that is why here it is redirected to the other method
-        return self._load_image(file_like_obj, colorkey, file_like_obj)
+    def _load_image_file_like(self, file_like_obj):
+        """Loads a file-like object and returns its subclassed AbstractImage."""
+        # TODO: Ask myself why this extra indirection is necessary.
+        return self._load_image(file_like_obj, file_like_obj)
 
 
 #  -----------------------------------------------------------------------------
 
 
 def demo_pyglet(file_name):
-    """Thanks to: HydroKirby from #pyglet on freenode.org
-
-    Loads and views a map using pyglet.
-
-    Holding the arrow keys will scroll along the map.
-    Holding the left shift key will make you scroll faster.
-    Pressing the escape key ends the application.
-
+    """Demonstrates loading, rendering, and traversing a Tiled map in pyglet.
+    
     TODO:
     Maybe use this to put topleft as origin:
-
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         glOrtho(0.0, (double)mTarget->w, (double)mTarget->h, 0.0, -1.0, 1.0);
@@ -119,7 +186,7 @@ def demo_pyglet(file_name):
     # window and the update function. Note that the position is in integers to
     # match Pyglet Sprites. Using floating-point numbers causes graphical
     # problems. See http://groups.google.com/group/pyglet-users/browse_thread/thread/52f9ae1ef7b0c8fa?pli=1
-    delta = [0, 0]
+    delta = [200, -world_map.pixel_height+150]
     frames_per_sec = 1.0 / 30.0
     window = pyglet.window.Window()
 
@@ -178,14 +245,13 @@ def demo_pyglet(file_name):
             continue
         group = pyglet.graphics.OrderedGroup(group_num)
         for ytile in range(layer.height):
-            # To compensate for pyglet's upside-down y-axis, the Sprites are
-            # placed in rows that are backwards compared to what was loaded
-            # into the map. The next operation puts all rows upside-down.
             for xtile in range(layer.width):
                 image_id = layer.content2D[xtile][ytile]
                 if image_id:
-                    # o_x and o_y are offsets. They are not helpful here.
-                    o_x, o_y, image_file = resources.indexed_tiles[image_id]
+                    image_file = resources.indexed_tiles[image_id][2]
+                    # The loader needed to load the images upside-down to match
+                    # the tiles to their correct images. This reversal must be
+                    # done again to render the rows in the correct order.
                     sprites.append(pyglet.sprite.Sprite(image_file,
                         world_map.tilewidth * xtile,
                         world_map.tileheight * (layer.height - ytile),
@@ -194,16 +260,6 @@ def demo_pyglet(file_name):
     pyglet.clock.schedule_interval(update, frames_per_sec)
     pyglet.app.run()
 
-
-#  -----------------------------------------------------------------------------
-def main():
-
-    args = sys.argv[1:]
-    if len(args) == 1:
-        demo_pyglet(args[0])
-    else:
-        #print 'usage: python helperspyglet.py mapfile.tmx'
-        print('usage: python %s your_map.tmx' % os.path.basename(__file__))
 
 #  -----------------------------------------------------------------------------
 
@@ -215,10 +271,9 @@ if __name__ == '__main__':
     # p.strip_dirs()
     # p.sort_stats('time')
     # p.print_stats()
+    if len(sys.argv) == 2:
+        demo_pyglet(sys.argv[1])
+    else:
+        print('Usage: python %s your_map.tmx' % os.path.basename(__file__))
 
-    main()
 
-
-if __debug__:
-    _dt = time.time() - _start_time
-    sys.stdout.write(u'%s loaded: %fs \n' % (__name__, _dt))
