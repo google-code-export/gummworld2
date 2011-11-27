@@ -709,8 +709,8 @@ def interpolated_step(pos, step, interp):
 #def get_parallax_tile_range(cam, map, layer, parallax, orig='bottomleft'):
 def get_parallax_tile_range(cam, map, layer, parallax, orig='center'):
     # Compute the camera center for this layer's parallax.
-    mapw,maph = layer.map_size
-    tile_size = layer.tile_size
+    mapw,maph = Vec2d(layer.width,layer.height)
+    tile_size = Vec2d(layer.tile_width,layer.tile_height)
     map_off = map.rect.topleft
     cam_rect = pygame.Rect(cam.rect)
     map_orig = Vec2d(getattr(map.rect, orig))
@@ -729,8 +729,13 @@ def get_parallax_tile_range(cam, map, layer, parallax, orig='center'):
 
 ## EXPERIMENTAL: not working quite right
 def draw_parallax_tile_range(layer, tile_range, pax_rect):
-    tiles = layer.get_tiles(*tile_range)
-    draw_parallax_tiles(layer, tiles, pax_rect)
+#    tiles = layer.get_tiles(*tile_range)
+    x,y,r,b = tile_range
+    tw,th = layer.tile_width,layer.tile_height
+    query_rect = pygame.Rect(x*tw, y*th, (r-x)*tw, (b-y)*th)
+##    print query_rect;quit()
+    tiles = layer.get_objects_in_rect(query_rect)
+    X_draw_parallax_tiles(layer, tiles, pax_rect)
 
 
 ## EXPERIMENTAL: not working quite right
@@ -739,7 +744,7 @@ def X_draw_parallax_tiles(layer, tiles, pax_rect, view=None):
     parallax_cam_topleft = Vec2d(pax_rect.topleft)
     if not view:
         view = State.camera
-    blit = view.blit
+    blit = view.surface.blit
     abs_offset = Vec2d(view.abs_offset)
     for s in tiles:
         if s:
