@@ -91,7 +91,7 @@ class TiledLayer(object):
     def add(self, tile):
         self.objects.add(tile)
     
-    def get_tiles_in_rect(self, rect):
+    def get_objects_in_rect(self, rect):
         return self.objects.intersect_rect(rect)
     
     def __len__(self):
@@ -103,6 +103,9 @@ class TiledLayer(object):
         new_layer = TiledLayer(self.parent_map, self, self.layeri)
         collapse_layer(self, new_layer, collapse)
         self.parent_map.layers[self.layeri] = new_layer
+    
+    def __iter__(self):
+        return iter(self.objects)
 
 
 def _load_tiled_tmx_map(map_file_name, gummworld_map, load_invisible=True):
