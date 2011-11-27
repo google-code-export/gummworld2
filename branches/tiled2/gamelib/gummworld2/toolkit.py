@@ -33,7 +33,9 @@ import pygame
 from pygame.locals import RLEACCEL, SRCALPHA, BLEND_RGBA_ADD
 from pygame.sprite import Sprite
 
-from gummworld2 import data, State, Map, MapLayer, Vec2d
+from gummworld2 import data, State, BasicMap, BasicLayer, Vec2d
+## TODO: remove Map and MapLayer
+from gummworld2 import Map, MapLayer
 from gummworld2.geometry import RectGeometry, PolyGeometry, CircleGeometry
 from gummworld2.ui import HUD, Stat, Statf, hud_font
 from tiledtmxloader.tiledtmxloader import TileMapParser
@@ -140,10 +142,10 @@ def make_tiles():
     Tiles transition from top-left to bottom-right, red to blue.
     """
     # Tiles are sprites; each sprite must have a name, an image, and a rect.
-    tw,th = State.map.tile_size
-    mw,mh = State.map.map_size
-    State.map.layers.append(MapLayer(
-        State.map.tile_size, State.map.map_size, True, True, True))
+    tw,th = State.map.tile_width, State.map.tile_height
+    mw,mh = State.map.width, State.map.height
+    layer = BasicLayer(State.map, 0)
+    State.map.layers.append(layer)
     for y in range(mh):
         for x in range(mw):
             s = pygame.sprite.Sprite()
@@ -156,7 +158,7 @@ def make_tiles():
             B = 255*facy
             s.image.fill((R,G,B))
             s.rect = s.image.get_rect(topleft=(x*tw,y*th))
-            State.map.add(s)
+            layer.add(s)
 
 # make_tiles
 
@@ -168,10 +170,10 @@ def make_tiles2():
     Tiles transition from top to bottom, light blue to brown.
     """
     # Tiles are sprites; each sprite must have a name, an image, and a rect.
-    tw,th = State.map.tile_size
-    mw,mh = State.map.map_size
-    State.map.layers.append(MapLayer(
-        State.map.tile_size, State.map.map_size, True, True, True))
+    tw,th = State.map.tile_width, State.map.tile_height
+    mw,mh = State.map.width, State.map.height
+    layer = BasicLayer(State.map, 0)
+    State.map.layers.append(layer)
     for y in range(mh):
         for x in range(mw):
             s = pygame.sprite.Sprite()
@@ -184,138 +186,9 @@ def make_tiles2():
             s.image.fill((R,G,B))
             pygame.draw.line(s.image, (R+9,G+9,B+9), (0,0), (0,th))
             s.rect = s.image.get_rect(topleft=(x*tw,y*th))
-            State.map.add(s)
+            layer.add(s)
 
 # make_tiles2
-
-
-# def collapse_map(map, num_tiles=(2,2)):
-    # """Collapse all layers in a map by combining num_tiles into one tile.
-    # Returns a new map.
-    
-    # The map argument is the source map. It must be an instance of Map.
-    
-    # The num_tiles argument is a tuple representing the number of tiles in the X
-    # and Y axes to combine.
-    # """
-    # # new map dimensions
-    # num_tiles = Vec2d(num_tiles)
-    # tw,th = map.tile_size * num_tiles
-    # mw,mh = map.map_size // num_tiles
-    # if mw * num_tiles.x != map.map_size.x:
-        # mw += 1
-    # if mh * num_tiles.y != map.map_size.y:
-        # mh += 1
-    # # new map
-    # new_map = Map((tw,th), (mw,mh))
-    # # collapse the tiles in each layer...
-    # for layeri,layer in enumerate(map.layers):
-        # new_layer = collapse_map_layer(map, layeri, num_tiles)
-        # # add a new layer
-        # new_map.layers.append(new_layer)
-    # if hasattr(map, 'tiled_map'):
-        # new_map.tiled_map = map.tiled_map
-    # return new_map
-def collapse_map(map, num_tiles=(2,2), layers=None):
-    """Collapse all layers in a map by combining num_tiles into one tile.
-    Returns a new map.
-    
-    The map argument is the source map. It must be an instance of Map.
-    
-    The num_tiles argument is a tuple representing the number of tiles in the X
-    and Y axes to combine.
-    """
-    # new map dimensions
-    num_tiles = Vec2d(num_tiles)
-    tw,th = map.tile_size * num_tiles
-    mw,mh = map.map_size // num_tiles
-    if mw * num_tiles.x != map.map_size.x:
-        mw += 1
-    if mh * num_tiles.y != map.map_size.y:
-        mh += 1
-    # new map
-    new_map = Map((tw,th), (mw,mh))
-    # collapse the tiles in each layer...
-    if layers is None:
-        layers = range(len(map.layers))
-    for layeri in layers:
-        layer = map.layers[layeri]
-        new_layer = collapse_map_layer(map, layeri, num_tiles)
-        # add a new layer
-        new_map.layers.append(new_layer)
-    if hasattr(map, 'tiled_map'):
-        new_map.tiled_map = map.tiled_map
-    return new_map
-
-# collapse_map
-
-
-def collapse_map_layer(map, layeri, num_tiles=(2,2)):
-    """Collapse a single layer in a map by combining num_tiles into one tile.
-    
-    The map argument is the source map. It must be an instance of Map.
-    
-    The layeri argument is an int representing the layer index to collapse.
-    
-    The num_tiles argument is a tuple representing the number of tiles in the X
-    and Y axes to combine.
-    """
-    # New map dimensions.
-    num_tiles = Vec2d(num_tiles)
-    tw,th = map.tile_size * num_tiles
-    mw,mh = map.map_size // num_tiles
-    if mw * num_tiles.x != map.map_size.x:
-        mw += 1
-    if mh * num_tiles.y != map.map_size.y:
-        mh += 1
-    layer = map.layers[layeri]
-    new_layer = MapLayer((tw,th), (mw,mh), visible=layer.visible,
-        make_grid=True, make_labels=True, name=layer.name)
-    # Walk the old map, stepping by the number of the tiles argument...
-    for y in range(0, map.map_size.y, num_tiles.y):
-        for x in range(0, map.map_size.x, num_tiles.x):
-        # Make a new sprite.
-            s = Sprite()
-            s.image = pygame.surface.Surface((tw,th))
-            s.rect = s.image.get_rect()
-            s.name = tuple((x,y) / num_tiles)
-            
-            # Blit (x,y) tile and neighboring tiles to right and lower...
-            tiles = map.get_tiles(x, y, x+num_tiles.x, y+num_tiles.y, layer=layeri)
-            tiles = [t for t in tiles if t]
-            if len(tiles):
-                # Detect colorkey.
-                colorkey = None
-                for tile in tiles:
-                    c = tile.image.get_colorkey()
-                    if c is not None:
-                        colorkey = c
-                # Fill dest image if there is a colorkey.
-                if colorkey is None and len(tiles) < num_tiles.x*num_tiles.y:
-                    colorkey = (0,0,0)
-                    s.image.fill(colorkey)
-                # Blit the images (first turning off source colorkey).
-                for tile in tiles:
-                    nx,ny = Vec2d(tile.name) - (x,y)
-                    p = s.rect.topleft + map.tile_size * (nx,ny)
-                    copy_image = tile.image.copy()
-                    copy_image.set_colorkey(None)
-                    s.image.blit(copy_image, p)
-                # Set the dest colorkey.
-                if colorkey is not None:
-                    s.image.set_colorkey(colorkey, RLEACCEL)
-##                    s.image.set_alpha(tile.image.get_alpha())
-                s.rect.topleft = Vec2d(x,y) * map.tile_size
-#                if not s.image in map.subpixel_cache:
-#                    map.subpixel_cache[s.image] = SubPixelSurface(s.image, 4)
-#                s.subpixel_image = map.subpixel_cache[s.image]
-                new_layer.append(s)
-            else:
-                new_layer.append(None)
-    
-    return new_layer
-
-# collapse_map_layer
 
 
 def reduce_map_layers(map, layersi):
@@ -333,7 +206,7 @@ def reduce_map_layers(map, layersi):
     (e.g. a surface colorkey), otherwise their pixels would completely erase the
     tiles underneath.
     
-    Alphas and blending are not supported by this routine.
+    Alphas and blending are not preserved by this routine.
     
     The tile and map sizes in the map layers should be of the same size.
     Otherwise the desired results will likely not be produced. If using
@@ -417,75 +290,6 @@ def reduce_map_layers(map, layersi):
     return new_map
 
 # reduce_map_layers
-
-
-def load_tiled_tmx_map(map_file_name, load_invisible=False, convert_alpha=False):
-    """Load an orthogonal TMX map file that was created by the Tiled Map Editor.
-    
-    Note: convert_alpha is experimental. It can lower performance when used
-    with some images. Do it only if there's a need.
-    
-    Thanks to DR0ID for his nice tiledtmxloader module:
-        http://www.pygame.org/project-map+loader+for+%27tiled%27-1158-2951.html
-    
-    And the creators of Tiled Map Editor:
-        http://www.mapeditor.org/
-    """
-    
-    # Taken pretty much verbatim from the (old) tiledtmxloader module.
-    #
-    # The tiledtmxloader.TileMap object is stored in the returned
-    # gamelib.Map object in attribute 'tiled_map'.
-    
-    world_map = TileMapParser().parse_decode(map_file_name)
-    resource = ResourceLoaderPygame()
-    resource.load(world_map)
-    world_map.resource = resource
-    tile_size = (world_map.tilewidth, world_map.tileheight)
-    
-    map_size = (world_map.width, world_map.height)
-    gummworld_map = Map(tile_size, map_size)
-    gummworld_map.tiled_map = world_map
-    
-    for layeri,layer in enumerate(world_map.layers):
-        gummworld_map.layers.append(MapLayer(
-            tile_size, map_size, layer.visible, True, True, name=str(layeri)))
-        if not layer.visible and not load_invisible:
-            continue
-        for ypos in xrange(0, layer.height):
-            for xpos in xrange(0, layer.width):
-                x = (xpos + layer.x) * world_map.tilewidth
-                y = (ypos + layer.y) * world_map.tileheight
-                img_idx = layer.content2D[xpos][ypos]
-                if img_idx == 0:
-                    gummworld_map.add(None, layer=layeri)
-                    continue
-                try:
-                    offx, offy, tile_img = world_map.resource.indexed_tiles[img_idx]
-                    screen_img = tile_img.copy()  #convert(tile_img)
-                except KeyError:
-                    print 'KeyError',img_idx,(xpos,ypos)
-                    continue
-                sprite = Sprite()
-                ## Note: alpha conversion can actually kill performance.
-                ## Do it only if there's a benefit.
-                if convert_alpha:
-                    if screen_img.get_alpha():
-                        screen_img = screen_img.convert_alpha()
-                    else:
-                        screen_img = screen_img.convert()
-                        if layer.opacity > -1:
-                            screen_img.set_alpha(None)
-                            alpha_value = int(255. * float(layer.opacity))
-                            screen_img.set_alpha(alpha_value)
-                            screen_img = screen_img.convert_alpha()
-                sprite.image = screen_img
-                sprite.rect = screen_img.get_rect(topleft=(x + offx, y + offy))
-                sprite.name = xpos,ypos
-                gummworld_map.add(sprite, layer=layeri)
-    return gummworld_map
-
-# load_tiled_tmx_map
 
 
 def load_entities(filepath, cls_dict={}):
@@ -759,6 +563,54 @@ def put_tilesheet_info(tilesheet_path, tilesheet_values):
         f.close()
 
 
+def get_visible_cell_ids(camera, map_):
+    """Return a list of the map's cell IDs that would be visible to the camera.
+    
+    The return value is a list of cell IDs in the map's spatialhash for each
+    layer. The per-layer values are necessary because maps can have layers with
+    different tile sizes, and therefore different grids.
+    
+    The return value is suitable for passing to get_objects_in_cell_ids().
+    
+    Returns:
+        [   [cell_id0, cell_id1, ...],  # layer0
+            [cell_id0, cell_id1, ...],  # layer1
+            ...,                        # layerN
+        ]
+    """
+    cell_ids = []
+    for layer in map_.layers:
+        cell_ids.append(layer.objects.intersect_indices(camera.rect))
+    return cell_ids
+
+
+def get_objects_in_cell_ids(map_, cell_ids_per_layer):
+    """Return a list of objects per layer for the specified cell IDs.
+    
+    The argument cell_ids_per_layer is a list of nested lists containing
+    cell IDs:
+        [   [cell_id0, cell_id1, ...],  # layer0
+            [cell_id0, cell_id1, ...],  # layer1
+            ...,                        # layerN
+        ]
+    
+    The return value is a similary constructed list of object lists:
+        [   [obj0, obj1, ...],          # layer0
+            [obj0, obj1, ...],          # layer1
+            ...,                        # layerN
+        ]
+    """
+    objects_per_layer = []
+    for layeri,cell_ids in enumerate(cell_ids_per_layer):
+        get_cell = map_.layers[layeri].objects.get_cell
+        objects = []
+        objects_extend = objects.extend
+        for cell_id in cell_ids:
+            objects_extend(get_cell(cell_id))
+        objects_per_layer.append(objects)
+    return objects_per_layer
+
+
 def interpolated_step(pos, step, interp):
     """Returns (float,float).
     
@@ -808,31 +660,17 @@ def draw_tiles():
     
     This function assumes that the tiles stored in the map are sprites.
     """
-    map = State.map
-    layers = map.layers
+    map_ = State.map
     camera = State.camera
-    visible_tile_range = camera.visible_tile_range
     blit = camera.surface.blit
     cx,cy = camera.rect.topleft
-    realx,realy = camera._position
-    for layeri in range(len(visible_tile_range)):
-        layer = layers[layeri]
-        if not layer.visible:
-            continue
-        left,top,right,bottom = visible_tile_range[layeri]
-        mapw,maph = layer.map_size
-        if left < 0: left = 0
-        if top < 0: top = 0
-        if right >= mapw: right = mapw #- 1
-        if bottom >= maph: bottom = maph #- 1
-        for y in range(top,bottom):
-            yoff = y * mapw
-            start = yoff + left
-            end = yoff + right
-            for s in layer[start:end]:
-                if s:
-                    rect = s.rect
-                    blit(s.image, (rect.x-cx, rect.y-cy))
+    visible_cell_ids = get_visible_cell_ids(camera, map_)
+    visible_objects = get_objects_in_cell_ids(map_, visible_cell_ids)
+    for sprites in visible_objects:
+        for sprite in sprites:
+            rect = sprite.rect
+            sx,sy = rect.topleft
+            blit(sprite.image, (sx-cx,sy-cy))
 
 # draw_tiles
 
@@ -959,50 +797,128 @@ def draw_tiles_of_layer(layeri, pallax_factor_x=1.0, pallax_factor_y=1.0):
             print "ERROR: layer", layeri, "not defined int map!"
 
 
-def draw_labels(layer=0):
-    """Draw visible labels if enabled.
-    
-    Labels for the specified layer are blitted to the camera surface. If the
-    layer has been collapsed with the collapse_map_layer() function so that
-    the layer's tile size differs from the grid label sprites, this will look
-    weird.
-    """
-    if State.show_labels:
-        tile_range = State.camera.visible_tile_range
-        if len(tile_range):
-            x1,y1,x2,y2 = tile_range[layer]
-            map_layer = State.map.layers[layer]
-            get = map_layer.get_labels
-            for s in get(x1,y1,x2,y2):
-                draw_sprite(s)
+## These no longer work. Labels and grid lines have been removed from the map
+## and layer classes.
+##
+#def draw_labels(layer=0):
+#    """Draw visible labels if enabled.
+#    
+#    Labels for the specified layer are blitted to the camera surface. If the
+#    layer has been collapsed with the collapse_map_layer() function so that
+#    the layer's tile size differs from the grid label sprites, this will look
+#    weird.
+#    """
+#    if State.show_labels:
+#        tile_range = State.camera.visible_tile_range
+#        if len(tile_range):
+#            x1,y1,x2,y2 = tile_range[layer]
+#            map_layer = State.map.layers[layer]
+#            get = map_layer.get_labels
+#            for s in get(x1,y1,x2,y2):
+#                draw_sprite(s)
+#
+
+
+#def draw_labels(cache_dict, layeri=0, color=pygame.Color('black')):
+#    global label_font
+#    if label_font is None:
+#        label_font = pygame.font.Font(data.filepath('font','Vera.ttf'), 7)
+#    lfont = label_font
+#    #
+#    camera = State.camera
+#    cam_rect = State.camera.rect
+#    blit = camera.surface.blit
+#    left,top,width,height = cam_rect
+#    layer = State.map.layers[layeri]
+#    tw,th = layer.tile_width, layer.tile_height
+#    x0 = left // tw
+#    y0 = top // th
+#    x1 = tw - (left - x0*tw)
+#    y1 = th - (top - y0*th)
+###    print x0,y0,x1,y1
+#    #
+#    for x in xrange(x1, width, layer.tile_width):
+#        for y in xrange(y1, height, layer.tile_height):
+###            print x,y
+#            name = (x+tw)//tw+x0, (y+th)//th+y0
+###            name = (x+tw)//tw, (y+th)//th
+#            label = cache_dict.get(name, None)
+#            if not label:
+#                label = lfont.render(str(name), True, color)
+#                cache_dict[name] = label
+#            blit(label, (x+2,y+2))
+def draw_labels(cache_dict, layeri=0, color=pygame.Color('black')):
+    global label_font
+    if label_font is None:
+        label_font = pygame.font.Font(data.filepath('font','Vera.ttf'), 7)
+    lfont = label_font
+    #
+    camera = State.camera
+    cam_rect = State.camera.rect
+    blit = camera.surface.blit
+    left,top,width,height = cam_rect
+    layer = State.map.layers[layeri]
+    tw,th = layer.tile_width, layer.tile_height
+    #
+    x1 = tw - (left - left//tw*tw)
+    y1 = th - (top - top//th*th)
+    #
+    for x in xrange(left-tw, left+width+tw, tw):
+        for y in xrange(top-th, top+height+th, th):
+            name = (x-tw)//tw+1, (y-th)//th+1
+            sx,sy = x-left-tw, y-top-th
+            label = cache_dict.get(name, None)
+            if not label:
+                label = lfont.render(
+                    '{0[0]:d},{0[1]:d}'.format(name), True, color)
+                cache_dict[name] = label
+            blit(label, (sx+x1+2,sy+y1+2))
+##    quit()
+label_font = None
 
 # draw_labels
 
 
-def draw_grid(layer=0):
-    """Draw grid if enabled.
+def draw_grid(grid_lines, layeri=0, color=pygame.Color('blue'), alpha=33):
+    """Draw a grid over the camera view.
     
-    Grids for the specified layer are blitted to the camera surface. If the layer
-    has been collapsed with the collapse_map_layer() function so that the
-    layer's tile size differs from the grid line sprites, this will look weird.
+    The grid_lines argument is a list of length two containing a cached
+    [vline,hline] pair. This function will initialize the contents if the
+    starting values evaluate to False (e.g. [0,0]).
+    
+    The layeri argument is the map layer from which to get the grid spacing.
+    
+    The color argument is the desired grid color.
+    
+    The alpha argument is the surface alpha. If alpha is not None, it must be a
+    valid value for pygame.Surface.set_alpha().
+    
+    color and alpha are only used when when creating the surfaces for the
+    grid_lines list.
     """
-    if State.show_grid:
-        x1,y1,x2,y2 = State.camera.visible_tile_range[layer]
-        # speed up access to grid lines and their rects
-        map = State.map
-        map_layer = map.layers[layer]
-        tw,th = map_layer.tile_size
-        vertical_grid_line = map_layer.vertical_grid_line
-        horizontal_grid_line = map_layer.horizontal_grid_line
-        map_rect = map.rect
-        x1 = max(x1*tw, map_rect.left)
-        x2 = min(x2*tw, map_rect.right)
-        y1 = max(y1*th, map_rect.top)
-        y2 = min(y2*th, map_rect.bottom)
-        for y in xrange(y1,y2,th):
-            for x in xrange(x1,x2,tw):
-                pos = x,y
-                draw_sprite(vertical_grid_line(pos))
-                draw_sprite(horizontal_grid_line(pos))
+    camera = State.camera
+    cam_rect = State.camera.rect
+    blit = camera.surface.blit
+    left,top,width,height = cam_rect
+    vline,hline = grid_lines
+    if not vline:
+        vline = pygame.Surface((1,height))
+        vline.fill(color)
+        if alpha is not None:
+            vline.set_alpha(alpha)
+        grid_lines[0] = vline
+    if not hline:
+        hline = pygame.Surface((width,1))
+        hline.fill(color)
+        if alpha is not None:
+            hline.set_alpha(alpha)
+        grid_lines[1] = hline
+    layer = State.map.layers[layeri]
+    x1 = layer.tile_width - (left - left // layer.tile_width * layer.tile_width)
+    for x in xrange(x1, width, layer.tile_width):
+        blit(vline, (x,0))
+    y1 = layer.tile_height - (top - top // layer.tile_height * layer.tile_height)
+    for y in xrange(y1, height, layer.tile_height):
+        blit(hline, (0,y))
 
 # draw_grid

@@ -1,6 +1,7 @@
 import pygame
 
 from gummworld2 import State, Vec2d
+from gummworld2.toolkit import get_visible_cell_ids, get_objects_in_cell_ids
 
 
 NEIGHBORS = (N,NE,E,SE,S,SW,W,NW) = (
@@ -162,7 +163,7 @@ class MapHandler(object):
         supermap_range is a dict of range specifications, such as returned by
         SuperMap.get_tile_range_in_rect().
         """
-        return self.map.get_tiles(map_range)
+        return get_objects_in_cell_ids(self.map, map_range)
     
     def get_tiles_in_rect(self, rect):
         """Return a dict of tiles that intersect rect.
@@ -170,7 +171,7 @@ class MapHandler(object):
         rect is a pygame.Rect expressed in world coordinates.
         """
         map_range = self.get_tile_range_in_rect(rect)
-        return self.get_tiles(map_range)
+        return get_objects_in_cell_ids(map_range)
     
     def get_tile_range_in_rect(self, rect):
         """Return a list of tile ranges, one for each layer, that intersect
@@ -181,7 +182,7 @@ class MapHandler(object):
         if self.rect.colliderect(rect):
             r = pygame.Rect(rect)
             r.topleft = self.world_to_local(r.topleft)
-            return self.map.get_tile_range_in_rect(r)
+            return get_visible_cell_ids(State.camera, self.map)
         else:
             return []
     
@@ -500,34 +501,24 @@ class SuperMap(object):
                 if map_handler not in visible_maps:
                     history.remove(map_handler)
                     map_handler._unload()
+        
+        self.visible_objects = self.get_tiles_in_rect(State.camera.rect)
     
     def draw(self):
         camera = State.camera
+        camera_rect = camera.rect
+        blit = camera.surface.blit
+        cx,cy = camera_rect.topleft
         get_handler = self.get_handler
-        world_to_screen = camera.world_to_screen
-        blit = camera.view.blit
-        visible_tiles = State.camera.visible_tiles
-        cam_pos = camera.rect.topleft
-        if isinstance(visible_tiles, dict):
-            for name,tile_layers in visible_tiles.items():
-                if not tile_layers:
-                    continue
-                local_to_world = get_handler(name).local_to_world
-                for tiles in tile_layers:
-                    for tile in tiles:
-                        pos = local_to_world(tile.rect.topleft)
-                        pos = vsub(pos, cam_pos)
-                        blit(tile.image, pos, tile.source_rect, tile.flags)
-        else:
-            ## UNTESTED
-            for tile_layers in visible_tiles:
-                local_to_world = get_handler(name).local_to_world
-                for tiles in tile_layers:
-                    for tile in tiles:
-                        pos = local_to_world(tile.rect.topleft)
-                        pos = world_to_screen(pos)
-                        blit(tile.image, pos)
-
+        for name,layers in self.visible_objects.items():
+            if not layers:
+                continue
+            local_to_world = get_handler(name).local_to_world
+            for sprites in layers:
+                for sprite in sprites:
+                    sx,sy = local_to_world(sprite.rect.topleft)
+                    pos = sx-cx, sy-cy
+                    blit(sprite.image, pos)
 
 def map_handler_name(map_handler):
     x,y = map_handler.name

@@ -54,7 +54,9 @@ from subpixel import SubPixelSurface
 #from tiledtmxloader.helperspygame import ResourceLoaderPygame, RendererPygame
 
 from screen import Screen, View
+## TODO: Get rid of old map references
 from map import Map, MapLayer
+from basicmap import BasicMap, BasicLayer
 from tiledmap import TiledMap
 from quadtree import QuadTree
 from supermap import SuperMap, MapHandler

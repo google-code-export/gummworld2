@@ -163,11 +163,14 @@ class SpatialHash(object):
     def intersect_objects(self, rect):
         """Return list of objects whose rects intersect rect.
         """
-        objs = {}
+        objs = set()
+        set_add = objs.add
+        colliderect = rect.colliderect
         for cell_ids in self.intersect_indices(rect):
             for o in self.get_cell(cell_ids):
-                objs[o] = 1
-        return objs.keys()
+                if colliderect(o.rect):
+                    set_add(o)
+        return list(objs)
     
     def get_cell_grid(self, cell_id):
         """Return the (col,row) coordinate for cell id.

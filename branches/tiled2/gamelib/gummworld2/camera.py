@@ -34,10 +34,8 @@ class Camera(object):
     """A Camera provides a few services:
     
         * Track a moving target in world coordinates.
-        * Determine the range of visible tiles.
-        * Retrieve visible tiles from a Map.
         * Convert coordinates between world and screen space.
-        * Interpolated scrolling to take advantage of higher frame rates.
+        * Interpolated view scrolling to take advantage of higher frame rates.
     
     Dependencies:
     
@@ -65,11 +63,6 @@ class Camera(object):
     Sometimes it may just be simplest, for example, to blit directly to the
     top-level surface.
     
-    Property visible_tile_range returns a list of map tile positions [(0,0),
-    (0,1), ...] that are visible on the screen.
-    
-    Property visible_tiles returns a list of MapLayer objects that are visible.
-    
     If creating multiple cameras to save and restore in State contexts, by
     default the state_restored() method updates the new camera from the old.
     This solves a split-brain condition that occurs when the cameras' internals
@@ -92,7 +85,6 @@ class Camera(object):
             view = State.screen
         self._target = target
         self._prev_target = target
-        self._visible_tile_range = []
         self._move_to = Vec2d(self.target.position)
         self._move_from = Vec2d(self.target.position)
         self._position = Vec2d(self.target.position)
@@ -149,10 +141,6 @@ class Camera(object):
 #        self._move_from = Vec2d(self._move_to)
 #        self._position = Vec2d(self._move_to)
         self.map = None
-        if State.map:
-            self._get_visible_tile_range()
-        else:
-            self._visible_tile_range = []
         self.update()
     
     def update(self, *args):
@@ -176,7 +164,6 @@ class Camera(object):
             interp, self._move_from, self._move_to)
         self.rect.center = round(x),round(y)
         self._interp = interp
-        self._get_visible_tile_range()
         return interp
     
     def slew(self, vec, dt):
@@ -278,25 +265,6 @@ class Camera(object):
         camera = self.target.position
         ## ?? this should be relative to subsurface ??
         return xy + camera - self.abs_screen_center
-        
-    @property
-    def visible_tile_range(self):
-        """The range of tiles that would be visible on the display surface. The
-        value is a list of tuples(x1,y1,x2,y2) representing map grid positions
-        for each layer. The per layer metrics are necessary because maps can
-        have layers with different tile sizes, and therefore different grids.
-        """
-        return self._visible_tile_range
-    
-    def _get_visible_tile_range(self):
-        self._visible_tile_range = State.map.get_tile_range_in_rect(self.rect)
-    
-    @property
-    def visible_tiles(self):
-        """A list of MapLayer objects that would be visible on the display
-        surface.
-        """
-        return State.map.get_tiles(self.visible_tile_range)
     
     def state_restored(self, prev):
         """Sync a stale camera after swapping it in.
@@ -313,6 +281,3 @@ class Camera(object):
             self._move_from = prev._move_from
             self._move_to = prev._move_to
             self._position = prev._position
-            self._get_visible_tile_range()
-        else:
-            self._get_visible_tile_range()
