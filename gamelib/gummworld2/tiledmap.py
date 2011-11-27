@@ -4,10 +4,11 @@ from tiledtmxloader.helperspygame import get_layers_from_map, SpriteLayer
 from tiledtmxloader.tiledtmxloader import TileMap, TileMapParser
 from tiledtmxloader.helperspygame import ResourceLoaderPygame, RendererPygame
 
+from gummworld2 import BasicMap, BasicLayer
 from gummworld2 import spatialhash
 
 
-class TiledMap(object):
+class TiledMap(BasicMap):
     
     def __init__(self, map_file_name, collapse=(1,1), collapse_layers=None, load_invisible=True):
         """Construct a TiledMap object.
@@ -28,32 +29,24 @@ class TiledMap(object):
         self.layers = []
         self.raw_map = _load_tiled_tmx_map(map_file_name, self, load_invisible)
         
-        self.rect = pygame.Rect(0,0,self.raw_map.pixel_width,self.raw_map.pixel_height)
+        tmp_layers = self.layers
+        
+        BasicMap.__init__(self,
+            self.raw_map.width, self.raw_map.height,
+            self.raw_map.tilewidth, self.raw_map.tileheight)
+        
+        self.layers = tmp_layers
         
         self.orientation = self.raw_map.orientation
-        self.tile_width = self.raw_map.tilewidth
-        self.tile_height = self.raw_map.tileheight
-        self.width = self.raw_map.width
-        self.height = self.raw_map.height
         self.properties = self.raw_map.properties
-        self.pixel_width = self.raw_map.pixel_width
-        self.pixel_height = self.raw_map.pixel_height
         self.map_file_name = self.raw_map.map_file_name
         self.named_layers = self.raw_map.named_layers
         
         if collapse > (1,1):
             collapse_map(self, collapse, collapse_layers)
     
-    def get_layer(self, layer_index):
-        return self.layers[layer_index]
-    
     def get_layer_by_name(self, layer_name):
         return self.named_layers[layer_name]
-    
-    def get_layers(self, which_layers=None):
-        if not which_layers:
-            which_layers = range(len(self.layers))
-        return [L for i,L in enumerate(self.layers) if i in which_layers]
     
     def get_tile_layers(self):
         rl = self.layers
@@ -61,32 +54,6 @@ class TiledMap(object):
     
     def get_object_groups(self):
         return [L for L in self.layers if L.is_object_group]
-    
-    def get_objects_in_rect(self, rect, layeri=0):
-        tiles = []
-        content2D = self.get_layer(layeri).content2D
-        x1,y1,x2,y2 = self.rect_to_range(rect, layeri)
-        for column in content2D[x1:x2+1]:
-            tiles.extend([t for t in column[y1:y2+1] if t])
-        return tiles
-    
-    def collapse(self, collapse=(1,1), which_layers=None):
-        """Collapse which_layers by joining num_tiles into one tile. The
-        original layers are replaced by new layers.
-        
-        The collapse argument is the number of tiles on the X and Y axes to
-        join.
-        
-        The collapse_layers argument is a sequence of indices indicating to
-        which TiledMap.layers the collapse algorithm should be applied. See the
-        tiledmap.collapse_map.
-        """
-        if layeri is None:
-            layers = self.get_tile_layers()
-        else:
-            layers = [self.get_layer(layeri)]
-        for layer in layers:
-            layer.collapse(collapse_level)
 
 
 class TiledLayer(object):
