@@ -65,8 +65,7 @@ class View(object):
         else:
             self.surface = surface
             self.parent_rect = self.surface.get_rect()
-        self.eraser = self.surface.copy()
-        self.eraser.fill(pygame.Color('black'))
+        self.fill_color = pygame.Color('black')
         self.rect = self.surface.get_rect()
     
     @property
@@ -96,9 +95,9 @@ class View(object):
         return self.surface.get_abs_offset()
 
     def clear(self):
-        """Clear the surface by blitting the surface in eraser attribute.
+        """Fill the surface with self.fill_color.
         """
-        self.surface.blit(self.eraser, (0,0))
+        self.surface.fill(self.fill_color)
     
     def blit(self, surf, pos, area=None, special_flags=0):
         """Blit a surface to this surface.
