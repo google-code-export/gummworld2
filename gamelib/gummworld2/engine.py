@@ -60,7 +60,7 @@ if __name__ == '__main__':
     import paths
 
 from gummworld2 import (
-    State, Context, Screen, View, Map, Camera, GameClock,
+    State, Context, Screen, View, BasicMap, Camera, GameClock,
     context, model, pygame_utils,
 )
 
@@ -92,7 +92,7 @@ class Engine(Context):
             The pygame display is initialized with an optional caption, and the
             resulting screen.Screen object is placed in State.screen.
             
-            An empty map.Map object is created and placed in State.map.
+            An empty map.BasicMap object is created and placed in State.map.
             
             An empty model.World* object is created and placed in State.world.
             
@@ -141,7 +141,7 @@ class Engine(Context):
             State.screen.surface is used as the source surface. This argument is
             ignored if camera_view is not None.
         
-        The following arguments are used to initialize a Map object:
+        The following arguments are used to initialize a BasicMap object:
             
             The tile_size and map_size arguments specify the width and height of
             a map tile, and width and height of a map in tiles, respectively.
@@ -216,13 +216,13 @@ class Engine(Context):
             if __debug__: print 'Engine: SKIPPING screen creation: no screen surface or resolution'
             self.screen = State.screen
         
-        ## Map.
+        ## BasicMap.
         if map:
             if __debug__: print 'Engine: using pre-made map'
             self.map = map
         elif tile_size and map_size:
-            if __debug__: print 'Engine: Map(tile_size, map_size)'
-            self.map = Map(tile_size, map_size)
+            if __debug__: print 'Engine: BasicMap(map_size, tile_size)'
+            self.map = BasicMap(map_size[0], map_size[1], tile_size[0], tile_size[1])
         else:
             if __debug__: print 'Engine: SKIPPING map creation: no map, tile_size, or map_size'
         
@@ -253,6 +253,7 @@ class Engine(Context):
             if camera_target is None:
                 if __debug__: print 'Engine: making camera target CircleBody()'
                 self.camera_target = model.CircleBody()
+            self.world.add(self.camera_target)
         elif world_type == QUADTREE_WORLD:
             if __debug__: print 'Engine: WorldQuadTree(self.map.rect, **world_args)'
             self.world = model.WorldQuadTree(self.map.rect, **world_args)
