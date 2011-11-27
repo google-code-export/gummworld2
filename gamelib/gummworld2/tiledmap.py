@@ -4,8 +4,8 @@ from tiledtmxloader.helperspygame import get_layers_from_map, SpriteLayer
 from tiledtmxloader.tiledtmxloader import TileMap, TileMapParser
 from tiledtmxloader.helperspygame import ResourceLoaderPygame, RendererPygame
 
-from gummworld2 import BasicMap, BasicLayer
 from gummworld2 import spatialhash
+from gummworld2.basicmap import BasicMap, BasicLayer, collapse_layer
 
 
 class TiledMap(BasicMap):
@@ -43,7 +43,8 @@ class TiledMap(BasicMap):
         self.named_layers = self.raw_map.named_layers
         
         if collapse > (1,1):
-            collapse_map(self, collapse, collapse_layers)
+#            collapse_map(self, collapse, collapse_layers)
+            self.collapse(collapse, collapse_layers)
     
     def get_layer_by_name(self, layer_name):
         return self.named_layers[layer_name]
@@ -92,6 +93,16 @@ class TiledLayer(object):
     
     def get_tiles_in_rect(self, rect):
         return self.objects.intersect_rect(rect)
+    
+    def __len__(self):
+        return len(self.objects.cell_ids)
+    
+    def collapse(self, collapse=(1,1)):
+        if collapse <= (1,1):
+            return
+        new_layer = TiledLayer(self.parent_map, self, self.layeri)
+        collapse_layer(self, new_layer, collapse)
+        self.parent_map.layers[self.layeri] = new_layer
 
 
 def _load_tiled_tmx_map(map_file_name, gummworld_map, load_invisible=True):
@@ -156,140 +167,3 @@ def _load_tiled_tmx_map(map_file_name, gummworld_map, load_invisible=True):
                 sprite.name = xpos,ypos
                 gummworld_layer.add(sprite)
     return world_map
-
-
-def collapse_map(map_, num_tiles=(2,2), which_layers=None):
-    """Collapse which_layers in map_ by joining num_tiles into one tile.
-    
-    The map_ argument is the map to manipulate. It must be an instance of
-    TiledMap.
-    
-    The num_tiles argument is a tuple representing the number of tiles in the X
-    and Y axes to combine.
-    
-    which_layers is the list of indicides for the map_.layers list that
-    will be collapsed.
-    
-    If a map area is sparse (fewer tiles than num_tiles[0] * num_tiles[1]) the
-    tiles will be kept as they are.
-    
-    If tiles with different characteristics are joined, the results can be
-    unexpected. These characteristics include some flags, depth, colorkey. This
-    can be avoided by pre-processing the map to convert all images so they have
-    compatible characteristics.
-    """
-    from gummworld2 import Vec2d
-    
-    # new map dimensions
-    num_tiles = Vec2d(num_tiles)
-    tw,th = (map_.tile_width,map_.tile_height) * num_tiles
-    mw,mh = (map_.width,map_.height) // num_tiles
-    if mw * num_tiles.x != map_.pixel_width:
-        mw += 1
-    if mh * num_tiles.y != map_.pixel_height:
-        mh += 1
-    map_.tile_width = tw
-    map_.tile_height = th
-    map_.width = mw
-    map_.height = mh
-    # collapse the tiles in each layer...
-    if which_layers is None:
-        which_layers = range(len(map_.layers))
-    for layeri in which_layers:
-        layer = map_.layers[layeri]
-        if layer.is_object_group:
-            continue
-        new_layer = TiledLayer(map_, layer, layeri)
-        collapse_layer(layer, new_layer, num_tiles)
-        print len(layer.objects),len(new_layer.objects)
-        # add a new layer
-        map_.layers[layeri] = new_layer
-
-
-def collapse_layer(old_layer, new_layer, num_tiles=(2,2)):
-    """Collapse a single layer by joining num_tiles into one tile. A new layer
-    is returned.
-    
-    The old_layer argument is the layer to process.
-    
-    The new_layer argument is the layer to build.
-    
-    The num_tiles argument is a tuple representing the number of tiles in the X
-    and Y axes to join.
-    
-    If a map area is sparse (fewer tiles than num_tiles[0] * num_tiles[1]) the
-    tiles will be kept as they are.
-    
-    If tiles with different characteristics are joined, the results can be
-    unexpected. These characteristics include some flags, depth, colorkey. This
-    can be avoided by pre-processing the map to convert all images so they have
-    compatible characteristics.
-    """
-    from pygame.sprite import Sprite
-    from gummworld2 import Vec2d
-    
-    # New layer dimensions.
-    num_tiles = Vec2d(num_tiles)
-    tw,th = (old_layer.tile_width,old_layer.tile_height) * num_tiles
-    mw,mh = (old_layer.width,old_layer.height) // num_tiles
-    if mw * num_tiles.x != old_layer.pixel_width:
-        mw += 1
-    if mh * num_tiles.y != old_layer.pixel_height:
-        mh += 1
-    # Poke the right values into new_layer.
-    cell_size = max(tw,th) * 2
-    new_layer.objects = spatialhash.SpatialHash(old_layer.rect, cell_size)
-    new_layer.width = mw
-    new_layer.height = mh
-    new_layer.tile_width = tw
-    new_layer.tile_height = th
-    # Grab groups of map sprites, joining them into a single larger image.
-    query_rect = pygame.Rect(0,0,tw-1,th-1)
-    for y in range(0, mh*th, th):
-        for x in range(0, mw*tw, tw):
-            query_rect.topleft = x,y
-##            print '----\n',query_rect
-            sprites = old_layer.objects.intersect_objects(query_rect)
-##            print [s.rect.topleft for s in sprites]
-            if len(sprites) != num_tiles.x * num_tiles.y:
-##                print 'not enough sprites:',len(sprites)
-                continue
-            # If sprite images have different characteristics, they cannot be
-            # reliably collapsed. In which case, keep them as-is.
-            incompatible = False
-            image = sprites[0].image
-            flags = image.get_flags() ^ pygame.SRCALPHA
-            colorkey = image.get_colorkey()
-            depth = image.get_bitsize()
-# This is probably too restrictive. However, some combinations of tiles may
-# give funky results.
-#            all_details = (flags,colorkey,depth)
-#            for s in sprites[1:]:
-#                if all_details != (
-#                        s.image.get_flags(),
-#                        s.image.get_colorkey(),
-#                        s.image.get_bitsize(),
-#                ):
-#                    incompatible = True
-#            if incompatible:
-#                print 'collapse_layer: incompatible image characteristics'
-#                for s in sprites:
-#                    new_layer.add(s)
-#                continue
-            # Make a new sprite.
-            new_sprite = Sprite()
-            new_sprite.rect = sprites[0].rect.unionall([s.rect for s in sprites[1:]])
-            new_sprite.rect.topleft = x,y
-            new_sprite.image = pygame.surface.Surface(new_sprite.rect.size, flags, depth)
-            if colorkey:
-                new_sprite.image.set_colorkey(colorkey)
-            
-            # Blit (x,y) tile and neighboring tiles to right and lower...
-            left = reduce(min, [s.rect.x for s in sprites])
-            top = reduce(min, [s.rect.y for s in sprites])
-            for sprite in sprites:
-                p = sprite.rect.x - left, sprite.rect.y - top
-##                print sprite.rect.topleft,p
-                new_sprite.image.blit(sprite.image.convert(depth, flags), p)
-            new_layer.add(new_sprite)
-    return new_layer

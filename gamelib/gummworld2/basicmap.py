@@ -125,12 +125,16 @@ class BasicMap(object):
         which TiledMap.layers the collapse algorithm should be applied. See the
         tiledmap.collapse_map.
         """
-        if layeri is None:
-            layers = self.get_tile_layers()
-        else:
-            layers = [self.get_layer(layeri)]
-        for layer in layers:
-            layer.collapse(collapse_level)
+        if collapse <= (1,1):
+            return
+        if which_layers is None:
+            which_layers = range(len(self.layers))
+        for layeri in which_layers:
+            self.layers[layeri].collapse(collapse)
+    
+    def merge(self, which_layers=None):
+        if which_layers is None:
+            which_layers = self.get_tile_layers()
 
 
 class BasicLayer(object):
@@ -156,53 +160,13 @@ class BasicLayer(object):
     
     def get_tiles_in_rect(self, rect):
         return self.objects.intersect_rect(rect)
-
-def collapse_map(map_, num_tiles=(2,2), which_layers=None):
-    """Collapse which_layers in map_ by joining num_tiles into one tile.
     
-    The map_ argument is the map to manipulate. It must be an instance of
-    TiledMap.
-    
-    The num_tiles argument is a tuple representing the number of tiles in the X
-    and Y axes to combine.
-    
-    which_layers is the list of indicides for the map_.layers list that
-    will be collapsed.
-    
-    If a map area is sparse (fewer tiles than num_tiles[0] * num_tiles[1]) the
-    tiles will be kept as they are.
-    
-    If tiles with different characteristics are joined, the results can be
-    unexpected. These characteristics include some flags, depth, colorkey. This
-    can be avoided by pre-processing the map to convert all images so they have
-    compatible characteristics.
-    """
-    from gummworld2 import Vec2d
-    
-    # new map dimensions
-    num_tiles = Vec2d(num_tiles)
-    tw,th = (map_.tile_width,map_.tile_height) * num_tiles
-    mw,mh = (map_.width,map_.height) // num_tiles
-    if mw * num_tiles.x != map_.pixel_width:
-        mw += 1
-    if mh * num_tiles.y != map_.pixel_height:
-        mh += 1
-    map_.tile_width = tw
-    map_.tile_height = th
-    map_.width = mw
-    map_.height = mh
-    # collapse the tiles in each layer...
-    if which_layers is None:
-        which_layers = range(len(map_.layers))
-    for layeri in which_layers:
-        layer = map_.layers[layeri]
-        if layer.is_object_group:
-            continue
-        new_layer = TiledLayer(map_, layer, layeri)
-        collapse_layer(layer, new_layer, num_tiles)
-        print len(layer.objects),len(new_layer.objects)
-        # add a new layer
-        map_.layers[layeri] = new_layer
+    def collapse(self, collapse=(1,1)):
+        if collapse <= (1,1):
+            return
+        new_layer = BasicLayer(self.parent_map, self.layeri)
+        collapse_layer(self, new_layer, collapse)
+        self.parent_map.layers[self.layeri] = new_layer
 
 
 def collapse_layer(old_layer, new_layer, num_tiles=(2,2)):
