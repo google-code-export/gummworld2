@@ -80,6 +80,8 @@ import popup_menu
 import state
 import ui
 import toolkit
+import basicmap
+import tiledmap
 import supermap
 
 if __debug__: print 'gummworld2 v%s loaded' % version.version
