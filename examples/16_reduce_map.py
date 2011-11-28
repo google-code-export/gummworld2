@@ -88,6 +88,7 @@ class App(Engine):
         )
         
         resolution = Vec2d(resolution)
+        map_data_file = data.filepath('map', 'Gumm multi layer.tmx')
         
         Engine.__init__(self,
             caption=caption,
@@ -95,39 +96,48 @@ class App(Engine):
             resolution=resolution,
             frame_speed=0)
         
-        # Load Tiled TMX map, then update the world and camera.
-        self.original_map = toolkit.load_tiled_tmx_map(
-            data.filepath('map', 'Gumm multi layer.tmx'))
+        ## Load Tiled TMX map, then update the world and camera.
+        self.original_map = TiledMap(map_data_file)
         self.map = self.original_map
         self.world = model.NoWorld(self.map.rect)
         self.set_state()
         
-        # The map reduced.
-        self.reduced_map = toolkit.reduce_map_layers(
-            self.original_map, range(len(self.original_map.layers)))
-        # The map collapsed.
-        self.collapsed_map = toolkit.collapse_map(self.original_map, (8,8))
-        # The map reduced and collapsed.
-        self.collapsed_reduced_map = toolkit.collapse_map(self.reduced_map, (8,8))
+        ## The map reduced.
+        self.reduced_map = TiledMap(map_data_file)
+        self.reduced_map.merge_layers(range(len(self.reduced_map.layers)))
+##        print 'reduced',len(self.reduced_map.layers)
+        ## The map collapsed.
+        self.collapsed_map = TiledMap(map_data_file, (8,8))
+##        print 'collapsed',len(self.collapsed_map.layers[0])
+        ## The map reduced and collapsed.
+        self.collapsed_reduced_map = TiledMap(map_data_file, (8,8))
+        self.collapsed_reduced_map.merge_layers(
+            range(len(self.collapsed_reduced_map.layers)))
+##        print 'both',len(self.collapsed_reduced_map.layers)
+##        quit()
+        
+        self.visible_objects = []
         
         State.show_grid = True
+        self.grid_cache = {}
+        self.label_cache = {}
         
         # I like huds. Add more stuff to the canned hud.
         toolkit.make_hud(caption)
         State.hud.add('Tile size', Statf(State.hud.next_pos(),
-            'Tile size %s', callback=lambda:str(tuple(State.map.tile_size)),
+            'Tile size %s', callback=lambda:str((State.map.tile_width,State.map.tile_height)),
             interval=2.))
-        def screen_info():
-            vis = State.camera.visible_tile_range
-            if len(vis):
-                vis = vis[0]
-                res = State.screen.size
-                tiles = Vec2d(vis[2]-vis[0], vis[3]-vis[1])
-                return 'Screen %dx%d / Visible tiles %dx%d' % (res.x,res.y,tiles.x,tiles.y,)
-            else:
-                return ''
-        State.hud.add('Screen', Stat(State.hud.next_pos(),
-            '', callback=screen_info, interval=2.))
+#        def screen_info():
+#            vis = State.camera.visible_tile_range
+#            if len(vis):
+#                vis = vis[0]
+#                res = State.screen.size
+#                tiles = Vec2d(vis[2]-vis[0], vis[3]-vis[1])
+#                return 'Screen %dx%d / Visible tiles %dx%d' % (res.x,res.y,tiles.x,tiles.y,)
+#            else:
+#                return ''
+#        State.hud.add('Screen', Stat(State.hud.next_pos(),
+#            '', callback=screen_info, interval=2.))
         def map_info():
             layern = len(State.map.layers)
             tilen = 0
@@ -155,6 +165,7 @@ class App(Engine):
         if self.mouse_down:
             self.update_mouse_movement(pygame.mouse.get_pos())
         self.update_camera_position()
+        self.visible_objects = toolkit.get_object_array()
         
     def update_mouse_movement(self, pos):
         # Angle of movement.
@@ -198,9 +209,11 @@ class App(Engine):
         """overrides Engine.draw"""
         # Draw stuff.
         State.screen.clear()
-        toolkit.draw_tiles()
-        toolkit.draw_grid()
-        toolkit.draw_labels()
+        toolkit.draw_object_array(self.visible_objects)
+        if State.show_grid:
+            toolkit.draw_grid(self.grid_cache)
+        if State.show_labels:
+            toolkit.draw_labels(self.label_cache)
         State.hud.draw()
         self.draw_avatar()
         State.screen.flip()

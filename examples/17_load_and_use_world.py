@@ -22,6 +22,8 @@ __author__ = 'Gummbum, (c) 2011'
 
 """17_load_and_use_world.py - A demo combining a Tiled Map Editor map and
 Gummworld2 Editor entities.
+
+NOTE: This is currently broken.
 """
 
 

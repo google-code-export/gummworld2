@@ -25,9 +25,6 @@ __author__ = 'Gummbum, (c) 2011'
 This demonstrates accessing Screen, Camera and World to convert their dimensions
 for a particular use.
 
-It also demonstrates use of BucketSprite and BucketGroup, two classes that work
-together in Gummworld2 to manage sprites in the traditional pygame manner.
-
 And throw in interpolated stepping for the moving balls (lines 190-191 in
 App.draw_balls()). Interpolation is expensive when used on a high number of
 objects, but without it the balls' movement is unpleasantly jerky because of the
@@ -42,25 +39,32 @@ from pygame.locals import *
 
 import paths
 import gummworld2
-from gummworld2 import (
-    context, toolkit,
-    Engine, State, BucketSprite, BucketGroup, SubPixelSurface, View, Vec2d,
-)
+from gummworld2 import Engine, State, BasicMap, SubPixelSurface, View, Vec2d
+from gummworld2 import context, model, spatialhash, toolkit
 
 
-class Sprite(BucketSprite):
+class Sprite(object):
     """A fast moving square of random color."""
     
     def __init__(self):
-        BucketSprite.__init__(self)
-        self.image = pygame.Surface((10,10))
+        world_rect = State.world.rect
         rr = randrange
+        self._position = Vec2d(rr(world_rect.width), rr(world_rect.height))
+        
+        self.image = pygame.Surface((10,10))
         color = Color(rr(128,255), rr(128,255), rr(128,255), rr(128,255))
         self.image.fill(color)
-        self.rect = self.image.get_rect()
-        world_rect = State.world.rect
-        self.position = rr(world_rect.width), rr(world_rect.height)
+        self.rect = self.image.get_rect(center=self.position)
         self.dir = Vec2d(choice([-5.0,5.0]), choice([-5.0,5.0]))
+    
+    @property
+    def position(self):
+        return self._position
+    @position.setter
+    def position(self, val):
+        p = self._position
+        p.x,p.y = val
+        self.rect.center = round(p.x),round(p.y)
     
     def update(self):
         newx,newy = self.position + self.dir
@@ -149,21 +153,30 @@ class App(Engine):
         
         # Make some default content.
         toolkit.make_tiles()
-        map = State.map
-        self.sprite_group = BucketGroup(map.tile_size, map.map_size)
+        map_ = State.map
+        mw,mh = map_.width, map_.height
+        tw,th = map_.tile_width, map_.tile_height
+        self.balls = spatialhash.SpatialHash(map_.rect, 30)
         for i in range(50):
-            self.sprite_group.add(Sprite())
+            self.balls.add(Sprite())
+        
+        self.visible_objects = []
         
         State.clock.schedule_interval(self.set_caption, 2.)
         
         self.move_x = 0
         self.move_y = 0
         
+        State.camera.init_position(State.camera.rect.center - Vec2d(5,5))
+        
     def update(self, dt):
         """overrides Engine.update"""
         self.update_camera_position()
-        self.sprite_group.update()
-
+        for ball in list(self.balls):
+            ball.update()
+            self.balls.add(ball)
+        self.visible_objects = self.balls.intersect_objects(State.camera.rect)
+    
     def update_camera_position(self):
         """update the camera's position if any movement keys are held down
         """
@@ -174,7 +187,7 @@ class App(Engine):
             wx = max(min(wx,rect.right), rect.left)
             wy = max(min(wy,rect.bottom), rect.top)
             camera.position = wx,wy
-        
+    
     def set_caption(self, dt):
         pygame.display.set_caption(self.caption+' - %d fps' % State.clock.fps)
     
@@ -184,7 +197,7 @@ class App(Engine):
         State.screen.clear()
         toolkit.draw_tiles()
         self.draw_balls()
-        self.minimap.draw(self.sprite_group)
+        self.minimap.draw(self.balls)
         State.screen.flip()
         
     def draw_balls(self):
@@ -196,8 +209,7 @@ class App(Engine):
         blit = camera.view.blit
         interpolated_step = toolkit.interpolated_step
         # Draw visible sprites...
-        for s in self.sprite_group.sprites_in_range(
-            camera.visible_tile_range[0]):
+        for s in self.visible_objects:
             x,y = interpolated_step(s.rect.topleft-camera_pos, s.dir, interp)
             blit(s.image, (round(x),round(y)))
     

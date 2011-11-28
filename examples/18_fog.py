@@ -23,6 +23,8 @@ __author__ = 'Gummbum, (c) 2011'
 """18_fog.py - A demo combining a Tiled Map Editor map, Gummworld2 Editor
 entities, and some fog images created with DR0ID's gradients module.
 
+NOTE: This is currently broken.
+
 For the fog gradients: http://www.pygame.org/project-gradients-307-3051.html
 
 # Here it is...

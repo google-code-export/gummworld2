@@ -87,7 +87,7 @@ class MainMenu(Engine):
             tile_size=(128,128), map_size=(10,10),
             camera_target=CameraTarget(screen_size//2),
             frame_speed=0)
-    
+        
         font = pygame.font.SysFont(None, 22)
         self.message = font.render(
             'Press any key to continue...', True, Color('white'))
@@ -137,14 +137,16 @@ class Game(Engine):
             frame_speed=0)
         
         toolkit.make_tiles()
+        self.visible_objects = []
     
     def update(self, dt):
         if self.movex or self.movey:
             State.camera.position += self.movex,self.movey
+        self.visible_objects = toolkit.get_object_array()
     
     def draw(self, dt):
         State.screen.clear()
-        toolkit.draw_tiles()
+        toolkit.draw_object_array(self.visible_objects)
         State.screen.flip()
 
     def on_key_down(self, unicode, key, mod):

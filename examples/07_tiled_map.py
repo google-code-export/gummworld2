@@ -44,7 +44,7 @@ from pygame.locals import *
 import paths
 import gummworld2
 from gummworld2 import context, data, model, geometry, toolkit
-from gummworld2 import Engine, State, CameraTargetSprite, Vec2d
+from gummworld2 import Engine, State, TiledMap, CameraTargetSprite, Vec2d
 
 
 class Avatar(CameraTargetSprite):
@@ -65,19 +65,17 @@ class App(Engine):
         
         resolution = Vec2d(resolution)
         
+        ## Load Tiled TMX map, then update the world's dimensions.
+        tiled_map = TiledMap(data.filepath('map', 'Gumm no swamps.tmx'))
+        
         Engine.__init__(self,
             caption='07 Tiled Map -  G: grid | L: labels',
             resolution=resolution,
             camera_target=Avatar((325,420), resolution//2),
+            map=tiled_map,
             frame_speed=0)
         
-        ## Load Tiled TMX map, then update the world's dimensions. Really, all
-        ## there is to it. See the toolkit module for more detail.
-        self.map = toolkit.load_tiled_tmx_map(
-            data.filepath('map', 'Gumm no swamps.tmx'))
-        self.world = model.NoWorld(self.map.rect)
-        ## Update State after manual initialization of map and world.
-        self.set_state()
+        self.visible_objects = []
         
         # I like huds.
         toolkit.make_hud()
@@ -95,15 +93,19 @@ class App(Engine):
         self.target_moved = (0,0)
         self.mouse_down = False
         
-        State.speed = 3.33
+        self.grid_cache = {}
+        self.label_cache = {}
         
+        State.speed = 3.33
+    
     def update(self, dt):
         """overrides Engine.update"""
         # If mouse button is held down update for continuous walking.
         if self.mouse_down:
             self.update_mouse_movement(pygame.mouse.get_pos())
         self.update_camera_position()
-        
+        self.visible_objects = toolkit.get_object_array()
+    
     def update_mouse_movement(self, pos):
         # Angle of movement.
         angle = geometry.angle_of(self.speed_box.center, pos)
@@ -118,7 +120,7 @@ class App(Engine):
                 self.speed = geometry.distance(
                     self.speed_box.center, (x,y)) / self.max_speed_box
                 break
-        
+    
     def update_camera_position(self):
         """update the camera's position if any movement keys are held down
         """
@@ -141,29 +143,31 @@ class App(Engine):
             wx = max(min(wx,rect.right), rect.left)
             wy = max(min(wy,rect.bottom), rect.top)
             camera.position = wx,wy
-        
+    
     def draw(self, dt):
         """overrides Engine.draw"""
         # Draw stuff.
         State.screen.clear()
-        toolkit.draw_tiles()
-        toolkit.draw_grid()
-        toolkit.draw_labels()
+        toolkit.draw_object_array(self.visible_objects)
+        if State.show_grid:
+            toolkit.draw_grid(self.grid_cache)
+        if State.show_labels:
+            toolkit.draw_labels(self.label_cache)
         State.hud.draw()
         self.draw_avatar()
         State.screen.flip()
-        
+    
     def draw_avatar(self):
         camera = State.camera
         avatar = camera.target
         camera.surface.blit(avatar.image, avatar.screen_position)
-        
+    
     def on_mouse_button_down(self, pos, button):
         self.mouse_down = True
-        
+    
     def on_mouse_button_up(self, pos, button):
         self.mouse_down = False
-        
+    
     def on_key_down(self, unicode, key, mod):
         # Turn on key-presses.
         if key == K_g:
@@ -172,7 +176,7 @@ class App(Engine):
             State.show_labels = not State.show_labels
         elif key == K_ESCAPE:
             context.pop()
-        
+    
     def on_quit(self):
         context.pop()
 

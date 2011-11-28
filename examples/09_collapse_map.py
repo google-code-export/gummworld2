@@ -49,7 +49,8 @@ from pygame.locals import *
 import paths
 import gummworld2
 from gummworld2 import context, data, model, geometry, toolkit
-from gummworld2 import Engine, State, CameraTargetSprite, Vec2d, Stat, Statf
+from gummworld2 import Engine, State, TiledMap, CameraTargetSprite, Vec2d
+from gummworld2 import Stat, Statf
 
 
 class Avatar(CameraTargetSprite):
@@ -68,27 +69,21 @@ class App(Engine):
     
     def __init__(self, resolution=(800,600)):
         
-        # Caption for window, and HUD in full-screen mode
-        caption = (
-            '09 Collapse Map - TAB: view | G: grid | ' +
-            'L: labels | Collapse: 1-10 (0 is 10)'
-        )
-        
         resolution = Vec2d(resolution)
+        self.map_file_name = data.filepath('map', 'Gumm no swamps.tmx')
+        
+        # Caption for window, and HUD in full-screen mode
+        caption = '09 Collapse Map - G: grid | L: labels | Collapse: 1-10 (0 is 10)'
         
         Engine.__init__(self,
             caption=caption,
+            resolution=resolution, #display_flags=FULLSCREEN,
             camera_target=Avatar((325,420), resolution//2),
-            resolution=resolution,
-            display_flags=FULLSCREEN,
-            frame_speed=0, default_schedules=False)
+            map=TiledMap(self.map_file_name),
+            frame_speed=0)  #, default_schedules=False)
         
-        # Load Tiled TMX map, then update the world and camera.
-        self.map = toolkit.load_tiled_tmx_map(
-            data.filepath('map', 'Gumm no swamps.tmx'))
-        self.world = model.NoWorld(self.map.rect)
-        self.set_state()
-        self.schedule_default()
+        self.visible_objects = []
+        
         # The collapse stat for the hud.
         self.collapse = 1
         
@@ -98,19 +93,27 @@ class App(Engine):
             'Collapse %d', callback=lambda:self.collapse,
             interval=2.))
         State.hud.add('Tile size', Statf(State.hud.next_pos(),
-            'Tile size %s', callback=lambda:str(tuple(State.map.tile_size)),
+            'Tile size %s', callback=lambda:str((State.map.tile_width,State.map.tile_height)),
             interval=2.))
-        def screen_info():
-            visible_tiles = State.camera.visible_tile_range
-            res = State.screen.size
-            if len(visible_tiles):
-                vis = visible_tiles[0]
-                tiles = Vec2d(vis[2]-vis[0], vis[3]-vis[1])
-            else:
-                tiles = Vec2d(0,0)
-            return 'Screen %dx%d / Visible tiles %dx%d' % (res.x,res.y,tiles.x,tiles.y,)
-        State.hud.add('Screen', Stat(State.hud.next_pos(),
-            '', callback=screen_info, interval=2.))
+#        def screen_info():
+#            visible_tiles = State.camera.visible_tile_range
+#            res = State.screen.size
+#            if len(visible_tiles):
+#                vis = visible_tiles[0]
+#                tiles = Vec2d(vis[2]-vis[0], vis[3]-vis[1])
+#            else:
+#                tiles = Vec2d(0,0)
+#            return 'Screen %dx%d / Visible tiles %dx%d' % (res.x,res.y,tiles.x,tiles.y,)
+#        State.hud.add('Screen', Stat(State.hud.next_pos(),
+#            '', callback=screen_info, interval=2.))
+        def map_info():
+            layern = len(State.map.layers)
+            tilen = 0
+            for layer in State.map.layers:
+                tilen += len(layer)
+            return '%d/%d' % (layern,tilen)
+        State.hud.add('Layers/Tiles', Statf(State.hud.next_pos(),
+            'Layers/Tiles: %s', callback=map_info, interval=2.))
         State.clock.schedule_update_priority(State.hud.update, 1.0)
         
         # Create a speed box for converting mouse position to destination
@@ -124,12 +127,16 @@ class App(Engine):
         self.speed = None
         self.mouse_down = False
         
+        self.grid_cache = {}
+        self.label_cache = {}
+        
     def update(self, dt):
         """overrides Engine.update"""
         # If mouse button is held down update for continuous walking.
         if self.mouse_down:
             self.update_mouse_movement(pygame.mouse.get_pos())
         self.update_camera_position()
+        self.visible_objects = toolkit.get_object_array()
         
     def update_mouse_movement(self, pos):
         # Angle of movement.
@@ -173,9 +180,11 @@ class App(Engine):
         """overrides Engine.draw"""
         # Draw stuff.
         State.screen.clear()
-        toolkit.draw_tiles()
-        toolkit.draw_grid()
-        toolkit.draw_labels()
+        toolkit.draw_object_array(self.visible_objects)
+        if State.show_grid:
+            toolkit.draw_grid(self.grid_cache)
+        if State.show_labels:
+            toolkit.draw_labels(self.label_cache)
         State.hud.draw()
         self.draw_avatar()
         if State.name == 'small':
@@ -200,16 +209,18 @@ class App(Engine):
             State.show_grid = not State.show_grid
         elif key == K_l:
             State.show_labels = not State.show_labels
-        elif key == K_1:
-            State.map = self.map
-        elif key in [K_0]+range(K_2,K_9+1):
+        elif K_0 <= key <= K_9+1:
             if key == K_0:
                 n = 10
             else:
                 n = key - K_0
-            State.map = toolkit.collapse_map(self.map, (n,n))
-            State.world.rect = State.map.rect.copy()
+            if n == self.collapse:
+                return
+            self.map = TiledMap(self.map_file_name, (n,n))
+            State.world.rect = self.map.rect.copy()
+            State.map = self.map
             self.collapse = n
+            self.grid_cache.clear()
         elif key == K_ESCAPE:
             context.pop()
         

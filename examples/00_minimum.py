@@ -32,7 +32,7 @@ import pygame
 from pygame.locals import *
 
 import paths
-from gummworld2 import State, Screen, Camera, GameClock, Map, Vec2d, toolkit
+from gummworld2 import State, Screen, Camera, GameClock, BasicMap, Vec2d, toolkit
 
 
 class CameraTarget(object):
@@ -54,8 +54,8 @@ class App(object):
     
     def __init__(self):
         
-        tile_size = 128,128
-        map_size = 10,10
+        map_width,map_height = 10,10
+        tile_width,tile_height = 128,128
         
         self.speed = 5
         self.movex = 0
@@ -64,7 +64,7 @@ class App(object):
         ## Set up the State variables and load some map content.
         
         State.screen = Screen((800,600))
-        State.map = Map(tile_size, map_size)
+        State.map = BasicMap(map_width, map_height, tile_width, tile_height)
         camera_target = CameraTarget(State.screen.center)
         State.camera = Camera(camera_target)
         State.clock = GameClock(

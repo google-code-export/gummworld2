@@ -32,7 +32,7 @@ from pygame.locals import *
 
 import paths
 import gummworld2
-from gummworld2 import context, State, Engine, MapLayer, Vec2d, toolkit
+from gummworld2 import context, State, Engine, BasicLayer, Vec2d, toolkit
 
 
 class App(Engine):
@@ -108,10 +108,11 @@ class App(Engine):
 
 def make_map():
     map = State.map
-    tw,th = map.tile_size
-    mw,mh = map.map_size
+    tw,th = map.tile_width,map.tile_height
+    mw,mh = map.width,map.height
     ## Layer 0: Sky with stars.
-    layer = MapLayer(map.tile_size, map.map_size, make_labels=True, make_grid=True)
+    layeri = 0
+    layer = BasicLayer(map, layeri)
     layer.parallax = Vec2d(.25,.25)
     make_grid = False
     make_labels = False
@@ -130,12 +131,16 @@ def make_map():
                 sprite.image.blit(tex, (1,1))
             if make_grid:
                 pygame.draw.rect(sprite.image, Color('darkgrey'), sprite.image.get_rect(), 1)
-            layer.append(sprite)
+            layer.add(sprite)
     ## A great big moon.
-    pygame.draw.circle(layer.get_tile_at(2,1).image, Color(255,255,170), (128,128), 75)
+    x = 2 * layer.tile_width
+    y = 1 * layer.tile_height
+    moon_sprite = layer.objects.intersect_objects(Rect(x,y,1,1))[0]
+    pygame.draw.circle(moon_sprite.image, Color(255,255,170), (128,128), 75)
     map.layers.append(layer)
     ## Layer 1: Mountains.
-    layer = MapLayer(map.tile_size, map.map_size, make_labels=True, make_grid=True)
+    layeri += 1
+    layer = BasicLayer(map, layeri)
     layer.parallax = Vec2d(.55,.55)
     skyline = [(0,th-randrange(randrange(100,150),th-1))]
     for y in range(mh):
@@ -158,7 +163,7 @@ def make_map():
                 pygame.draw.polygon(sprite.image, Color(18,5,5), skyline)
                 pygame.draw.lines(sprite.image, Color(25,22,18), False, skyline[2:], 6)
             sprite.rect = sprite.image.get_rect(topleft=(tw*x,th*y))
-            layer.append(sprite)
+            layer.add(sprite)
     map.layers.append(layer)
     ## Layer 2,3,4: Trees.
     tree_data = [
@@ -170,7 +175,8 @@ def make_map():
     make_grid = False
     make_labels = False
     for color,parallax,treetops,numtrees in tree_data:
-        layer = MapLayer(map.tile_size, map.map_size, make_labels=True, make_grid=True)
+        layeri += 1
+        layer = BasicLayer(map, layeri)
         layer.parallax = parallax
         skyline = [(0,th-randrange(randrange(100,150),th-1))]
         for y in range(mh):
@@ -179,7 +185,7 @@ def make_map():
             for x in range(mw):
                 # Null tile if it is "in the sky" and tile debugging is off.
                 if y < mh-1 and not (make_grid or make_labels):
-                    layer.append(None)
+##                    layer.add(None)
                     continue
                 sprite = pygame.sprite.Sprite()
                 sprite.name = x,y
@@ -205,7 +211,7 @@ def make_map():
                     sprite.image.blit(tex, (1,1))
                 if make_grid:
                     pygame.draw.rect(sprite.image, color, sprite.image.get_rect(), 1)
-                layer.append(sprite)
+                layer.add(sprite)
         map.layers.append(layer)
 
 

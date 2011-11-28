@@ -40,7 +40,7 @@ class App(Engine):
         State.hud.add('History', Statf(State.hud.next_pos(),
             'History %s', callback=lambda:'%s/%s'%(str(len(State.map.history)),str(State.map.max_maps)), interval=.5))
         State.hud.add('Collapse Level', Statf(State.hud.next_pos(),
-            'Collapse Level %s', callback=lambda:'%d'%State.map.current.collapse_level, interval=.5))
+            'Collapse %s', callback=lambda:'%s'%str(State.map.current.collapse_level), interval=.5))
         State.clock.schedule_update_priority(State.hud.update, 1.0)
         
         State.speed = 3.33
@@ -83,13 +83,14 @@ class TiledMapHandler(MapHandler):
     
     # 4 gives better FPS at resolution 320x320, but can cause loading hiccups
     # 2 gives smoothest loading, highest cache hits
-    collapse_level = 1
+    collapse_level = (4,4)
     
     def load(self):
-        self.map = TiledMap(data.filepath('map',self.map_file), collapse_level=self.collapse_level)
+        self.map = TiledMap(
+            data.filepath('map',self.map_file), collapse=self.collapse_level)
     
     def collapse(self, clevel):
-        if clevel > 0:
+        if clevel > (1,1):
             self.collapse_level = clevel
             # self.map could be None if the map isn't loaded or has been
             # unloaded.

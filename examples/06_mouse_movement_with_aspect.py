@@ -73,6 +73,10 @@ class App(Engine):
         
         # Make some default content.
         toolkit.make_tiles2()
+        self.visible_objects = []
+        
+        self.grid_cache = {}
+        self.label_cache = {}
         toolkit.make_hud()
         State.clock.schedule_update_priority(State.hud.update, 1.0)
         
@@ -95,6 +99,7 @@ class App(Engine):
         if self.mouse_down:
             self.update_mouse_movement(pygame.mouse.get_pos())
         self.update_camera_position()
+        self.visible_objects = toolkit.get_object_array()
     
     def update_mouse_movement(self, pos):
         ## Speed box center is screen center, this is the origin. Mouse pos is
@@ -146,9 +151,11 @@ class App(Engine):
         """overrides Engine.draw"""
         # Draw stuff.
         State.screen.clear()
-        toolkit.draw_tiles()
-        toolkit.draw_grid()
-        toolkit.draw_labels()
+        toolkit.draw_object_array(self.visible_objects)
+        if State.show_grid:
+            toolkit.draw_grid(self.grid_cache)
+        if State.show_labels:
+            toolkit.draw_labels(self.label_cache)
         State.hud.draw()
         self.draw_avatar()
         State.screen.flip()
