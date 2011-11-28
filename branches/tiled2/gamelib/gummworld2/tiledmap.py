@@ -27,20 +27,24 @@ class TiledMap(BasicMap):
         collapse via TileMap.collapse(), collapse_map(), or collapse_layer().
         """
         self.layers = []
-        self.raw_map = _load_tiled_tmx_map(map_file_name, self, load_invisible)
         
-        tmp_layers = self.layers
+        self.raw_map = TileMapParser().parse_decode(map_file_name)
         
-        BasicMap.__init__(self,
-            self.raw_map.width, self.raw_map.height,
-            self.raw_map.tilewidth, self.raw_map.tileheight)
+        self.width = self.raw_map.width
+        self.height = self.raw_map.height
+        self.tile_width = self.raw_map.tilewidth
+        self.tile_height = self.raw_map.tileheight
+        self.pixel_width = self.raw_map.pixel_width
+        self.pixel_height = self.raw_map.pixel_height
         
-        self.layers = tmp_layers
+        self.rect = pygame.Rect(0,0,self.pixel_width,self.pixel_height)
         
         self.orientation = self.raw_map.orientation
         self.properties = self.raw_map.properties
         self.map_file_name = self.raw_map.map_file_name
         self.named_layers = self.raw_map.named_layers
+        
+        _load_tiled_tmx_map(self.raw_map, self, load_invisible)
         
         if collapse > (1,1):
             self.collapse(collapse, collapse_layers)
@@ -59,33 +63,32 @@ class TiledMap(BasicMap):
 class TiledLayer(object):
     
     def __init__(self, parent_map, layer, layeri):
+        import sys
+        
         self.parent_map = parent_map
+        self.is_object_group = layer.is_object_group
+        self.name = layer.name
         
-        # layer may be an instance of TiledLayer or tiledtmxloader.TileLayer
-        if isinstance(layer, TiledLayer):
-            tile_width = layer.tile_width
-            tile_height = layer.tile_height
+        self.width = parent_map.width
+        self.height = parent_map.height
+        self.tile_width = parent_map.tile_width
+        self.tile_height = parent_map.tile_height
+        self.pixel_width = parent_map.pixel_width
+        self.pixel_height = parent_map.pixel_height
+        
+        if self.is_object_group:
+            self.opacity = 1
         else:
-            tile_width = layer.tilewidth
-            tile_height = layer.tileheight
-        self.tile_width = tile_width
-        self.tile_height = tile_height
-        self.width = layer.width
-        self.height = layer.height
-        self.pixel_width = self.width * tile_width
-        self.pixel_height = self.height * tile_height
-        
-        cell_size = max(tile_width, tile_height)
-        self.rect = pygame.Rect(0,0, layer.pixel_width+1, layer.pixel_height+1)
+            self.opacity = layer.opacity
+        cell_size = max(self.tile_width, self.tile_height)
+        self.rect = pygame.Rect(0,0, self.pixel_width+1, self.pixel_height+1)
         self.objects = spatialhash.SpatialHash(self.rect, cell_size)
         
         self.layeri = layeri
         
         self.name = layer.name
         self.properties = layer.properties
-        self.opacity = layer.opacity
         self.visible = layer.visible
-        self.is_object_group = layer.is_object_group
     
     def add(self, tile):
         self.objects.add(tile)
@@ -97,31 +100,22 @@ class TiledLayer(object):
         return len(self.objects.cell_ids)
     
     def collapse(self, collapse=(1,1)):
-        if collapse <= (1,1):
+        if self.is_object_group or collapse <= (1,1):
             return
         new_layer = TiledLayer(self.parent_map, self, self.layeri)
         collapse_layer(self, new_layer, collapse)
         self.parent_map.layers[self.layeri] = new_layer
     
     def blit_layer(self, src_layer):
-        for dest_sprite in self:
-            dimage = dest_sprite.image.copy()
-            drect = dest_sprite.rect
-            for src_sprite in src_layer:
-                simage = src_sprite.image
-                srect = src_sprite.rect
-                dx = drect.x - srect.x
-                dy = drect.y - srect.y
-                dimage.blit(src_sprite.image, (0,0), src_sprite.rect.move(dx,dy))
-    
-    def blit_layer(self, src_layer):
+        if self.is_object_group:
+            return
         blit_layer(self, src_layer)
     
     def __iter__(self):
         return iter(self.objects)
 
 
-def _load_tiled_tmx_map(map_file_name, gummworld_map, load_invisible=True):
+def _load_tiled_tmx_map(tmx_map, gummworld_map, load_invisible=True):
     """Load an orthogonal TMX map file that was created by the Tiled Map Editor.
     
     If load_invisible is False, layers where visible!=0 will be empty. Their
@@ -141,45 +135,54 @@ def _load_tiled_tmx_map(map_file_name, gummworld_map, load_invisible=True):
     
     from pygame.sprite import Sprite
     
-    world_map = TileMapParser().parse_decode(map_file_name)
     resource = ResourceLoaderPygame()
-    resource.load(world_map)
-    tile_size = (world_map.tilewidth, world_map.tileheight)
-    map_size = (world_map.width, world_map.height)
+    resource.load(tmx_map)
+    tile_size = (tmx_map.tilewidth, tmx_map.tileheight)
+    map_size = (tmx_map.width, tmx_map.height)
     
-    for layeri,layer in enumerate(world_map.layers):
+    for layeri,layer in enumerate(tmx_map.layers):
         gummworld_layer = TiledLayer(gummworld_map, layer, layeri)
         gummworld_map.layers.append(gummworld_layer)
         if not layer.visible and not load_invisible:
             continue
-        for ypos in xrange(0, layer.height):
-            for xpos in xrange(0, layer.width):
-                x = (xpos + layer.x) * layer.tilewidth
-                y = (ypos + layer.y) * layer.tileheight
-                img_idx = layer.content2D[xpos][ypos]
-                if img_idx == 0:
-                    continue
-                try:
-                    offx,offy,tile_img = resource.indexed_tiles[img_idx]
-                    screen_img = tile_img
-                except KeyError:
-                    print 'KeyError',img_idx,(xpos,ypos)
-                    continue
+        if layer.is_object_group:
+            for obj in layer.objects:
                 sprite = Sprite()
-                ## Note: alpha conversion can actually kill performance.
-                ## Do it only if there's a benefit.
-#                if convert_alpha:
-#                    if screen_img.get_alpha():
-#                        screen_img = screen_img.convert_alpha()
-#                    else:
-#                        screen_img = screen_img.convert()
-#                        if layer.opacity > -1:
-#                            screen_img.set_alpha(None)
-#                            alpha_value = int(255. * float(layer.opacity))
-#                            screen_img.set_alpha(alpha_value)
-#                            screen_img = screen_img.convert_alpha()
-                sprite.image = screen_img
-                sprite.rect = screen_img.get_rect(topleft=(x + offx, y + offy))
-                sprite.name = xpos,ypos
+                sprite.image = obj.image
+                sprite.rect = pygame.Rect(obj.x, obj.y, obj.width, obj.height)
+                sprite.type = obj.type
+                sprite.image_source = obj.image_source
+                sprite.name = obj.name
+                sprite.properties = obj.properties
                 gummworld_layer.add(sprite)
-    return world_map
+        else:
+            for ypos in xrange(0, layer.height):
+                for xpos in xrange(0, layer.width):
+                    x = (xpos + layer.x) * layer.tilewidth
+                    y = (ypos + layer.y) * layer.tileheight
+                    img_idx = layer.content2D[xpos][ypos]
+                    if img_idx == 0:
+                        continue
+                    try:
+                        offx,offy,tile_img = resource.indexed_tiles[img_idx]
+                        screen_img = tile_img
+                    except KeyError:
+                        print 'KeyError',img_idx,(xpos,ypos)
+                        continue
+                    sprite = Sprite()
+                    ## Note: alpha conversion can actually kill performance.
+                    ## Do it only if there's a benefit.
+#                    if convert_alpha:
+#                        if screen_img.get_alpha():
+#                            screen_img = screen_img.convert_alpha()
+#                        else:
+#                            screen_img = screen_img.convert()
+#                            if layer.opacity > -1:
+#                                screen_img.set_alpha(None)
+#                                alpha_value = int(255. * float(layer.opacity))
+#                                screen_img.set_alpha(alpha_value)
+#                                screen_img = screen_img.convert_alpha()
+                    sprite.image = screen_img
+                    sprite.rect = screen_img.get_rect(topleft=(x + offx, y + offy))
+                    sprite.name = xpos,ypos
+                    gummworld_layer.add(sprite)
