@@ -460,6 +460,7 @@ def put_tilesheet_info(tilesheet_path, tilesheet_values):
 
 def get_visible_cell_ids(camera, map_, max_speed=10):
     """Return a list of the map's cell IDs that would be visible to the camera.
+    This function is mainly for SuperMap, which needs to specify the map.
     
     The camera argument is the camera that defines the view.
     
@@ -495,6 +496,7 @@ def get_visible_cell_ids(camera, map_, max_speed=10):
 
 def get_objects_in_cell_ids(map_, cell_ids_per_layer):
     """Return a list of objects per layer for the specified cell IDs.
+    This function is mainly for SuperMap, which needs to specify the map.
     
     The argument cell_ids_per_layer is a list of nested lists containing
     cell IDs:
@@ -522,6 +524,7 @@ def get_objects_in_cell_ids(map_, cell_ids_per_layer):
 
 def get_object_array(max_speed=10):
     """Return a list of the map's objects that would be visible to the camera.
+    Operates on State.map and State.camera.
     
     The max_speed argument adds this many pixels to each edge of the query rect
     to accommodate for the space moved during frame interpolation cycles. This
