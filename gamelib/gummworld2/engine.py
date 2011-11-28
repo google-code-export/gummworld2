@@ -67,15 +67,13 @@ from gummworld2 import (
 
 NO_WORLD = 0
 SIMPLE_WORLD = 1
-QUADTREE_WORLD = 2
-PYMUNK_WORLD = 3
+PYMUNK_WORLD = 2
 
 
 class Engine(Context):
     
     NO_WORLD = NO_WORLD
     SIMPLE_WORLD = SIMPLE_WORLD
-    QUADTREE_WORLD = QUADTREE_WORLD
     PYMUNK_WORLD = PYMUNK_WORLD
     
     def __init__(self,
@@ -150,7 +148,7 @@ class Engine(Context):
             
             The world_type argument specifies which of the world classes to
             create. It must be one of engine.NO_WORLD, engine.SIMPLE_WORLD,
-            engine.QUADTREE_WORLD, engine.PYMUNK_WORLD.
+            engine.PYMUNK_WORLD.
             
             The world_args argument is a dict that can be passed verbatim to
             the world constructor (see the World* classes in the model module)
@@ -254,12 +252,6 @@ class Engine(Context):
                 if __debug__: print 'Engine: making camera target CircleBody()'
                 self.camera_target = model.CircleBody()
             self.world.add(self.camera_target)
-        elif world_type == QUADTREE_WORLD:
-            if __debug__: print 'Engine: WorldQuadTree(self.map.rect, **world_args)'
-            self.world = model.WorldQuadTree(self.map.rect, **world_args)
-            if camera_target is None:
-                if __debug__: print 'Engine: making camera target QuadTreeObject()'
-                self.camera_target = model.QuadTreeObject(pygame.Rect(0,0,20,20))
         
         ## Create the camera.
         if any((self.camera_target, camera_view, camera_view_rect)):
