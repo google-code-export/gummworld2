@@ -24,6 +24,36 @@ __doc__ = """context.py - A simple context stack for Gummworld2.
 """
 
 
+cstack = []
+
+
+def push(c, do_enter=True):
+    if cstack:
+        if __debug__: print "CONTEXT: suspending", cstack[-1].__class__.__name__
+        cstack[-1].suspend()
+    if __debug__: print "CONTEXT: pushing", c.__class__.__name__
+    cstack.append(c)
+    if do_enter:
+        if __debug__: print "CONTEXT: enter", c.__class__.__name__
+        c.enter()
+
+
+def pop(n = 1):
+    for j in range(n):
+        if cstack:
+            if __debug__: print "CONTEXT: pop/exit", cstack[-1].__class__.__name__
+            c = cstack[-1]
+            del cstack[-1]
+            c.exit()
+        if cstack:
+            if __debug__: print "CONTEXT: resume", cstack[-1].__class__.__name__
+            cstack[-1].resume()
+
+
+def top():
+    return cstack[-1] if cstack else None
+
+
 class Context(object):
     def __init__(self):
         object.__init__(self)
@@ -45,30 +75,6 @@ class Context(object):
     def exit(self):
         """Called when this context is popped off the stack."""
         pass
-        
-
-cstack = []
-
-def push(c, do_enter=True):
-    if cstack:
-        if __debug__: print "CONTEXT: suspending", cstack[-1].__class__.__name__
-        cstack[-1].suspend()
-    if __debug__: print "CONTEXT: pushing", c.__class__.__name__
-    cstack.append(c)
-    if do_enter:
-        if __debug__: print "CONTEXT: enter", c.__class__.__name__
-        c.enter()
-
-def pop(n = 1):
-    for j in range(n):
-        if cstack:
-            if __debug__: print "CONTEXT: pop/exit", cstack[-1].__class__.__name__
-            c = cstack[-1]
-            del cstack[-1]
-            c.exit()
-        if cstack:
-            if __debug__: print "CONTEXT: resume", cstack[-1].__class__.__name__
-            cstack[-1].resume()
-
-def top():
-    return cstack[-1] if cstack else None
+    push = staticmethod(push)
+    pop = staticmethod(pop)
+    top = staticmethod(top)
