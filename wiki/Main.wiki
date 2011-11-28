@@ -5,7 +5,11 @@
 
 With release v0.3.0 the tiled2 branch is live. The included tiletmxloader v3 brings optimizations and bug fixes. The gummworld2 library brings many optimizations and a few bug fixes, and quite a bit of internal redesign as well as some API changes. Some dead modules and toolkit functions have been removed.
 
-Some API changes were necessary to bring in the new features.
+SpatialHash replaces Quadtree and 2D arrays for map objects storage. It is much more flexible and easy to query than arrays, and a lot faster than Quadtree.
+
+A new SuperMap class joins an arbitrary number of maps together, with memory-friendly auto-loading and unloading and other features. This class is also super easy to use, and enables unlimited world building.
+
+API changes were necessary to bring in the new features.
 
 = Introduction =
 
