@@ -6,9 +6,9 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.engine</strong></big></big> (version $Id: engine.py 287 2011-05-01 19:26:45Z stabbingfinger@gmail.com $)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.engine</strong></big></big> (version $Id: engine.py 364 2011-11-28 06:00:33Z stabbingfinger@gmail.com $)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/svn/gummworld2/gamelib/gummworld2/engine.py">c:\cygwin\home\bw\devel\python\svn\gummworld2\gamelib\gummworld2\engine.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/dist/gummworld2/tiled2/gamelib/gummworld2/engine.py">c:\cygwin\home\bw\devel\python\dist\gummworld2\tiled2\gamelib\gummworld2\engine.py</a></font></td></tr></table>
     <p><tt>engine.py&nbsp;-&nbsp;A&nbsp;sample&nbsp;engine&nbsp;for&nbsp;Gummworld2.<br>
 &nbsp;<br>
 This&nbsp;module&nbsp;provides&nbsp;an&nbsp;<a href="#Engine">Engine</a>&nbsp;class&nbsp;that&nbsp;can&nbsp;be&nbsp;subclassed&nbsp;for&nbsp;an&nbsp;application<br>
@@ -75,7 +75,7 @@ This&nbsp;constructor&nbsp;does&nbsp;the&nbsp;following:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;pygame&nbsp;display&nbsp;is&nbsp;initialized&nbsp;with&nbsp;an&nbsp;optional&nbsp;caption,&nbsp;and&nbsp;the<br>
 &nbsp;&nbsp;&nbsp;&nbsp;resulting&nbsp;screen.Screen&nbsp;object&nbsp;is&nbsp;placed&nbsp;in&nbsp;State.screen.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;empty&nbsp;map.Map&nbsp;object&nbsp;is&nbsp;created&nbsp;and&nbsp;placed&nbsp;in&nbsp;State.map.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;empty&nbsp;map.BasicMap&nbsp;object&nbsp;is&nbsp;created&nbsp;and&nbsp;placed&nbsp;in&nbsp;State.map.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;empty&nbsp;model.World*&nbsp;object&nbsp;is&nbsp;created&nbsp;and&nbsp;placed&nbsp;in&nbsp;State.world.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<br>
@@ -124,7 +124,7 @@ The&nbsp;following&nbsp;arguments&nbsp;are&nbsp;used&nbsp;to&nbsp;initialize&nbs
 &nbsp;&nbsp;&nbsp;&nbsp;State.screen.surface&nbsp;is&nbsp;used&nbsp;as&nbsp;the&nbsp;source&nbsp;surface.&nbsp;This&nbsp;argument&nbsp;is<br>
 &nbsp;&nbsp;&nbsp;&nbsp;ignored&nbsp;if&nbsp;camera_view&nbsp;is&nbsp;not&nbsp;None.<br>
 &nbsp;<br>
-The&nbsp;following&nbsp;arguments&nbsp;are&nbsp;used&nbsp;to&nbsp;initialize&nbsp;a&nbsp;Map&nbsp;object:<br>
+The&nbsp;following&nbsp;arguments&nbsp;are&nbsp;used&nbsp;to&nbsp;initialize&nbsp;a&nbsp;BasicMap&nbsp;object:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;tile_size&nbsp;and&nbsp;map_size&nbsp;arguments&nbsp;specify&nbsp;the&nbsp;width&nbsp;and&nbsp;height&nbsp;of<br>
 &nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;map&nbsp;tile,&nbsp;and&nbsp;width&nbsp;and&nbsp;height&nbsp;of&nbsp;a&nbsp;map&nbsp;in&nbsp;tiles,&nbsp;respectively.<br>
@@ -133,7 +133,7 @@ The&nbsp;following&nbsp;arguments&nbsp;are&nbsp;used&nbsp;to&nbsp;initialize&nbs
 &nbsp;&nbsp;&nbsp;&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;world_type&nbsp;argument&nbsp;specifies&nbsp;which&nbsp;of&nbsp;the&nbsp;world&nbsp;classes&nbsp;to<br>
 &nbsp;&nbsp;&nbsp;&nbsp;create.&nbsp;It&nbsp;must&nbsp;be&nbsp;one&nbsp;of&nbsp;engine.NO_WORLD,&nbsp;engine.SIMPLE_WORLD,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;engine.QUADTREE_WORLD,&nbsp;engine.PYMUNK_WORLD.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;engine.PYMUNK_WORLD.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;world_args&nbsp;argument&nbsp;is&nbsp;a&nbsp;dict&nbsp;that&nbsp;can&nbsp;be&nbsp;passed&nbsp;verbatim&nbsp;to<br>
 &nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;world&nbsp;constructor&nbsp;(see&nbsp;the&nbsp;World*&nbsp;classes&nbsp;in&nbsp;the&nbsp;model&nbsp;module)<br>
@@ -248,9 +248,7 @@ Data descriptors defined here:<br>
 Data and other attributes defined here:<br>
 <dl><dt><strong>NO_WORLD</strong> = 0</dl>
 
-<dl><dt><strong>PYMUNK_WORLD</strong> = 3</dl>
-
-<dl><dt><strong>QUADTREE_WORLD</strong> = 2</dl>
+<dl><dt><strong>PYMUNK_WORLD</strong> = 2</dl>
 
 <dl><dt><strong>SIMPLE_WORLD</strong> = 1</dl>
 
@@ -259,6 +257,14 @@ Methods inherited from <a href="gummworld2.context.html#Context">gummworld2.cont
 <dl><dt><a name="Engine-exit"><strong>exit</strong></a>(self)</dt><dd><tt>Called&nbsp;when&nbsp;this&nbsp;context&nbsp;is&nbsp;popped&nbsp;off&nbsp;the&nbsp;stack.</tt></dd></dl>
 
 <dl><dt><a name="Engine-suspend"><strong>suspend</strong></a>(self)</dt><dd><tt>Called&nbsp;when&nbsp;another&nbsp;context&nbsp;is&nbsp;pushed&nbsp;on&nbsp;top&nbsp;of&nbsp;this&nbsp;one.</tt></dd></dl>
+
+<hr>
+Static methods inherited from <a href="gummworld2.context.html#Context">gummworld2.context.Context</a>:<br>
+<dl><dt><a name="Engine-pop"><strong>pop</strong></a>(n<font color="#909090">=1</font>)</dt></dl>
+
+<dl><dt><a name="Engine-push"><strong>push</strong></a>(c, do_enter<font color="#909090">=True</font>)</dt></dl>
+
+<dl><dt><a name="Engine-top"><strong>top</strong></a>()</dt></dl>
 
 <hr>
 Data descriptors inherited from <a href="gummworld2.context.html#Context">gummworld2.context.Context</a>:<br>
@@ -297,15 +303,14 @@ To&nbsp;exit&nbsp;the&nbsp;run&nbsp;loop&nbsp;gracefully,&nbsp;call&nbsp;context
 <strong>MOUSEBUTTONUP</strong> = 6<br>
 <strong>MOUSEMOTION</strong> = 4<br>
 <strong>NO_WORLD</strong> = 0<br>
-<strong>PYMUNK_WORLD</strong> = 3<br>
-<strong>QUADTREE_WORLD</strong> = 2<br>
+<strong>PYMUNK_WORLD</strong> = 2<br>
 <strong>QUIT</strong> = 12<br>
 <strong>SIMPLE_WORLD</strong> = 1<br>
 <strong>USEREVENT</strong> = 24<br>
 <strong>VIDEOEXPOSE</strong> = 17<br>
 <strong>VIDEORESIZE</strong> = 16<br>
 <strong>__author__</strong> = 'Gummbum, (c) 2011'<br>
-<strong>__version__</strong> = '$Id: engine.py 287 2011-05-01 19:26:45Z stabbingfinger@gmail.com $'</td></tr></table><p>
+<strong>__version__</strong> = '$Id: engine.py 364 2011-11-28 06:00:33Z stabbingfinger@gmail.com $'</td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#7799ee">
 <td colspan=3 valign=bottom>&nbsp;<br>

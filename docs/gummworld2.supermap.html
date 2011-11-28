@@ -1,0 +1,300 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module gummworld2.supermap</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.supermap</strong></big></big> (version $Id: supermap.py 362 2011-11-28 04:46:48Z stabbingfinger@gmail.com $)</font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/dist/gummworld2/tiled2/gamelib/gummworld2/supermap.py">c:\cygwin\home\bw\devel\python\dist\gummworld2\tiled2\gamelib\gummworld2\supermap.py</a></font></td></tr></table>
+    <p><tt>supermap.py&nbsp;-&nbsp;Auto-loading&nbsp;/&nbsp;unloading&nbsp;multiple-maps&nbsp;grid&nbsp;for<br>
+Gummworld2.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="pygame.html">pygame</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="gummworld2.supermap.html#MapHandler">MapHandler</a>
+</font></dt><dt><font face="helvetica, arial"><a href="gummworld2.supermap.html#SuperMap">SuperMap</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="MapHandler">class <strong>MapHandler</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>A&nbsp;<a href="#MapHandler">MapHandler</a>&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;is&nbsp;responsible&nbsp;for&nbsp;sensing&nbsp;when&nbsp;triggers&nbsp;have&nbsp;been<br>
+tripped&nbsp;by&nbsp;a&nbsp;triggering&nbsp;rect&nbsp;(e.g.&nbsp;the&nbsp;camera),&nbsp;and&nbsp;loading&nbsp;and&nbsp;unloading<br>
+its&nbsp;map.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="MapHandler-__init__"><strong>__init__</strong></a>(self, name, map_file)</dt><dd><tt>Construct&nbsp;a&nbsp;<a href="#MapHandler">MapHandler</a>&nbsp;<a href="__builtin__.html#object">object</a>.<br>
+&nbsp;<br>
+name&nbsp;is&nbsp;a&nbsp;tuple&nbsp;representing&nbsp;the&nbsp;2D&nbsp;vector&nbsp;of&nbsp;this&nbsp;map&nbsp;in&nbsp;the&nbsp;<a href="#SuperMap">SuperMap</a>.<br>
+The&nbsp;position&nbsp;in&nbsp;the&nbsp;<a href="#SuperMap">SuperMap</a>&nbsp;is&nbsp;relative&nbsp;to&nbsp;the&nbsp;origin&nbsp;map,&nbsp;so&nbsp;negative<br>
+values&nbsp;are&nbsp;valid.<br>
+&nbsp;<br>
+map_file&nbsp;is&nbsp;a&nbsp;string&nbsp;containing&nbsp;the&nbsp;path&nbsp;to&nbsp;the&nbsp;map&nbsp;file&nbsp;used&nbsp;by&nbsp;the<br>
+<a href="#MapHandler">MapHandler</a>.<a href="#MapHandler-load">load</a>()&nbsp;method.<br>
+&nbsp;<br>
+Attributes:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;name&nbsp;:&nbsp;The&nbsp;name&nbsp;argument&nbsp;from&nbsp;the&nbsp;constructor.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;map_file&nbsp;:&nbsp;The&nbsp;map_file&nbsp;argument&nbsp;from&nbsp;the&nbsp;constructor.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;rect&nbsp;:&nbsp;The&nbsp;bounding&nbsp;rect&nbsp;of&nbsp;this&nbsp;map&nbsp;in&nbsp;world&nbsp;space.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;supermap&nbsp;:&nbsp;The&nbsp;parent&nbsp;<a href="#SuperMap">SuperMap</a>&nbsp;<a href="__builtin__.html#object">object</a>.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;map&nbsp;:&nbsp;The&nbsp;map&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;containing&nbsp;tiles.&nbsp;Current&nbsp;supported:&nbsp;BasicMap<br>
+&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;TiledMap.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;triggers&nbsp;:&nbsp;The&nbsp;list&nbsp;of&nbsp;trigger&nbsp;objects&nbsp;linking&nbsp;this&nbsp;map&nbsp;to<br>
+&nbsp;&nbsp;&nbsp;&nbsp;neighboring&nbsp;maps.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;timestamp&nbsp;:&nbsp;The&nbsp;time&nbsp;that&nbsp;this&nbsp;handler&nbsp;was&nbsp;last&nbsp;updated.</tt></dd></dl>
+
+<dl><dt><a name="MapHandler-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="MapHandler-enter"><strong>enter</strong></a>(self)</dt><dd><tt>Optional.&nbsp;Override&nbsp;this&nbsp;class&nbsp;to&nbsp;perform&nbsp;actions&nbsp;when&nbsp;the&nbsp;map&nbsp;is<br>
+promoted&nbsp;to&nbsp;<a href="#SuperMap">SuperMap</a>.current.</tt></dd></dl>
+
+<dl><dt><a name="MapHandler-exit"><strong>exit</strong></a>(self)</dt><dd><tt>Optional.&nbsp;Override&nbsp;this&nbsp;class&nbsp;to&nbsp;perform&nbsp;actions&nbsp;when&nbsp;the&nbsp;map&nbsp;is<br>
+demoted&nbsp;from&nbsp;<a href="#SuperMap">SuperMap</a>.current.</tt></dd></dl>
+
+<dl><dt><a name="MapHandler-get_objects"><strong>get_objects</strong></a>(self, map_range)</dt><dd><tt>Return&nbsp;a&nbsp;dict&nbsp;of&nbsp;tiles&nbsp;in&nbsp;the&nbsp;specified&nbsp;bounds.<br>
+&nbsp;<br>
+supermap_range&nbsp;is&nbsp;a&nbsp;dict&nbsp;of&nbsp;range&nbsp;specifications,&nbsp;such&nbsp;as&nbsp;returned&nbsp;by<br>
+<a href="#SuperMap">SuperMap</a>.<a href="#MapHandler-get_tile_range_in_rect">get_tile_range_in_rect</a>().</tt></dd></dl>
+
+<dl><dt><a name="MapHandler-get_objects_in_rect"><strong>get_objects_in_rect</strong></a>(self, rect)</dt><dd><tt>Return&nbsp;a&nbsp;dict&nbsp;of&nbsp;objects&nbsp;that&nbsp;intersect&nbsp;rect.<br>
+&nbsp;<br>
+rect&nbsp;is&nbsp;a&nbsp;pygame.Rect&nbsp;expressed&nbsp;in&nbsp;world&nbsp;coordinates.</tt></dd></dl>
+
+<dl><dt><a name="MapHandler-get_tile_range_in_rect"><strong>get_tile_range_in_rect</strong></a>(self, rect)</dt><dd><tt>Return&nbsp;a&nbsp;list&nbsp;of&nbsp;tile&nbsp;ranges,&nbsp;one&nbsp;for&nbsp;each&nbsp;layer,&nbsp;that&nbsp;intersect<br>
+rect.<br>
+&nbsp;<br>
+rect&nbsp;is&nbsp;a&nbsp;pygame.Rect&nbsp;expressed&nbsp;in&nbsp;world&nbsp;coordinates.</tt></dd></dl>
+
+<dl><dt><a name="MapHandler-load"><strong>load</strong></a>(self)</dt><dd><tt>Override&nbsp;this&nbsp;class.&nbsp;It&nbsp;must&nbsp;set&nbsp;self.<strong>map</strong>&nbsp;to&nbsp;a&nbsp;valid&nbsp;BasicMap&nbsp;or<br>
+TiledMap&nbsp;<a href="__builtin__.html#object">object</a>.<br>
+&nbsp;<br>
+This&nbsp;stub&nbsp;method&nbsp;does&nbsp;absolutely&nbsp;nothing&nbsp;to&nbsp;manage&nbsp;the&nbsp;map.&nbsp;To&nbsp;load&nbsp;the<br>
+tile&nbsp;map,&nbsp;call&nbsp;the&nbsp;appropriate&nbsp;loader.<br>
+&nbsp;<br>
+Considerations:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;a&nbsp;map&nbsp;is&nbsp;loaded&nbsp;(self.<strong>map</strong>&nbsp;is&nbsp;not&nbsp;None),&nbsp;this&nbsp;method&nbsp;will&nbsp;not&nbsp;be<br>
+&nbsp;&nbsp;&nbsp;&nbsp;called.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;a&nbsp;map&nbsp;was&nbsp;loaded,&nbsp;the&nbsp;unload&nbsp;method&nbsp;does&nbsp;not&nbsp;necessarily&nbsp;have&nbsp;to<br>
+&nbsp;&nbsp;&nbsp;&nbsp;completely&nbsp;shut&nbsp;down&nbsp;a&nbsp;map.&nbsp;For&nbsp;example,&nbsp;Tiled&nbsp;maps&nbsp;can&nbsp;provide&nbsp;data<br>
+&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;non-tile&nbsp;objects.&nbsp;Such&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;may&nbsp;have&nbsp;AI,&nbsp;or&nbsp;otherwise&nbsp;serve<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;purpose&nbsp;in&nbsp;the&nbsp;game&nbsp;logic.&nbsp;*IF*&nbsp;the&nbsp;tiles&nbsp;were&nbsp;unloaded&nbsp;but&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;objects&nbsp;were&nbsp;not,&nbsp;then&nbsp;you&nbsp;will&nbsp;need&nbsp;to&nbsp;extend&nbsp;this&nbsp;class&nbsp;to&nbsp;handle<br>
+&nbsp;&nbsp;&nbsp;&nbsp;that&nbsp;situation&nbsp;since&nbsp;it&nbsp;will&nbsp;be&nbsp;desirable&nbsp;to&nbsp;reload&nbsp;the&nbsp;tiles&nbsp;on<br>
+&nbsp;&nbsp;&nbsp;&nbsp;demand&nbsp;but&nbsp;undesirable&nbsp;to&nbsp;create&nbsp;more&nbsp;objects.</tt></dd></dl>
+
+<dl><dt><a name="MapHandler-local_to_world"><strong>local_to_world</strong></a>(self, xy)</dt><dd><tt>Convert&nbsp;a&nbsp;2D&nbsp;vector&nbsp;in&nbsp;local&nbsp;space&nbsp;to&nbsp;a&nbsp;2D&nbsp;vector&nbsp;in&nbsp;world&nbsp;space.<br>
+&nbsp;<br>
+This&nbsp;conversion&nbsp;is&nbsp;needed&nbsp;to&nbsp;translate&nbsp;maps,&nbsp;which&nbsp;use&nbsp;local&nbsp;space.</tt></dd></dl>
+
+<dl><dt><a name="MapHandler-run_triggers"><strong>run_triggers</strong></a>(self, triggering_rect)</dt><dd><tt>Run&nbsp;all&nbsp;triggers&nbsp;in&nbsp;this&nbsp;map&nbsp;versus&nbsp;the&nbsp;triggering_rect.<br>
+&nbsp;<br>
+The&nbsp;triggering&nbsp;rect&nbsp;is&nbsp;typically&nbsp;the&nbsp;camera&nbsp;rect.&nbsp;It&nbsp;is&nbsp;collision-<br>
+checked&nbsp;against&nbsp;each&nbsp;trigger's&nbsp;rect&nbsp;to&nbsp;assess&nbsp;if&nbsp;neighboring&nbsp;map&nbsp;needs<br>
+to&nbsp;be&nbsp;loaded.</tt></dd></dl>
+
+<dl><dt><a name="MapHandler-unload"><strong>unload</strong></a>(self)</dt><dd><tt>Optional.&nbsp;Override&nbsp;this&nbsp;class&nbsp;to&nbsp;perform&nbsp;actions,&nbsp;such&nbsp;as&nbsp;saving&nbsp;the<br>
+state&nbsp;of&nbsp;dynamic&nbsp;context,&nbsp;when&nbsp;the&nbsp;map&nbsp;is&nbsp;unloaded&nbsp;from&nbsp;memory.<br>
+&nbsp;<br>
+This&nbsp;stub&nbsp;method&nbsp;does&nbsp;absolutely&nbsp;nothing&nbsp;to&nbsp;manage&nbsp;the&nbsp;map.&nbsp;To&nbsp;unload<br>
+the&nbsp;tile&nbsp;map,&nbsp;set&nbsp;self.<strong>map</strong>=None.</tt></dd></dl>
+
+<dl><dt><a name="MapHandler-update"><strong>update</strong></a>(self, dt, *args)</dt><dd><tt>Optional.&nbsp;Override&nbsp;this&nbsp;class&nbsp;to&nbsp;perform&nbsp;actions&nbsp;when&nbsp;the&nbsp;map&nbsp;is<br>
+updated&nbsp;via&nbsp;<a href="#SuperMap">SuperMap</a>.<a href="#MapHandler-update">update</a>().</tt></dd></dl>
+
+<dl><dt><a name="MapHandler-world_to_local"><strong>world_to_local</strong></a>(self, xy)</dt><dd><tt>Convert&nbsp;a&nbsp;2D&nbsp;vector&nbsp;in&nbsp;world&nbsp;space&nbsp;to&nbsp;a&nbsp;2D&nbsp;vector&nbsp;in&nbsp;local&nbsp;space.<br>
+&nbsp;<br>
+This&nbsp;conversion&nbsp;is&nbsp;needed&nbsp;to&nbsp;translate&nbsp;maps,&nbsp;which&nbsp;use&nbsp;local&nbsp;space.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="SuperMap">class <strong>SuperMap</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#SuperMap">SuperMap</a>&nbsp;is&nbsp;a&nbsp;dict&nbsp;of&nbsp;<a href="#MapHandler">MapHandler</a>&nbsp;objects.&nbsp;The&nbsp;supermap&nbsp;is&nbsp;expressed&nbsp;in&nbsp;world<br>
+coordinates.&nbsp;It&nbsp;uses&nbsp;map&nbsp;handlers&nbsp;to&nbsp;trigger&nbsp;map&nbsp;loading&nbsp;and&nbsp;unloading&nbsp;as<br>
+the&nbsp;camera&nbsp;moves&nbsp;around&nbsp;the&nbsp;world.<br>
+&nbsp;<br>
+This&nbsp;class&nbsp;implements&nbsp;the&nbsp;required&nbsp;method&nbsp;signature&nbsp;for&nbsp;integration&nbsp;with&nbsp;the<br>
+Camera&nbsp;class.&nbsp;Thus,&nbsp;State.map&nbsp;=&nbsp;<a href="#SuperMap">SuperMap</a>()&nbsp;is&nbsp;valid.<br>
+&nbsp;<br>
+Note&nbsp;that&nbsp;map&nbsp;tools&nbsp;in&nbsp;the&nbsp;toolkit&nbsp;module&nbsp;will&nbsp;not&nbsp;work&nbsp;with&nbsp;the&nbsp;<a href="#SuperMap">SuperMap</a><br>
+because&nbsp;those&nbsp;tools&nbsp;only&nbsp;know&nbsp;how&nbsp;to&nbsp;work&nbsp;with&nbsp;BasicMap&nbsp;or&nbsp;TiledMap&nbsp;objects<br>
+where&nbsp;the&nbsp;map&nbsp;represents&nbsp;the&nbsp;entire&nbsp;world.<br>
+&nbsp;<br>
+The&nbsp;following&nbsp;<a href="#SuperMap">SuperMap</a>&nbsp;shows&nbsp;the&nbsp;names&nbsp;and&nbsp;relative&nbsp;positions&nbsp;of&nbsp;the&nbsp;maps<br>
+in&nbsp;world&nbsp;space.&nbsp;The&nbsp;name&nbsp;is&nbsp;a&nbsp;tuple&nbsp;of&nbsp;int,&nbsp;length&nbsp;2.&nbsp;In&nbsp;general&nbsp;it&nbsp;makes<br>
+sense&nbsp;to&nbsp;have&nbsp;(0,0)&nbsp;be&nbsp;the&nbsp;origin&nbsp;map,&nbsp;but&nbsp;it&nbsp;is&nbsp;not&nbsp;required.&nbsp;A&nbsp;supermap<br>
+can&nbsp;be&nbsp;irregular,&nbsp;and&nbsp;even&nbsp;have&nbsp;holes&nbsp;in&nbsp;it.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;+-------+-------+-------+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;|(-1,-1)|&nbsp;(0,-1)|&nbsp;(1,-1)|<br>
+&nbsp;&nbsp;&nbsp;&nbsp;+-------+-------+-------+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;|(-1,0)&nbsp;|&nbsp;(0,0)&nbsp;|&nbsp;(1,0)&nbsp;|<br>
+&nbsp;&nbsp;&nbsp;&nbsp;+-------+-------+-------+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;|(-1,1)&nbsp;|&nbsp;(0,1)&nbsp;|&nbsp;(1,1)&nbsp;|<br>
+&nbsp;&nbsp;&nbsp;&nbsp;+-------+-------+-------+<br>
+&nbsp;<br>
+The&nbsp;following&nbsp;code&nbsp;adds&nbsp;three&nbsp;maps&nbsp;in&nbsp;single-row&nbsp;layout,&nbsp;starting&nbsp;with&nbsp;map<br>
+(0,0)&nbsp;and&nbsp;proceeding&nbsp;to&nbsp;the&nbsp;right:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;class&nbsp;MyMapHandler(<a href="#MapHandler">MapHandler</a>):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;def&nbsp;load(self):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;self.<strong>map</strong>&nbsp;=&nbsp;load_a_map()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;supermap&nbsp;=&nbsp;<a href="#SuperMap">SuperMap</a>()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;supermap.<a href="#SuperMap-add_handler">add_handler</a>(MyMapHandler((0,0),&nbsp;'map00.tmx'))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;supermap.<a href="#SuperMap-add_handler">add_handler</a>(MyMapHandler((1,0),&nbsp;'map10.tmx'))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;supermap.<a href="#SuperMap-add_handler">add_handler</a>(MyMapHandler((2,0),&nbsp;'map20.tmx'))<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="SuperMap-__init__"><strong>__init__</strong></a>(self, origin<font color="#909090">=(0, 0)</font>, max_maps<font color="#909090">=4</font>)</dt><dd><tt>Construct&nbsp;a&nbsp;<a href="#SuperMap">SuperMap</a>&nbsp;<a href="__builtin__.html#object">object</a>.<br>
+&nbsp;<br>
+origin&nbsp;is&nbsp;a&nbsp;tuple&nbsp;representing&nbsp;the&nbsp;2D&nbsp;vector&nbsp;in&nbsp;the&nbsp;<a href="#SuperMap">SuperMap</a>&nbsp;which<br>
+holds&nbsp;the&nbsp;<a href="#SuperMap">SuperMap</a>&nbsp;origin.&nbsp;The&nbsp;topleft&nbsp;of&nbsp;this&nbsp;maps&nbsp;rect&nbsp;will&nbsp;be&nbsp;set&nbsp;to<br>
+(0,0)&nbsp;and&nbsp;all&nbsp;other&nbsp;maps'&nbsp;world&nbsp;space&nbsp;will&nbsp;be&nbsp;relative&nbsp;to&nbsp;this&nbsp;map.<br>
+&nbsp;<br>
+max_maps&nbsp;is&nbsp;an&nbsp;int&nbsp;representing&nbsp;the&nbsp;maximum&nbsp;number&nbsp;of&nbsp;maps&nbsp;to&nbsp;keep&nbsp;in<br>
+memory.&nbsp;Maps&nbsp;above&nbsp;this&nbsp;number&nbsp;will&nbsp;be&nbsp;unloaded&nbsp;via&nbsp;the&nbsp;<a href="#MapHandler">MapHandler</a><br>
+based&nbsp;on&nbsp;the&nbsp;order&nbsp;in&nbsp;which&nbsp;they&nbsp;were&nbsp;last&nbsp;updated.&nbsp;The&nbsp;minimum<br>
+functional&nbsp;value&nbsp;is&nbsp;1.&nbsp;A&nbsp;value&nbsp;of&nbsp;0&nbsp;will&nbsp;never&nbsp;unload&nbsp;maps.<br>
+&nbsp;<br>
+Attributes:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;origin&nbsp;:&nbsp;origin&nbsp;from&nbsp;the&nbsp;constructor.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;max_maps&nbsp;:&nbsp;max_maps&nbsp;from&nbsp;the&nbsp;constructor.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;rect&nbsp;:&nbsp;The&nbsp;world&nbsp;bounding&nbsp;rect.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;handlers&nbsp;:&nbsp;A&nbsp;dict&nbsp;containing&nbsp;map&nbsp;handler&nbsp;objects,&nbsp;keyed&nbsp;by&nbsp;the&nbsp;tuple<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#MapHandler">MapHandler</a>.name.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;current&nbsp;:&nbsp;The&nbsp;current&nbsp;<a href="#MapHandler">MapHandler</a>&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;which&nbsp;contains&nbsp;the&nbsp;global<br>
+&nbsp;&nbsp;&nbsp;&nbsp;camera's&nbsp;position&nbsp;(State.camera.position).<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;visible_maps&nbsp;:&nbsp;The&nbsp;list&nbsp;of&nbsp;<a href="#MapHandler">MapHandler</a>&nbsp;objects&nbsp;that&nbsp;are&nbsp;visible<br>
+&nbsp;&nbsp;&nbsp;&nbsp;within&nbsp;the&nbsp;global&nbsp;camera's&nbsp;rect&nbsp;(State.camera.rect).<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;history&nbsp;:&nbsp;The&nbsp;list&nbsp;of&nbsp;loaded&nbsp;maps,&nbsp;ordered&nbsp;on&nbsp;last&nbsp;update.</tt></dd></dl>
+
+<dl><dt><a name="SuperMap-add_handler"><strong>add_handler</strong></a>(self, map_handler)</dt><dd><tt>Add&nbsp;map_handler&nbsp;to&nbsp;this&nbsp;<a href="#SuperMap">SuperMap</a>.<br>
+&nbsp;<br>
+map_handler&nbsp;is&nbsp;the&nbsp;<a href="#MapHandler">MapHandler</a>&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;to&nbsp;add&nbsp;to&nbsp;this&nbsp;<a href="#SuperMap">SuperMap</a>.</tt></dd></dl>
+
+<dl><dt><a name="SuperMap-draw"><strong>draw</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="SuperMap-get_handler"><strong>get_handler</strong></a>(self, name)</dt><dd><tt>Return&nbsp;the&nbsp;named&nbsp;<a href="#MapHandler">MapHandler</a>&nbsp;<a href="__builtin__.html#object">object</a>.<br>
+&nbsp;<br>
+name&nbsp;is&nbsp;a&nbsp;tuple&nbsp;representing&nbsp;the&nbsp;2D&nbsp;vector&nbsp;of&nbsp;this&nbsp;map&nbsp;in&nbsp;this&nbsp;<a href="#SuperMap">SuperMap</a>.</tt></dd></dl>
+
+<dl><dt><a name="SuperMap-get_objects"><strong>get_objects</strong></a>(self, supermap_range)</dt></dl>
+
+<dl><dt><a name="SuperMap-get_objects_in_rect"><strong>get_objects_in_rect</strong></a>(self, rect)</dt></dl>
+
+<dl><dt><a name="SuperMap-get_tile_range_in_rect"><strong>get_tile_range_in_rect</strong></a>(self, rect)</dt><dd><tt>rect&nbsp;must&nbsp;be&nbsp;in&nbsp;world&nbsp;space.</tt></dd></dl>
+
+<dl><dt><a name="SuperMap-set_current"><strong>set_current</strong></a>(self, map_handler)</dt><dd><tt>Promote&nbsp;map_handler&nbsp;as&nbsp;the&nbsp;current&nbsp;map&nbsp;handler.<br>
+&nbsp;<br>
+map_handler&nbsp;is&nbsp;a&nbsp;<a href="#MapHandler">MapHandler</a>&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;to&nbsp;promote&nbsp;to&nbsp;current.<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;current&nbsp;map&nbsp;handler&nbsp;is&nbsp;a&nbsp;valid&nbsp;<a href="#MapHandler">MapHandler</a>&nbsp;<a href="__builtin__.html#object">object</a>,&nbsp;its&nbsp;exit()<br>
+method&nbsp;will&nbsp;be&nbsp;called.<br>
+&nbsp;<br>
+Finally,&nbsp;map_handler's&nbsp;map&nbsp;will&nbsp;be&nbsp;loaded&nbsp;(as&nbsp;a&nbsp;failsafe;&nbsp;typically&nbsp;it<br>
+is&nbsp;already&nbsp;loaded&nbsp;via&nbsp;a&nbsp;trigger),&nbsp;and&nbsp;its&nbsp;enter()&nbsp;method&nbsp;is&nbsp;called.</tt></dd></dl>
+
+<dl><dt><a name="SuperMap-update"><strong>update</strong></a>(self, dt, *args)</dt><dd><tt>Update&nbsp;this&nbsp;<a href="#SuperMap">SuperMap</a>.<br>
+&nbsp;<br>
+This&nbsp;method&nbsp;runs&nbsp;each&nbsp;<a href="#MapHandler">MapHandler</a>'s&nbsp;triggers,&nbsp;promotes&nbsp;a&nbsp;<a href="#MapHandler">MapHandler</a>&nbsp;to<br>
+current&nbsp;when&nbsp;appropriate,&nbsp;and&nbsp;calls&nbsp;each&nbsp;<a href="#MapHandler">MapHandler</a>'s&nbsp;<a href="#SuperMap-update">update</a>()&nbsp;method.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-make_trigger"><strong>make_trigger</strong></a>(name, border, rect, trigger<font color="#909090">=None</font>)</dt></dl>
+ <dl><dt><a name="-map_handler_name"><strong>map_handler_name</strong></a>(map_handler)</dt></dl>
+ <dl><dt><a name="-map_handler_timestamp"><strong>map_handler_timestamp</strong></a>(map_handler)</dt></dl>
+ <dl><dt><a name="-print_supermap"><strong>print_supermap</strong></a>(super_map)</dt><dd><tt>Print&nbsp;a&nbsp;supermap,&nbsp;its&nbsp;handlers,&nbsp;and&nbsp;each&nbsp;handler's&nbsp;triggers.</tt></dd></dl>
+ <dl><dt><a name="-vadd"><strong>vadd</strong></a>(a, b)</dt><dd><tt>Add&nbsp;2D&nbsp;vectors&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+ <dl><dt><a name="-vsub"><strong>vsub</strong></a>(a, b)</dt><dd><tt>Subtract&nbsp;2D&nbsp;vector&nbsp;b&nbsp;from&nbsp;a.</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>BORDERS</strong> = {(-1, -1): 'NW', (-1, 0): 'W', (-1, 1): 'SW', (0, -1): 'N', (0, 1): 'S', (1, -1): 'NE', (1, 0): 'E', (1, 1): 'SE'}<br>
+<strong>E</strong> = (1, 0)<br>
+<strong>N</strong> = (0, -1)<br>
+<strong>NE</strong> = (1, -1)<br>
+<strong>NEIGHBORS</strong> = ((0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1))<br>
+<strong>NW</strong> = (-1, -1)<br>
+<strong>S</strong> = (0, 1)<br>
+<strong>SE</strong> = (1, 1)<br>
+<strong>SW</strong> = (-1, 1)<br>
+<strong>W</strong> = (-1, 0)<br>
+<strong>__author__</strong> = 'Gummbum, (c) 2011'<br>
+<strong>__version__</strong> = '$Id: supermap.py 362 2011-11-28 04:46:48Z stabbingfinger@gmail.com $'</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#7799ee">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Author</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#7799ee"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Gummbum,&nbsp;(c)&nbsp;2011</td></tr></table>
+</body></html>

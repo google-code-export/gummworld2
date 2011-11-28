@@ -6,9 +6,9 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.screen</strong></big></big> (version $Id: screen.py 293 2011-05-06 14:32:26Z stabbingfinger@gmail.com $)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.screen</strong></big></big> (version $Id: screen.py 365 2011-11-28 06:07:49Z stabbingfinger@gmail.com $)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/svn/gummworld2/gamelib/gummworld2/screen.py">c:\cygwin\home\bw\devel\python\svn\gummworld2\gamelib\gummworld2\screen.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/dist/gummworld2/tiled2/gamelib/gummworld2/screen.py">c:\cygwin\home\bw\devel\python\dist\gummworld2\tiled2\gamelib\gummworld2\screen.py</a></font></td></tr></table>
     <p><tt>screen.py&nbsp;-&nbsp;Yer&nbsp;basic&nbsp;display&nbsp;class&nbsp;for&nbsp;Gummworld2.</tt></p>
 <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
@@ -70,7 +70,9 @@ Otherwise,&nbsp;size&nbsp;and&nbsp;flags&nbsp;are&nbsp;used&nbsp;to&nbsp;initial
 Methods inherited from <a href="gummworld2.screen.html#View">View</a>:<br>
 <dl><dt><a name="Screen-blit"><strong>blit</strong></a>(self, surf, pos, area<font color="#909090">=None</font>, special_flags<font color="#909090">=0</font>)</dt><dd><tt>Blit&nbsp;a&nbsp;surface&nbsp;to&nbsp;this&nbsp;surface.</tt></dd></dl>
 
-<dl><dt><a name="Screen-clear"><strong>clear</strong></a>(self)</dt><dd><tt>Clear&nbsp;the&nbsp;surface&nbsp;by&nbsp;blitting&nbsp;the&nbsp;surface&nbsp;in&nbsp;eraser&nbsp;attribute.</tt></dd></dl>
+<dl><dt><a name="Screen-clear"><strong>clear</strong></a>(self)</dt><dd><tt>Fill&nbsp;the&nbsp;surface&nbsp;with&nbsp;self.<strong>fill_color</strong>.</tt></dd></dl>
+
+<dl><dt><a name="Screen-fill"><strong>fill</strong></a>(self, color, rect<font color="#909090">=None</font>, special_flags<font color="#909090">=0</font>)</dt><dd><tt>Fill&nbsp;this&nbsp;surface&nbsp;with&nbsp;color.</tt></dd></dl>
 
 <hr>
 Data descriptors inherited from <a href="gummworld2.screen.html#View">View</a>:<br>
@@ -127,7 +129,9 @@ the&nbsp;surface&nbsp;argument.</tt></dd></dl>
 
 <dl><dt><a name="View-blit"><strong>blit</strong></a>(self, surf, pos, area<font color="#909090">=None</font>, special_flags<font color="#909090">=0</font>)</dt><dd><tt>Blit&nbsp;a&nbsp;surface&nbsp;to&nbsp;this&nbsp;surface.</tt></dd></dl>
 
-<dl><dt><a name="View-clear"><strong>clear</strong></a>(self)</dt><dd><tt>Clear&nbsp;the&nbsp;surface&nbsp;by&nbsp;blitting&nbsp;the&nbsp;surface&nbsp;in&nbsp;eraser&nbsp;attribute.</tt></dd></dl>
+<dl><dt><a name="View-clear"><strong>clear</strong></a>(self)</dt><dd><tt>Fill&nbsp;the&nbsp;surface&nbsp;with&nbsp;self.<strong>fill_color</strong>.</tt></dd></dl>
+
+<dl><dt><a name="View-fill"><strong>fill</strong></a>(self, color, rect<font color="#909090">=None</font>, special_flags<font color="#909090">=0</font>)</dt><dd><tt>Fill&nbsp;this&nbsp;surface&nbsp;with&nbsp;color.</tt></dd></dl>
 
 <hr>
 Data descriptors defined here:<br>
@@ -160,7 +164,7 @@ Data descriptors defined here:<br>
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><strong>__author__</strong> = 'Gummbum, (c) 2011'<br>
-<strong>__version__</strong> = '$Id: screen.py 293 2011-05-06 14:32:26Z stabbingfinger@gmail.com $'</td></tr></table><p>
+<strong>__version__</strong> = '$Id: screen.py 365 2011-11-28 06:07:49Z stabbingfinger@gmail.com $'</td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#7799ee">
 <td colspan=3 valign=bottom>&nbsp;<br>

@@ -6,9 +6,9 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.geometry</strong></big></big> (version $Id: geometry.py 273 2011-04-23 08:06:10Z stabbingfinger@gmail.com $)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.geometry</strong></big></big> (version $Id: geometry.py 343 2011-10-31 04:51:03Z stabbingfinger@gmail.com $)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/svn/gummworld2/gamelib/gummworld2/geometry.py">c:\cygwin\home\bw\devel\python\svn\gummworld2\gamelib\gummworld2\geometry.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/dist/gummworld2/tiled2/gamelib/gummworld2/geometry.py">c:\cygwin\home\bw\devel\python\dist\gummworld2\tiled2\gamelib\gummworld2\geometry.py</a></font></td></tr></table>
     <p><tt>geometry.py&nbsp;-&nbsp;Geometry&nbsp;module&nbsp;for&nbsp;Gummworld2.<br>
 &nbsp;<br>
 Geometry&nbsp;classes&nbsp;and&nbsp;functions.</tt></p>
@@ -630,6 +630,17 @@ Return&nbsp;the&nbsp;sine&nbsp;of&nbsp;x&nbsp;(measured&nbsp;in&nbsp;radians).</
  <dl><dt><a name="-sqrt"><strong>sqrt</strong></a>(...)</dt><dd><tt><a href="#-sqrt">sqrt</a>(x)<br>
 &nbsp;<br>
 Return&nbsp;the&nbsp;square&nbsp;root&nbsp;of&nbsp;x.</tt></dd></dl>
+ <dl><dt><a name="-step_toward_point"><strong>step_toward_point</strong></a>((x1, y1), (x2, y2), distance)</dt><dd><tt>Calculate&nbsp;the&nbsp;point&nbsp;at&nbsp;a&nbsp;given&nbsp;distance&nbsp;along&nbsp;the&nbsp;line&nbsp;with&nbsp;end&nbsp;points<br>
+(x1,y1)&nbsp;and&nbsp;(x2,y2).<br>
+&nbsp;<br>
+This&nbsp;function&nbsp;is&nbsp;about&nbsp;twice&nbsp;as&nbsp;fast&nbsp;as&nbsp;the&nbsp;combination&nbsp;<a href="#-angle_of">angle_of</a>()&nbsp;and<br>
+<a href="#-point_on_circumference">point_on_circumference</a>().<br>
+&nbsp;<br>
+The&nbsp;(x1,y1)&nbsp;argument&nbsp;is&nbsp;the&nbsp;origin.<br>
+&nbsp;<br>
+The&nbsp;(x2,y2)&nbsp;argument&nbsp;is&nbsp;the&nbsp;destination.<br>
+&nbsp;<br>
+The&nbsp;distance&nbsp;argument&nbsp;is&nbsp;the&nbsp;size&nbsp;of&nbsp;the&nbsp;step,&nbsp;or&nbsp;speed.</tt></dd></dl>
 </td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#55aa55">
@@ -638,7 +649,7 @@ Return&nbsp;the&nbsp;square&nbsp;root&nbsp;of&nbsp;x.</tt></dd></dl>
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><strong>__author__</strong> = 'Gummbum, (c) 2011'<br>
-<strong>__version__</strong> = '$Id: geometry.py 273 2011-04-23 08:06:10Z stabbingfinger@gmail.com $'<br>
+<strong>__version__</strong> = '$Id: geometry.py 343 2011-10-31 04:51:03Z stabbingfinger@gmail.com $'<br>
 <strong>pi</strong> = 3.1415926535897931</td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#7799ee">

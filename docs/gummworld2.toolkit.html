@@ -6,9 +6,9 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.toolkit</strong></big></big> (version $Id: toolkit.py 305 2011-05-21 21:59:02Z stabbingfinger@gmail.com $)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.toolkit</strong></big></big> (version $Id: toolkit.py 368 2011-11-28 15:05:15Z stabbingfinger@gmail.com $)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/svn/gummworld2/gamelib/gummworld2/toolkit.py">c:\cygwin\home\bw\devel\python\svn\gummworld2\gamelib\gummworld2\toolkit.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/dist/gummworld2/tiled2/gamelib/gummworld2/toolkit.py">c:\cygwin\home\bw\devel\python\dist\gummworld2\tiled2\gamelib\gummworld2\toolkit.py</a></font></td></tr></table>
     <p><tt>toolkit.py&nbsp;-&nbsp;Some&nbsp;helper&nbsp;tools&nbsp;for&nbsp;Gummworld2.</tt></p>
 <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
@@ -102,32 +102,58 @@ Data descriptors defined here:<br>
     
 <tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><dl><dt><a name="-X_draw_parallax_tiles"><strong>X_draw_parallax_tiles</strong></a>(layer, tiles, pax_rect, view<font color="#909090">=None</font>)</dt><dd><tt>##&nbsp;EXPERIMENTAL:&nbsp;not&nbsp;working&nbsp;quite&nbsp;right</tt></dd></dl>
- <dl><dt><a name="-collapse_map"><strong>collapse_map</strong></a>(map, num_tiles<font color="#909090">=(2, 2)</font>, layers<font color="#909090">=None</font>)</dt><dd><tt>Collapse&nbsp;all&nbsp;layers&nbsp;in&nbsp;a&nbsp;map&nbsp;by&nbsp;combining&nbsp;num_tiles&nbsp;into&nbsp;one&nbsp;tile.<br>
-Returns&nbsp;a&nbsp;new&nbsp;map.<br>
+ <dl><dt><a name="-draw_grid"><strong>draw_grid</strong></a>(grid_cache, layeri<font color="#909090">=0</font>, color<font color="#909090">=(0, 0, 255, 255)</font>, alpha<font color="#909090">=33</font>)</dt><dd><tt>Draw&nbsp;a&nbsp;grid&nbsp;over&nbsp;the&nbsp;camera&nbsp;view.<br>
 &nbsp;<br>
-The&nbsp;map&nbsp;argument&nbsp;is&nbsp;the&nbsp;source&nbsp;map.&nbsp;It&nbsp;must&nbsp;be&nbsp;an&nbsp;instance&nbsp;of&nbsp;Map.<br>
+The&nbsp;grid_lines&nbsp;argument&nbsp;is&nbsp;a&nbsp;list&nbsp;of&nbsp;length&nbsp;two&nbsp;containing&nbsp;a&nbsp;cached<br>
+[vline,hline]&nbsp;pair.&nbsp;This&nbsp;function&nbsp;will&nbsp;initialize&nbsp;the&nbsp;contents&nbsp;if&nbsp;the<br>
+starting&nbsp;values&nbsp;evaluate&nbsp;to&nbsp;False&nbsp;(e.g.&nbsp;[0,0]).<br>
 &nbsp;<br>
-The&nbsp;num_tiles&nbsp;argument&nbsp;is&nbsp;a&nbsp;tuple&nbsp;representing&nbsp;the&nbsp;number&nbsp;of&nbsp;tiles&nbsp;in&nbsp;the&nbsp;X<br>
-and&nbsp;Y&nbsp;axes&nbsp;to&nbsp;combine.</tt></dd></dl>
- <dl><dt><a name="-collapse_map_layer"><strong>collapse_map_layer</strong></a>(map, layeri, num_tiles<font color="#909090">=(2, 2)</font>)</dt><dd><tt>Collapse&nbsp;a&nbsp;single&nbsp;layer&nbsp;in&nbsp;a&nbsp;map&nbsp;by&nbsp;combining&nbsp;num_tiles&nbsp;into&nbsp;one&nbsp;tile.<br>
+The&nbsp;layeri&nbsp;argument&nbsp;is&nbsp;the&nbsp;map&nbsp;layer&nbsp;from&nbsp;which&nbsp;to&nbsp;get&nbsp;the&nbsp;grid&nbsp;spacing.<br>
 &nbsp;<br>
-The&nbsp;map&nbsp;argument&nbsp;is&nbsp;the&nbsp;source&nbsp;map.&nbsp;It&nbsp;must&nbsp;be&nbsp;an&nbsp;instance&nbsp;of&nbsp;Map.<br>
+The&nbsp;color&nbsp;argument&nbsp;is&nbsp;the&nbsp;desired&nbsp;grid&nbsp;color.<br>
 &nbsp;<br>
-The&nbsp;layeri&nbsp;argument&nbsp;is&nbsp;an&nbsp;int&nbsp;representing&nbsp;the&nbsp;layer&nbsp;index&nbsp;to&nbsp;collapse.<br>
+The&nbsp;alpha&nbsp;argument&nbsp;is&nbsp;the&nbsp;surface&nbsp;alpha.&nbsp;If&nbsp;alpha&nbsp;is&nbsp;not&nbsp;None,&nbsp;it&nbsp;must&nbsp;be&nbsp;a<br>
+valid&nbsp;value&nbsp;for&nbsp;pygame.Surface.set_alpha().<br>
 &nbsp;<br>
-The&nbsp;num_tiles&nbsp;argument&nbsp;is&nbsp;a&nbsp;tuple&nbsp;representing&nbsp;the&nbsp;number&nbsp;of&nbsp;tiles&nbsp;in&nbsp;the&nbsp;X<br>
-and&nbsp;Y&nbsp;axes&nbsp;to&nbsp;combine.</tt></dd></dl>
- <dl><dt><a name="-draw_grid"><strong>draw_grid</strong></a>(layer<font color="#909090">=0</font>)</dt><dd><tt>Draw&nbsp;grid&nbsp;if&nbsp;enabled.<br>
+color&nbsp;and&nbsp;alpha&nbsp;are&nbsp;only&nbsp;used&nbsp;when&nbsp;when&nbsp;creating&nbsp;the&nbsp;surfaces&nbsp;for&nbsp;the<br>
+grid_lines&nbsp;list.</tt></dd></dl>
+ <dl><dt><a name="-draw_labels"><strong>draw_labels</strong></a>(cache_dict, layeri<font color="#909090">=0</font>, color<font color="#909090">=(0, 0, 0, 255)</font>)</dt><dd><tt>#def&nbsp;<a href="#-draw_labels">draw_labels</a>(cache_dict,&nbsp;layeri=0,&nbsp;color=pygame.Color('black')):<br>
+#&nbsp;&nbsp;&nbsp;&nbsp;global&nbsp;label_font<br>
+#&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;label_font&nbsp;is&nbsp;None:<br>
+#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;label_font&nbsp;=&nbsp;pygame.font.Font(data.filepath('font','Vera.ttf'),&nbsp;7)<br>
+#&nbsp;&nbsp;&nbsp;&nbsp;lfont&nbsp;=&nbsp;label_font<br>
+#&nbsp;&nbsp;&nbsp;&nbsp;#<br>
+#&nbsp;&nbsp;&nbsp;&nbsp;camera&nbsp;=&nbsp;State.camera<br>
+#&nbsp;&nbsp;&nbsp;&nbsp;cam_rect&nbsp;=&nbsp;State.camera.rect<br>
+#&nbsp;&nbsp;&nbsp;&nbsp;blit&nbsp;=&nbsp;camera.surface.blit<br>
+#&nbsp;&nbsp;&nbsp;&nbsp;left,top,width,height&nbsp;=&nbsp;cam_rect<br>
+#&nbsp;&nbsp;&nbsp;&nbsp;layer&nbsp;=&nbsp;State.map.layers[layeri]<br>
+#&nbsp;&nbsp;&nbsp;&nbsp;tw,th&nbsp;=&nbsp;layer.tile_width,&nbsp;layer.tile_height<br>
+#&nbsp;&nbsp;&nbsp;&nbsp;x0&nbsp;=&nbsp;left&nbsp;//&nbsp;tw<br>
+#&nbsp;&nbsp;&nbsp;&nbsp;y0&nbsp;=&nbsp;top&nbsp;//&nbsp;th<br>
+#&nbsp;&nbsp;&nbsp;&nbsp;x1&nbsp;=&nbsp;tw&nbsp;-&nbsp;(left&nbsp;-&nbsp;x0*tw)<br>
+#&nbsp;&nbsp;&nbsp;&nbsp;y1&nbsp;=&nbsp;th&nbsp;-&nbsp;(top&nbsp;-&nbsp;y0*th)<br>
+###&nbsp;&nbsp;&nbsp;&nbsp;print&nbsp;x0,y0,x1,y1<br>
+#&nbsp;&nbsp;&nbsp;&nbsp;#<br>
+#&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;x&nbsp;in&nbsp;xrange(x1,&nbsp;width,&nbsp;layer.tile_width):<br>
+#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;y&nbsp;in&nbsp;xrange(y1,&nbsp;height,&nbsp;layer.tile_height):<br>
+###&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print&nbsp;x,y<br>
+#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;name&nbsp;=&nbsp;(x+tw)//tw+x0,&nbsp;(y+th)//th+y0<br>
+###&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;name&nbsp;=&nbsp;(x+tw)//tw,&nbsp;(y+th)//th<br>
+#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;label&nbsp;=&nbsp;cache_dict.get(name,&nbsp;None)<br>
+#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;not&nbsp;label:<br>
+#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;label&nbsp;=&nbsp;lfont.render(str(name),&nbsp;True,&nbsp;color)<br>
+#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cache_dict[name]&nbsp;=&nbsp;label<br>
+#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;blit(label,&nbsp;(x+2,y+2))</tt></dd></dl>
+ <dl><dt><a name="-draw_object_array"><strong>draw_object_array</strong></a>(object_array)</dt><dd><tt>Draw&nbsp;a&nbsp;layered&nbsp;array&nbsp;of&nbsp;objects.<br>
 &nbsp;<br>
-Grids&nbsp;for&nbsp;the&nbsp;specified&nbsp;layer&nbsp;are&nbsp;blitted&nbsp;to&nbsp;the&nbsp;camera&nbsp;surface.&nbsp;If&nbsp;the&nbsp;layer<br>
-has&nbsp;been&nbsp;collapsed&nbsp;with&nbsp;the&nbsp;<a href="#-collapse_map_layer">collapse_map_layer</a>()&nbsp;function&nbsp;so&nbsp;that&nbsp;the<br>
-layer's&nbsp;tile&nbsp;size&nbsp;differs&nbsp;from&nbsp;the&nbsp;grid&nbsp;line&nbsp;sprites,&nbsp;this&nbsp;will&nbsp;look&nbsp;weird.</tt></dd></dl>
- <dl><dt><a name="-draw_labels"><strong>draw_labels</strong></a>(layer<font color="#909090">=0</font>)</dt><dd><tt>Draw&nbsp;visible&nbsp;labels&nbsp;if&nbsp;enabled.<br>
-&nbsp;<br>
-Labels&nbsp;for&nbsp;the&nbsp;specified&nbsp;layer&nbsp;are&nbsp;blitted&nbsp;to&nbsp;the&nbsp;camera&nbsp;surface.&nbsp;If&nbsp;the<br>
-layer&nbsp;has&nbsp;been&nbsp;collapsed&nbsp;with&nbsp;the&nbsp;<a href="#-collapse_map_layer">collapse_map_layer</a>()&nbsp;function&nbsp;so&nbsp;that<br>
-the&nbsp;layer's&nbsp;tile&nbsp;size&nbsp;differs&nbsp;from&nbsp;the&nbsp;grid&nbsp;label&nbsp;sprites,&nbsp;this&nbsp;will&nbsp;look<br>
-weird.</tt></dd></dl>
+For&nbsp;best&nbsp;performance:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+def&nbsp;update(self,&nbsp;dt):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;self.<strong>visible_objects</strong>&nbsp;=&nbsp;toolkit.<a href="#-get_object_array">get_object_array</a>()<br>
+def&nbsp;draw(self,&nbsp;dt):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;...<br>
+&nbsp;&nbsp;&nbsp;&nbsp;toolkit.<a href="#-draw_object_array">draw_object_array</a>(self.<strong>visible_objects</strong>)</tt></dd></dl>
  <dl><dt><a name="-draw_parallax_tile_range"><strong>draw_parallax_tile_range</strong></a>(layer, tile_range, pax_rect)</dt><dd><tt>##&nbsp;EXPERIMENTAL:&nbsp;not&nbsp;working&nbsp;quite&nbsp;right</tt></dd></dl>
  <dl><dt><a name="-draw_parallax_tiles"><strong>draw_parallax_tiles</strong></a>(maps, view)</dt><dd><tt>maps&nbsp;is&nbsp;a&nbsp;list&nbsp;of&nbsp;maps<br>
 &nbsp;<br>
@@ -141,7 +167,11 @@ Assumptions:<br>
  <dl><dt><a name="-draw_sprite"><strong>draw_sprite</strong></a>(s, blit_flags<font color="#909090">=0</font>)</dt><dd><tt>Draw&nbsp;a&nbsp;sprite&nbsp;on&nbsp;the&nbsp;camera's&nbsp;surface&nbsp;using&nbsp;world-to-screen&nbsp;conversion.</tt></dd></dl>
  <dl><dt><a name="-draw_tiles"><strong>draw_tiles</strong></a>()</dt><dd><tt>Draw&nbsp;visible&nbsp;tiles.<br>
 &nbsp;<br>
-This&nbsp;function&nbsp;assumes&nbsp;that&nbsp;the&nbsp;tiles&nbsp;stored&nbsp;in&nbsp;the&nbsp;map&nbsp;are&nbsp;sprites.</tt></dd></dl>
+Quick&nbsp;and&nbsp;dirty&nbsp;draw&nbsp;function,&nbsp;handles&nbsp;getting&nbsp;the&nbsp;objects&nbsp;and&nbsp;drawing<br>
+them.&nbsp;This&nbsp;is&nbsp;a&nbsp;bit&nbsp;more&nbsp;expensive&nbsp;than&nbsp;getting&nbsp;tiles&nbsp;during&nbsp;the&nbsp;update<br>
+cycle&nbsp;and&nbsp;reusing&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;array&nbsp;for&nbsp;the&nbsp;draw&nbsp;cycles.&nbsp;However,&nbsp;it&nbsp;is<br>
+less&nbsp;hassle,&nbsp;and&nbsp;one&nbsp;might&nbsp;want&nbsp;to&nbsp;use&nbsp;this&nbsp;tactic&nbsp;if&nbsp;panning&nbsp;more&nbsp;than<br>
+one&nbsp;tile&nbsp;span&nbsp;per&nbsp;tick.</tt></dd></dl>
  <dl><dt><a name="-draw_tiles_of_layer"><strong>draw_tiles_of_layer</strong></a>(layeri, pallax_factor_x<font color="#909090">=1.0</font>, pallax_factor_y<font color="#909090">=1.0</font>)</dt><dd><tt>Draw&nbsp;visible&nbsp;tiles.<br>
 &nbsp;<br>
 This&nbsp;function&nbsp;assumes&nbsp;that&nbsp;the&nbsp;tiles&nbsp;stored&nbsp;in&nbsp;the&nbsp;map&nbsp;are&nbsp;sprites.</tt></dd></dl>
@@ -155,9 +185,60 @@ PolyGeometry.<br>
 &nbsp;<br>
 The&nbsp;values&nbsp;saved&nbsp;are&nbsp;those&nbsp;needed&nbsp;for&nbsp;each&nbsp;shape-class's&nbsp;constructor,&nbsp;plus&nbsp;a<br>
 block&nbsp;of&nbsp;arbitrary&nbsp;user&nbsp;data.&nbsp;The&nbsp;user&nbsp;data&nbsp;is&nbsp;url-encoded.</tt></dd></dl>
+ <dl><dt><a name="-get_object_array"><strong>get_object_array</strong></a>(max_speed<font color="#909090">=10</font>)</dt><dd><tt>Return&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;map's&nbsp;objects&nbsp;that&nbsp;would&nbsp;be&nbsp;visible&nbsp;to&nbsp;the&nbsp;camera.<br>
+Operates&nbsp;on&nbsp;State.map&nbsp;and&nbsp;State.camera.<br>
+&nbsp;<br>
+The&nbsp;max_speed&nbsp;argument&nbsp;adds&nbsp;this&nbsp;many&nbsp;pixels&nbsp;to&nbsp;each&nbsp;edge&nbsp;of&nbsp;the&nbsp;query&nbsp;rect<br>
+to&nbsp;accommodate&nbsp;for&nbsp;the&nbsp;space&nbsp;moved&nbsp;during&nbsp;frame&nbsp;interpolation&nbsp;cycles.&nbsp;This<br>
+should&nbsp;at&nbsp;least&nbsp;match&nbsp;the&nbsp;scrolling&nbsp;speed&nbsp;to&nbsp;avoid&nbsp;black&nbsp;flickers&nbsp;at&nbsp;the<br>
+screen&nbsp;edges.<br>
+&nbsp;<br>
+The&nbsp;return&nbsp;value&nbsp;is&nbsp;a&nbsp;list&nbsp;of&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;lists:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;&nbsp;[obj0,&nbsp;obj1,&nbsp;...],&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;layer0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[obj0,&nbsp;obj1,&nbsp;...],&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;layer1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;layerN<br>
+&nbsp;&nbsp;&nbsp;&nbsp;]</tt></dd></dl>
+ <dl><dt><a name="-get_objects_in_cell_ids"><strong>get_objects_in_cell_ids</strong></a>(map_, cell_ids_per_layer)</dt><dd><tt>Return&nbsp;a&nbsp;list&nbsp;of&nbsp;objects&nbsp;per&nbsp;layer&nbsp;for&nbsp;the&nbsp;specified&nbsp;cell&nbsp;IDs.<br>
+This&nbsp;function&nbsp;is&nbsp;mainly&nbsp;for&nbsp;SuperMap,&nbsp;which&nbsp;needs&nbsp;to&nbsp;specify&nbsp;the&nbsp;map.<br>
+&nbsp;<br>
+The&nbsp;argument&nbsp;cell_ids_per_layer&nbsp;is&nbsp;a&nbsp;list&nbsp;of&nbsp;nested&nbsp;lists&nbsp;containing<br>
+cell&nbsp;IDs:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;&nbsp;[cell_id0,&nbsp;cell_id1,&nbsp;...],&nbsp;&nbsp;#&nbsp;layer0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[cell_id0,&nbsp;cell_id1,&nbsp;...],&nbsp;&nbsp;#&nbsp;layer1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;layerN<br>
+&nbsp;&nbsp;&nbsp;&nbsp;]<br>
+&nbsp;<br>
+The&nbsp;return&nbsp;value&nbsp;is&nbsp;a&nbsp;similary&nbsp;constructed&nbsp;list&nbsp;of&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;lists:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;&nbsp;[obj0,&nbsp;obj1,&nbsp;...],&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;layer0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[obj0,&nbsp;obj1,&nbsp;...],&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;layer1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;layerN<br>
+&nbsp;&nbsp;&nbsp;&nbsp;]</tt></dd></dl>
  <dl><dt><a name="-get_parallax_tile_range"><strong>get_parallax_tile_range</strong></a>(cam, map, layer, parallax, orig<font color="#909090">='center'</font>)</dt><dd><tt>##&nbsp;EXPERIMENTAL:&nbsp;not&nbsp;working&nbsp;quite&nbsp;right<br>
 #def&nbsp;<a href="#-get_parallax_tile_range">get_parallax_tile_range</a>(cam,&nbsp;map,&nbsp;layer,&nbsp;parallax,&nbsp;orig='bottomleft'):</tt></dd></dl>
  <dl><dt><a name="-get_tilesheet_info"><strong>get_tilesheet_info</strong></a>(tilesheet_path)</dt><dd><tt>Get&nbsp;the&nbsp;tilesheet&nbsp;meta&nbsp;data&nbsp;from&nbsp;file&nbsp;if&nbsp;it&nbsp;exists.</tt></dd></dl>
+ <dl><dt><a name="-get_visible_cell_ids"><strong>get_visible_cell_ids</strong></a>(camera, map_, max_speed<font color="#909090">=10</font>)</dt><dd><tt>Return&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;map's&nbsp;cell&nbsp;IDs&nbsp;that&nbsp;would&nbsp;be&nbsp;visible&nbsp;to&nbsp;the&nbsp;camera.<br>
+This&nbsp;function&nbsp;is&nbsp;mainly&nbsp;for&nbsp;SuperMap,&nbsp;which&nbsp;needs&nbsp;to&nbsp;specify&nbsp;the&nbsp;map.<br>
+&nbsp;<br>
+The&nbsp;camera&nbsp;argument&nbsp;is&nbsp;the&nbsp;camera&nbsp;that&nbsp;defines&nbsp;the&nbsp;view.<br>
+&nbsp;<br>
+The&nbsp;map_&nbsp;argument&nbsp;is&nbsp;the&nbsp;BasicMap&nbsp;or&nbsp;TiledMap&nbsp;to&nbsp;query.<br>
+&nbsp;<br>
+The&nbsp;max_speed&nbsp;argument&nbsp;adds&nbsp;this&nbsp;many&nbsp;pixels&nbsp;to&nbsp;each&nbsp;edge&nbsp;of&nbsp;the&nbsp;query&nbsp;rect<br>
+to&nbsp;accommodate&nbsp;for&nbsp;the&nbsp;space&nbsp;moved&nbsp;during&nbsp;frame&nbsp;interpolation&nbsp;cycles.&nbsp;This<br>
+should&nbsp;at&nbsp;least&nbsp;match&nbsp;the&nbsp;scrolling&nbsp;speed&nbsp;to&nbsp;avoid&nbsp;black&nbsp;flickers&nbsp;at&nbsp;the<br>
+screen&nbsp;edge.<br>
+&nbsp;<br>
+The&nbsp;return&nbsp;value&nbsp;is&nbsp;a&nbsp;list&nbsp;of&nbsp;cell&nbsp;IDs&nbsp;in&nbsp;the&nbsp;map's&nbsp;spatialhash&nbsp;for&nbsp;each<br>
+layer.&nbsp;The&nbsp;per-layer&nbsp;values&nbsp;are&nbsp;necessary&nbsp;because&nbsp;maps&nbsp;can&nbsp;have&nbsp;layers&nbsp;with<br>
+different&nbsp;tile&nbsp;sizes,&nbsp;and&nbsp;therefore&nbsp;different&nbsp;grids.<br>
+&nbsp;<br>
+The&nbsp;return&nbsp;value&nbsp;is&nbsp;suitable&nbsp;for&nbsp;passing&nbsp;to&nbsp;<a href="#-get_objects_in_cell_ids">get_objects_in_cell_ids</a>().<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;&nbsp;[cell_id0,&nbsp;cell_id1,&nbsp;...],&nbsp;&nbsp;#&nbsp;layer0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[cell_id0,&nbsp;cell_id1,&nbsp;...],&nbsp;&nbsp;#&nbsp;layer1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;layerN<br>
+&nbsp;&nbsp;&nbsp;&nbsp;]</tt></dd></dl>
  <dl><dt><a name="-import_world_quadtree"><strong>import_world_quadtree</strong></a>(fh, rect_cls, poly_cls, circle_cls)</dt><dd><tt>A&nbsp;world&nbsp;entity&nbsp;importer&nbsp;compatible&nbsp;with&nbsp;QuadTree.<br>
 &nbsp;<br>
 This&nbsp;function&nbsp;is&nbsp;required&nbsp;by&nbsp;world_editor.py,&nbsp;and&nbsp;possibly&nbsp;other&nbsp;scripts,&nbsp;to<br>
@@ -201,16 +282,6 @@ shape&nbsp;data.&nbsp;The&nbsp;following&nbsp;keys&nbsp;are&nbsp;supported:&nbsp
 classes&nbsp;will&nbsp;be&nbsp;used&nbsp;by&nbsp;default:&nbsp;geometry.RectGeometry,<br>
 geometry.PolyGeometry,&nbsp;geometry.CircleGeometry.&nbsp;Classes&nbsp;substituted&nbsp;in&nbsp;this<br>
 manner&nbsp;must&nbsp;have&nbsp;constructors&nbsp;that&nbsp;are&nbsp;compatible&nbsp;with&nbsp;the&nbsp;default&nbsp;classes.</tt></dd></dl>
- <dl><dt><a name="-load_tiled_tmx_map"><strong>load_tiled_tmx_map</strong></a>(map_file_name, load_invisible<font color="#909090">=False</font>, convert_alpha<font color="#909090">=False</font>)</dt><dd><tt>Load&nbsp;an&nbsp;orthogonal&nbsp;TMX&nbsp;map&nbsp;file&nbsp;that&nbsp;was&nbsp;created&nbsp;by&nbsp;the&nbsp;Tiled&nbsp;Map&nbsp;Editor.<br>
-&nbsp;<br>
-Note:&nbsp;convert_alpha&nbsp;is&nbsp;experimental.&nbsp;It&nbsp;can&nbsp;lower&nbsp;performance&nbsp;when&nbsp;used<br>
-with&nbsp;some&nbsp;images.&nbsp;Do&nbsp;it&nbsp;only&nbsp;if&nbsp;there's&nbsp;a&nbsp;need.<br>
-&nbsp;<br>
-Thanks&nbsp;to&nbsp;DR0ID&nbsp;for&nbsp;his&nbsp;nice&nbsp;tiledtmxloader&nbsp;module:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://www.pygame.org/project-map+loader+for+%27tiled%27-1158-2951.html">http://www.pygame.org/project-map+loader+for+%27tiled%27-1158-2951.html</a><br>
-&nbsp;<br>
-And&nbsp;the&nbsp;creators&nbsp;of&nbsp;Tiled&nbsp;Map&nbsp;Editor:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://www.mapeditor.org/">http://www.mapeditor.org/</a></tt></dd></dl>
  <dl><dt><a name="-load_tilesheet"><strong>load_tilesheet</strong></a>(file_path)</dt><dd><tt>Load&nbsp;a&nbsp;tilesheet.&nbsp;A&nbsp;toolkit.<a href="#Tilesheet">Tilesheet</a>&nbsp;containing&nbsp;tilesheet&nbsp;info&nbsp;is<br>
 returned.<br>
 &nbsp;<br>
@@ -229,43 +300,6 @@ visible&nbsp;content&nbsp;to&nbsp;aid&nbsp;early&nbsp;game&nbsp;design&nbsp;or&n
 &nbsp;<br>
 Tiles&nbsp;transition&nbsp;from&nbsp;top&nbsp;to&nbsp;bottom,&nbsp;light&nbsp;blue&nbsp;to&nbsp;brown.</tt></dd></dl>
  <dl><dt><a name="-put_tilesheet_info"><strong>put_tilesheet_info</strong></a>(tilesheet_path, tilesheet_values)</dt><dd><tt>Put&nbsp;the&nbsp;tilesheet&nbsp;meta&nbsp;data&nbsp;to&nbsp;file.</tt></dd></dl>
- <dl><dt><a name="-reduce_map_layers"><strong>reduce_map_layers</strong></a>(map, layersi)</dt><dd><tt>Reduce&nbsp;the&nbsp;number&nbsp;of&nbsp;layers&nbsp;in&nbsp;a&nbsp;map&nbsp;by&nbsp;blitting&nbsp;two&nbsp;or&nbsp;more&nbsp;layers&nbsp;into<br>
-a&nbsp;single&nbsp;layer.&nbsp;A&nbsp;new&nbsp;instance&nbsp;of&nbsp;Map&nbsp;is&nbsp;returned.<br>
-&nbsp;<br>
-The&nbsp;map&nbsp;argument&nbsp;is&nbsp;the&nbsp;source&nbsp;map.&nbsp;It&nbsp;must&nbsp;be&nbsp;an&nbsp;instance&nbsp;of&nbsp;Map.<br>
-&nbsp;<br>
-The&nbsp;layersi&nbsp;argument&nbsp;is&nbsp;a&nbsp;sequence&nbsp;of&nbsp;int&nbsp;of&nbsp;length&nbsp;two&nbsp;or&nbsp;more.&nbsp;The<br>
-layers&nbsp;are&nbsp;blitted&nbsp;in&nbsp;the&nbsp;order&nbsp;specified.&nbsp;Layers&nbsp;not&nbsp;specified&nbsp;and&nbsp;layers<br>
-that&nbsp;are&nbsp;not&nbsp;visible&nbsp;(i.e.&nbsp;layer.visible==False)&nbsp;will&nbsp;be&nbsp;copied&nbsp;as&nbsp;a&nbsp;layer<br>
-instead&nbsp;of&nbsp;being&nbsp;blitted.<br>
-&nbsp;<br>
-Tiles&nbsp;in&nbsp;the&nbsp;blitted&nbsp;layers&nbsp;typically&nbsp;need&nbsp;to&nbsp;have&nbsp;some&nbsp;transparent&nbsp;pixels<br>
-(e.g.&nbsp;a&nbsp;surface&nbsp;colorkey),&nbsp;otherwise&nbsp;their&nbsp;pixels&nbsp;would&nbsp;completely&nbsp;erase&nbsp;the<br>
-tiles&nbsp;underneath.<br>
-&nbsp;<br>
-Alphas&nbsp;and&nbsp;blending&nbsp;are&nbsp;not&nbsp;supported&nbsp;by&nbsp;this&nbsp;routine.<br>
-&nbsp;<br>
-The&nbsp;tile&nbsp;and&nbsp;map&nbsp;sizes&nbsp;in&nbsp;the&nbsp;map&nbsp;layers&nbsp;should&nbsp;be&nbsp;of&nbsp;the&nbsp;same&nbsp;size.<br>
-Otherwise&nbsp;the&nbsp;desired&nbsp;results&nbsp;will&nbsp;likely&nbsp;not&nbsp;be&nbsp;produced.&nbsp;If&nbsp;using<br>
-collapse_map_layer&nbsp;and&nbsp;reduce_map_layers&nbsp;on&nbsp;subsets&nbsp;of&nbsp;map&nbsp;layers,&nbsp;one<br>
-would&nbsp;usually&nbsp;want&nbsp;to&nbsp;call&nbsp;reduce_map_layers&nbsp;first.&nbsp;See&nbsp;the&nbsp;Combo&nbsp;example<br>
-below,&nbsp;in&nbsp;which&nbsp;only&nbsp;two&nbsp;of&nbsp;three&nbsp;layers&nbsp;are&nbsp;transformed.<br>
-&nbsp;<br>
-Yes,&nbsp;this&nbsp;could&nbsp;be&nbsp;a&nbsp;challenge&nbsp;to&nbsp;manage&nbsp;for&nbsp;maps&nbsp;with&nbsp;special-purpose<br>
-layers.&nbsp;One&nbsp;needs&nbsp;to&nbsp;know&nbsp;one's&nbsp;maps&nbsp;and&nbsp;layers&nbsp;before&nbsp;and&nbsp;after&nbsp;the<br>
-transformations.&nbsp;Annotating&nbsp;map&nbsp;layers&nbsp;with&nbsp;a&nbsp;name&nbsp;or&nbsp;ID&nbsp;attribute&nbsp;might<br>
-help.&nbsp;If&nbsp;the&nbsp;base&nbsp;layer&nbsp;has&nbsp;a&nbsp;name&nbsp;attribute&nbsp;it&nbsp;will&nbsp;be&nbsp;copied&nbsp;to&nbsp;the&nbsp;new<br>
-map&nbsp;layer.<br>
-&nbsp;<br>
-Basic&nbsp;example:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;new_map&nbsp;=&nbsp;<a href="#-reduce_map_layers">reduce_map_layers</a>(orig_map,&nbsp;range(len(orig_map.layers)))<br>
-&nbsp;<br>
-Combo&nbsp;example:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Reduce&nbsp;3-layer&nbsp;map&nbsp;to&nbsp;two&nbsp;layers.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;map&nbsp;=&nbsp;<a href="#-reduce_map_layers">reduce_map_layers</a>(map,&nbsp;(0,1))<br>
-&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Collapse&nbsp;layer&nbsp;0,&nbsp;two&nbsp;tiles&nbsp;into&nbsp;one&nbsp;tile.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;map&nbsp;=&nbsp;<a href="#-collapse_map_layer">collapse_map_layer</a>(map,&nbsp;0,&nbsp;(2,2))<br>
-&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;The&nbsp;resulting&nbsp;map&nbsp;has&nbsp;two&nbsp;layers&nbsp;numbered&nbsp;0&nbsp;and&nbsp;1.</tt></dd></dl>
 </td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#55aa55">
@@ -278,9 +312,9 @@ Combo&nbsp;example:<br>
 <strong>RLEACCEL</strong> = 16384<br>
 <strong>SRCALPHA</strong> = 65536<br>
 <strong>__author__</strong> = 'Gummbum, (c) 2011'<br>
-<strong>__version__</strong> = '$Id: toolkit.py 305 2011-05-21 21:59:02Z stabbingfinger@gmail.com $'<br>
-<strong>haspygame19</strong> = True<br>
-<strong>hud_font</strong> = &lt;pygame.font.Font object&gt;</td></tr></table><p>
+<strong>__version__</strong> = '$Id: toolkit.py 368 2011-11-28 15:05:15Z stabbingfinger@gmail.com $'<br>
+<strong>hud_font</strong> = &lt;pygame.font.Font object&gt;<br>
+<strong>label_font</strong> = None</td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#7799ee">
 <td colspan=3 valign=bottom>&nbsp;<br>

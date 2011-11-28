@@ -1,0 +1,156 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module gummworld2.tiledmap</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.tiledmap</strong></big></big> (version $Id: tiledmap.py 362 2011-11-28 04:46:48Z stabbingfinger@gmail.com $)</font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/dist/gummworld2/tiled2/gamelib/gummworld2/tiledmap.py">c:\cygwin\home\bw\devel\python\dist\gummworld2\tiled2\gamelib\gummworld2\tiledmap.py</a></font></td></tr></table>
+    <p><tt>tiledmap.py&nbsp;-&nbsp;Tiled&nbsp;Map&nbsp;module&nbsp;for&nbsp;Gummworld2.<br>
+&nbsp;<br>
+See&nbsp;basicmap&nbsp;module&nbsp;for&nbsp;the&nbsp;basic&nbsp;docs.<br>
+&nbsp;<br>
+These&nbsp;classes&nbsp;add&nbsp;support&nbsp;for&nbsp;Tiled&nbsp;maps&nbsp;loaded&nbsp;by&nbsp;tiletmxloader.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="pygame.html">pygame</a><br>
+</td><td width="25%" valign=top><a href="gummworld2.spatialhash.html">gummworld2.spatialhash</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="gummworld2.tiledmap.html#TiledLayer">TiledLayer</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="gummworld2.basicmap.html#BasicMap">gummworld2.basicmap.BasicMap</a>(<a href="__builtin__.html#object">__builtin__.object</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="gummworld2.tiledmap.html#TiledMap">TiledMap</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="TiledLayer">class <strong>TiledLayer</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="TiledLayer-__init__"><strong>__init__</strong></a>(self, parent_map, layer, layeri)</dt></dl>
+
+<dl><dt><a name="TiledLayer-__iter__"><strong>__iter__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="TiledLayer-__len__"><strong>__len__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="TiledLayer-add"><strong>add</strong></a>(self, tile)</dt></dl>
+
+<dl><dt><a name="TiledLayer-blit_layer"><strong>blit_layer</strong></a>(self, src_layer)</dt></dl>
+
+<dl><dt><a name="TiledLayer-collapse"><strong>collapse</strong></a>(self, collapse<font color="#909090">=(1, 1)</font>)</dt></dl>
+
+<dl><dt><a name="TiledLayer-get_objects_in_rect"><strong>get_objects_in_rect</strong></a>(self, rect)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="TiledMap">class <strong>TiledMap</strong></a>(<a href="gummworld2.basicmap.html#BasicMap">gummworld2.basicmap.BasicMap</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="gummworld2.tiledmap.html#TiledMap">TiledMap</a></dd>
+<dd><a href="gummworld2.basicmap.html#BasicMap">gummworld2.basicmap.BasicMap</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="TiledMap-__init__"><strong>__init__</strong></a>(self, map_file_name, collapse<font color="#909090">=(1, 1)</font>, collapse_layers<font color="#909090">=None</font>, load_invisible<font color="#909090">=True</font>)</dt><dd><tt>Construct&nbsp;a&nbsp;<a href="#TiledMap">TiledMap</a>&nbsp;<a href="__builtin__.html#object">object</a>.<br>
+&nbsp;<br>
+the&nbsp;map_file_name&nbsp;argument&nbsp;is&nbsp;the&nbsp;path&nbsp;and&nbsp;filename&nbsp;of&nbsp;the&nbsp;TMX&nbsp;map&nbsp;file.<br>
+&nbsp;<br>
+The&nbsp;collapse&nbsp;argument&nbsp;is&nbsp;the&nbsp;number&nbsp;of&nbsp;tiles&nbsp;on&nbsp;the&nbsp;X&nbsp;and&nbsp;Y&nbsp;axes&nbsp;to<br>
+join.<br>
+&nbsp;<br>
+The&nbsp;collapse_layers&nbsp;argument&nbsp;is&nbsp;a&nbsp;sequence&nbsp;of&nbsp;indices&nbsp;indicating&nbsp;to<br>
+which&nbsp;<a href="#TiledMap">TiledMap</a>.layers&nbsp;the&nbsp;collapse&nbsp;algorithm&nbsp;should&nbsp;be&nbsp;applied.&nbsp;See&nbsp;the<br>
+tiledmap.collapse_map.<br>
+&nbsp;<br>
+If&nbsp;you&nbsp;don't&nbsp;want&nbsp;every&nbsp;layer&nbsp;collapsed,&nbsp;or&nbsp;different&nbsp;collapse&nbsp;values<br>
+per&nbsp;layer,&nbsp;use&nbsp;the&nbsp;default&nbsp;of&nbsp;(1,1)&nbsp;and&nbsp;pick&nbsp;individual&nbsp;tile&nbsp;layers&nbsp;to<br>
+collapse&nbsp;via&nbsp;TileMap.<a href="#TiledMap-collapse">collapse</a>(),&nbsp;collapse_map(),&nbsp;or&nbsp;collapse_layer().</tt></dd></dl>
+
+<dl><dt><a name="TiledMap-get_layer_by_name"><strong>get_layer_by_name</strong></a>(self, layer_name)</dt></dl>
+
+<dl><dt><a name="TiledMap-get_object_groups"><strong>get_object_groups</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="TiledMap-get_tile_layers"><strong>get_tile_layers</strong></a>(self)</dt></dl>
+
+<hr>
+Methods inherited from <a href="gummworld2.basicmap.html#BasicMap">gummworld2.basicmap.BasicMap</a>:<br>
+<dl><dt><a name="TiledMap-collapse"><strong>collapse</strong></a>(self, collapse<font color="#909090">=(1, 1)</font>, which_layers<font color="#909090">=None</font>)</dt><dd><tt>Collapse&nbsp;which_layers&nbsp;by&nbsp;joining&nbsp;num_tiles&nbsp;into&nbsp;one&nbsp;tile.&nbsp;The<br>
+original&nbsp;layers&nbsp;are&nbsp;replaced&nbsp;by&nbsp;new&nbsp;layers.<br>
+&nbsp;<br>
+The&nbsp;collapse&nbsp;argument&nbsp;is&nbsp;the&nbsp;number&nbsp;of&nbsp;tiles&nbsp;on&nbsp;the&nbsp;X&nbsp;and&nbsp;Y&nbsp;axes&nbsp;to<br>
+join.<br>
+&nbsp;<br>
+The&nbsp;collapse_layers&nbsp;argument&nbsp;is&nbsp;a&nbsp;sequence&nbsp;of&nbsp;indices&nbsp;indicating&nbsp;to<br>
+which&nbsp;<a href="#TiledMap">TiledMap</a>.layers&nbsp;the&nbsp;collapse&nbsp;algorithm&nbsp;should&nbsp;be&nbsp;applied.&nbsp;See&nbsp;the<br>
+tiledmap.collapse_map.</tt></dd></dl>
+
+<dl><dt><a name="TiledMap-get_layer"><strong>get_layer</strong></a>(self, layer_index)</dt></dl>
+
+<dl><dt><a name="TiledMap-get_layers"><strong>get_layers</strong></a>(self, which_layers<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="TiledMap-get_objects_in_rect"><strong>get_objects_in_rect</strong></a>(self, rect, layeri<font color="#909090">=0</font>)</dt></dl>
+
+<dl><dt><a name="TiledMap-merge_layers"><strong>merge_layers</strong></a>(self, which_layers<font color="#909090">=None</font>)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="gummworld2.basicmap.html#BasicMap">gummworld2.basicmap.BasicMap</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>__author__</strong> = 'Gummbum, (c) 2011'<br>
+<strong>__version__</strong> = '$Id: tiledmap.py 362 2011-11-28 04:46:48Z stabbingfinger@gmail.com $'</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#7799ee">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Author</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#7799ee"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Gummbum,&nbsp;(c)&nbsp;2011</td></tr></table>
+</body></html>
