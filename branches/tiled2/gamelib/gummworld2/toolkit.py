@@ -520,9 +520,30 @@ def get_objects_in_cell_ids(map_, cell_ids_per_layer):
     return objects_per_layer
 
 
-def get_object_array():
-    visible_cell_ids = get_visible_cell_ids(State.camera, State.map)
-    return get_objects_in_cell_ids(State.map, visible_cell_ids)
+def get_object_array(max_speed=10):
+    """Return a list of the map's objects that would be visible to the camera.
+    
+    The max_speed argument adds this many pixels to each edge of the query rect
+    to accommodate for the space moved during frame interpolation cycles. This
+    should at least match the scrolling speed to avoid black flickers at the
+    screen edges.
+    
+    The return value is a list of object lists:
+        [   [obj0, obj1, ...],          # layer0
+            [obj0, obj1, ...],          # layer1
+            ...,                        # layerN
+        ]
+    """
+    objects_per_layer = []
+    empty_list = []
+    query_rect = State.camera.rect.inflate(max_speed*2,max_speed*2)
+    for layer in State.map.layers:
+        if layer.visible:
+            objects_per_layer.append(
+                layer.objects.intersect_objects(query_rect))
+        else:
+            objects_per_layer.append(empty_list)
+    return objects_per_layer
 
 
 def draw_object_array(object_array):
