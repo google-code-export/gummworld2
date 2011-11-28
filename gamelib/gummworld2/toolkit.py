@@ -563,8 +563,17 @@ def put_tilesheet_info(tilesheet_path, tilesheet_values):
         f.close()
 
 
-def get_visible_cell_ids(camera, map_):
+def get_visible_cell_ids(camera, map_, max_speed=10):
     """Return a list of the map's cell IDs that would be visible to the camera.
+    
+    The camera argument is the camera that defines the view.
+    
+    The map_ argument is the BasicMap or TiledMap to query.
+    
+    The max_speed argument adds this many pixels to each edge of the query rect
+    to accommodate for the space moved during frame interpolation cycles. This
+    should at least match the scrolling speed to avoid black flickers at the
+    screen edge.
     
     The return value is a list of cell IDs in the map's spatialhash for each
     layer. The per-layer values are necessary because maps can have layers with
@@ -578,9 +587,14 @@ def get_visible_cell_ids(camera, map_):
             ...,                        # layerN
         ]
     """
+    empty_list = []
     cell_ids = []
+    query_rect = camera.rect.inflate(max_speed*2,max_speed*2)
     for layer in map_.layers:
-        cell_ids.append(layer.objects.intersect_indices(camera.rect))
+        if layer.visible:
+            cell_ids.append(layer.objects.intersect_indices(query_rect))
+        else:
+            cell_ids.append(empty_list)
     return cell_ids
 
 
@@ -603,11 +617,11 @@ def get_objects_in_cell_ids(map_, cell_ids_per_layer):
     objects_per_layer = []
     for layeri,cell_ids in enumerate(cell_ids_per_layer):
         get_cell = map_.layers[layeri].objects.get_cell
-        objects = []
-        objects_extend = objects.extend
+        objects = set()
+        objects_update = objects.update
         for cell_id in cell_ids:
-            objects_extend(get_cell(cell_id))
-        objects_per_layer.append(objects)
+            objects_update(get_cell(cell_id))
+        objects_per_layer.append(list(objects))
     return objects_per_layer
 
 
@@ -632,6 +646,8 @@ def draw_object_array(object_array):
     cx,cy = cam.rect.topleft
     for sprites in object_array:
         for sprite in sprites:
+            if not sprite.image:
+                continue
             rect = sprite.rect
             sx,sy = rect.topleft
             blit(sprite.image, (sx-cx,sy-cy))
