@@ -42,14 +42,14 @@ from pygame.locals import *
 
 import paths
 import gummworld2
-from gummworld2 import Engine, State, CameraTargetSprite, Vec2d
-from gummworld2 import context, geometry, toolkit
+from gummworld2 import Engine, State, Vec2d
+from gummworld2 import context, model, geometry, toolkit
 
 
-class Avatar(CameraTargetSprite):
+class Avatar(model.Object):
     
     def __init__(self, map_pos, screen_pos):
-        CameraTargetSprite.__init__(self)
+        model.Object.__init__(self)
         self.image = pygame.Surface((10,10))
         self.rect = self.image.get_rect()
         pygame.draw.circle(self.image, Color('yellow'), self.rect.center, 4)

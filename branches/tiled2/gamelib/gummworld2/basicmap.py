@@ -20,52 +20,28 @@ __version__ = '$Id$'
 __author__ = 'Gummbum, (c) 2011'
 
 
-__doc__ = """map.py - Map module for Gummworld2.
+__doc__ = """basicmap.py - Basic Map module for Gummworld2.
 
-Defines the Map, which serves tiles, tile labels, and grid outlines. Supports
-tile layers.
+Defines the BasicMap, which serves layers and sprite objects.
 
-Map combines view (pygame) and model (world coordinates). It contains a rect
-attribute defining its dimensions, and observes pygame coordinate space.
+BasicMap combines view (pygame) and model (world coordinates). It contains a
+rect attribute defining its dimensions, and observes pygame coordinate space.
 
-The layers attribute is a two-dimensional list of tile sprites. This can be
-accessed directly, or via the class methods. See also the Camera class for
-its visible tile range utilities.
-
-IMPORTANT: Map instance variables tile_size and map_size define the *original*
-dimensions of the map. Map layers can support individual tile sizes and map
-sizes. When rendering a layer one should use the MapLayer instance variables
-instead. This is especially important for two cases:
-    
-    1. Loading a map that uses layers with different tile sizes.
-    2. Using toolkit.collapse_map_layer() to resize a layer.
-
-If a map has only one layer, or all layers have the same dimensions it is safe
-to use the Map instance variables tile_size and map_size.
-
-It may help to see a code representation. Here are two layers, one with 32x32
-tiles and another with 64x64 tiles. Note that both layer sizes in pixels are the
-same (320x320 pixels) but the map grids are at 10 and 5 respectively.
-    
-    map.layers = [
-        MapLayer((32,32), (10,10)),
-        MapLayer((64,64), (5,5)),
-    ]
-
-The sprites for grid lines and grid labels are created when each map layer is
-created. The toolkit.collapse_* functions also convert these sprites.
+The layers attribute is a spatialhash containing sprites. This can be
+accessed directly, or via the class methods. See also the toolkit module for
+convenience utilities.
 
 The caller must manage maps and their corresponding worlds by swapping the
 State.map and State.world package globals, for example:
     
     # Create the initial map and world, and save it.
-    State.map = Map(tile_size, map_size)
+    State.map = BasicMap(width, height, tile_width, tile_height)
     State.world = model.World(State.map.rect)
     levels = []
     levels.append((State.map,State.world))
     ...
     # Create a new one, save it.
-    State.map = Map(new_tile_size, new_map_size)
+    State.map = BasicMap(new_width, new_height, new_tile_width, new_tile_height)
     State.world = model.World(State.map.rect)
     levels.append((State.map,State.world))
     ...

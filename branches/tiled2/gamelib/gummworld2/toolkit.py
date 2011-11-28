@@ -34,15 +34,11 @@ from pygame.locals import RLEACCEL, SRCALPHA, BLEND_RGBA_ADD
 from pygame.sprite import Sprite
 
 from gummworld2 import data, State, BasicMap, BasicLayer, Vec2d
-## TODO: remove Map and MapLayer
-from gummworld2 import Map, MapLayer
 from gummworld2.geometry import RectGeometry, PolyGeometry, CircleGeometry
 from gummworld2.ui import HUD, Stat, Statf, hud_font
 from tiledtmxloader.tiledtmxloader import TileMapParser
 from tiledtmxloader.helperspygame import ResourceLoaderPygame
 
-# HACK by Cosmo to get pygame 1.8 working
-haspygame19 = pygame.version.vernum >= (1, 9)
 
 # Filename-matching extensions for image formats that pygame can load.
 IMAGE_FILE_EXTENSIONS = (
@@ -189,107 +185,6 @@ def make_tiles2():
             layer.add(s)
 
 # make_tiles2
-
-
-def reduce_map_layers(map, layersi):
-    """Reduce the number of layers in a map by blitting two or more layers into
-    a single layer. A new instance of Map is returned.
-    
-    The map argument is the source map. It must be an instance of Map.
-    
-    The layersi argument is a sequence of int of length two or more. The
-    layers are blitted in the order specified. Layers not specified and layers
-    that are not visible (i.e. layer.visible==False) will be copied as a layer
-    instead of being blitted.
-    
-    Tiles in the blitted layers typically need to have some transparent pixels
-    (e.g. a surface colorkey), otherwise their pixels would completely erase the
-    tiles underneath.
-    
-    Alphas and blending are not preserved by this routine.
-    
-    The tile and map sizes in the map layers should be of the same size.
-    Otherwise the desired results will likely not be produced. If using
-    collapse_map_layer and reduce_map_layers on subsets of map layers, one
-    would usually want to call reduce_map_layers first. See the Combo example
-    below, in which only two of three layers are transformed.
-    
-    Yes, this could be a challenge to manage for maps with special-purpose
-    layers. One needs to know one's maps and layers before and after the
-    transformations. Annotating map layers with a name or ID attribute might
-    help. If the base layer has a name attribute it will be copied to the new
-    map layer.
-    
-    Basic example:
-        new_map = reduce_map_layers(orig_map, range(len(orig_map.layers)))
-    
-    Combo example:
-        # Reduce 3-layer map to two layers.
-        map = reduce_map_layers(map, (0,1))
-        # Collapse layer 0, two tiles into one tile.
-        map = collapse_map_layer(map, 0, (2,2))
-        # The resulting map has two layers numbered 0 and 1.
-    """
-    # Prepare a new map.
-    tw,th = map.tile_size
-    mw,mh = map.map_size
-    new_map = Map((tw,th), (mw,mh))
-    # Prepare a base layer.
-    i = layersi[0]
-    base_layer = map.layers[i]
-    new_base_layer = MapLayer(base_layer.tile_size, base_layer.map_size, visible=base_layer.visible,
-        make_grid=True, make_labels=True, name=base_layer.name)
-    new_map.layers.append(new_base_layer)
-    # Make the base layer.
-    for src_sprite in base_layer:
-        if src_sprite:
-            s = pygame.sprite.Sprite()
-            s.image = src_sprite.image.copy()
-            s.rect = src_sprite.rect.copy()
-            s.name = src_sprite.name
-        else:
-            s = None
-        new_base_layer.append(s)
-    # Blit the tiles in the specified layers.
-    for layeri in layersi[1:]:
-        layer = map.layers[layeri]
-        if not layer.visible:
-            # Skip invisible layers.
-            continue
-        for i,src_sprite in enumerate(layer):
-            if src_sprite:
-                x,y = src_sprite.name
-                s = new_base_layer.get_tile_at(x, y)
-                if s is None:
-                    s = pygame.sprite.Sprite()
-                    s.name = x,y
-                    s.image = src_sprite.image.copy()
-                    s.rect = src_sprite.rect.copy()
-                    new_base_layer[i] = s
-                else:
-                    s.image.blit(src_sprite.image, (0,0))
-    # Copy layers that were not specified and layers that are not invisible.
-    for i,layer in enumerate(map.layers):
-        if i in layersi and layer.visible:
-            # Already been copied.
-            continue
-        new_layer = MapLayer(layer.tile_size, layer.map_size,
-            visible=layer.visible, make_grid=True, make_labels=True,
-            name=layer.name)
-        new_map.insert(i, new_layer)
-        for src_sprite in layer:
-            if src_sprite:
-                s = pygame.sprite.Sprite()
-                s.name = src_sprite.name
-                s.image = src_sprite.image.copy()
-                s.rect = src_sprite.rect.copy()
-            else:
-                s = None
-            new_layer.append(s)
-    
-    return new_map
-
-# reduce_map_layers
 
 
 def load_entities(filepath, cls_dict={}):
@@ -659,10 +554,7 @@ def draw_sprite(s, blit_flags=0):
     camera = State.camera
     cx,cy = camera.rect.topleft
     sx,sy = s.rect.topleft
-    if haspygame19:
-        camera.surface.blit(s.image, (sx-cx, sy-cy), special_flags=blit_flags)
-    else:
-        camera.surface.blit(s.image, (sx-cx, sy-cy))
+    camera.surface.blit(s.image, (sx-cx, sy-cy), None, blit_flags)
 
 # draw_sprite
 

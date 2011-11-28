@@ -47,7 +47,6 @@ if __debug__: print 'gummworld2 v%s loading...' % version.version
 from vec2d import Vec2d
 from state import State
 from context import Context
-from subpixel import SubPixelSurface
 from spatialhash import SpatialHash
 
 # the following creates a separate namespace, don't do it.
@@ -55,19 +54,16 @@ from spatialhash import SpatialHash
 #from tiledtmxloader.helperspygame import ResourceLoaderPygame, RendererPygame
 
 from screen import Screen, View
-## TODO: Get rid of old map references
-from map import Map, MapLayer
 from basicmap import BasicMap, BasicLayer
 from tiledmap import TiledMap
 from supermap import SuperMap, MapHandler
 from camera import Camera
 from gameclock import GameClock
+from subpixel import SubPixelSurface
 from popup_menu import PopupMenu
 from ui import HUD, Stat, Statf
-from canvas import Canvas
-from sprite import CameraTargetSprite, BucketSprite, BucketGroup
 
-from engine import run, Engine, NO_WORLD, SIMPLE_WORLD, QUADTREE_WORLD, PYMUNK_WORLD
+from engine import run, Engine, NO_WORLD, SIMPLE_WORLD, PYMUNK_WORLD
 
 
 # Toolkits and utilities

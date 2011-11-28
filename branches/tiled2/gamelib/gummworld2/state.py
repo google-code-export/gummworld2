@@ -65,14 +65,14 @@ class State(object):
         name: The name of the current state context. This can be any immutable
             value. Initial value is 'init', and the state is saved so that State
             can be reset via State.restore('init').
-        screen: A screen.Screen object, which is a wrapper for the top level
+        screen: A Screen object, which is a wrapper for the top level
             pygame surface.
         world: A model.World* object used to store game model entities.
-        world_type: One of engine.NO_WORLD, engine.SIMPLE_WORLD,
-            engine.QUADTREE_WORLD, or engine.PYMUNK_WORLD if State was
-            initialized via the Engine class. Else it is None.
-        camera: A camera.Camera object.
-        map: A map.Map object.
+        world_type: One of engine.NO_WORLD, engine.SIMPLE_WORLD, or
+            engine.PYMUNK_WORLD if State was initialized via the Engine class.
+            Else it is None.
+        camera: A Camera object.
+        map: A BasicMap, TiledMap, or SuperMap object.
     
     Class variable State.default_attrs holds the list of attributes that are
     saved and restored by default when the static methods State.save() and
@@ -84,16 +84,16 @@ class State(object):
     
     ## core objects
     
-    screen = None               # screen.Screen
+    screen = None               # Screen
     world = None                # model.World
     world_type = None           # engine.*_WORLD
     
-    camera = None               # camera.Camera
-    camera_target = None        # camera.Camera.target
-    map = None                  # map.Map
+    camera = None               # Camera
+    camera_target = None        # Camera.target
+    map = None                  # BasicMap, TiledMap, SuperMap
     
-    clock = None                # gameclock.GameClock
-    menu = None                 # popup_menu.PopupMenu
+    clock = None                # GameClock
+    menu = None                 # PopupMenu
     
     ## game settings
     

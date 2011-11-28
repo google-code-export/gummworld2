@@ -27,7 +27,7 @@ camera.py - Camera module for Gummworld2.
 
 import pygame
 
-from gummworld2 import State, Map, MapLayer, TiledMap, SuperMap, Vec2d, geometry
+from gummworld2 import State, Vec2d, geometry
 
 
 class Camera(object):
