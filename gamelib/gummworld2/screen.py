@@ -99,6 +99,11 @@ class View(object):
         """
         self.surface.fill(self.fill_color)
     
+    def fill(self, color, rect=None, special_flags=0):
+        """Fill this surface with color.
+        """
+        self.surface.fill(color, rect, special_flags)
+    
     def blit(self, surf, pos, area=None, special_flags=0):
         """Blit a surface to this surface.
         """
