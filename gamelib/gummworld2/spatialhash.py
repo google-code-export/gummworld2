@@ -20,6 +20,13 @@ from pygame.locals import Rect
 class SpatialHash(object):
     
     def __init__(self, world_rect, cell_size):
+        ## Must inflate world rect by 1. This is because pygame rects consider
+        ## the right and bottom borders to have zero units width. But the
+        ## hashing calculates those as one unit width. Thus, taking pygame
+        ## rect space at face value will attempt to access non-existant buckets
+        ## at the corner cases.
+        world_rect = world_rect.inflate(1,1)
+        
         self.rect = Rect(world_rect)
         self.bounds = (
             world_rect[0],

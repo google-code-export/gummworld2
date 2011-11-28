@@ -65,10 +65,10 @@ import gummworld2
 from gummworld2 import *
 
 
-class Avatar(CameraTargetSprite):
+class Avatar(model.Object):
     
     def __init__(self, map_pos, screen_pos):
-        CameraTargetSprite.__init__(self)
+        model.Object.__init__(self)
         self.image = pygame.surface.Surface((10,10))
         self.rect = self.image.get_rect()
         pygame.draw.circle(self.image, Color('yellow'), self.rect.center, 4)

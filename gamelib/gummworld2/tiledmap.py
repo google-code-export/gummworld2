@@ -1,3 +1,32 @@
+#!/usr/bin/env python
+
+# This file is part of Gummworld2.
+#
+# Gummworld2 is free software: you can redistribute it and/or modify it
+# under the terms of the GNU Lesser General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Gummworld2 is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with Gummworld2.  If not, see <http://www.gnu.org/licenses/>.
+
+
+__version__ = '$Id$'
+__author__ = 'Gummbum, (c) 2011'
+
+
+__doc__ = """tiledmap.py - Tiled Map module for Gummworld2.
+
+See basicmap module for the basic docs.
+
+These classes add support for Tiled maps loaded by tiletmxloader.
+"""
+
 import pygame
 
 from tiledtmxloader.helperspygame import get_layers_from_map, SpriteLayer
@@ -129,9 +158,6 @@ def _load_tiled_tmx_map(tmx_map, gummworld_map, load_invisible=True):
     """
     
     # Taken pretty much verbatim from the (old) tiledtmxloader module.
-    #
-    # The tiledtmxloader.TileMap object is stored in the returned
-    # gamelib.Map object in attribute 'tiled_map'.
     
     from pygame.sprite import Sprite
     
