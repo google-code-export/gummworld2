@@ -40,7 +40,7 @@ from pygame.locals import K_ESCAPE, K_TAB, K_UP, K_DOWN, K_LEFT, K_RIGHT
 
 import paths
 import gummworld2
-from gummworld2 import context, Engine, State, Camera, View, toolkit
+from gummworld2 import context, Engine, State, Camera, View, Vec2d, toolkit
 
 
 class App(Engine):
@@ -52,11 +52,12 @@ class App(Engine):
             caption='03 Switch View - Press TAB to cycle views',
             resolution=(600,600),
             tile_size=(128,128), map_size=(10,10),
-            frame_speed=0, default_schedules=False)
+            frame_speed=0)  #, default_schedules=False)
         
         ## Create a second camera so we can switch between them...
         
         ## Save the main state.
+        State.camera.init_position(Vec2d(State.camera.rect.size) / 2 - 5)
         State.save('main')
         State.name = 'main'
         
@@ -80,7 +81,7 @@ class App(Engine):
         self.move_y = 0
         
         ## Start the default schedules.
-        self.schedule_default()
+#        self.schedule_default()
         
     def update(self, dt):
         """overrides Engine.update"""
@@ -91,7 +92,7 @@ class App(Engine):
         """overrides Engine.draw"""
         # Draw stuff.
         State.camera.interpolate()
-        State.screen.clear()
+        State.camera.view.clear()
         toolkit.draw_tiles()
         if State.name == 'small':
             pygame.draw.rect(State.screen.surface, (99,99,99),
@@ -127,6 +128,7 @@ class App(Engine):
             ## may need to do this for your own classes if you integrate them
             ## with State.save() and State.restore().
             State.restore(self.next_state[State.name])
+            State.screen.clear()
         elif key == K_ESCAPE:
             context.pop()
         

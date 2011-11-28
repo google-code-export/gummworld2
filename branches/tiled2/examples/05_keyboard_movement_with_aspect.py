@@ -67,9 +67,9 @@ class App(Engine):
         
         # Make some default content.
         toolkit.make_tiles2()
+        self.visible_objects = []
         toolkit.make_hud()
         State.clock.schedule_update_priority(State.hud.update, 1.0)
-        State.show_labels = True
         
         self.move_x = 0
         self.move_y = 0
@@ -78,6 +78,7 @@ class App(Engine):
         """overrides Engine.update"""
         self.update_camera_position()
         State.camera.update(dt)
+        self.visible_objects = toolkit.get_object_array()
     
     def update_camera_position(self):
         """update the camera's position if any movement keys are held down
@@ -95,8 +96,7 @@ class App(Engine):
         # Draw stuff.
         State.camera.interpolate()
         State.screen.clear()
-        toolkit.draw_tiles()
-        toolkit.draw_labels()
+        toolkit.draw_object_array(self.visible_objects)
         State.hud.draw()
         if State.name == 'small':
             pygame.draw.rect(State.screen.surface, (99,99,99),

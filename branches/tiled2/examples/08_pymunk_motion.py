@@ -43,7 +43,7 @@ except:
 import paths
 import gummworld2
 from gummworld2 import context, data, model, geometry, toolkit
-from gummworld2 import Engine, State, CameraTargetSprite, Vec2d
+from gummworld2 import Engine, State, TiledMap, CameraTargetSprite, Vec2d
 
 
 class Avatar(Sprite):
@@ -60,27 +60,24 @@ class Avatar(Sprite):
 class App(Engine):
     
     def __init__(self, resolution=(640,480)):
+        
+        resolution = Vec2d(resolution)
+        
+        # Load Tiled TMX map, then update the world's dimensions.
+        tiled_map = TiledMap(data.filepath('map', 'Gumm no swamps.tmx'))
+        
         ## Camera target is a pymunk circle body. We want to delay scheduling
         ## the world and camera items until after we create the world.
         Engine.__init__(self,
             caption='08 pymunk Motion -  G: grid | L: labels',
             resolution=resolution,
-            camera_target=model.CircleBody(),
-            frame_speed=0, default_schedules=False)
+            map=tiled_map, world_type=gummworld2.PYMUNK_WORLD,
+            frame_speed=0)  #, default_schedules=False)
+        
+        self.visible_objects = []
         
         # Make an avatar sprite so we have something to draw.
-        resolution = Vec2d(resolution)
         self.avatar = Avatar(resolution//2)
-        
-        # Load Tiled TMX map, then update the world's dimensions.
-        self.map = toolkit.load_tiled_tmx_map(
-            data.filepath('map', 'Gumm no swamps.tmx'))
-        self.world = model.WorldPymunk(self.map.rect)
-        self.world.add(self.camera_target)
-        # Update State after manual initialization of map and world. Schedule
-        # the world and camera items now.
-        self.set_state()
-        self.schedule_default()
         
         # I like huds.
         toolkit.make_hud()
@@ -97,6 +94,9 @@ class App(Engine):
         self.speed = None
         self.mouse_down = False
         
+        self.grid_cache = {}
+        self.label_cache = {}
+        
         State.camera.init_position((325,420))
     
     def update(self, dt):
@@ -105,6 +105,7 @@ class App(Engine):
         if self.mouse_down:
             self.update_mouse_movement(pygame.mouse.get_pos())
         self.update_camera_position()
+        self.visible_objects = toolkit.get_object_array()
     
     def update_mouse_movement(self, pos):
         # Angle of movement.
@@ -150,9 +151,11 @@ class App(Engine):
         """overrides Engine.draw"""
         # Draw stuff.
         State.screen.clear()
-        toolkit.draw_tiles()
-        toolkit.draw_grid()
-        toolkit.draw_labels()
+        toolkit.draw_object_array(self.visible_objects)
+        if State.show_grid:
+            toolkit.draw_grid(self.grid_cache)
+        if State.show_labels:
+            toolkit.draw_labels(self.label_cache)
         State.hud.draw()
         self.draw_avatar()
         State.screen.flip()

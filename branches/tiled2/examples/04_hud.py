@@ -57,6 +57,7 @@ class App(Engine):
         
         # Make some default content.
         toolkit.make_tiles()
+        self.visible_objects = []
         
         ## Make the hud. toolkit makes it visible by default.
         toolkit.make_hud()
@@ -68,6 +69,7 @@ class App(Engine):
         """overrides Engine.update"""
         self.update_camera_position()
         State.camera.update()
+        self.visible_objects = toolkit.get_object_array()
         ## Update the hud.
         State.hud.update(dt)
         
@@ -75,8 +77,8 @@ class App(Engine):
         """overrides Engine.draw"""
         # Draw stuff.
         State.camera.interpolate()
-        State.screen.clear()
-        toolkit.draw_tiles()
+        State.camera.view.clear()
+        toolkit.draw_object_array(self.visible_objects)
         ## Draw the hud.
         State.hud.draw()
         if State.name == 'small':
@@ -110,6 +112,7 @@ class App(Engine):
         elif key == K_TAB:
             # Select the next state name and and restore it.
             State.restore(self.next_state[State.name])
+            State.screen.clear()
         elif key == K_ESCAPE:
             context.pop()
         

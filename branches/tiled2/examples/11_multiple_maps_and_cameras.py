@@ -34,7 +34,7 @@ from pygame.locals import Rect, K_ESCAPE, K_TAB, K_UP, K_DOWN, K_LEFT, K_RIGHT
 import paths
 import gummworld2
 from gummworld2 import context, state, model, geometry, toolkit
-from gummworld2 import Engine, State, Camera, Map, View, Vec2d
+from gummworld2 import Engine, State, Camera, BasicMap, View, Vec2d
 
 
 class App(Engine):
@@ -67,7 +67,8 @@ class App(Engine):
         State.camera = Camera(model.Object(), self.view2)
         State.camera.update_when_restored = False
         ## Make another map.
-        State.map = Map(State.map.tile_size, State.map.map_size)
+        m = State.map
+        State.map = BasicMap(m.width, m.height, m.tile_width, m.tile_height)
         toolkit.make_tiles2()
         ## Save the state.
         State.save(self.view2)

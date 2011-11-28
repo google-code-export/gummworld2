@@ -29,7 +29,7 @@ from pygame.locals import K_ESCAPE, K_UP, K_DOWN, K_LEFT, K_RIGHT
 
 import paths
 import gummworld2
-from gummworld2 import context, Engine, State, toolkit
+from gummworld2 import context, Engine, State, Vec2d, toolkit
 
 
 class App(Engine):
@@ -47,6 +47,8 @@ class App(Engine):
         
         self.move_x = 0
         self.move_y = 0
+        
+        State.camera.init_position(State.camera.rect.center - Vec2d(5,5))
         
     def update(self, dt):
         """overrides Engine.update"""
