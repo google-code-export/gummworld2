@@ -1,0 +1,173 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module gummworld2.basicmap</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.basicmap</strong></big></big> (version $Id: basicmap.py 362 2011-11-28 04:46:48Z stabbingfinger@gmail.com $)</font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/dist/gummworld2/tiled2/gamelib/gummworld2/basicmap.py">c:\cygwin\home\bw\devel\python\dist\gummworld2\tiled2\gamelib\gummworld2\basicmap.py</a></font></td></tr></table>
+    <p><tt>basicmap.py&nbsp;-&nbsp;Basic&nbsp;Map&nbsp;module&nbsp;for&nbsp;Gummworld2.<br>
+&nbsp;<br>
+Defines&nbsp;the&nbsp;<a href="#BasicMap">BasicMap</a>,&nbsp;which&nbsp;serves&nbsp;layers&nbsp;and&nbsp;sprite&nbsp;objects.<br>
+&nbsp;<br>
+<a href="#BasicMap">BasicMap</a>&nbsp;combines&nbsp;view&nbsp;(pygame)&nbsp;and&nbsp;model&nbsp;(world&nbsp;coordinates).&nbsp;It&nbsp;contains&nbsp;a<br>
+rect&nbsp;attribute&nbsp;defining&nbsp;its&nbsp;dimensions,&nbsp;and&nbsp;observes&nbsp;pygame&nbsp;coordinate&nbsp;space.<br>
+&nbsp;<br>
+The&nbsp;layers&nbsp;attribute&nbsp;is&nbsp;a&nbsp;spatialhash&nbsp;containing&nbsp;sprites.&nbsp;This&nbsp;can&nbsp;be<br>
+accessed&nbsp;directly,&nbsp;or&nbsp;via&nbsp;the&nbsp;class&nbsp;methods.&nbsp;See&nbsp;also&nbsp;the&nbsp;toolkit&nbsp;module&nbsp;for<br>
+convenience&nbsp;utilities.<br>
+&nbsp;<br>
+The&nbsp;caller&nbsp;must&nbsp;manage&nbsp;maps&nbsp;and&nbsp;their&nbsp;corresponding&nbsp;worlds&nbsp;by&nbsp;swapping&nbsp;the<br>
+State.map&nbsp;and&nbsp;State.world&nbsp;package&nbsp;globals,&nbsp;for&nbsp;example:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Create&nbsp;the&nbsp;initial&nbsp;map&nbsp;and&nbsp;world,&nbsp;and&nbsp;save&nbsp;it.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;State.map&nbsp;=&nbsp;<a href="#BasicMap">BasicMap</a>(width,&nbsp;height,&nbsp;tile_width,&nbsp;tile_height)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;State.world&nbsp;=&nbsp;model.World(State.map.rect)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;levels&nbsp;=&nbsp;[]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;levels.append((State.map,State.world))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;...<br>
+&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Create&nbsp;a&nbsp;new&nbsp;one,&nbsp;save&nbsp;it.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;State.map&nbsp;=&nbsp;<a href="#BasicMap">BasicMap</a>(new_width,&nbsp;new_height,&nbsp;new_tile_width,&nbsp;new_tile_height)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;State.world&nbsp;=&nbsp;model.World(State.map.rect)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;levels.append((State.map,State.world))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;...<br>
+&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Restore&nbsp;a&nbsp;map&nbsp;and&nbsp;world.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;State.map,State.world&nbsp;=&nbsp;levels[0]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+Alternatively&nbsp;State.save()&nbsp;and&nbsp;State.restore()&nbsp;can&nbsp;be&nbsp;used&nbsp;to&nbsp;facilitate&nbsp;this.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="gummworld2.data.html">gummworld2.data</a><br>
+</td><td width="25%" valign=top><a href="pygame.html">pygame</a><br>
+</td><td width="25%" valign=top><a href="gummworld2.spatialhash.html">gummworld2.spatialhash</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="gummworld2.basicmap.html#BasicLayer">BasicLayer</a>
+</font></dt><dt><font face="helvetica, arial"><a href="gummworld2.basicmap.html#BasicMap">BasicMap</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="BasicLayer">class <strong>BasicLayer</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="BasicLayer-__init__"><strong>__init__</strong></a>(self, parent_map, layer_index)</dt></dl>
+
+<dl><dt><a name="BasicLayer-__iter__"><strong>__iter__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="BasicLayer-add"><strong>add</strong></a>(self, tile)</dt></dl>
+
+<dl><dt><a name="BasicLayer-blit_layer"><strong>blit_layer</strong></a>(self, src_layer)</dt></dl>
+
+<dl><dt><a name="BasicLayer-collapse"><strong>collapse</strong></a>(self, collapse<font color="#909090">=(1, 1)</font>)</dt></dl>
+
+<dl><dt><a name="BasicLayer-get_objects_in_rect"><strong>get_objects_in_rect</strong></a>(self, rect)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="BasicMap">class <strong>BasicMap</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="BasicMap-__init__"><strong>__init__</strong></a>(self, width, height, tile_width, tile_height)</dt><dd><tt>Construct&nbsp;a&nbsp;<a href="#BasicMap">BasicMap</a>&nbsp;<a href="__builtin__.html#object">object</a>.</tt></dd></dl>
+
+<dl><dt><a name="BasicMap-collapse"><strong>collapse</strong></a>(self, collapse<font color="#909090">=(1, 1)</font>, which_layers<font color="#909090">=None</font>)</dt><dd><tt>Collapse&nbsp;which_layers&nbsp;by&nbsp;joining&nbsp;num_tiles&nbsp;into&nbsp;one&nbsp;tile.&nbsp;The<br>
+original&nbsp;layers&nbsp;are&nbsp;replaced&nbsp;by&nbsp;new&nbsp;layers.<br>
+&nbsp;<br>
+The&nbsp;collapse&nbsp;argument&nbsp;is&nbsp;the&nbsp;number&nbsp;of&nbsp;tiles&nbsp;on&nbsp;the&nbsp;X&nbsp;and&nbsp;Y&nbsp;axes&nbsp;to<br>
+join.<br>
+&nbsp;<br>
+The&nbsp;collapse_layers&nbsp;argument&nbsp;is&nbsp;a&nbsp;sequence&nbsp;of&nbsp;indices&nbsp;indicating&nbsp;to<br>
+which&nbsp;TiledMap.layers&nbsp;the&nbsp;collapse&nbsp;algorithm&nbsp;should&nbsp;be&nbsp;applied.&nbsp;See&nbsp;the<br>
+tiledmap.collapse_map.</tt></dd></dl>
+
+<dl><dt><a name="BasicMap-get_layer"><strong>get_layer</strong></a>(self, layer_index)</dt></dl>
+
+<dl><dt><a name="BasicMap-get_layers"><strong>get_layers</strong></a>(self, which_layers<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="BasicMap-get_objects_in_rect"><strong>get_objects_in_rect</strong></a>(self, rect, layeri<font color="#909090">=0</font>)</dt></dl>
+
+<dl><dt><a name="BasicMap-merge_layers"><strong>merge_layers</strong></a>(self, which_layers<font color="#909090">=None</font>)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-blit_layer"><strong>blit_layer</strong></a>(dest_layer, src_layer)</dt></dl>
+ <dl><dt><a name="-collapse_layer"><strong>collapse_layer</strong></a>(old_layer, new_layer, num_tiles<font color="#909090">=(2, 2)</font>)</dt><dd><tt>Collapse&nbsp;a&nbsp;single&nbsp;layer&nbsp;by&nbsp;joining&nbsp;num_tiles&nbsp;into&nbsp;one&nbsp;tile.&nbsp;A&nbsp;new&nbsp;layer<br>
+is&nbsp;returned.<br>
+&nbsp;<br>
+The&nbsp;old_layer&nbsp;argument&nbsp;is&nbsp;the&nbsp;layer&nbsp;to&nbsp;process.<br>
+&nbsp;<br>
+The&nbsp;new_layer&nbsp;argument&nbsp;is&nbsp;the&nbsp;layer&nbsp;to&nbsp;build.<br>
+&nbsp;<br>
+The&nbsp;num_tiles&nbsp;argument&nbsp;is&nbsp;a&nbsp;tuple&nbsp;representing&nbsp;the&nbsp;number&nbsp;of&nbsp;tiles&nbsp;in&nbsp;the&nbsp;X<br>
+and&nbsp;Y&nbsp;axes&nbsp;to&nbsp;join.<br>
+&nbsp;<br>
+If&nbsp;a&nbsp;map&nbsp;area&nbsp;is&nbsp;sparse&nbsp;(fewer&nbsp;tiles&nbsp;than&nbsp;num_tiles[0]&nbsp;*&nbsp;num_tiles[1])&nbsp;the<br>
+tiles&nbsp;will&nbsp;be&nbsp;kept&nbsp;as&nbsp;they&nbsp;are.<br>
+&nbsp;<br>
+If&nbsp;tiles&nbsp;with&nbsp;different&nbsp;characteristics&nbsp;are&nbsp;joined,&nbsp;the&nbsp;results&nbsp;can&nbsp;be<br>
+unexpected.&nbsp;These&nbsp;characteristics&nbsp;include&nbsp;some&nbsp;flags,&nbsp;depth,&nbsp;colorkey.&nbsp;This<br>
+can&nbsp;be&nbsp;avoided&nbsp;by&nbsp;pre-processing&nbsp;the&nbsp;map&nbsp;to&nbsp;convert&nbsp;all&nbsp;images&nbsp;so&nbsp;they&nbsp;have<br>
+compatible&nbsp;characteristics.</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>__author__</strong> = 'Gummbum, (c) 2011'<br>
+<strong>__version__</strong> = '$Id: basicmap.py 362 2011-11-28 04:46:48Z stabbingfinger@gmail.com $'<br>
+<strong>text_color</strong> = (255, 255, 0, 255)</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#7799ee">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Author</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#7799ee"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Gummbum,&nbsp;(c)&nbsp;2011</td></tr></table>
+</body></html>

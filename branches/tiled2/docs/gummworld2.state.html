@@ -6,9 +6,9 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.state</strong></big></big> (version $Id: state.py 280 2011-04-27 05:33:38Z stabbingfinger@gmail.com $)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.state</strong></big></big> (version $Id: state.py 362 2011-11-28 04:46:48Z stabbingfinger@gmail.com $)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/svn/gummworld2/gamelib/gummworld2/state.py">c:\cygwin\home\bw\devel\python\svn\gummworld2\gamelib\gummworld2\state.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/dist/gummworld2/tiled2/gamelib/gummworld2/state.py">c:\cygwin\home\bw\devel\python\dist\gummworld2\tiled2\gamelib\gummworld2\state.py</a></font></td></tr></table>
     <p><tt>state.py&nbsp;-&nbsp;A&nbsp;class&nbsp;for&nbsp;convenient&nbsp;global&nbsp;access&nbsp;to&nbsp;Gummworld2<br>
 run-time&nbsp;objects.<br>
 &nbsp;<br>
@@ -48,14 +48,14 @@ Descriptions&nbsp;of&nbsp;class&nbsp;attributes:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;name:&nbsp;The&nbsp;name&nbsp;of&nbsp;the&nbsp;current&nbsp;state&nbsp;context.&nbsp;This&nbsp;can&nbsp;be&nbsp;any&nbsp;immutable<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value.&nbsp;Initial&nbsp;value&nbsp;is&nbsp;'init',&nbsp;and&nbsp;the&nbsp;state&nbsp;is&nbsp;saved&nbsp;so&nbsp;that&nbsp;<a href="#State">State</a><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;can&nbsp;be&nbsp;reset&nbsp;via&nbsp;<a href="#State">State</a>.<a href="#State-restore">restore</a>('init').<br>
-&nbsp;&nbsp;&nbsp;&nbsp;screen:&nbsp;A&nbsp;screen.Screen&nbsp;<a href="__builtin__.html#object">object</a>,&nbsp;which&nbsp;is&nbsp;a&nbsp;wrapper&nbsp;for&nbsp;the&nbsp;top&nbsp;level<br>
+&nbsp;&nbsp;&nbsp;&nbsp;screen:&nbsp;A&nbsp;Screen&nbsp;<a href="__builtin__.html#object">object</a>,&nbsp;which&nbsp;is&nbsp;a&nbsp;wrapper&nbsp;for&nbsp;the&nbsp;top&nbsp;level<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pygame&nbsp;surface.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;world:&nbsp;A&nbsp;model.World*&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;used&nbsp;to&nbsp;store&nbsp;game&nbsp;model&nbsp;entities.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;world_type:&nbsp;One&nbsp;of&nbsp;engine.NO_WORLD,&nbsp;engine.SIMPLE_WORLD,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;engine.QUADTREE_WORLD,&nbsp;or&nbsp;engine.PYMUNK_WORLD&nbsp;if&nbsp;<a href="#State">State</a>&nbsp;was<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;initialized&nbsp;via&nbsp;the&nbsp;Engine&nbsp;class.&nbsp;Else&nbsp;it&nbsp;is&nbsp;None.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;camera:&nbsp;A&nbsp;camera.Camera&nbsp;<a href="__builtin__.html#object">object</a>.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;map:&nbsp;A&nbsp;map.Map&nbsp;<a href="__builtin__.html#object">object</a>.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;world_type:&nbsp;One&nbsp;of&nbsp;engine.NO_WORLD,&nbsp;engine.SIMPLE_WORLD,&nbsp;or<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;engine.PYMUNK_WORLD&nbsp;if&nbsp;<a href="#State">State</a>&nbsp;was&nbsp;initialized&nbsp;via&nbsp;the&nbsp;Engine&nbsp;class.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Else&nbsp;it&nbsp;is&nbsp;None.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;camera:&nbsp;A&nbsp;Camera&nbsp;<a href="__builtin__.html#object">object</a>.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;map:&nbsp;A&nbsp;BasicMap,&nbsp;TiledMap,&nbsp;or&nbsp;SuperMap&nbsp;<a href="__builtin__.html#object">object</a>.<br>
 &nbsp;<br>
 Class&nbsp;variable&nbsp;<a href="#State">State</a>.default_attrs&nbsp;holds&nbsp;the&nbsp;list&nbsp;of&nbsp;attributes&nbsp;that&nbsp;are<br>
 saved&nbsp;and&nbsp;restored&nbsp;by&nbsp;default&nbsp;when&nbsp;the&nbsp;static&nbsp;methods&nbsp;<a href="#State">State</a>.<a href="#State-save">save</a>()&nbsp;and<br>
@@ -126,7 +126,7 @@ Data and other attributes defined here:<br>
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><strong>__author__</strong> = 'Gummbum, (c) 2011'<br>
-<strong>__version__</strong> = '$Id: state.py 280 2011-04-27 05:33:38Z stabbingfinger@gmail.com $'<br>
+<strong>__version__</strong> = '$Id: state.py 362 2011-11-28 04:46:48Z stabbingfinger@gmail.com $'<br>
 <strong>states</strong> = {'init': {'camera': None, 'clock': None, 'map': None, 'menu': None, 'screen': None, 'show_grid': False, 'show_hud': False, 'show_labels': False, 'speed': 4, 'world': None, ...}}</td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#7799ee">

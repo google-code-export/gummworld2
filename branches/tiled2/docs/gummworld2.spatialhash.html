@@ -1,0 +1,149 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module gummworld2.spatialhash</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.spatialhash</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/dist/gummworld2/tiled2/gamelib/gummworld2/spatialhash.py">c:\cygwin\home\bw\devel\python\dist\gummworld2\tiled2\gamelib\gummworld2\spatialhash.py</a></font></td></tr></table>
+    <p><tt>spatialhash.py&nbsp;-&nbsp;High&nbsp;performance&nbsp;spatial&nbsp;hash&nbsp;for&nbsp;spatial<br>
+partitioning&nbsp;and&nbsp;fast&nbsp;collision&nbsp;detection.<br>
+&nbsp;<br>
+Objects&nbsp;must&nbsp;have&nbsp;a&nbsp;pygame&nbsp;Rect&nbsp;attribute.&nbsp;Optionally,&nbsp;objects&nbsp;may&nbsp;have&nbsp;a<br>
+collided&nbsp;static&nbsp;method&nbsp;attribute&nbsp;for&nbsp;lower-level&nbsp;collision&nbsp;detection&nbsp;(see&nbsp;the<br>
+gummworld2.geometry&nbsp;module).<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;is&nbsp;derived&nbsp;from&nbsp;the&nbsp;article&nbsp;and&nbsp;source&nbsp;code&nbsp;written&nbsp;by&nbsp;Conkerjo&nbsp;at<br>
+<a href="http://conkerjo.wordpress.com/2009/06/13/spatial-hashing-implementation-for-fast-2d-collisions/">http://conkerjo.wordpress.com/2009/06/13/spatial-hashing-implementation-for-fast-2d-collisions/</a>.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="pygame.html">pygame</a><br>
+</td><td width="25%" valign=top><a href="time.html">time</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="gummworld2.spatialhash.html#SpatialHash">SpatialHash</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="SpatialHash">class <strong>SpatialHash</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="SpatialHash-__contains__"><strong>__contains__</strong></a>(self, obj)</dt></dl>
+
+<dl><dt><a name="SpatialHash-__init__"><strong>__init__</strong></a>(self, world_rect, cell_size)</dt></dl>
+
+<dl><dt><a name="SpatialHash-__iter__"><strong>__iter__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="SpatialHash-__len__"><strong>__len__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="SpatialHash-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="SpatialHash-add"><strong>add</strong></a>(self, obj)</dt><dd><tt>Add&nbsp;or&nbsp;re-add&nbsp;obj.&nbsp;Return&nbsp;True&nbsp;if&nbsp;in&nbsp;bounds,&nbsp;else&nbsp;return&nbsp;False.<br>
+&nbsp;<br>
+If&nbsp;this&nbsp;method&nbsp;returns&nbsp;False&nbsp;then&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;is&nbsp;completely&nbsp;out&nbsp;of<br>
+bounds&nbsp;and&nbsp;cannot&nbsp;be&nbsp;stored&nbsp;in&nbsp;this&nbsp;space.<br>
+&nbsp;<br>
+Note&nbsp;that&nbsp;when&nbsp;obj&nbsp;changes&nbsp;its&nbsp;position,&nbsp;you&nbsp;must&nbsp;add&nbsp;it&nbsp;again&nbsp;so&nbsp;that<br>
+its&nbsp;cell&nbsp;membership&nbsp;is&nbsp;updated.&nbsp;This&nbsp;method&nbsp;first&nbsp;removes&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;if<br>
+it&nbsp;is&nbsp;already&nbsp;in&nbsp;the&nbsp;spatial&nbsp;hash.</tt></dd></dl>
+
+<dl><dt><a name="SpatialHash-clear"><strong>clear</strong></a>(self)</dt><dd><tt>Clear&nbsp;all&nbsp;objects.</tt></dd></dl>
+
+<dl><dt><a name="SpatialHash-collide"><strong>collide</strong></a>(self, obj)</dt><dd><tt>Return&nbsp;list&nbsp;of&nbsp;objects&nbsp;that&nbsp;collide&nbsp;with&nbsp;obj.</tt></dd></dl>
+
+<dl><dt><a name="SpatialHash-collidealldict"><strong>collidealldict</strong></a>(self, rect<font color="#909090">=None</font>)</dt><dd><tt>Return&nbsp;dict&nbsp;of&nbsp;all&nbsp;collisions.<br>
+&nbsp;<br>
+If&nbsp;rect&nbsp;is&nbsp;specified,&nbsp;only&nbsp;the&nbsp;cells&nbsp;that&nbsp;intersect&nbsp;rect&nbsp;will&nbsp;be<br>
+checked.<br>
+&nbsp;<br>
+The&nbsp;contents&nbsp;of&nbsp;the&nbsp;returned&nbsp;dict&nbsp;are:&nbsp;{obj&nbsp;:&nbsp;[other1,other2,...],...}</tt></dd></dl>
+
+<dl><dt><a name="SpatialHash-collidealllist"><strong>collidealllist</strong></a>(self, rect<font color="#909090">=None</font>)</dt><dd><tt>Return&nbsp;list&nbsp;of&nbsp;all&nbsp;collisions.<br>
+&nbsp;<br>
+If&nbsp;rect&nbsp;is&nbsp;specified,&nbsp;only&nbsp;the&nbsp;cells&nbsp;that&nbsp;intersect&nbsp;rect&nbsp;will&nbsp;be<br>
+checked.<br>
+&nbsp;<br>
+The&nbsp;contents&nbsp;of&nbsp;the&nbsp;returned&nbsp;list&nbsp;are:&nbsp;[(obj,other),...]</tt></dd></dl>
+
+<dl><dt><a name="SpatialHash-collideany"><strong>collideany</strong></a>(self, obj)</dt><dd><tt>Return&nbsp;True&nbsp;if&nbsp;obj&nbsp;collides&nbsp;with&nbsp;any&nbsp;other&nbsp;<a href="__builtin__.html#object">object</a>,&nbsp;else&nbsp;False.</tt></dd></dl>
+
+<dl><dt><a name="SpatialHash-get_cell"><strong>get_cell</strong></a>(self, cell_id)</dt><dd><tt>Return&nbsp;the&nbsp;cell&nbsp;stored&nbsp;at&nbsp;bucket&nbsp;index&nbsp;cell_id.<br>
+&nbsp;<br>
+The&nbsp;returned&nbsp;cell&nbsp;is&nbsp;a&nbsp;list&nbsp;of&nbsp;objects.</tt></dd></dl>
+
+<dl><dt><a name="SpatialHash-get_cell_grid"><strong>get_cell_grid</strong></a>(self, cell_id)</dt><dd><tt>Return&nbsp;the&nbsp;(col,row)&nbsp;coordinate&nbsp;for&nbsp;cell&nbsp;id.</tt></dd></dl>
+
+<dl><dt><a name="SpatialHash-get_cell_pos"><strong>get_cell_pos</strong></a>(self, cell_id)</dt><dd><tt>Return&nbsp;the&nbsp;world&nbsp;coordinates&nbsp;for&nbsp;topleft&nbsp;corner&nbsp;of&nbsp;cell.</tt></dd></dl>
+
+<dl><dt><a name="SpatialHash-get_nearby_objects"><strong>get_nearby_objects</strong></a>(self, obj)</dt><dd><tt>Return&nbsp;a&nbsp;list&nbsp;of&nbsp;objects&nbsp;that&nbsp;share&nbsp;the&nbsp;same&nbsp;cells&nbsp;as&nbsp;obj.</tt></dd></dl>
+
+<dl><dt><a name="SpatialHash-index"><strong>index</strong></a>(self, cell)</dt><dd><tt>Return&nbsp;the&nbsp;bucket&nbsp;index&nbsp;of&nbsp;cell.<br>
+&nbsp;<br>
+Returns&nbsp;None&nbsp;if&nbsp;cell&nbsp;does&nbsp;not&nbsp;exist&nbsp;in&nbsp;buckets.<br>
+&nbsp;<br>
+Note&nbsp;that&nbsp;<a href="#SpatialHash">SpatialHash</a>.buckets.<a href="#SpatialHash-index">index</a>(cell)&nbsp;does&nbsp;*NOT*&nbsp;work&nbsp;because<br>
+list.<a href="#SpatialHash-index">index</a>()&nbsp;tests&nbsp;equality,&nbsp;not&nbsp;identity.</tt></dd></dl>
+
+<dl><dt><a name="SpatialHash-index_at"><strong>index_at</strong></a>(self, x, y)</dt><dd><tt>Return&nbsp;the&nbsp;cell_id&nbsp;of&nbsp;the&nbsp;cell&nbsp;that&nbsp;contains&nbsp;point&nbsp;(x,y).<br>
+&nbsp;<br>
+None&nbsp;is&nbsp;returned&nbsp;if&nbsp;point&nbsp;(x,y)&nbsp;is&nbsp;not&nbsp;in&nbsp;bounds.</tt></dd></dl>
+
+<dl><dt><a name="SpatialHash-intersect_indices"><strong>intersect_indices</strong></a>(self, rect)</dt><dd><tt>Return&nbsp;list&nbsp;of&nbsp;cell&nbsp;ids&nbsp;that&nbsp;intersect&nbsp;rect.</tt></dd></dl>
+
+<dl><dt><a name="SpatialHash-intersect_objects"><strong>intersect_objects</strong></a>(self, rect)</dt><dd><tt>Return&nbsp;list&nbsp;of&nbsp;objects&nbsp;whose&nbsp;rects&nbsp;intersect&nbsp;rect.</tt></dd></dl>
+
+<dl><dt><a name="SpatialHash-itercells"><strong>itercells</strong></a>(self)</dt><dd><tt>Returns&nbsp;a&nbsp;generator&nbsp;that&nbsp;iterates&nbsp;over&nbsp;all&nbsp;cells.</tt></dd></dl>
+
+<dl><dt><a name="SpatialHash-iterobjects"><strong>iterobjects</strong></a>(self)</dt><dd><tt>Returns&nbsp;a&nbsp;generator&nbsp;that&nbsp;iterates&nbsp;over&nbsp;all&nbsp;objects.<br>
+&nbsp;<br>
+Invoking&nbsp;a&nbsp;<a href="#SpatialHash">SpatialHash</a>&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;as&nbsp;an&nbsp;iterator&nbsp;produces&nbsp;the&nbsp;same&nbsp;behavior<br>
+as&nbsp;<a href="#SpatialHash-iterobjects">iterobjects</a>().</tt></dd></dl>
+
+<dl><dt><a name="SpatialHash-remove"><strong>remove</strong></a>(self, obj)</dt><dd><tt>Remove&nbsp;obj.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>objects</strong></dt>
+<dd><tt>Return&nbsp;the&nbsp;entire&nbsp;list&nbsp;of&nbsp;objects.</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-ceil"><strong>ceil</strong></a>(...)</dt><dd><tt><a href="#-ceil">ceil</a>(x)<br>
+&nbsp;<br>
+Return&nbsp;the&nbsp;ceiling&nbsp;of&nbsp;x&nbsp;as&nbsp;a&nbsp;float.<br>
+This&nbsp;is&nbsp;the&nbsp;smallest&nbsp;integral&nbsp;value&nbsp;&gt;=&nbsp;x.</tt></dd></dl>
+</td></tr></table>
+</body></html>

@@ -6,9 +6,9 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.camera</strong></big></big> (version $Id: camera.py 288 2011-05-01 19:28:58Z stabbingfinger@gmail.com $)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.camera</strong></big></big> (version $Id: camera.py 362 2011-11-28 04:46:48Z stabbingfinger@gmail.com $)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/svn/gummworld2/gamelib/gummworld2/camera.py">c:\cygwin\home\bw\devel\python\svn\gummworld2\gamelib\gummworld2\camera.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/dist/gummworld2/tiled2/gamelib/gummworld2/camera.py">c:\cygwin\home\bw\devel\python\dist\gummworld2\tiled2\gamelib\gummworld2\camera.py</a></font></td></tr></table>
     <p><tt>camera.py&nbsp;-&nbsp;<a href="#Camera">Camera</a>&nbsp;module&nbsp;for&nbsp;Gummworld2.</tt></p>
 <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
@@ -44,10 +44,8 @@
 <td colspan=2><tt>A&nbsp;<a href="#Camera">Camera</a>&nbsp;provides&nbsp;a&nbsp;few&nbsp;services:<br>
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;Track&nbsp;a&nbsp;moving&nbsp;target&nbsp;in&nbsp;world&nbsp;coordinates.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;Determine&nbsp;the&nbsp;range&nbsp;of&nbsp;visible&nbsp;tiles.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;Retrieve&nbsp;visible&nbsp;tiles&nbsp;from&nbsp;a&nbsp;Map.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;Convert&nbsp;coordinates&nbsp;between&nbsp;world&nbsp;and&nbsp;screen&nbsp;space.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;Interpolated&nbsp;scrolling&nbsp;to&nbsp;take&nbsp;advantage&nbsp;of&nbsp;higher&nbsp;frame&nbsp;rates.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;Interpolated&nbsp;view&nbsp;scrolling&nbsp;to&nbsp;take&nbsp;advantage&nbsp;of&nbsp;higher&nbsp;frame&nbsp;rates.<br>
 &nbsp;<br>
 Dependencies:<br>
 &nbsp;<br>
@@ -74,11 +72,6 @@ mouse&nbsp;position&nbsp;relative&nbsp;to&nbsp;the&nbsp;top-level&nbsp;surface.&
 positioning&nbsp;graphics&nbsp;based&nbsp;on&nbsp;the&nbsp;mouse&nbsp;position&nbsp;under&nbsp;these&nbsp;circumstances.<br>
 Sometimes&nbsp;it&nbsp;may&nbsp;just&nbsp;be&nbsp;simplest,&nbsp;for&nbsp;example,&nbsp;to&nbsp;blit&nbsp;directly&nbsp;to&nbsp;the<br>
 top-level&nbsp;surface.<br>
-&nbsp;<br>
-Property&nbsp;visible_tile_range&nbsp;returns&nbsp;a&nbsp;list&nbsp;of&nbsp;map&nbsp;tile&nbsp;positions&nbsp;[(0,0),<br>
-(0,1),&nbsp;...]&nbsp;that&nbsp;are&nbsp;visible&nbsp;on&nbsp;the&nbsp;screen.<br>
-&nbsp;<br>
-Property&nbsp;visible_tiles&nbsp;returns&nbsp;a&nbsp;list&nbsp;of&nbsp;MapLayer&nbsp;objects&nbsp;that&nbsp;are&nbsp;visible.<br>
 &nbsp;<br>
 If&nbsp;creating&nbsp;multiple&nbsp;cameras&nbsp;to&nbsp;save&nbsp;and&nbsp;restore&nbsp;in&nbsp;State&nbsp;contexts,&nbsp;by<br>
 default&nbsp;the&nbsp;<a href="#Camera-state_restored">state_restored</a>()&nbsp;method&nbsp;updates&nbsp;the&nbsp;new&nbsp;camera&nbsp;from&nbsp;the&nbsp;old.<br>
@@ -195,16 +188,6 @@ Think&nbsp;of&nbsp;it&nbsp;as&nbsp;an&nbsp;alternative&nbsp;to&nbsp;hard-coding&
 <dd><tt>The&nbsp;view&nbsp;from&nbsp;which&nbsp;to&nbsp;derive&nbsp;the&nbsp;surface&nbsp;and&nbsp;viewing&nbsp;dimensions&nbsp;and,<br>
 for&nbsp;subsurfaces,&nbsp;the&nbsp;rect&nbsp;for&nbsp;the&nbsp;subsurface&nbsp;in&nbsp;the&nbsp;parent&nbsp;surface.</tt></dd>
 </dl>
-<dl><dt><strong>visible_tile_range</strong></dt>
-<dd><tt>The&nbsp;range&nbsp;of&nbsp;tiles&nbsp;that&nbsp;would&nbsp;be&nbsp;visible&nbsp;on&nbsp;the&nbsp;display&nbsp;surface.&nbsp;The<br>
-value&nbsp;is&nbsp;a&nbsp;list&nbsp;of&nbsp;tuples(x1,y1,x2,y2)&nbsp;representing&nbsp;map&nbsp;grid&nbsp;positions<br>
-for&nbsp;each&nbsp;layer.&nbsp;The&nbsp;per&nbsp;layer&nbsp;metrics&nbsp;are&nbsp;necessary&nbsp;because&nbsp;maps&nbsp;can<br>
-have&nbsp;layers&nbsp;with&nbsp;different&nbsp;tile&nbsp;sizes,&nbsp;and&nbsp;therefore&nbsp;different&nbsp;grids.</tt></dd>
-</dl>
-<dl><dt><strong>visible_tiles</strong></dt>
-<dd><tt>A&nbsp;list&nbsp;of&nbsp;MapLayer&nbsp;objects&nbsp;that&nbsp;would&nbsp;be&nbsp;visible&nbsp;on&nbsp;the&nbsp;display<br>
-surface.</tt></dd>
-</dl>
 </td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#55aa55">
@@ -213,7 +196,7 @@ surface.</tt></dd>
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><strong>__author__</strong> = 'Gummbum, (c) 2011'<br>
-<strong>__version__</strong> = '$Id: camera.py 288 2011-05-01 19:28:58Z stabbingfinger@gmail.com $'</td></tr></table><p>
+<strong>__version__</strong> = '$Id: camera.py 362 2011-11-28 04:46:48Z stabbingfinger@gmail.com $'</td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#7799ee">
 <td colspan=3 valign=bottom>&nbsp;<br>
