@@ -254,7 +254,7 @@ class MapHandler(object):
         """
         if not self.map:
             if __debug__: print '%s: load map %s' % (self.__class__.__name__, self.name,)
-            self.timestamp = State.clock._get_ticks()
+            self.timestamp = State.clock.get_ticks()
             self.load()
     
     def _unload(self):
@@ -268,7 +268,7 @@ class MapHandler(object):
                 self.supermap.current = None
     
     def _update(self, dt):
-        self.timestamp = State.clock._get_ticks()
+        self.timestamp = State.clock.get_ticks()
         self.update(dt)
     
     def load(self):

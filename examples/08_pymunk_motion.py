@@ -81,7 +81,6 @@ class App(Engine):
         
         # I like huds.
         toolkit.make_hud()
-        State.clock.schedule_update_priority(State.hud.update, 1.0)
         
         # Create a speed box for converting mouse position to destination
         # and scroll speed.
@@ -104,8 +103,11 @@ class App(Engine):
         # If mouse button is held down update for continuous walking.
         if self.mouse_down:
             self.update_mouse_movement(pygame.mouse.get_pos())
-        self.update_camera_position()
+        self.update_camera_position(dt)
+        State.camera.update()
+        State.world.step(dt)
         self.visible_objects = toolkit.get_object_array()
+        State.hud.update(dt)
     
     def update_mouse_movement(self, pos):
         # Angle of movement.
@@ -122,7 +124,7 @@ class App(Engine):
                     self.speed_box.center, (x,y)) / self.max_speed_box
                 break
     
-    def update_camera_position(self):
+    def update_camera_position(self, dt):
         """update the camera's position if any movement keys are held down
         """
         if self.move_to is not None:
@@ -143,7 +145,7 @@ class App(Engine):
             rect = State.world.rect
             wx = max(min(wx,rect.right), rect.left)
             wy = max(min(wy,rect.bottom), rect.top)
-            camera.slew(Vec2d(wx,wy), State.clock.update_elapsed)
+            camera.slew(Vec2d(wx,wy), dt)
         elif State.camera.target.velocity != (0,0):
             State.camera.target.velocity = (0,0)
     

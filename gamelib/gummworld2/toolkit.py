@@ -107,7 +107,7 @@ def make_hud(caption=None, visible=True):
         State.hud.add('Caption', Stat(next_pos(), caption))
     
     State.hud.add('FPS',
-        Statf(next_pos(), 'FPS %d', callback=State.clock.get_fps))
+        Statf(next_pos(), 'FPS %d', callback=lambda:State.clock.fps))
     
     rect = State.world.rect
     l,t,r,b = rect.left,rect.top,rect.right,rect.bottom

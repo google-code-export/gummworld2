@@ -44,7 +44,7 @@ class App(Engine):
             caption='05 Keyboard Movement with Aspect - Press TAB to cycle views',
             resolution=(600,600),
             tile_size=(128,64), map_size=(10,20),
-            frame_speed=0, default_schedules=False)
+            frame_speed=0)
         
         ## Map scrolls 1.0X on x-axis, 0.5X on y-axis. See on_key_down() for the
         ## application of these values. The net visual effect is that the map
@@ -69,7 +69,6 @@ class App(Engine):
         toolkit.make_tiles2()
         self.visible_objects = []
         toolkit.make_hud()
-        State.clock.schedule_update_priority(State.hud.update, 1.0)
         
         self.move_x = 0
         self.move_y = 0
@@ -78,7 +77,9 @@ class App(Engine):
         """overrides Engine.update"""
         self.update_camera_position()
         State.camera.update(dt)
+        State.camera.update()
         self.visible_objects = toolkit.get_object_array()
+        State.hud.update(dt)
     
     def update_camera_position(self):
         """update the camera's position if any movement keys are held down

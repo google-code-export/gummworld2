@@ -39,7 +39,7 @@ class App(Engine):
             caption='04 HUD - TAB: view | H: HUD',
             resolution=(800,600),
             tile_size=(128,128), map_size=(10,10),
-            frame_speed=0, default_schedules=False)
+            frame_speed=0)
         
         # Create two cameras. This will let us switch the view and observe what
         # the HUD reports.

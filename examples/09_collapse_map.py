@@ -114,7 +114,6 @@ class App(Engine):
             return '%d/%d' % (layern,tilen)
         State.hud.add('Layers/Tiles', Statf(State.hud.next_pos(),
             'Layers/Tiles: %s', callback=map_info, interval=2.))
-        State.clock.schedule_update_priority(State.hud.update, 1.0)
         
         # Create a speed box for converting mouse position to destination
         # and scroll speed.
@@ -136,7 +135,9 @@ class App(Engine):
         if self.mouse_down:
             self.update_mouse_movement(pygame.mouse.get_pos())
         self.update_camera_position()
+        State.camera.update()
         self.visible_objects = toolkit.get_object_array()
+        State.hud.update(dt)
         
     def update_mouse_movement(self, pos):
         # Angle of movement.

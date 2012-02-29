@@ -172,6 +172,7 @@ class App(Engine):
     def update(self, dt):
         """overrides Engine.update"""
         self.update_camera_position()
+        State.camera.update(dt)
         for ball in list(self.balls):
             ball.update()
             self.balls.add(ball)

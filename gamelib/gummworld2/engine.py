@@ -80,7 +80,7 @@ class Engine(Context):
         screen_surface=None, resolution=None, display_flags=0, caption=None,
         camera_target=None, camera_view=None, camera_view_rect=None,
         map=None, tile_size=None, map_size=None,
-        update_speed=30, frame_speed=30, default_schedules=True,
+        update_speed=30, frame_speed=30, ##default_schedules=True,
         world_type=NO_WORLD, world_args={},
         set_state=True):
         """Construct an instance of Engine.
@@ -167,24 +167,24 @@ class Engine(Context):
         Engine.update() and Engine.draw() are registered as callbacks in the
         clock.
         
-        By default the Engine class schedules these additional items:
-            
-            clock.schedule_update_priority(self._get_event, -2.0)
-            clock.schedule_update_priority(State.world.step, -1.0)
-            clock.schedule_update_priority(State.camera.update, 1.0)
-            clock.schedule_frame_priority(State.camera.interpolate, -1.0)
-            
-        The first three items coincide with the clock's callback to
-        Engine.update(). The last item coincides with Engine.draw().
-        
-        The use of priorities allows user items to be scheduled in between these
-        default items by using an appropriate float value: lower priorities will
-        be run first. See gameclock.GameClock.schedule_*_priority().
-        
-        To prevent scheduling the world and camera items, pass the constructor
-        argument default_schedules=False. If these are not scheduled by Engine,
-        the using program will either need to schedule them or place them
-        directly in the overridden update() and draw() methods, as appropriate.
+#        By default the Engine class schedules these additional items:
+#            
+#            clock.schedule_update_priority(self._get_event, -2.0)
+#            clock.schedule_update_priority(State.world.step, -1.0)
+#            clock.schedule_update_priority(State.camera.update, 1.0)
+#            clock.schedule_frame_priority(State.camera.interpolate, -1.0)
+#            
+#        The first three items coincide with the clock's callback to
+#        Engine.update(). The last item coincides with Engine.draw().
+#        
+#        The use of priorities allows user items to be scheduled in between these
+#        default items by using an appropriate float value: lower priorities will
+#        be run first. See gameclock.GameClock.schedule_*_priority().
+#        
+#        To prevent scheduling the world and camera items, pass the constructor
+#        argument default_schedules=False. If these are not scheduled by Engine,
+#        the using program will either need to schedule them or place them
+#        directly in the overridden update() and draw() methods, as appropriate.
         """
         
         if __debug__: print 'Engine: -- new engine --'
@@ -269,26 +269,18 @@ class Engine(Context):
         else:
             if __debug__: print 'Engine: SKIPPING camera creation: no camera target, view, or view rect'
         
-        ## Clock setup. Use pygame.time.get_ticks unless in Windows.
-        if sys.platform in('win32','cygwin'):
-            if __debug__: print 'Engine: using time.clock for Windows platform'
-            time_source = None
-        else:
-            if __debug__: print 'Engine: using pygame.time.get_ticks for non-Windows platform'
-            time_source = lambda:pygame.time.get_ticks()/1000.
         ## Create the clock, specifying callbacks for update() and draw().
         if __debug__: print 'Engine: creating GameClock'
         self.clock = GameClock(
             update_speed, frame_speed,
-            update_callback=self.update, frame_callback=self.draw,
-            time_source=time_source)
+            update_callback=self._update, frame_callback=self._draw)
         
         ## Default schedules.
-        if __debug__: print 'Engine: scheduling _get_events at priority -2.0'
-        self.clock.schedule_update_priority(self._get_events, -2.0)
-        if default_schedules:
-            if __debug__: print 'Engine: scheduling default items'
-            self.schedule_default()
+#        if __debug__: print 'Engine: scheduling _get_events at priority -2.0'
+#        self.clock.schedule_update_priority(self._get_events, -2.0)
+#        if default_schedules:
+#            if __debug__: print 'Engine: scheduling default items'
+#            self.schedule_default()
         
         ## Init joysticks.
         if not pygame.joystick.get_init():
@@ -333,30 +325,45 @@ class Engine(Context):
         if self.clock is not None:
             State.clock = self.clock
     
-    def schedule_default(self):
-        """Schedule default items.
-        
-        Note: These are not tracked. If you intend to manually replace
-        State.world or State.camera after constructing the Engine object,
-        you'll likely want to unschedule some or all of these and manage the
-        schedules yourself. If you replace the objects without unscheduling
-        their callbacks, the lost references will result in memory and CPU
-        leaks.
-        """
-        if self.world and isinstance(self.world, model.WorldPymunk):
-            self.clock.schedule_update_priority(self.world.step, -1.0)
-        if self.camera:
-            self.clock.schedule_update_priority(self.camera.update, 1.0)
-            self.clock.schedule_frame_priority(self.camera.interpolate, -1.0)
+#    def schedule_default(self):
+#        """Schedule default items.
+#        
+#        Note: These are not tracked. If you intend to manually replace
+#        State.world or State.camera after constructing the Engine object,
+#        you'll likely want to unschedule some or all of these and manage the
+#        schedules yourself. If you replace the objects without unscheduling
+#        their callbacks, the lost references will result in memory and CPU
+#        leaks.
+#        """
+#        if self.world and isinstance(self.world, model.WorldPymunk):
+#            self.clock.schedule_update_priority(self.world.step, -1.0)
+#        if self.camera:
+#            self.clock.schedule_update_priority(self.camera.update, 1.0)
+#            self.clock.schedule_frame_priority(self.camera.interpolate, -1.0)
+#    
+#    def unschedule_default(self):
+#        """Unschedule default items.
+#        """
+#        if self.world:
+#            self.clock.unschedule(self.world.step)
+#        if self.camera:
+#            self.clock.unschedule(self.camera.update)
+#            self.clock.unschedule(self.camera.interpolate)
     
-    def unschedule_default(self):
-        """Unschedule default items.
+    def _update(self, dt):
+        """The clock's update_callback, which in turn calls
+        Engine._get_events and Engine.update.
         """
-        if self.world:
-            self.clock.unschedule(self.world.step)
-        if self.camera:
-            self.clock.unschedule(self.camera.update)
-            self.clock.unschedule(self.camera.interpolate)
+        self._get_events()
+        self.update(dt)
+    
+    def _draw(self, interp):
+        """The clock's draw_callback, which in turn calls
+        Camera.interpolate and Engine.draw.
+        """
+        if State.camera:
+            State.camera.interpolate()
+        self.draw(interp)
     
     def update(self, dt):
         """Override this method. Called by run() when the clock signals an
@@ -369,13 +376,12 @@ class Engine(Context):
         """
         pass
     
-    def draw(self, dt):
+    def draw(self, interp):
         """Override this method. Called by run() when the clock signals a
         frame cycle is ready.
         
         Suggestion:
             State.screen.clear()
-            State.camera.interpolate()
             ... custom draw the screen ...
             State.screen.flip()
         """
@@ -387,7 +393,7 @@ class Engine(Context):
         """
         return list(self._joysticks)
     
-    def _get_events(self, dt):
+    def _get_events(self):
         """Get events and call the handler. Called automatically by run() each
         time the clock indicates an update cycle is ready.
         """

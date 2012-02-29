@@ -80,9 +80,6 @@ class App(Engine):
         self.move_x = 0
         self.move_y = 0
         
-        ## Start the default schedules.
-#        self.schedule_default()
-        
     def update(self, dt):
         """overrides Engine.update"""
         self.update_camera_position()

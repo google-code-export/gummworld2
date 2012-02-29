@@ -72,6 +72,7 @@ class App(Engine):
             test_rect.center += self.move
             test_rect.clamp_ip(State.map.rect)
             State.camera.position = test_rect.center
+        State.camera.update(dt)
         State.hud.update(dt)
     
     def draw(self, dt):
