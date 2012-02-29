@@ -73,6 +73,7 @@ class App(Engine):
         ## For each update cycle, update your game info and camera.
         if self.movex or self.movey:
             State.camera.position += self.movex,self.movey
+        State.camera.update()
     
     def draw(self, dt):
         ## For each frame cycle, draw the screen contents.

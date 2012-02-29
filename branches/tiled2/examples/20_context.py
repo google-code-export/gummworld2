@@ -142,6 +142,7 @@ class Game(Engine):
     def update(self, dt):
         if self.movex or self.movey:
             State.camera.position += self.movex,self.movey
+        State.camera.update(dt)
         self.visible_objects = toolkit.get_object_array()
     
     def draw(self, dt):

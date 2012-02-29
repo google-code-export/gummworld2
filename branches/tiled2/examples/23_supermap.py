@@ -15,8 +15,9 @@ COLLAPSE_KEYS = range(K_1, K_9+1)
 class App(Engine):
     
     def __init__(self):
-        #resolution = 320,320
-        resolution = 800,600
+        resolution = 320,240
+#        resolution = 640,480
+#        resolution = 800,600
         self.movex = 0
         self.movey = 0
         self.visible_tiles = {}
@@ -41,7 +42,6 @@ class App(Engine):
             'History %s', callback=lambda:'%s/%s'%(str(len(State.map.history)),str(State.map.max_maps)), interval=.5))
         State.hud.add('Collapse Level', Statf(State.hud.next_pos(),
             'Collapse %s', callback=lambda:'%s'%str(State.map.current.collapse_level), interval=.5))
-        State.clock.schedule_update_priority(State.hud.update, 1.0)
         
         State.speed = 3.33
     
@@ -50,7 +50,9 @@ class App(Engine):
             r = State.camera.rect.move(self.movex,self.movey)
             r.clamp_ip(State.map.rect)
             State.camera.position = r.center
+        State.camera.update(dt)
         State.map.update(dt)
+        State.hud.update(dt)
     
     def draw(self, dt):
         State.screen.clear()

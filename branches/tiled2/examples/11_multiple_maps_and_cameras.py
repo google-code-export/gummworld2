@@ -52,6 +52,12 @@ class App(Engine):
             camera_view_rect=Rect(0,0, half_width,full_height),
             frame_speed=0)
         
+        ## Some would call this a bad practice, but we don't want to write
+        ## our own engine so we'll exploit the internal logic of Engine.
+        ## Bypass Engine._draw, which calls Camera.interpolate. We will do
+        ## that in our draw routine when we swap views.
+        State.clock.frame_callback = self.draw
+        
         ## The two views will each have their own camera and map.
         State.default_attrs = ['camera','map']
         
@@ -74,8 +80,8 @@ class App(Engine):
         State.save(self.view2)
         
         ## Schedule the second camera callbacks like Engine does.
-        State.clock.schedule_update_priority(State.camera.update, 1.0)
-        State.clock.schedule_frame_priority(State.camera.interpolate, -1.0)
+#        State.clock.schedule_update_priority(State.camera.update, 1.0)
+#        State.clock.schedule_frame_priority(State.camera.interpolate, -1.0)
         State.clock.schedule_interval(self.set_caption, 2.)
         
         # Some data to contribute to motion.
@@ -99,6 +105,7 @@ class App(Engine):
         for view in (self.view1, self.view2):
             State.restore(view)
             self.update_camera_position(view)
+            State.camera.update(dt)
 
     def update_camera_position(self, view):
         """move the camera's position
@@ -122,6 +129,7 @@ class App(Engine):
         ## Restore each view and draw its map.
         for view in (self.view1, self.view2):
             State.restore(view)
+            State.camera.interpolate()
             view.clear()
             toolkit.draw_tiles()
         State.screen.flip()

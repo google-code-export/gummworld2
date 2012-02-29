@@ -78,7 +78,6 @@ class App(Engine):
         self.grid_cache = {}
         self.label_cache = {}
         toolkit.make_hud()
-        State.clock.schedule_update_priority(State.hud.update, 1.0)
         
         ## Mouse movement is going to use a diamond geometry to calculate a
         ## speed factor that's derived from the distance from center to the
@@ -99,7 +98,9 @@ class App(Engine):
         if self.mouse_down:
             self.update_mouse_movement(pygame.mouse.get_pos())
         self.update_camera_position()
+        State.camera.update()
         self.visible_objects = toolkit.get_object_array()
+        State.hud.update(dt)
     
     def update_mouse_movement(self, pos):
         ## Speed box center is screen center, this is the origin. Mouse pos is

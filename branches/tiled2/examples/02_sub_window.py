@@ -53,6 +53,7 @@ class App(Engine):
     def update(self, dt):
         """overrides Engine.update"""
         self.update_camera_position()
+        State.camera.update()
 
     def update_camera_position(self):
         """update the camera's position if any movement keys are held down

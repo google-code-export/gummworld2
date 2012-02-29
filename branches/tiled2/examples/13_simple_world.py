@@ -97,7 +97,7 @@ class App(Engine):
             caption='13 Simple World - Space: show images',
             resolution=(800,600),
             tile_size=(128,128), map_size=(10,10),
-            frame_speed=0, default_schedules=False,
+            frame_speed=0,
             world_type=SIMPLE_WORLD)
         
         # Make some default content.

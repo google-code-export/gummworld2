@@ -124,7 +124,6 @@ class App(Engine):
             resolution=(600,600),
             tile_size=self.tile_size, map_size=self.map_size,
             update_speed=30, frame_speed=0,
-            default_schedules=False,
         )
         State.camera.init_position((300,300))
         
@@ -162,12 +161,11 @@ class App(Engine):
     
     def make_hud(self):
         State.hud = HUD()
-        State.clock.schedule_update_priority(State.hud.update, 1.0)
         next_pos = State.hud.next_pos
         
         # Frames per second.
         State.hud.add('FPS', Statf(next_pos(),
-            'FPS %d', callback=State.clock.get_fps, interval=.2))
+            'FPS %d', callback=lambda:State.clock.fps, interval=.2))
         
         # Entities on screen.
         State.hud.add('Things', Statf(next_pos(),
@@ -189,6 +187,7 @@ class App(Engine):
     def update(self, dt):
         self.update_world()
         self.update_collisions()
+        State.hud.update(dt)
     
     def update_world(self):
         world = State.world

@@ -45,7 +45,6 @@ class App(Engine):
         Engine.__init__(self,
             resolution=(640,480),
             update_speed=30, frame_speed=0,
-            default_schedules=False,
         )
         
         self.paused = False
@@ -82,11 +81,14 @@ class App(Engine):
         self.clock.resume()
         self.paused = False
     
+    def update(self, dt):
+        for meter in self.meters:
+            meter.update(dt)
+    
     def draw(self, dt):
         """Draw the view."""
         surf = self.screen.surface
         for meter in self.meters:
-            meter.update(dt)
             meter.draw(dt, surf)
         self.screen.flip()
     
