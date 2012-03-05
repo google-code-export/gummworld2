@@ -1,22 +1,22 @@
 #!/usr/bin/env python
 
-# This file is part of Gummworld2.
+# This file is part of GameClock.
 #
-# Gummworld2 is free software: you can redistribute it and/or modify it
+# GameClock is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Lesser General Public License as published
 # by the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# Gummworld2 is distributed in the hope that it will be useful,
+# GameClock is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Lesser General Public License for more details.
 #
 # You should have received a copy of the GNU Lesser General Public
-# License along with Gummworld2.  If not, see <http://www.gnu.org/licenses/>.
+# License along with GameClock.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__version__ = '$Id: gameclock.py$'
+__version__ = '$Id: gameclock.py v0.0.2$'
 __author__ = 'Gummbum, (c) 2011-2012'
 
 
@@ -168,6 +168,7 @@ class GameClock(object):
         self._next_second = TIME
         self._update_ready = False
         self._frame_ready = False
+#        self._frame_skip = 0
         self._paused = 0
         
         # Schedules
@@ -247,14 +248,16 @@ class GameClock(object):
             self.num_updates += 1
             if self.update_callback:
                 self._update_ready = True
-        if real_time + self.cost_of_frame < self._next_update and real_time >= self._next_frame:
+        if real_time - self._last_frame >= self._update_interval or (
+                real_time + self.cost_of_frame < self._next_update and
+                real_time >= self._next_frame):
             self.dt_frame = real_time - self._last_frame
             self._last_frame = real_time
             self._next_frame = real_time + self._frame_interval
             self.num_frames += 1
             if self.frame_callback:
                 self._frame_ready = True
-        
+
         # Check if a schedule is due, and when.
         sched_ready = False
         sched_due = 0
