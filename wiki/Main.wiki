@@ -3,6 +3,16 @@
 
 = News =
 
+==v0.4.0==
+
+The release v0.4.0 provides a GameClock that uses a fixed timestep. It should be compatible with games designed for the previous, variable-timestep GameClock. The variable-dt clock has been retired because it has critical problems keeping time on low-end systems that cannot keep up with a minimum desired ticks-per-second, sometimes resulting in unplayable games on under-performing systems. The fixed timestep handles this case more reliably.
+
+==gw2 Skeleton==
+
+The skeleton provides a skellington-like directory structure into which a gummworld2 distro can be dropped to quick-start a project. The skeleton provides launchers for three purposes: debugging output launcher, normal command-line launcher, and Windows Python launcher. It also provides stub context modules for a game's settings, main, intro, menu, game, and credits. The stubs function right out of the box, but require custom content to do anything useful beyond a "put message here" splash screen and uninteresting game menu. This supports quick prototyping and project startup which can save hours of repetitive work.
+
+==v0.3.0==
+
 With release v0.3.0 the tiled2 branch is live. The included tiletmxloader v3 brings optimizations and bug fixes. The gummworld2 library brings many optimizations and a few bug fixes, and quite a bit of internal redesign as well as some API changes. Some dead modules and toolkit functions have been removed.
 
 SpatialHash replaces Quadtree and 2D arrays for map objects storage. It is much more flexible and easy to query than arrays, and a lot faster than Quadtree.
