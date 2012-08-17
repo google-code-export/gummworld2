@@ -127,13 +127,16 @@ import time
 
 class _IntervalItem(object):
     """An interval item runs after an elapsed interval."""
-    __slots__ = ['func', 'interval', 'lasttime', 'life', 'args']
+    # __slots__ = ['func', 'interval', 'lasttime', 'life', 'args', 'id']
+    id = 0
     def __init__(self, func, interval, curtime, life, args):
         self.func = func
         self.interval = float(interval)
         self.lasttime = curtime
         self.life = life
         self.args = args
+        self.id = _IntervalItem.id
+        _IntervalItem.id += 1
 
 
 class GameClock(object):
@@ -239,7 +242,9 @@ class GameClock(object):
         update_interval = self._update_interval
         game_time = self._game_time
         if real_time >= self._next_update:
-            self.dt_update = real_time - self._last_update_real
+##AARGH - Why did I do this? It's supposed to be a fixed timestep. :P
+##            self.dt_update = real_time - self._last_update_real
+            self.dt_update = update_interval
             self._last_update_real = real_time
             game_time += update_interval
             self._game_time = game_time
@@ -337,11 +342,12 @@ class GameClock(object):
                 sequence, like so: item.func(*[item.interval]+item.args).
             
         """
-        self.unschedule(func)
+        # self.unschedule(func)
         item = _IntervalItem(
             func, interval, self.get_ticks(), life, [interval]+list(args))
         self._schedules.append(item)
         self._need_sort = True
+        return item.id
     
     def unschedule(self, func):
         """Unschedule a managed function."""
@@ -349,7 +355,13 @@ class GameClock(object):
         for item in list(sched):
             if item.func == func:
                 sched.remove(item)
-    
+
+    def unschedule_by_id(self, id):
+        """Unschedule a managed function."""
+        sched = self._schedules
+        for item in list(sched):
+            if item.id == id:
+                sched.remove(item)                
     @staticmethod
     def _interval_item_sort_key(item):
         return item.lasttime + item.interval
@@ -368,6 +380,7 @@ class GameClock(object):
         if self._need_sort:
             self._schedules.sort(key=self._interval_item_sort_key)
             self._need_sort = False
+            if __debug__: print '>>>>>>', self._schedules
         real_time = self._real_time
         for sched in self._schedules:
             interval = sched.interval
@@ -378,7 +391,7 @@ class GameClock(object):
                 need_sort = True
                 if sched.life > 0:
                     if sched.life == 1:
-                        self._unschedules.append(sched.func)
+                        self._unschedules.append(sched.id)
                         need_sort = False
                     else:
                         sched.life -= 1
@@ -387,8 +400,8 @@ class GameClock(object):
             else:
                 break
         if self._unschedules:
-            for func in self._unschedules:
-                self.unschedule(func)
+            for id in self._unschedules:
+                self.unschedule_by_id(id)
             del self._unschedules[:]
     
     def _flip(self, real_time):
