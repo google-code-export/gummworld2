@@ -381,7 +381,6 @@ class GameClock(object):
         if self._need_sort:
             self._schedules.sort(key=self._interval_item_sort_key)
             self._need_sort = False
-            if __debug__: print '>>>>>>', self._schedules
         real_time = self._real_time
         for sched in self._schedules:
             interval = sched.interval
