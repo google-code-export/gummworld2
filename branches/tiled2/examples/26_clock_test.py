@@ -65,7 +65,7 @@ class App(Engine):
         """Process events and redraw the view while clock is paused."""
         while self.paused:
             pygame.time.wait(40)
-            self._get_events(0)
+            self._get_events()
             self.draw(0)
     
     def pause(self):
