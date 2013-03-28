@@ -16,7 +16,7 @@
 # License along with GameClock.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__version__ = '$Id: gameclock.py v0.0.2$'
+__version__ = '$Id$'
 __author__ = 'Gummbum, (c) 2011-2012'
 
 
@@ -242,9 +242,10 @@ class GameClock(object):
         update_interval = self._update_interval
         game_time = self._game_time
         if real_time >= self._next_update:
-##AARGH - Why did I do this? It's supposed to be a fixed timestep. :P
+## FIX: Commented code is a variable timestep. Very bad on underpowered CPUs,
+## and generally prone to "losing time".
 ##            self.dt_update = real_time - self._last_update_real
-            self.dt_update = update_interval
+            self.dt_update = update_interval  # fixed timestep: good
             self._last_update_real = real_time
             game_time += update_interval
             self._game_time = game_time
