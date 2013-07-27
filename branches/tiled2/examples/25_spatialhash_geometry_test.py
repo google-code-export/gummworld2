@@ -117,10 +117,10 @@ class App(Engine):
         self.map_size = 10,10
         self.cell_size = self.map_size[0] * self.tile_size[0]
         self.worst_case = 0
-        self.num_sprites = 640
+        self.num_sprites = 550
         
         Engine.__init__(self,
-            caption='24 SpatialHash Stress Test - [+/-]: Cells | G: Grid',
+            caption='24 SpatialHash Geometry Test - [+/-]: Cells | G: Grid',
             resolution=(600,600),
             tile_size=self.tile_size, map_size=self.map_size,
             update_speed=30, frame_speed=0,
@@ -183,7 +183,7 @@ class App(Engine):
                 len(State.world)**2/1000,
             ),
             interval=.25))
-
+    
     def update(self, dt):
         self.update_world()
         self.update_collisions()
