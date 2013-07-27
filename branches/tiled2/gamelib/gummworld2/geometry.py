@@ -391,9 +391,9 @@ def rect_collided_other(self, other, rect_pre_tested=None):
         return False
     elif other_collided is line_collided_other:
         end_points = other.end_points
-        p1,p2 = end_points
         return len(line_intersects_rect(end_points, rect)) > 0 or \
-            rect.collidepoint(p1)==True or rect.collidepoint(p2)==True
+            rect.collidepoint(end_points[0]) == True or \
+            rect.collidepoint(end_points[1]) == True
     
     return other_collided(other, self)
 
@@ -484,6 +484,111 @@ def poly_collided_other(self, other, rect_pre_tested=None):
         return False
     
     return other.collided(other, self)
+
+
+class LineGeometry(object):
+    
+    def __init__(self, x1, y1, x2, y2):
+        super(LineGeometry, self).__init__()
+        self._p1 = Vec2d(x1,y1)
+        self._p2 = Vec2d(x2,y2)
+    
+    @property
+    def points(self):
+        return tuple(self._p1[:]) + tuple(self._p2[:])
+    @points.setter
+    def points(self, endpoints):
+        """set end points of line
+        line.points = x1,y1,x2,y2
+        line.points = (x1,y1),(x2,y2)
+        """
+        if len(endpoints) == 4:
+            self._p1[:] = endpoints[0:2]
+            self._p2[:] = endpoints[2:4]
+        elif len(endpoints) == 2:
+            self._p1[:] = endpoints[0]
+            self._p2[:] = endpoints[1]
+        else:
+            raise ValueError('{0}.points: endpoints={1}'.format(
+                self.__class__.__name__, endpoints))
+    
+    @property
+    def end_points(self):
+        return self._p1[:],self._p2[:]
+    
+    ## entity's collided, static method used by QuadTree callback
+    collided = staticmethod(line_collided_other)
+    
+    @property
+    def position(self):
+        """GOTCHA: Something like "line_geom.position.x += 1" will not do what
+        you expect. That operation does not update the line instance variable.
+        Instead use "line_geom.position += (1,0)".
+        """
+        return self._p1[:]
+    @position.setter
+    def position(self, val):
+        x = val[0]
+        y = val[1]
+        p1 = self._p1
+        x1 = p1[0]
+        y1 = p1[1]
+        dx = x - x1
+        dy = y - y1
+        p1[0] = x
+        p1[1] = y
+        
+        p2 = self._p2
+        p2[0] += dx
+        p2[1] += dy
+    
+    @property
+    def p1(self):
+        return self._p1[:]
+    @p1.setter
+    def p1(self, xorxy, y=None):
+        if y is None:
+            self._p1[:] = xorxy
+        else:
+            self._p1[:] = xorxy,y
+    
+    @property
+    def p2(self):
+        return self._p2[:]
+    @p2.setter
+    def p2(self, xorxy, y=None):
+        if y is None:
+            self._p2[:] = xorxy
+        else:
+            self._p2[:] = xorxy,y
+    
+    @property
+    def x1(self):
+        return self._p1[0]
+    @x1.setter
+    def x1(self, val):
+        self._p1[0] = val
+    
+    @property
+    def y1(self):
+        return self._p1[1]
+    @x1.setter
+    def y1(self, val):
+        self._p1[1] = val
+    
+    @property
+    def x2(self):
+        return self._p2[0]
+    @x1.setter
+    def x2(self, val):
+        self._p2[0] = val
+    
+    @property
+    def y2(self):
+        return self._p2[1]
+    @x1.setter
+    def y2(self, val):
+        self._p2[1] = val
 
 
 class RectGeometry(object):
@@ -792,3 +897,20 @@ def rect_to_lines(rect):
     """
     tl,tr,br,bl = rect.topleft,rect.topright,rect.bottomright,rect.bottomleft
     return [(tl,tr),(tr,br),(br,bl),(bl,tl)]
+
+
+if __name__ == '__main__':
+    line = LineGeometry(10,10,50,50)
+    assert line.points == (10,10,50,50)
+    line.p1 = 20,20
+    assert line.points == (20,20,50,50)
+    line.p2 = 60,60
+    assert line.points == (20,20,60,60)
+    line.points = 10,20,30,40
+    assert line.points == (10,20,30,40)
+    line.points = (20,20),(30,40)
+    assert line.points == (20,20,30,40)
+    try:
+        line.points = 1,2,3,4,5
+    except ValueError:
+        print 'LineGeometry: all tests passed'
