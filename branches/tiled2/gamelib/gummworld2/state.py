@@ -46,7 +46,7 @@ _init_attrs = [
     'camera', 'map',
     'clock', 'menu',
     'running', 'speed', 'dt',
-    'show_grid', 'show_labels', 'show_hud',
+    'show_grid', 'show_labels',
 ]
 
 # The states dict stores lists of saved objects, keyed by a name. Any valid dict
@@ -103,7 +103,6 @@ class State(object):
     
     show_grid = False
     show_labels = False
-    show_hud = False
     
     ## static save/restore methods
     

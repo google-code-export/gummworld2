@@ -52,7 +52,15 @@ class HUD(pygame.sprite.OrderedUpdates):
 #        self.y = lambda n: self.top + self.font_height * n
         self.x = State.screen.rect.x + 5
         self.i = 0
-
+        self._visible = True
+    
+    @property
+    def visible(self):
+        return self._visible
+    @visible.setter
+    def visible(self, bool):
+        self._visible = bool
+    
     @property
     def bottom(self):
         return self.top + sum([s.font.size('W')[1] for s in self])
@@ -88,7 +96,7 @@ class HUD(pygame.sprite.OrderedUpdates):
             stat.update(dt)
 
     def draw(self, dt=0, surface=None):
-        if not State.show_hud:
+        if not self.visible:
             return
         if surface is None:
             super(HUD, self).draw(State.camera.surface)
@@ -170,12 +178,11 @@ if __name__ == '__main__':
     top = 20
     height = hud_font.get_height()
     State.hud = HUD()
-    State.show_hud = True
     y = lambda n: top+height*n
     State.hud.add('stat1', Stat((left,y(0)), 'Stat 1'))
-    State.hud.add('time', Statf((left,y(1)), 'Time %d', callback=lambda:State.clock.time, interval=.1))
-    State.hud.add('fps', Statf((left,y(2)), 'FPS %d', callback=State.clock.get_fps))
-    State.clock.schedule_update_priority(State.hud.update, 1.0)
+    State.hud.add('time', Statf((left,y(1)), 'Time %d', callback=lambda:State.clock.get_ticks(), interval=.1))
+    State.hud.add('fps', Statf((left,y(2)), 'FPS %d', callback=lambda:State.clock.fps))
+    State.clock.schedule_interval(State.hud.update, 1.0)
     while 1:
         State.clock.tick()
         State.screen.clear()
