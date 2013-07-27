@@ -1,9 +1,11 @@
 __doc__ = """spatialhash.py - High performance spatial hash for spatial
 partitioning and fast collision detection.
 
-Objects must have a pygame Rect attribute. Optionally, objects may have a
-collided static method attribute for lower-level collision detection (see the
-gummworld2.geometry module).
+Objects (other than geometry.LineGeometry) must have a pygame Rect attribute.
+Optionally, objects may have a collided static method attribute for lower-level
+collision detection (see the gummworld2.geometry module).
+
+Objects that are outside the world bounding rect are ignored by add().
 
 This module is derived from the article and source code written by Conkerjo at
 http://conkerjo.wordpress.com/2009/06/13/spatial-hashing-implementation-for-fast-2d-collisions/.
@@ -39,11 +41,13 @@ class SpatialHash(object):
         self.rows = int(ceil(world_rect.h / float(cell_size)))
         self.cols = int(ceil(world_rect.w / float(cell_size)))
         self.buckets = [[] for i in range(self.rows*self.cols)]
+        ## cell_ids = {obj1:[cells...], obj2:[cells...], ...}
         self.cell_ids = WeakKeyDictionary()
         
         self.num_buckets = len(self.buckets)
         
         self.coll_tests = 0
+        self._temp_rect = pygame.Rect(0,0,0,0)
     
     @property
     def objects(self):
@@ -61,7 +65,11 @@ class SpatialHash(object):
         its cell membership is updated. This method first removes the object if
         it is already in the spatial hash.
         """
-        cell_ids = self.intersect_indices(obj.rect)
+        try:
+            cell_ids = self.intersect_indices(obj.rect)
+        except AttributeError:
+            rect = self._get_rect_for_line(obj)
+            cell_ids = self.intersect_indices(rect)
         if obj in self.cell_ids and cell_ids == self.cell_ids[obj]:
             return cell_ids == True
         self.remove(obj)
@@ -94,7 +102,11 @@ class SpatialHash(object):
         """Return a list of objects that share the same cells as obj.
         """
         nearby_objs = []
-        cell_ids = self.intersect_indices(obj.rect)
+        try:
+            cell_ids = self.intersect_indices(obj.rect)
+        except AttributeError:
+            rect = self._get_rect_for_line(obj)
+            cell_ids = self.intersect_indices(rect)
         buckets = self.buckets
         for cell_id in cell_ids:
             nearby_objs.extend(buckets[cell_id])
@@ -133,11 +145,12 @@ class SpatialHash(object):
         """Return list of cell ids that intersect rect.
         """
         # Not pretty, but these ugly optimizations shave 50% off run-time
-        # versus function calls and attributes. This is called by add(),
+        # versus function calls and attributes. This method is called by add(),
         # which gets called whenever an object moves.
         
         # return value
-        cell_ids = set()
+#        cell_ids = set()
+        cell_ids = {}
         
         # pre-calculate bounds
         left = rect[0]
@@ -158,14 +171,16 @@ class SpatialHash(object):
         
         # misc speedups
         cols = self.cols
-        cell_ids_add = cell_ids.add
+#        cell_ids_add = cell_ids.add
         
         for x in x_range:
             for y in y_range:
                 cell_id = x//cell_size + y//cell_size * cols
-                cell_ids_add(cell_id)
+#                cell_ids_add(cell_id)
+                cell_ids[cell_id] = 1
         
-        return list(cell_ids)
+#        return list(cell_ids)
+        return cell_ids.keys()
     
     def intersect_objects(self, rect):
         """Return list of objects whose rects intersect rect.
@@ -199,12 +214,25 @@ class SpatialHash(object):
     def collideany(self, obj):
         """Return True if obj collides with any other object, else False.
         """
-        collided = self._extended_collided
+#        collided = self._extended_collided
         for other in self.get_nearby_objects(obj):
             if other is obj:
                 continue
-            if collided(obj, other):
-                return True
+#            if collided(obj, other):
+#                return True
+            try:
+                if obj.rect.colliderect(other.rect):
+                    try:
+                        if obj.collided(obj, other, True):
+                            return True
+                    except AttributeError:
+                            return True
+            except AttributeError:
+                try:
+                    if obj.collided(obj, other, True):
+                        return True
+                except AttributeError:
+                    pass
         return False
     
     def collide(self, obj):
@@ -212,12 +240,25 @@ class SpatialHash(object):
         """
         collisions = []
         append = collisions.append
-        collided = self._extended_collided
+#        collided = self._extended_collided
         for other in self.get_nearby_objects(obj):
             if other is obj:
                 continue
-            if collided(obj, other):
-                append(other)
+#            if collided(obj, other):
+#                append(other)
+            try:
+                if obj.rect.colliderect(other.rect):
+                    try:
+                        if obj.collided(obj, other, True):
+                            append(obj)
+                    except AttributeError:
+                            append(obj)
+            except AttributeError:
+                try:
+                    if obj.collided(obj, other, True):
+                        append(obj)
+                except AttributeError:
+                    pass
         return collisions
     
     def collidealldict(self, rect=None):
@@ -230,7 +271,6 @@ class SpatialHash(object):
         """
         collisions = {}
         self.coll_tests = 0
-        collided = self._extended_collided
         if rect:
             buckets = self.buckets
             cells = [buckets[i] for i in self.intersect_indices(rect)]
@@ -238,15 +278,33 @@ class SpatialHash(object):
             cells = self.buckets
         tests = 0
         for cell in cells:
-            i = 0
             for obj in cell:
-                i += 1
-                for other in cell[i:]:
+                for other in cell:
+                    if other is obj:
+                        continue
                     tests += 1
-                    if collided(obj, other):
-                        if obj not in collisions:
-                            collisions[obj] = []
-                        collisions[obj].append(other)
+                    try:
+                        if obj.rect.colliderect(other.rect):
+                            try:
+                                if obj.collided(obj, other, True):
+                                    try:
+                                        collisions[obj].append(other)
+                                    except KeyError:
+                                        collisions[obj] = [other]
+                            except AttributeError:
+                                    try:
+                                        collisions[obj].append(other)
+                                    except KeyError:
+                                        collisions[obj] = [other]
+                    except AttributeError:
+                        try:
+                            if obj.collided(obj, other, True):
+                                try:
+                                    collisions[obj].append(other)
+                                except KeyError:
+                                    collisions[obj] = [other]
+                        except AttributeError:
+                            pass
         self.coll_tests = tests
         return collisions
     
@@ -258,9 +316,7 @@ class SpatialHash(object):
         
         The contents of the returned list are: [(obj,other),...]
         """
-        collisions = set()
-        cadd = collisions.add
-        collided = self._extended_collided
+        collisions = {}
         if rect:
             buckets = self.buckets
             cells = [buckets[i] for i in self.intersect_indices(rect)]
@@ -268,29 +324,72 @@ class SpatialHash(object):
             cells = self.buckets
         tests = 0
         for cell in cells:
-            i = 0
             for obj in cell:
-                i += 1
-                for other in cell[i:]:
+                for other in cell:
+                    if other is obj:
+                        continue
                     tests += 1
-                    if collided(obj, other):
-                        cadd((obj,other))
-                        cadd((other,obj))
+                    try:
+                        if obj.rect.colliderect(other.rect):
+                            try:
+                                if obj.collided(obj, other, True):
+                                    collisions[(obj,other)] = 1
+#                                    collisions[(other,obj)] = 1
+                            except AttributeError:
+                                    collisions[(obj,other)] = 1
+#                                    collisions[(other,obj)] = 1
+                    except AttributeError:
+                        try:
+                            if obj.collided(obj, other, True):
+                                collisions[(obj,other)] = 1
+                                collisions[(other,obj)] = 1
+                        except AttributeError:
+                            pass
         self.coll_tests = tests
-        return list(collisions)
+        return collisions.keys()
+    
+    def collideallflatlist(self, rect=None):
+        """Return flat list of all collisions.
+        
+        If rect is specified, only the cells that intersect rect will be
+        checked.
+        
+        The contents of the returned list are: [obj1,other1,obj2,other2...]
+        """
+        collisions = []
+        append = collisions.append
+        if rect:
+            buckets = self.buckets
+            cells = [buckets[i] for i in self.intersect_indices(rect)]
+        else:
+            cells = self.buckets
+        tests = 0
+        for cell in cells:
+            for obj in cell:
+                for other in cell:
+                    if other is obj:
+                        continue
+                    tests += 1
+                    try:
+                        if obj.rect.colliderect(other.rect):
+                            try:
+                                if obj.collided(obj, other, True):
+                                    append(obj)
+                                    append(other)
+                            except AttributeError:
+                                    append(obj)
+                                    append(other)
+                    except AttributeError:
+                        try:
+                            if obj.collided(obj, other, True):
+                                append(obj)
+                                append(other)
+                        except AttributeError:
+                            pass
+        self.coll_tests = tests
+        return collisions
     
     @staticmethod
-    def _extended_collided(obj, other):
-        if obj.rect.colliderect(other.rect):
-            if hasattr(obj, 'collided'):
-                return obj.collided(obj, other, True)
-            elif hasattr(other, 'collided'):
-                return other.collided(other, obj, True)
-            else:
-                return True
-        else:
-            return False
-    
     def clear(self):
         """Clear all objects.
         """
@@ -311,6 +410,45 @@ class SpatialHash(object):
         """
         for cell in self.buckets:
             yield cell
+    
+    def _extended_collided(obj, other):
+        """Deprecated - moved inline for speed
+        """
+        try:
+            if obj.rect.colliderect(other.rect):
+                try:
+                    return obj.collided(obj, other, True)
+                except AttributeError:
+                        return True
+            else:
+                return False
+        except AttributeError:
+            try:
+                return obj.collided(obj, other, True)
+            except AttributeError:
+                return False
+    
+    def _get_rect_for_line(self, obj):
+        """Lines don't have a rect attribute. Use self._temp_rect to fudge it.
+        """
+        points = obj.points
+        rect = self._temp_rect
+        x1 = points[0]
+        y1 = points[1]
+        x2 = points[2]
+        y2 = points[3]
+        if x1 > x2:
+            t = x1
+            x1 = x2
+            x2 = t
+        if y1 > y2:
+            t = y1
+            y1 = y2
+            y2 = t
+        rect.topleft = x1,y1
+        rect.width = x2 - x1
+        rect.height = y2 - y1
+        return rect
     
     def __iter__(self):
         for obj in self.cell_ids:
