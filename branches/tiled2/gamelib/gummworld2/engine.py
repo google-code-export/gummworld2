@@ -166,25 +166,6 @@ class Engine(Context):
         
         Engine.update() and Engine.draw() are registered as callbacks in the
         clock.
-        
-#        By default the Engine class schedules these additional items:
-#            
-#            clock.schedule_update_priority(self._get_event, -2.0)
-#            clock.schedule_update_priority(State.world.step, -1.0)
-#            clock.schedule_update_priority(State.camera.update, 1.0)
-#            clock.schedule_frame_priority(State.camera.interpolate, -1.0)
-#            
-#        The first three items coincide with the clock's callback to
-#        Engine.update(). The last item coincides with Engine.draw().
-#        
-#        The use of priorities allows user items to be scheduled in between these
-#        default items by using an appropriate float value: lower priorities will
-#        be run first. See gameclock.GameClock.schedule_*_priority().
-#        
-#        To prevent scheduling the world and camera items, pass the constructor
-#        argument default_schedules=False. If these are not scheduled by Engine,
-#        the using program will either need to schedule them or place them
-#        directly in the overridden update() and draw() methods, as appropriate.
         """
         
         if __debug__: print 'Engine: -- new engine --'
@@ -274,13 +255,6 @@ class Engine(Context):
         self.clock = GameClock(
             update_speed, frame_speed,
             update_callback=self._update, frame_callback=self._draw)
-        
-        ## Default schedules.
-#        if __debug__: print 'Engine: scheduling _get_events at priority -2.0'
-#        self.clock.schedule_update_priority(self._get_events, -2.0)
-#        if default_schedules:
-#            if __debug__: print 'Engine: scheduling default items'
-#            self.schedule_default()
         
         ## Init joysticks.
         if not pygame.joystick.get_init():
