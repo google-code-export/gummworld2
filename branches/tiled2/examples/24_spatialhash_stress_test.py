@@ -1,4 +1,5 @@
 from math import ceil
+import os
 import sys
 from random import randrange, choice as randchoice
 import cProfile
@@ -29,7 +30,7 @@ class Thing(model.Object):
         self.image = self.image_green
         
         self.position = position
-        choices = [-0.5,-0.3,-0.1,0.1,0.3,0.5]
+        choices = [-0.5,-0.4,-0.3,0.3,0.4,0.5]
         self.step = Vec2d(randchoice(choices), randchoice(choices))
         self.hit = 0
     
@@ -180,7 +181,7 @@ class App(Engine):
         history = self.tune_fps_history
         current_fps = self.clock.fps
         
-        if self.tune_count > 5:
+        if self.tune_count > 6:
             print '\nfinished auto tuning'
             self.num_cells = self.tune_num_cells
             self.dec_things()
@@ -226,8 +227,25 @@ class App(Engine):
             for o in State.world.intersect_objects(filter_rect):
                 o.hit = True
         else:
-            for c in State.world.collidealllist():
-                c[0].hit = True
+            # Set which=N for different tests.
+            which = 2
+            
+            if which == 0:
+                # List of tuples
+                coll = State.world.collidealllist()
+                for pair in coll:
+                    pair[0].hit = True
+            elif which == 1:
+                # Dict of lists
+                coll = State.world.collidealldict()
+                for obj,others_list in coll.items():
+                    obj.hit = True
+            elif which == 2:
+                # Flat List of pairs [0,0,1,1,...]
+                coll = State.world.collideallflatlist()
+                for i in xrange(0, len(coll), 2):
+                    pair = coll[i:i+1]
+                    pair[0].hit = True
     
     def draw(self, dt):
         State.screen.clear()
@@ -319,12 +337,13 @@ if __name__ == '__main__':
     
     def run_it():
         gummworld2.run(app)
-    
     app = App()
-
+    
     if True:
         run_it()
     else:
-        cProfile.run('run_it()')
-        p = pstats.Stats()
-        p.print_stats()
+        pfile = '24.prof'
+        cProfile.run('run_it()', pfile)
+        p = pstats.Stats(pfile)
+        p.sort_stats('time').print_stats()
+        os.remove(pfile)
