@@ -60,7 +60,6 @@ class App(gummworld2.Engine):
         
         # Make a HUD.
         State.hud = HUD()
-        State.hud.set_visible(True)
         next_pos = State.hud.next_pos
         # Frames per second.
         State.hud.add('FPS', Statf(next_pos(),
