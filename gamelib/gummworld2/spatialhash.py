@@ -250,13 +250,13 @@ class SpatialHash(object):
                 if obj.rect.colliderect(other.rect):
                     try:
                         if obj.collided(obj, other, True):
-                            append(obj)
+                            append(other)
                     except AttributeError:
-                            append(obj)
+                            append(other)
             except AttributeError:
                 try:
                     if obj.collided(obj, other, True):
-                        append(obj)
+                        append(other)
                 except AttributeError:
                     pass
         return collisions
