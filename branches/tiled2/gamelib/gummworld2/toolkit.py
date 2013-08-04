@@ -30,7 +30,7 @@ import urllib
 
 
 import pygame
-from pygame.locals import RLEACCEL, SRCALPHA, BLEND_RGBA_ADD
+from pygame.locals import RLEACCEL, SRCALPHA, BLEND_RGBA_ADD, Color
 from pygame.sprite import Sprite
 
 from gummworld2 import data, State, BasicMap, BasicLayer, Vec2d
@@ -100,7 +100,7 @@ def make_hud(caption=None, visible=True):
     both as an example, and for an early design and debugging convenience.
     """
     State.hud = HUD()
-    State.hud.visible = visible
+#    State.hud.visible = visible
     next_pos = State.hud.next_pos
     
     if caption:
@@ -131,7 +131,7 @@ def make_hud(caption=None, visible=True):
 # make_hud
 
 
-def make_tiles():
+def make_tiles(label=False):
     """Create tiles to fill the current map. This is a utility for easily making
     visible content to aid early game design or debugging.
     
@@ -142,6 +142,10 @@ def make_tiles():
     mw,mh = State.map.width, State.map.height
     layer = BasicLayer(State.map, 0)
     State.map.layers.append(layer)
+    if label:
+        font = pygame.font.Font(data.filepath('font', 'Vera.ttf'), 7)
+        fg = Color('yellow')
+        bg = Color(70,70,70)
     for y in range(mh):
         for x in range(mw):
             s = pygame.sprite.Sprite()
@@ -154,6 +158,9 @@ def make_tiles():
             B = 255*facy
             s.image.fill((R,G,B))
             s.rect = s.image.get_rect(topleft=(x*tw,y*th))
+            if label:
+                tag = font.render(str(s.name), 1, fg, bg)
+                s.image.blit(tag, (1,1))
             layer.add(s)
 
 # make_tiles
