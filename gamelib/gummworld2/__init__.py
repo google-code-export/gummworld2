@@ -55,6 +55,7 @@ from spatialhash import SpatialHash
 
 from screen import Screen, View
 from basicmap import BasicMap, BasicLayer
+from basicmaprenderer import BasicMapRenderer
 from tiledmap import TiledMap
 from supermap import SuperMap, MapHandler
 from camera import Camera
