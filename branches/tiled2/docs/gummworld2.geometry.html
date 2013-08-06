@@ -6,9 +6,9 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.geometry</strong></big></big> (version $Id: geometry.py 343 2011-10-31 04:51:03Z stabbingfinger@gmail.com $)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.geometry</strong></big></big> (version $Id: geometry.py 384 2013-07-27 22:29:03Z stabbingfinger@gmail.com $)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/dist/gummworld2/tiled2/gamelib/gummworld2/geometry.py">c:\cygwin\home\bw\devel\python\dist\gummworld2\tiled2\gamelib\gummworld2\geometry.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/svn/gummworld2_devel/gamelib/gummworld2/geometry.py">c:\cygwin\home\bw\devel\python\svn\gummworld2_devel\gamelib\gummworld2\geometry.py</a></font></td></tr></table>
     <p><tt>geometry.py&nbsp;-&nbsp;Geometry&nbsp;module&nbsp;for&nbsp;Gummworld2.<br>
 &nbsp;<br>
 Geometry&nbsp;classes&nbsp;and&nbsp;functions.</tt></p>
@@ -33,6 +33,7 @@ Geometry&nbsp;classes&nbsp;and&nbsp;functions.</tt></p>
 <dl>
 <dt><font face="helvetica, arial"><a href="gummworld2.geometry.html#CircleGeometry">CircleGeometry</a>
 </font></dt><dt><font face="helvetica, arial"><a href="gummworld2.geometry.html#Ellipse">Ellipse</a>
+</font></dt><dt><font face="helvetica, arial"><a href="gummworld2.geometry.html#LineGeometry">LineGeometry</a>
 </font></dt><dt><font face="helvetica, arial"><a href="gummworld2.geometry.html#PolyGeometry">PolyGeometry</a>
 </font></dt><dt><font face="helvetica, arial"><a href="gummworld2.geometry.html#RectGeometry">RectGeometry</a>
 </font></dt></dl>
@@ -394,6 +395,53 @@ Data descriptors defined here:<br>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="LineGeometry">class <strong>LineGeometry</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="LineGeometry-__init__"><strong>__init__</strong></a>(self, x1, y1, x2, y2)</dt></dl>
+
+<hr>
+Static methods defined here:<br>
+<dl><dt><a name="LineGeometry-collided"><strong>collided</strong></a> = line_collided_other(self, other, rect_pre_tested<font color="#909090">=None</font>)</dt><dd><tt>Return&nbsp;results&nbsp;of&nbsp;collision&nbsp;test&nbsp;between&nbsp;a&nbsp;line&nbsp;and&nbsp;other&nbsp;geometry.<br>
+&nbsp;<br>
+self&nbsp;is&nbsp;a&nbsp;line,&nbsp;it&nbsp;must&nbsp;have&nbsp;an&nbsp;end_points&nbsp;attr.<br>
+&nbsp;<br>
+See&nbsp;circle_collided_other&nbsp;description&nbsp;for&nbsp;other&nbsp;details.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>end_points</strong></dt>
+</dl>
+<dl><dt><strong>p1</strong></dt>
+</dl>
+<dl><dt><strong>p2</strong></dt>
+</dl>
+<dl><dt><strong>points</strong></dt>
+</dl>
+<dl><dt><strong>position</strong></dt>
+<dd><tt>GOTCHA:&nbsp;Something&nbsp;like&nbsp;"line_geom.position.x&nbsp;+=&nbsp;1"&nbsp;will&nbsp;not&nbsp;do&nbsp;what<br>
+you&nbsp;expect.&nbsp;That&nbsp;operation&nbsp;does&nbsp;not&nbsp;update&nbsp;the&nbsp;line&nbsp;instance&nbsp;variable.<br>
+Instead&nbsp;use&nbsp;"line_geom.position&nbsp;+=&nbsp;(1,0)".</tt></dd>
+</dl>
+<dl><dt><strong>x1</strong></dt>
+</dl>
+<dl><dt><strong>x2</strong></dt>
+</dl>
+<dl><dt><strong>y1</strong></dt>
+</dl>
+<dl><dt><strong>y2</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="PolyGeometry">class <strong>PolyGeometry</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
     
 <tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
@@ -649,7 +697,7 @@ The&nbsp;distance&nbsp;argument&nbsp;is&nbsp;the&nbsp;size&nbsp;of&nbsp;the&nbsp
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><strong>__author__</strong> = 'Gummbum, (c) 2011'<br>
-<strong>__version__</strong> = '$Id: geometry.py 343 2011-10-31 04:51:03Z stabbingfinger@gmail.com $'<br>
+<strong>__version__</strong> = '$Id: geometry.py 384 2013-07-27 22:29:03Z stabbingfinger@gmail.com $'<br>
 <strong>pi</strong> = 3.1415926535897931</td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#7799ee">

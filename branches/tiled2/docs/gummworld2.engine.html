@@ -6,9 +6,9 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.engine</strong></big></big> (version $Id: engine.py 364 2011-11-28 06:00:33Z stabbingfinger@gmail.com $)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.engine</strong></big></big> (version $Id: engine.py 383 2013-07-27 22:28:24Z stabbingfinger@gmail.com $)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/dist/gummworld2/tiled2/gamelib/gummworld2/engine.py">c:\cygwin\home\bw\devel\python\dist\gummworld2\tiled2\gamelib\gummworld2\engine.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/svn/gummworld2_devel/gamelib/gummworld2/engine.py">c:\cygwin\home\bw\devel\python\svn\gummworld2_devel\gamelib\gummworld2\engine.py</a></font></td></tr></table>
     <p><tt>engine.py&nbsp;-&nbsp;A&nbsp;sample&nbsp;engine&nbsp;for&nbsp;Gummworld2.<br>
 &nbsp;<br>
 This&nbsp;module&nbsp;provides&nbsp;an&nbsp;<a href="#Engine">Engine</a>&nbsp;class&nbsp;that&nbsp;can&nbsp;be&nbsp;subclassed&nbsp;for&nbsp;an&nbsp;application<br>
@@ -68,7 +68,7 @@ though&nbsp;not&nbsp;everything&nbsp;created&nbsp;in&nbsp;the&nbsp;constructor&n
 </dl>
 <hr>
 Methods defined here:<br>
-<dl><dt><a name="Engine-__init__"><strong>__init__</strong></a>(self, screen_surface<font color="#909090">=None</font>, resolution<font color="#909090">=None</font>, display_flags<font color="#909090">=0</font>, caption<font color="#909090">=None</font>, camera_target<font color="#909090">=None</font>, camera_view<font color="#909090">=None</font>, camera_view_rect<font color="#909090">=None</font>, map<font color="#909090">=None</font>, tile_size<font color="#909090">=None</font>, map_size<font color="#909090">=None</font>, update_speed<font color="#909090">=30</font>, frame_speed<font color="#909090">=30</font>, default_schedules<font color="#909090">=True</font>, world_type<font color="#909090">=0</font>, world_args<font color="#909090">={}</font>, set_state<font color="#909090">=True</font>)</dt><dd><tt>Construct&nbsp;an&nbsp;instance&nbsp;of&nbsp;<a href="#Engine">Engine</a>.<br>
+<dl><dt><a name="Engine-__init__"><strong>__init__</strong></a>(self, screen_surface<font color="#909090">=None</font>, resolution<font color="#909090">=None</font>, display_flags<font color="#909090">=0</font>, caption<font color="#909090">=None</font>, camera_target<font color="#909090">=None</font>, camera_view<font color="#909090">=None</font>, camera_view_rect<font color="#909090">=None</font>, map<font color="#909090">=None</font>, tile_size<font color="#909090">=None</font>, map_size<font color="#909090">=None</font>, update_speed<font color="#909090">=30</font>, frame_speed<font color="#909090">=30</font>, world_type<font color="#909090">=0</font>, world_args<font color="#909090">={}</font>, set_state<font color="#909090">=True</font>)</dt><dd><tt>Construct&nbsp;an&nbsp;instance&nbsp;of&nbsp;<a href="#Engine">Engine</a>.<br>
 &nbsp;<br>
 This&nbsp;constructor&nbsp;does&nbsp;the&nbsp;following:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<br>
@@ -150,33 +150,13 @@ The&nbsp;clock&nbsp;sacrifices&nbsp;frames&nbsp;per&nbsp;second&nbsp;in&nbsp;ord
 updates&nbsp;per&nbsp;second.&nbsp;If&nbsp;frame_speed&nbsp;is&nbsp;0&nbsp;the&nbsp;frame&nbsp;rate&nbsp;is&nbsp;uncapped.<br>
 &nbsp;<br>
 <a href="#Engine">Engine</a>.<a href="#Engine-update">update</a>()&nbsp;and&nbsp;<a href="#Engine">Engine</a>.<a href="#Engine-draw">draw</a>()&nbsp;are&nbsp;registered&nbsp;as&nbsp;callbacks&nbsp;in&nbsp;the<br>
-clock.<br>
-&nbsp;<br>
-By&nbsp;default&nbsp;the&nbsp;<a href="#Engine">Engine</a>&nbsp;class&nbsp;schedules&nbsp;these&nbsp;additional&nbsp;items:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;clock.schedule_update_priority(self.<strong>_get_event</strong>,&nbsp;-2.0)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;clock.schedule_update_priority(State.world.step,&nbsp;-1.0)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;clock.schedule_update_priority(State.camera.update,&nbsp;1.0)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;clock.schedule_frame_priority(State.camera.interpolate,&nbsp;-1.0)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<br>
-The&nbsp;first&nbsp;three&nbsp;items&nbsp;coincide&nbsp;with&nbsp;the&nbsp;clock's&nbsp;callback&nbsp;to<br>
-<a href="#Engine">Engine</a>.<a href="#Engine-update">update</a>().&nbsp;The&nbsp;last&nbsp;item&nbsp;coincides&nbsp;with&nbsp;<a href="#Engine">Engine</a>.<a href="#Engine-draw">draw</a>().<br>
-&nbsp;<br>
-The&nbsp;use&nbsp;of&nbsp;priorities&nbsp;allows&nbsp;user&nbsp;items&nbsp;to&nbsp;be&nbsp;scheduled&nbsp;in&nbsp;between&nbsp;these<br>
-default&nbsp;items&nbsp;by&nbsp;using&nbsp;an&nbsp;appropriate&nbsp;float&nbsp;value:&nbsp;lower&nbsp;priorities&nbsp;will<br>
-be&nbsp;run&nbsp;first.&nbsp;See&nbsp;gameclock.GameClock.schedule_*_priority().<br>
-&nbsp;<br>
-To&nbsp;prevent&nbsp;scheduling&nbsp;the&nbsp;world&nbsp;and&nbsp;camera&nbsp;items,&nbsp;pass&nbsp;the&nbsp;constructor<br>
-argument&nbsp;default_schedules=False.&nbsp;If&nbsp;these&nbsp;are&nbsp;not&nbsp;scheduled&nbsp;by&nbsp;<a href="#Engine">Engine</a>,<br>
-the&nbsp;using&nbsp;program&nbsp;will&nbsp;either&nbsp;need&nbsp;to&nbsp;schedule&nbsp;them&nbsp;or&nbsp;place&nbsp;them<br>
-directly&nbsp;in&nbsp;the&nbsp;overridden&nbsp;<a href="#Engine-update">update</a>()&nbsp;and&nbsp;<a href="#Engine-draw">draw</a>()&nbsp;methods,&nbsp;as&nbsp;appropriate.</tt></dd></dl>
+clock.</tt></dd></dl>
 
-<dl><dt><a name="Engine-draw"><strong>draw</strong></a>(self, dt)</dt><dd><tt>Override&nbsp;this&nbsp;method.&nbsp;Called&nbsp;by&nbsp;<a href="#-run">run</a>()&nbsp;when&nbsp;the&nbsp;clock&nbsp;signals&nbsp;a<br>
+<dl><dt><a name="Engine-draw"><strong>draw</strong></a>(self, interp)</dt><dd><tt>Override&nbsp;this&nbsp;method.&nbsp;Called&nbsp;by&nbsp;<a href="#-run">run</a>()&nbsp;when&nbsp;the&nbsp;clock&nbsp;signals&nbsp;a<br>
 frame&nbsp;cycle&nbsp;is&nbsp;ready.<br>
 &nbsp;<br>
 Suggestion:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;State.screen.clear()<br>
-&nbsp;&nbsp;&nbsp;&nbsp;State.camera.interpolate()<br>
 &nbsp;&nbsp;&nbsp;&nbsp;...&nbsp;custom&nbsp;draw&nbsp;the&nbsp;screen&nbsp;...<br>
 &nbsp;&nbsp;&nbsp;&nbsp;State.screen.flip()</tt></dd></dl>
 
@@ -218,18 +198,7 @@ If&nbsp;you&nbsp;override&nbsp;this,&nbsp;make&nbsp;sure&nbsp;you&nbsp;call&nbsp
 &nbsp;<br>
 If&nbsp;you&nbsp;override&nbsp;this,&nbsp;make&nbsp;sure&nbsp;you&nbsp;call&nbsp;the&nbsp;super.</tt></dd></dl>
 
-<dl><dt><a name="Engine-schedule_default"><strong>schedule_default</strong></a>(self)</dt><dd><tt>Schedule&nbsp;default&nbsp;items.<br>
-&nbsp;<br>
-Note:&nbsp;These&nbsp;are&nbsp;not&nbsp;tracked.&nbsp;If&nbsp;you&nbsp;intend&nbsp;to&nbsp;manually&nbsp;replace<br>
-State.world&nbsp;or&nbsp;State.camera&nbsp;after&nbsp;constructing&nbsp;the&nbsp;<a href="#Engine">Engine</a>&nbsp;object,<br>
-you'll&nbsp;likely&nbsp;want&nbsp;to&nbsp;unschedule&nbsp;some&nbsp;or&nbsp;all&nbsp;of&nbsp;these&nbsp;and&nbsp;manage&nbsp;the<br>
-schedules&nbsp;yourself.&nbsp;If&nbsp;you&nbsp;replace&nbsp;the&nbsp;objects&nbsp;without&nbsp;unscheduling<br>
-their&nbsp;callbacks,&nbsp;the&nbsp;lost&nbsp;references&nbsp;will&nbsp;result&nbsp;in&nbsp;memory&nbsp;and&nbsp;CPU<br>
-leaks.</tt></dd></dl>
-
 <dl><dt><a name="Engine-set_state"><strong>set_state</strong></a>(self)</dt></dl>
-
-<dl><dt><a name="Engine-unschedule_default"><strong>unschedule_default</strong></a>(self)</dt><dd><tt>Unschedule&nbsp;default&nbsp;items.</tt></dd></dl>
 
 <dl><dt><a name="Engine-update"><strong>update</strong></a>(self, dt)</dt><dd><tt>Override&nbsp;this&nbsp;method.&nbsp;Called&nbsp;by&nbsp;<a href="#-run">run</a>()&nbsp;when&nbsp;the&nbsp;clock&nbsp;signals&nbsp;an<br>
 update&nbsp;cycle&nbsp;is&nbsp;ready.<br>
@@ -310,7 +279,7 @@ To&nbsp;exit&nbsp;the&nbsp;run&nbsp;loop&nbsp;gracefully,&nbsp;call&nbsp;context
 <strong>VIDEOEXPOSE</strong> = 17<br>
 <strong>VIDEORESIZE</strong> = 16<br>
 <strong>__author__</strong> = 'Gummbum, (c) 2011'<br>
-<strong>__version__</strong> = '$Id: engine.py 364 2011-11-28 06:00:33Z stabbingfinger@gmail.com $'</td></tr></table><p>
+<strong>__version__</strong> = '$Id: engine.py 383 2013-07-27 22:28:24Z stabbingfinger@gmail.com $'</td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#7799ee">
 <td colspan=3 valign=bottom>&nbsp;<br>
