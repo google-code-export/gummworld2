@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 """
@@ -44,7 +43,7 @@ Minimal OpenGL used. (Less of a learning curve.)
 
 __revision__ = "$Rev$"
 __version__ = "3.0.0." + __revision__[6:-2]
-__author__ = u'DR0ID @ 2009-2011'
+__author__ = 'DR0ID @ 2009-2011'
 
 
 #  -----------------------------------------------------------------------------
@@ -52,13 +51,13 @@ __author__ = u'DR0ID @ 2009-2011'
 
 import sys
 from xml.dom import minidom, Node
-import StringIO
+import io
 import os.path
 
 import pyglet
 
 import copy
-import tiledtmxloader
+from . import tmxreader
 
 #  -----------------------------------------------------------------------------
 
@@ -67,7 +66,7 @@ import tiledtmxloader
 # .. so that the video card can dump the map to the screen without having to 
 # analyze the tile data again and again.
 
-class ResourceLoaderPyglet(tiledtmxloader.AbstractResourceLoader):
+class ResourceLoaderPyglet(tmxreader.AbstractResourceLoader):
     """Loads all tile images and lays them out on a grid.
 
     Unlike the AbstractResourceLoader this class derives from, no overridden
@@ -78,7 +77,7 @@ class ResourceLoaderPyglet(tiledtmxloader.AbstractResourceLoader):
     """
 
     def load(self, tile_map):
-        tiledtmxloader.AbstractResourceLoader.load(self, tile_map)
+        tmxreader.AbstractResourceLoader.load(self, tile_map)
         # ISSUE 17: flipped tiles
         for layer in self.world_map.layers:
             for gid in layer.decoded_content:
@@ -180,7 +179,7 @@ def demo_pyglet(file_name):
     import pyglet
     from pyglet.gl import glTranslatef, glLoadIdentity
 
-    world_map = tiledtmxloader.TileMapParser().parse_decode(file_name)
+    world_map = tmxreader.TileMapParser().parse_decode(file_name)
     # delta is the x/y position of the map view.
     # delta is a list so that it can be accessed from the on_draw method of
     # window and the update function. Note that the position is in integers to
@@ -240,7 +239,7 @@ def demo_pyglet(file_name):
             continue
         if layer.is_object_group:
             # This is unimplemented in this minimal-case example code.
-            # Should you as a user of tiledtmxloader need this layer,
+            # Should you as a user of tmxreader need this layer,
             # I hope to have a separate demo using objects as well.
             continue
         group = pyglet.graphics.OrderedGroup(group_num)
@@ -274,6 +273,6 @@ if __name__ == '__main__':
     if len(sys.argv) == 2:
         demo_pyglet(sys.argv[1])
     else:
-        print('Usage: python %s your_map.tmx' % os.path.basename(__file__))
+        print(('Usage: python %s your_map.tmx' % os.path.basename(__file__)))
 
 

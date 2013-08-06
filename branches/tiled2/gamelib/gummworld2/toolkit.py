@@ -36,7 +36,7 @@ from pygame.sprite import Sprite
 from gummworld2 import data, State, BasicMap, BasicLayer, Vec2d
 from gummworld2.geometry import RectGeometry, PolyGeometry, CircleGeometry
 from gummworld2.ui import HUD, Stat, Statf, hud_font
-from tiledtmxloader.tiledtmxloader import TileMapParser
+from tiledtmxloader.tmxreader import TileMapParser
 from tiledtmxloader.helperspygame import ResourceLoaderPygame
 
 
