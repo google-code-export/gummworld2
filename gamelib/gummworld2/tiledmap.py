@@ -30,7 +30,7 @@ These classes add support for Tiled maps loaded by tiletmxloader.
 import pygame
 
 from tiledtmxloader.helperspygame import get_layers_from_map, SpriteLayer
-from tiledtmxloader.tiledtmxloader import TileMap, TileMapParser
+from tiledtmxloader.tmxreader import TileMap, TileMapParser
 from tiledtmxloader.helperspygame import ResourceLoaderPygame, RendererPygame
 
 from gummworld2 import spatialhash
