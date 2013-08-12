@@ -3,6 +3,8 @@
 
 = News =
 
+Aug 11, 2013
+
 The newest pymunk's API changes make it incompatible with Gummworld2. Consequently, the decision is made to deprecate the pymunk aspects of Gummworld2 (i.e. the automatic import, the references in modules engine, model, and anywhere else). This decision was made after it became clear that pymunk was not as valuable to my projects as originally expected. It is still easy enough to incorporate pymunk into Gummworld2 by stepping it the Engine.update() method. This is what I have been doing myself instead of using any of the canned "world" classes, which frankly are still undeveloped.
 
 So here's the word: choose your own model or physics, or design your own. On the one hand, you'll have to do this on your own steam. On the other hand: 1) You have to freedom (just as you always had with Gummworld2) to select or design the model that works best for you; 2) You won't have to struggle with learning someone else's (my) idea of a monstrous, inefficient model that tries to fulfill every need and misses the mark; 3) In my opinion, it is the most fun part of programming!
