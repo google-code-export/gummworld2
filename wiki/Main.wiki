@@ -3,9 +3,19 @@
 
 = News =
 
-==v0.4.0==
+The newest pymunk's API changes make it incompatible with Gummworld2. Consequently, the decision is made to deprecate the pymunk aspects of Gummworld2 (i.e. the automatic import, the references in modules engine, model, and anywhere else). This decision was made after it became clear that pymunk was not as valuable to my projects as originally expected. It is still easy enough to incorporate pymunk into Gummworld2 by stepping it the Engine.update() method. This is what I have been doing myself instead of using any of the canned "world" classes, which frankly are still undeveloped.
 
-The release v0.4.0 provides a GameClock that uses a fixed timestep. It should be compatible with games designed for the previous, variable-timestep GameClock. The variable-dt clock has been retired because it has critical problems keeping time on low-end systems that cannot keep up with a minimum desired ticks-per-second, sometimes resulting in unplayable games on under-performing systems. The fixed timestep handles this case more reliably.
+So here's the word: choose your own model or physics, or design your own. On the one hand, you'll have to do this on your own steam. On the other hand: 1) You have to freedom (just as you always had with Gummworld2) to select or design the model that works best for you; 2) You won't have to struggle with learning someone else's (my) idea of a monstrous, inefficient model that tries to fulfill every need and misses the mark; 3) In my opinion, it is the most fun part of programming!
+
+==v0.4.2==
+
+Version 0.4.2 adds some improvements. Most notably a BasicMapRenderer class as an optional replacement for collapsing tiles, which resolves the hassle and memory waste issues with the collapse implementation while providing the same high-performance scrolling.
+
+There is also the new LineGeometry, which had been too long neglected. A change to SpatialHash accompanies the new geometry, so that collisions between lines and all shapes can be detected.
+
+There is a significant a bug. BasicMapRenderer.set_dirty() blows up. This has been fixed in revision 402, and an example has been added. Please pull from the repo if you really need this fix. It is only one file.
+
+There is a minor bug. gummworld2/version.py still says 0.4.1. Sorry for any inconvenience.
 
 ==gw2 Skeleton==
 
@@ -25,7 +35,7 @@ API changes were necessary to bring in the new features.
 
 This is Gummworld2. It's designed as a light [http://www.pygame.org pygame] framework for a [http://pyweek.org/e/multifac/ scrolling game], where the map is larger than the display. It emphasizes simplicity, freedom, and performance.
 
-Gummworld2 is foremost about optimal scrolling. It provides just a few management classes, driven by a very simple (optional) engine. It is merely a _suggestion_ to use the engine for the game framework, [http://www.mapeditor.org/ Tiled] for maps, and [http://www.pygame.org/project-pymunk-780-2576.html pymunk] for physics. Examples and a toolkit are included to demonstrate the ease of incorporating these. If you prefer to use other libraries and utilities, it is quite easy to use Gummworld2 simply for scrolling maps and leverage your own tools.
+Gummworld2 is foremost about optimal scrolling. It provides just a few management classes, driven by a very simple (optional) engine. It is merely a _suggestion_ to use the engine for the game framework, and [http://www.mapeditor.org/ Tiled] for maps. Examples and a toolkit are included to demonstrate the ease of incorporating these. If you prefer to use other libraries and utilities, it is quite easy to use Gummworld2 simply for scrolling maps and leverage your own tools.
 
 In fact, even maps and scrolling are optional. If you wish to use the Engine or core classes simply for the program framework, Gummworld2 [http://pyggy.pyweek.org/e/gummX1/ lends itself well].
 
@@ -41,7 +51,7 @@ Given the name Gummworld2, one may wonder about the original [http://www.pygame.
 
 = API Overview =
 
-Gummworld2 is currently developed with Windows 7, Python 2.6, pygame 1.9.1, pymunk 1.0.0, and Tiled Map Editor 0.6.1 (the Qt version). Most of the testing is on the development platform. Light testing for demo performance and operation has been done with Windows XP SP 2 and Ubuntu 10. Almost assuredly Gummworld2 will not work with pygame 1.8.1 and earlier, since various classes may not have provided the copy() method (most notably Rect) and other new features.
+Gummworld2 is currently developed with Windows 7, Python 2.6, pygame 1.9.1, and Tiled Map Editor 0.6.1 (the Qt version). Most of the testing is on the development platform. Light testing for demo performance and operation has been done with Windows XP SP 2 and Ubuntu 10. Almost assuredly Gummworld2 will not work with pygame 1.8.1 and earlier, since various classes may not have provided the copy() method (most notably Rect) and other new features.
 
 The library performs basic scrolling of tiles by syncing a camera with a target object that moves about the large map space. Change the target object's position and the camera follows.
 
@@ -57,7 +67,7 @@ These are the core classes.
 
   Map: Serves map tiles in layers. Also serves labels and grid lines as design aids.
 
-  World`*`: Containers for objects that define the game model. Choices are NoWorld, World, WorldQuadTree, and WorldPymunk which provide some "canned" options for implementing a world. You are free to use these, build your own, or ignore it entirely.
+~~  World`*`: Containers for objects that define the game model. Choices are NoWorld, World, WorldQuadTree, and WorldPymunk which provide some "canned" options for implementing a world. You are free to use these, build your own, or ignore it entirely. ~~ World, aka model, is targeted for removal. There are many designs for model, and it seems unwise to impose a single front-end. It is best to leave it up to the individual. Engine.update() is the stub intended to step the model.
 
   GameClock: Keeps constant game time. No-fuss variable frame rate. Calculates interpolated fraction of a game tick, which can be used for prediction, sub-pixel motion, and precision timing.
 
@@ -71,7 +81,7 @@ There are a few utilities to simplify laborious tasks and ease experimentation w
 
 The nicer examples use Tiled maps. While this is one of the easiest ways to make and import tile maps, it is not required. Any map source can be used as long as its data can be converted to the Map class's meager requirements. See the toolkit module for a few functions that load maps, the bunny game for an ASCII map, and the Map class documentation.
 
-Note that although pymunk and Tiled are supported, they are not required. There is no need to consider them if you prefer not to use them. However, at this time the world editor only imports Tiled maps. Tiled maps are not critical to the operation of the editor or Gummworld2, but at present they certainly make designing layout a lot easier in the editor.
+Note that although Tiled is supported, it is not required. There is no need to consider it if you prefer not to use it. However, at this time the world editor only imports Tiled maps. Tiled maps are not critical to the operation of the editor or Gummworld2, but at present they certainly make designing layout a lot easier in the editor.
 
 Lastly, a general caution. The instance variables representing 2D coordinates are typically implemented as `Vec2d`. Attempts will be made to protect them from direct assignment, as clobbering them with a sequence or other object will break some library routines. Keep this in mind when overriding in subclasses or choosing to directly access the underlying private `_attributes`.
 
@@ -81,7 +91,7 @@ Initial efforts focused on the map, its visual presentation, and interface. Rece
 
 A mini game was finished in 0.0.2 as a proof-of-concept, and kept functional as the library evolved. The game and all but one example do not use an external physics library; I would describe them as pygame-only. A few examples use Tiled maps.
 
-The editor is not a map editor. Tiled already does that well. Gummworld2's editor supplements Tiled's static maps by visually overlaying tagged geometry for physics--e.g. rects and circles for pygame; circles and polygons for pymunk or others--and placement of interactive game content, e.g. baddies, doors, traps. The geometry would typically be invisible in the game, and used for game events like:
+The editor is not a map editor. Tiled already does that well. Gummworld2's editor supplements Tiled's static maps by visually overlaying tagged geometry for physics--e.g. lines, rects, circles, and polygons--and placement of interactive game content, e.g. baddies, doors, traps. The geometry would typically be invisible in the game, and used for game events like:
 
   * Did my space ship hit the cavern wall.
   * Did my truck venture into this sand pit.
@@ -105,7 +115,6 @@ Library:
     * NoWorld is the default, for game makers that do not want a canned model (DONE)
     * World is a dumb model with a list for entities (DONE)
     * WorldQuadTree is an advanced model that provides optimal collision checking in large maps with many elements (DONE)
-    * WorldPymunk is a model that leverages pymunk; needs more shape classes and pymunk-ish things (incomplete)
   * Menu (DONE)
   * Grid (DONE)
   * HUD (DONE)
@@ -135,19 +144,15 @@ Editor:
 
 ===Library===
 
-===pymunk===
-
-pymunk is barely more than a concept thus far. It is fundamentally proven in examples/08_pymunk_motion.py. Shape classes and a map importer will eventually come.
-
 ===World Editor===
 
-Game makers can load a map in the editor, draw shapes on it to define game objects, then save a "physics map". Games can load the graphics and physics maps, and rely on pymunk or other implementations for run-time physics. For Python purists, Gummworld2 provides a QuadTree implementation that is compatible with editor files and can leverage geometric shapes for collision detection.
+Game makers can load a map in the editor, draw shapes on it to define game objects, then save a "physics map". Games can load the graphics and physics maps, and rely on custom or third-party implementations for run-time physics. For Python purists, Gummworld2 provides a high-performance SpatialHash implementation that is compatible with geometric shapes (lines, rects, polys, circles in the geometry module) for collision detection and culling.
 
 [http://www.mapeditor.org/ Tiled Map Editor] and [http://www.pygame.org/project-map+loader+for+%27tiled%27-1158-2951.html pytmxloader] make a great team. It is a no-brainer to use them, unless you've got a pile of reusable content from other sources.
 
 Placing static obstacles and boundaries on a map is admittedly nice. However, the world editor can also be used to place "spawned" game objects, i.e. objects that are not in static map layers. For example, groups of orcs, gates, siege weapons, random rubble. The world editor can load tilesets to aid visualizing world content design. It's very useful to be able to insert a physical "device" into the world map, size its geometry accurately, and provide a handle or descriptive data for a few reasons:
 
-  # Shapes are needed for dimensions; and potentially other physics-related purposes in the case of pymunk.
+  # Shapes are needed for dimensions; and potentially other physics-related purposes.
   # Shapes do not necessarily require a visual component.
   # Shapes offer geometry options. One can choose irregular shapes, or shapes that snug the edges of visuals smaller than an entire tile.
   # Obviously, if objects in the physics dimension are interacting those interactions need to correlate with the presentation layer.
