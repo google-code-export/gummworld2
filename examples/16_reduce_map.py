@@ -17,13 +17,11 @@
 
 
 __version__ = '$Id$'
-__author__ = 'Gummbum, (c) 2011'
+__author__ = 'Gummbum, (c) 2011-2013'
 
 
-"""16_reduce_map.py - An example of using toolkit.reduce_map_layers in
-Gummworld2.
-
-This demo does not use pymunk.
+__doc__ = """16_reduce_map.py - An example of using toolkit.reduce_map_layers
+in Gummworld2.
 
 The results of this demo can be impressive on computers with fast CPUs.
 

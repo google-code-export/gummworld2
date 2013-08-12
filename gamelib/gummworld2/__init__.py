@@ -17,7 +17,7 @@
 
 
 __version__ = '$Id$'
-__author__ = 'Gummbum, (c) 2011'
+__author__ = 'Gummbum, (c) 2011-2013'
 
 
 """__init__.py - Package initializer for Gummworld2.
@@ -29,13 +29,6 @@ the map is larger than the display. It emphasizes simplicity, freedom, and
 performance.
 """
 
-
-try:
-    import pymunk
-except:
-    print 'pymunk not found: proceeding without'
-else:
-    pymunk.init_pymunk()
 
 import pygame
 pygame.init()
@@ -64,7 +57,7 @@ from subpixel import SubPixelSurface
 from popup_menu import PopupMenu
 from ui import HUD, Stat, Statf
 
-from engine import run, Engine, NO_WORLD, SIMPLE_WORLD, PYMUNK_WORLD
+from engine import run, Engine, NO_WORLD, SIMPLE_WORLD
 
 
 # Toolkits and utilities

@@ -22,8 +22,6 @@ __author__ = 'Gummbum, (c) 2011'
 
 """09_collapse_map.py - An example of using toolkit.collapse_map in Gummworld2.
 
-This demo does not use pymunk.
-
 The results of this demo can be impressive on computers with fast CPUs.
 
 Maps with many small tiles are great for designing maps with interesting detail.

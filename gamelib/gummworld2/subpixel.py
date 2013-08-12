@@ -1,3 +1,6 @@
+# Attribution: DR0ID
+# Source: http://www.pygame.org/project-Sub-pixel+surface-413-.html
+
 import pygame
 from math import floor
 

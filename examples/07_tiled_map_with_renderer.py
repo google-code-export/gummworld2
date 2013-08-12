@@ -17,11 +17,11 @@
 
 
 __version__ = '$Id$'
-__author__ = 'Gummbum, (c) 2011'
+__author__ = 'Gummbum, (c) 2011-2013'
 
 
-"""07_tiled_map_with_renderer.py - An example of using Tiled maps with the
-BasicMapRenderer in Gummworld2.
+__doc__ = """07_tiled_map_with_renderer.py - An example of using Tiled maps with
+the BasicMapRenderer in Gummworld2.
 
 This demo uses small tiles from a tileset distributed with Tiled 0.7.2,
 the Java version. It gets around the lower performance of small tiles by

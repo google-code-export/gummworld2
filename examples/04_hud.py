@@ -17,10 +17,10 @@
 
 
 __version__ = '$Id$'
-__author__ = 'Gummbum, (c) 2011'
+__author__ = 'Gummbum, (c) 2011-2013'
 
 
-"""04_hud.py - An example of using a hud in Gummworld2.
+__doc__ = """04_hud.py - An example of using a hud in Gummworld2.
 """
 
 

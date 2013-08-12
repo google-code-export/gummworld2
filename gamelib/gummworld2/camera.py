@@ -17,7 +17,7 @@
 
 
 __version__ = '$Id$'
-__author__ = 'Gummbum, (c) 2011'
+__author__ = 'Gummbum, (c) 2011-2013'
 
 
 __doc__="""
@@ -165,13 +165,6 @@ class Camera(object):
         self.rect.center = round(x),round(y)
         self._interp = interp
         return interp
-    
-    def slew(self, vec, dt):
-        """Move Camera.target via pymunk.
-        
-        If using pymunk, use this instead of Camera.position.
-        """
-        self.target.slew(vec, dt)
     
     def init_position(self, pos):
         """Hard set position to pos.

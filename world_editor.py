@@ -17,7 +17,7 @@
 
 
 __version__ = '$Id$'
-__author__ = 'Gummbum, (c) 2011'
+__author__ = 'Gummbum, (c) 2011-2013'
 
 
 __doc__ = """world_editor.py - A world editor for Gummworld2.
@@ -153,7 +153,7 @@ from pygame.locals import *
 import paths
 from gummworld2 import (
     model, data, geometry, toolkit, pygame_utils,
-    State, Camera, Map, Screen, View,
+    State, Camera, BasicMap, Screen, View, SpatialHash,
     HUD, Stat, Statf,
     GameClock, Vec2d,
 )
@@ -787,18 +787,22 @@ class MapEditor(object):
         # Set up the Gummworld2 state.
         State.clock = GameClock(30, 30)
         State.screen = Screen(screen_size, RESIZABLE)
-        State.map = Map(tile_size, map_size)
+        tw,th = tile_size
+        mw,mh = map_size
+        State.map = BasicMap(mw,mh, tw,th)
         State.camera = Camera(
-            model.QuadTreeObject(Rect(0,0,5,5)),
+            model.Object((0,0)),
             View(State.screen.surface, Rect(0,0,screen_size.x*2/3,screen_size.y))
         )
         self.world_grids = []
         self.make_world()
+        self.grid_cache = {}
+        self.label_cache = {}
         pygame.display.set_caption('Gummworld2 World Editor')
         x,y = State.camera.view.rect.topleft
         w,h = Vec2d(screen_size) - (State.camera.view.rect.right,0)
         State.gui_panel = View(State.screen.surface, Rect(x,y,w,h))
-        State.screen.eraser.fill(Color('grey'))
+        State.screen.fill_color = Color('grey')
         
         # Mouse details.
         #   mouse_shape: world entity for mouse interaction.
@@ -871,7 +875,7 @@ class MapEditor(object):
         State.camera.update()
         self.update_shapes()
         if State.show_hud:
-            State.hud.update(State.clock.update_elapsed)
+            State.hud.update(State.clock._update_interval)
     
     def update_gui(self):
         """Update the GUI, then update the app from the GUI.
@@ -885,9 +889,10 @@ class MapEditor(object):
         """Update the mouseover_shapes list.
         """
         mouse_shape = self.mouse_shape
-        self.mouseover_shapes = [shape for ent,shape in State.world.collisions
-            if ent is mouse_shape
-        ]
+##        self.mouseover_shapes = [shape for ent,shape in State.world.collisions
+##            if ent is mouse_shape
+#        ]
+        self.mouseover_shapes = State.world.intersect_objects(mouse_shape.rect)
     
     def draw(self):
         """Draw all.
@@ -896,8 +901,8 @@ class MapEditor(object):
         State.camera.interpolate()
         State.screen.clear()
         toolkit.draw_tiles()
-        toolkit.draw_labels()
-        toolkit.draw_grid()
+        toolkit.draw_labels(self.label_cache)
+        toolkit.draw_grid(self.grid_cache)
         self.draw_world()
         if State.show_hud:
             State.hud.draw()
@@ -910,7 +915,7 @@ class MapEditor(object):
         """
         mouse_shape = self.mouse_shape
         selected = self.selected
-        things = State.world.entities_in(State.camera.rect)
+        things = State.world.intersect_objects(State.camera.rect)
         camera = State.camera
         blit = camera.view.surface.blit
         world_to_screen = camera.world_to_screen
@@ -979,15 +984,16 @@ class MapEditor(object):
             entities = State.world.entity_branch.keys()
         else:
             entities = []
-        State.world = model.WorldQuadTree(
-            State.map.rect, worst_case=99, collide_entities=True)
-        State.world.add(*entities)
+        State.world = SpatialHash(State.map.rect, 128)
+        for i in entities:
+            State.world.add(e)
         State.camera.position = State.camera.view.center
         del self.world_grids[:]
-        num_levels = State.world.num_levels
+#        num_levels = State.world.num_levels
         top_rect = State.world.rect
-        worst_case = -State.world.worst_case if State.world.worst_case else 0
+#        worst_case = -State.world.worst_case if State.world.worst_case else 0
         def make_grid(branch):
+            return
             level = branch.level
             do_me = level == 2      # this displays critical top-level grids
             if do_me:
@@ -1064,7 +1070,8 @@ class MapEditor(object):
         
         #   H-slider.
         minv = view_rect.centerx - thick
-        maxv = State.map.tile_size.x * State.map.map_size.x - minv + thick
+##        maxv = State.map.tile_size.x * State.map.map_size.x - minv + thick
+        maxv = State.map.tile_width * State.map.width - minv + thick
         size = max(round(float(w) / State.map.rect.w * w), 25)
         if reset:
             val = view_rect.centerx
@@ -1078,7 +1085,8 @@ class MapEditor(object):
         
         #   V-slider.
         minv = view_rect.centery - self.gui_form['menus'].rect.bottom - 3
-        maxv = State.map.tile_size.y * State.map.map_size.y - minv + thick
+##        maxv = State.map.tile_size.y * State.map.map_size.y - minv + thick
+        maxv = State.map.tile_height * State.map.height - minv + thick
         size = max(round(float(h) / State.map.rect.h * h), 25)
         if reset:
             val = view_rect.centery
@@ -1762,7 +1770,7 @@ class MapEditor(object):
                 # Run the importer plugin.
                 try:
                     file_handle = open(State.file_entities, 'rb')
-                    entities,tilesheets = toolkit.import_world_quadtree(
+                    entities,tilesheets = toolkit.import_world(
                         file_handle, RectGeom, PolyGeom, CircleGeom)
                     self.changes_unsaved = False
                 except:
@@ -1779,7 +1787,7 @@ class MapEditor(object):
                     load_tiles(entities, tilesheets)
                     self.deselect()
                 # Put the mouse shape back.
-                State.world.add(self.mouse_shape)
+##                State.world.add(self.mouse_shape)
         
     # MapEditor.action_entities_import
     
@@ -1793,12 +1801,12 @@ class MapEditor(object):
                 return
         # Specify the exporter plugin to use.
         # Don't save the mouse shape.
-        State.world.remove(self.mouse_shape)
+##        State.world.remove(self.mouse_shape)
         # Run the exporter plugin.
         try:
             file_handle = open(State.file_entities, 'wb')
             entities = State.world.entity_branch.keys()
-            toolkit.export_world_quadtree(file_handle, entities)
+            toolkit.export_world(file_handle, entities)
             self.changes_unsaved = False
         except:
             exc_type,exc_value,exc_traceback = sys.exc_info()
@@ -1809,7 +1817,7 @@ class MapEditor(object):
         else:
             file_handle.close()
         # Put the mouse shape back.
-        State.world.add(self.mouse_shape)
+##        State.world.add(self.mouse_shape)
         
     # MapEditor.action_entities_save
     
@@ -1981,7 +1989,7 @@ class MapEditor(object):
         """Handler for MOUSEMOTION events.
         """
         self.mouse_shape.position = State.camera.screen_to_world(pos)
-        State.world.add(self.mouse_shape)
+##        State.world.add(self.mouse_shape)
         if self.mouse_down:
             self.action_mouse_drag(e)
         else:
@@ -2005,7 +2013,7 @@ class MapEditor(object):
         screen_size = w,h
         State.screen = Screen(screen_size, RESIZABLE)
         State.camera.view = View(State.screen.surface, Rect(0,0,w*2/3,h))
-        State.screen.eraser.fill(Color('grey'))
+        State.screen.clear()
         
         # Resize the widgets.
         self.gui_modal_off()
@@ -2111,7 +2119,7 @@ def make_hud():
         else:
             return 'none'
     State.hud.add('Save File', Statf(next_pos(),
-        'Save File %s', callback=get_entities_file, interval=1000) )
+        'Save File %s', callback=get_entities_file, interval=0) )
     
     rect = State.world.rect
     l,t,r,b = rect.left,rect.top,rect.right,rect.bottom
@@ -2121,17 +2129,11 @@ def make_hud():
     def get_mouse():
         s = pygame.mouse.get_pos()
         w = State.camera.screen_to_world(s)
-        return 'S%s W%s@%s' % (str(s), str((int(w.x),int(w.y),)),
-            str(State.world.level_of(State.app.mouse_shape)).lower())
+#        return 'S%s W%s@%s' % (str(s), str((int(w.x),int(w.y),)),
+#            str(State.world.level_of(State.app.mouse_shape)).lower())
+        return 'S%s W%s' % (str(s), str( (int(w.x),int(w.y)) ))
     State.hud.add('Mouse',
-        Statf(next_pos(), 'Mouse %s', callback=get_mouse, interval=100))
-    
-#    def get_world_pos():
-#        s = State.camera.world_to_screen(State.camera.position)
-#        w = State.camera.position
-#        return 'S'+str((int(s.x),int(s.y),)) + ' W'+str((int(w.x),int(w.y),))
-#    State.hud.add('Camera',
-#        Statf(next_pos(), 'Camera %s', callback=get_world_pos, interval=100))
+        Statf(next_pos(), 'Mouse %s', callback=get_mouse, interval=0))
 
 #    def gui_name():
 #        w = State.app.gui_hover()
@@ -2141,16 +2143,9 @@ def make_hud():
     
     def get_selected():
         shape = State.app.selected
-        return 'none' if shape is None else '%s@%d/%d'%(
-            shape.rect.center, State.world.level_of(shape), State.world.num_levels)
+        return 'none' if shape is None else '%s'%(shape.rect.center,)
     State.hud.add('Selected',
-        Statf(next_pos(), 'Selected %s', callback=get_selected, interval=100))
-    
-    def get_top_level():
-        n = len(State.world.entities)
-        return str(n)
-    State.hud.add('In Top Level',
-        Statf(next_pos(), 'In Top Level %s', callback=get_top_level, interval=100))
+        Statf(next_pos(), 'Selected %s', callback=get_selected, interval=0))
 
 # make_hud
 

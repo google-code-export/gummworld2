@@ -17,7 +17,7 @@
 
 
 __version__ = '$Id$'
-__author__ = 'Gummbum, (c) 2011'
+__author__ = 'Gummbum, (c) 2011-2013'
 
 
 __doc__ = """19_parallax.py - Using map layers to produce the illusion of

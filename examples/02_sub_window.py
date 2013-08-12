@@ -17,10 +17,10 @@
 
 
 __version__ = '$Id$'
-__author__ = 'Gummbum, (c) 2011'
+__author__ = 'Gummbum, (c) 2011-2013'
 
 
-"""02_sub_window.py - An example of a sub-window view for Gummworld2.
+__doc__ = """02_sub_window.py - An example of a sub-window view for Gummworld2.
 """
 
 

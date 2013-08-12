@@ -17,11 +17,11 @@
 
 
 __version__ = '$Id$'
-__author__ = 'Gummbum, (c) 2011'
+__author__ = 'Gummbum, (c) 2011-2013'
 
 
-"""06_mouse_movement_with_aspect.py - An example of using movement aspect in
-Gummworld2.
+__doc__ = """06_mouse_movement_with_aspect.py - An example of using movement
+aspect in Gummworld2.
 
 This demo uses the mouse. There are a number of key points, since interpreting
 the mouse state is a little more involved than key-presses. The demo handles
