@@ -17,10 +17,10 @@
 
 
 __version__ = '$Id$'
-__author__ = 'Gummbum, (c) 2011'
+__author__ = 'Gummbum, (c) 2011-2013'
 
 
-"""03_switch_view.py - An example of switching state in Gummworld2.
+__doc__ = """03_switch_view.py - An example of switching state in Gummworld2.
 
 This example has two views: a full-window view and a sub-window view. Use TAB to
 switch between them. This example only uses the State tricks to swap two

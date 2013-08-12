@@ -17,11 +17,10 @@
 
 
 __version__ = '$Id$'
-__author__ = 'Gummbum, (c) 2011'
+__author__ = 'Gummbum, (c) 2011-2013'
 
 
-"""12_separate_model_and_view.py - An example of separating model and view in
-Gummworld2.
+"""13_simple_world.py - An example of separating model and view in Gummworld2.
 
 This uses the dumb model.World class to store model objects.
 """

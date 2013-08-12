@@ -17,21 +17,12 @@
 
 
 __version__ = '$Id$'
-__author__ = 'Gummbum, (c) 2011'
+__author__ = 'Gummbum, (c) 2011-2013'
 
 
-__doc__ = """model.py - Physics model for Gummworld2.
-
-If pymunk is installed and can be imported, then the pymunk subclasses
-WorldPymunk and various bodies will be created. Otherwise, only the classes
-World and Object will be available.
-"""
+__doc__ = """model.py - Physics model for Gummworld2."""
 
 import pygame
-try:
-    import pymunk
-except:
-    pymunk = None
 
 from gummworld2.geometry import RectGeometry, CircleGeometry, PolyGeometry
 from gummworld2 import State, Vec2d, data
@@ -136,36 +127,3 @@ class World(object):
     
     def __repr__(self):
         return "<%s(%d objects)>" % (self.__class__.__name__, len(self))
-
-
-if pymunk is not None:
-    
-    class WorldPymunk(pymunk.Space):
-        """If pymunk is available use WorldPymunk. This WorldPymunk class sets up
-        the pymunk space, and abstracts the step() method.
-        """
-        
-        def __init__(self, rect):
-            """left, bottom, right, top are bounding box edges in pygame space"""
-            super(WorldPymunk, self).__init__()
-            self.rect = pygame.Rect(rect)
-        
-        def step(self, dt):
-            super(WorldPymunk, self).step(dt)
-
-
-    class CircleBody(pymunk.Body):
-        """A pymunk.Circle with defaults for position, angle, velocity, radius,
-        mass, and the shape.
-        """
-        
-        def __init__(self, mass=1.0, radius=1.0,
-            position=(0.0,0.0), angle=0.0, velocity=(0,0)):
-
-            inertia = pymunk.moment_for_circle(mass, 0, radius, (0,0))
-            super(CircleBody, self).__init__(mass, inertia)
-            self.shape = pymunk.Circle(self, radius)
-
-            self.position = position
-            self.angle = angle
-            self.velocity = velocity

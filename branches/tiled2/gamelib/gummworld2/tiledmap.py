@@ -17,7 +17,7 @@
 
 
 __version__ = '$Id$'
-__author__ = 'Gummbum, (c) 2011'
+__author__ = 'Gummbum, (c) 2011-2013'
 
 
 __doc__ = """tiledmap.py - Tiled Map module for Gummworld2.

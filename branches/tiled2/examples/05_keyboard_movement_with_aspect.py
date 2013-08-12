@@ -17,11 +17,11 @@
 
 
 __version__ = '$Id$'
-__author__ = 'Gummbum, (c) 2011'
+__author__ = 'Gummbum, (c) 2011-2013'
 
 
-"""05_keyboard_movement_with_aspect.py - An example of using movement aspect in
-Gummworld2.
+__doc__ = """05_keyboard_movement_with_aspect.py - An example of using movement
+aspect in Gummworld2.
 """
 
 

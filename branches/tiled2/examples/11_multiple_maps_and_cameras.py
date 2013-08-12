@@ -17,11 +17,11 @@
 
 
 __version__ = '$Id$'
-__author__ = 'Gummbum, (c) 2011'
+__author__ = 'Gummbum, (c) 2011-2013'
 
 
-"""11_multiple_maps_and_cameras.py - An example of two scrolling maps and
-cameras in Gummworld2.
+__doc__ = """11_multiple_maps_and_cameras.py - An example of two scrolling maps
+and cameras in Gummworld2.
 
 This demo leverages State.save() and State.restore() to manage simultaneously
 scrolling maps.

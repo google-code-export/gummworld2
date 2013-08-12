@@ -1,8 +1,8 @@
 REQUIREMENTS
 ============
 
-The Gummworld2 distribution includes all its dependencies except Python, pygame,
-and pymunk.
+The Gummworld2 distribution includes all its dependencies except Python and
+pygame.
 
 Python is available for many platforms. Pre-built Python bundles are available
 at python.org/, third-party implementors, or may be available via your operating
@@ -15,9 +15,6 @@ thorbrian.com/pygame/builds.php.
 Gummworld2 has been tested on Windows XP, Windows 7, and Ubuntu with Python 2.6
 and pygame 1.9.1. Others have reported success with Mac OS X and later versions
 of Python.
-
-pymunk is optional, and auto-detected by the library. Version 1.0 is used at the
-time of this writing.
 
 
 INSTALLATION AND SETUP

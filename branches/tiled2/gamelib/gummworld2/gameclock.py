@@ -17,7 +17,7 @@
 
 
 __version__ = '$Id$'
-__author__ = 'Gummbum, (c) 2011-2012'
+__author__ = 'Gummbum, (c) 2011-2013'
 
 
 __doc__ = """gameclock.py - Game clock for Gummworld2.

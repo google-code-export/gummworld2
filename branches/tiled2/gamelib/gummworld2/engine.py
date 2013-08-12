@@ -17,7 +17,7 @@
 
 
 __version__ = '$Id$'
-__author__ = 'Gummbum, (c) 2011'
+__author__ = 'Gummbum, (c) 2011-2013'
 
 
 __doc__ = """engine.py - A sample engine for Gummworld2.
@@ -51,10 +51,6 @@ from pygame.locals import (
     ACTIVEEVENT, VIDEORESIZE, VIDEOEXPOSE,
     USEREVENT,
 )
-try:
-    import pymunk
-except:
-    pymunk = None
 
 if __name__ == '__main__':
     import paths
@@ -67,14 +63,12 @@ from gummworld2 import (
 
 NO_WORLD = 0
 SIMPLE_WORLD = 1
-PYMUNK_WORLD = 2
 
 
 class Engine(Context):
     
     NO_WORLD = NO_WORLD
     SIMPLE_WORLD = SIMPLE_WORLD
-    PYMUNK_WORLD = PYMUNK_WORLD
     
     def __init__(self,
         screen_surface=None, resolution=None, display_flags=0, caption=None,
@@ -147,8 +141,7 @@ class Engine(Context):
         The following arguments are used to initialize a model.World* object:
             
             The world_type argument specifies which of the world classes to
-            create. It must be one of engine.NO_WORLD, engine.SIMPLE_WORLD,
-            engine.PYMUNK_WORLD.
+            create. It must be one of engine.NO_WORLD, or engine.SIMPLE_WORLD.
             
             The world_args argument is a dict that can be passed verbatim to
             the world constructor (see the World* classes in the model module)
@@ -226,13 +219,6 @@ class Engine(Context):
             if camera_target is None:
                 if __debug__: print 'Engine: making camera target Object()'
                 self.camera_target = model.Object()
-        elif world_type == PYMUNK_WORLD:
-            if __debug__: print 'Engine: WorldPymunk(self.map.rect)'
-            self.world = model.WorldPymunk(self.map.rect)
-            if camera_target is None:
-                if __debug__: print 'Engine: making camera target CircleBody()'
-                self.camera_target = model.CircleBody()
-            self.world.add(self.camera_target)
         
         ## Create the camera.
         if any((self.camera_target, camera_view, camera_view_rect)):
@@ -298,31 +284,6 @@ class Engine(Context):
             State.camera_target = self.camera_target
         if self.clock is not None:
             State.clock = self.clock
-    
-#    def schedule_default(self):
-#        """Schedule default items.
-#        
-#        Note: These are not tracked. If you intend to manually replace
-#        State.world or State.camera after constructing the Engine object,
-#        you'll likely want to unschedule some or all of these and manage the
-#        schedules yourself. If you replace the objects without unscheduling
-#        their callbacks, the lost references will result in memory and CPU
-#        leaks.
-#        """
-#        if self.world and isinstance(self.world, model.WorldPymunk):
-#            self.clock.schedule_update_priority(self.world.step, -1.0)
-#        if self.camera:
-#            self.clock.schedule_update_priority(self.camera.update, 1.0)
-#            self.clock.schedule_frame_priority(self.camera.interpolate, -1.0)
-#    
-#    def unschedule_default(self):
-#        """Unschedule default items.
-#        """
-#        if self.world:
-#            self.clock.unschedule(self.world.step)
-#        if self.camera:
-#            self.clock.unschedule(self.camera.update)
-#            self.clock.unschedule(self.camera.interpolate)
     
     def _update(self, dt):
         """The clock's update_callback, which in turn calls

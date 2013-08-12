@@ -17,10 +17,11 @@
 
 
 __version__ = '$Id$'
-__author__ = 'Gummbum, (c) 2011'
+__author__ = 'Gummbum, (c) 2011-2013'
 
 
-"""10_minimap.py - An example using sub-window as a minimap for Gummworld2.
+__doc__ = """10_minimap.py - An example using sub-window as a minimap for
+Gummworld2.
 
 This demonstrates accessing Screen, Camera and World to convert their dimensions
 for a particular use.

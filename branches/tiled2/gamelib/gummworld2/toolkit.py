@@ -17,7 +17,7 @@
 
 
 __version__ = '$Id$'
-__author__ = 'Gummbum, (c) 2011'
+__author__ = 'Gummbum, (c) 2011-2013'
 
 
 __doc__ = """toolkit.py - Some helper tools for Gummworld2.
@@ -205,31 +205,20 @@ def load_entities(filepath, cls_dict={}):
     geometry.PolyGeometry, geometry.CircleGeometry. Classes substituted in this
     manner must have constructors that are compatible with the default classes.
     """
-#    import_script = data.filepath(
-#        'plugins', os.path.join('map','import_world_quadtree.py'))
-    State.world.remove(*State.world.entity_branch.keys())
     file_handle = open(filepath, 'rb')
-#    locals_dict = {
-#        'fh'         : file_handle,
-#    }
-#    locals_dict['rect_cls'] = cls_dict.get('rect_cls', RectGeometry)
-#    locals_dict['poly_cls'] = cls_dict.get('poly_cls', PolyGeometry)
-#    locals_dict['circle_cls'] = cls_dict.get('circle_cls', CircleGeometry)
-#    execfile(import_script, {}, locals_dict)
-    entities,tilesheets = import_world_quadtree(
+    entities,tilesheets = import_world(
         file_handle, RectGeometry, PolyGeometry, CircleGeometry)
     file_handle.close()
-#    return locals_dict['entities']
     return entities,tilesheets
 
 # load_world
 
 
-def export_world_quadtree(fh, entities):
-    """A quadtree-to-text exporter.
+def export_world(fh, entities):
+    """A sequence-to-text exporter.
     
     This function is required by world_editor.py, and possibly other scripts, to
-    export quadtree entities to a text file.
+    export entities to a text file.
     
     Geometry classes used by this plugin are: RectGeometry, CircleGeometry, and
     PolyGeometry.
@@ -295,15 +284,15 @@ def export_world_quadtree(fh, entities):
         else:
             raise pygame.error, 'unsupported type: ' + entity.__class__.__name__
     
-# export_world_quadtree
+# export_world
 
 
-def import_world_quadtree(fh, rect_cls, poly_cls, circle_cls):
-    """A world entity importer compatible with QuadTree.
+def import_world(fh, rect_cls, poly_cls, circle_cls):
+    """A world entity importer.
     
     This function is required by world_editor.py, and possibly other scripts, to
     import world entities from a text file. It understands the format of files
-    created by export_world_quadtree().
+    created by export_world().
 
     Geometry classes used by this function to create shape objects are specified
     by the rect_cls, poly_cls, and circle_cls arguments. The constructor
@@ -391,7 +380,7 @@ def import_world_quadtree(fh, rect_cls, poly_cls, circle_cls):
         
     return entities, tilesheets
     
-# import_world_quadtree
+# import_world
     
 
 def load_tilesheet(file_path):

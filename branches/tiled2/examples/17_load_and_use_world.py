@@ -17,13 +17,11 @@
 
 
 __version__ = '$Id$'
-__author__ = 'Gummbum, (c) 2011'
+__author__ = 'Gummbum, (c) 2011-2013'
 
 
-"""17_load_and_use_world.py - A demo combining a Tiled Map Editor map and
-Gummworld2 Editor entities.
-
-NOTE: This is currently broken.
+__doc__ = """17_load_and_use_world.py - A demo combining a Tiled Map Editor
+map and Gummworld2 Editor entities.
 """
 
 
@@ -37,11 +35,11 @@ from gummworld2 import *
 from gummworld2.geometry import RectGeometry, CircleGeometry, PolyGeometry
 
 
-class Avatar(model.QuadTreeObject):
+class Avatar(geometry.CircleGeometry):
     
     def __init__(self, map_pos, screen_pos):
+        geometry.CircleGeometry.__init__(self, map_pos, 5)
         self.image = pygame.surface.Surface((10,10))
-        model.QuadTreeObject.__init__(self, self.image.get_rect(), map_pos)
         pygame.draw.circle(self.image, Color('yellow'), (5,5), 4)
         self.image.set_colorkey(Color('black'))
         self.screen_position = screen_pos - 5
@@ -59,20 +57,14 @@ class App(Engine):
             resolution=resolution,
             frame_speed=0)
         
-        self.map = toolkit.collapse_map(
-            toolkit.load_tiled_tmx_map(data.filepath('map', 'mini2.tmx')),
-            num_tiles=(9,8))
-        self.world = model.WorldQuadTree(
-            self.map.rect, worst_case=1000, collide_entities=True)
+        self.map = TiledMap(data.filepath('map', 'mini2.tmx'))
+        self.world = SpatialHash(self.map.rect, 32)
         self.set_state()
         
         entities,tilesheets = toolkit.load_entities(
             data.filepath('map', 'mini2.entities'))
-        State.world.add(*entities)
-        
-        # I like huds.
-        toolkit.make_hud()
-        State.clock.schedule_update_priority(State.hud.update, 1.0)
+        for e in entities:
+            State.world.add(e)
         
         # Create a speed box for converting mouse position to destination
         # and scroll speed. 800x600 has aspect ratio 8:6.
@@ -83,19 +75,29 @@ class App(Engine):
         # Mouse and movement state. move_to is in world coordinates.
         self.move_to = None
         self.speed = None
-        self.target_moved = (0,0)
         self.mouse_down = False
         self.side_steps = []
+        self.faux_avatar = Avatar(self.camera.target.position, 0)
         
         State.show_world = False
-        State.speed = 3
+        State.speed = 5
         
+        # Use the renderer.
+        self.renderer = BasicMapRenderer(
+            self.map, max_scroll_speed=State.speed)
+        
+        # I like huds.
+        toolkit.make_hud()
+        State.clock.schedule_interval(State.hud.update, 1.0)
+    
     def update(self, dt):
         """overrides Engine.update"""
         # If mouse button is held down update for continuous walking.
         if self.mouse_down:
             self.update_mouse_movement(pygame.mouse.get_pos())
         self.update_camera_position()
+        self.renderer.set_rect(center=State.camera.rect.center)
+        State.camera.update()
         
     def update_mouse_movement(self, pos):
         # Angle of movement.
@@ -139,13 +141,11 @@ class App(Engine):
             # Check world collisions.
             world = State.world
             camera_target = camera.target
-            dummy = model.QuadTreeObject(camera_target.rect.copy())
+            dummy = self.faux_avatar
+            dummy.position = camera_target.position
             def can_step(step):
                 dummy.position = step
-                world.add(dummy)
-                collisions = [c[0] for c in world.collisions.keys()]
-                world.remove(dummy)
-                return dummy not in collisions
+                return not world.collideany(dummy)
             # Remove camera target so it's not a factor in collisions.
             world.remove(camera_target)
             move_ok = can_step((newx,newy))
@@ -175,20 +175,24 @@ class App(Engine):
             if not move_ok:
                 # Reset camera position.
                 self.move_to = None
-                world.add(camera_target)
             else:
                 # Keep avatar inside map bounds.
                 rect = State.world.rect
-                newx = max(min(newx,rect.right), rect.left)
-                newy = max(min(newy,rect.bottom), rect.top)
+                if newx < rect.left:
+                    newx = rect.left
+                elif newx > rect.right:
+                    newx = rect.right
+                if newy < rect.top:
+                    newy = rect.top
+                elif newy > rect.bottom:
+                    newy = rect.bottom
                 camera.position = newx,newy
-                world.add(camera_target)
         
     def draw(self, dt):
         """overrides Engine.draw"""
         # Draw stuff.
         State.screen.clear()
-        toolkit.draw_tiles()
+        self.renderer.draw_tiles()
         self.draw_world()
         State.hud.draw()
         self.draw_avatar()
@@ -202,7 +206,7 @@ class App(Engine):
         
         camera = State.camera
         camera_target = camera.target
-        things = State.world.entities_in(camera.rect)
+        things = State.world.intersect_objects(camera.rect)
         display = camera.view.surface
         world_to_screen = camera.world_to_screen
         color = Color('white')

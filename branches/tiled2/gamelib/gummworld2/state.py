@@ -17,7 +17,7 @@
 
 
 __version__ = '$Id$'
-__author__ = 'Gummbum, (c) 2011'
+__author__ = 'Gummbum, (c) 2011-2013'
 
 
 __doc__ = """state.py - A class for convenient global access to Gummworld2
@@ -68,9 +68,8 @@ class State(object):
         screen: A Screen object, which is a wrapper for the top level
             pygame surface.
         world: A model.World* object used to store game model entities.
-        world_type: One of engine.NO_WORLD, engine.SIMPLE_WORLD, or
-            engine.PYMUNK_WORLD if State was initialized via the Engine class.
-            Else it is None.
+        world_type: engine.NO_WORLD or engine.SIMPLE_WORLD if State was
+            initialized via the Engine class. Else it is None.
         camera: A Camera object.
         map: A BasicMap, TiledMap, or SuperMap object.
     
