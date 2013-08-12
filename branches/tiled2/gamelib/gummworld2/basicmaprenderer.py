@@ -83,6 +83,7 @@ class BasicMapRenderer(object):
         self._lifespan = self.DEFAULT_LIFESPAN
         self._examine_queue = []
         self._dead = []
+        self.dirty_rects = []
         
         self.tile_size = tile_size
         
@@ -100,6 +101,7 @@ class BasicMapRenderer(object):
                 raise pygame.error('rect attribute not permitted: %s' % (k,))
             setattr(self._rect, k, kwargs[k])
         self.get_tiles()
+        del self.dirty_rects[:]
     
     @property
     def max_scroll_speed(self):
@@ -151,7 +153,8 @@ class BasicMapRenderer(object):
         tiles = self._tiles
         for rect in areas:
             for tile in tiles.values():
-                if rect.intersects(tile.rect):
+                if rect.colliderect(tile.rect):
+                    self.dirty_rects.append(tile.rect)
                     del tiles[tile.idx]
         self.get_tiles()
     
