@@ -23,6 +23,17 @@ __author__ = 'Gummbum, (c) 2011-2013'
 __doc__ = """world_editor.py - A world editor for Gummworld2.
 """
 
+##                                                                        ##
+## Configurables                                                          ##
+##                                                                        ##
+
+SCREEN_SIZE = (1024,768)
+
+##                                                                        ##
+## No more configurables after this point                                 ##
+##                                                                        ##
+
+
 HELP_TEXT = """
 Saving and loading is fully implemented. The file format may change over time as features are added. However, efforts will be made to keep tools backwards compatible. Finally, the file contents are simply URL-quoted ASCII which should be easy to convert.
 
@@ -153,7 +164,7 @@ from pygame.locals import *
 import paths
 from gummworld2 import (
     model, data, geometry, toolkit, pygame_utils,
-    State, Camera, BasicMap, Screen, View, SpatialHash,
+    State, Camera, BasicMap, TiledMap, Screen, View, SpatialHash,
     HUD, Stat, Statf,
     GameClock, Vec2d,
 )
@@ -781,27 +792,31 @@ class MapEditor(object):
         tile_size = 128,128
         map_size = 10,10
         
-        screen_size = Vec2d(1024,768)
-        screen_size = Vec2d(800,600)
+        screen_size = Vec2d(SCREEN_SIZE)
         
         # Set up the Gummworld2 state.
         State.clock = GameClock(30, 30)
-        State.screen = Screen(screen_size, RESIZABLE)
+        if screen_size.x < 800:
+            screen_size.w = 800
+        if screen_size.y < 600:
+            screen_size.h = 600
+        State.screen = Screen(screen_size)  ##, RESIZABLE) ## broken
         tw,th = tile_size
         mw,mh = map_size
         State.map = BasicMap(mw,mh, tw,th)
+        view_w = screen_size.x - 266
         State.camera = Camera(
             model.Object((0,0)),
-            View(State.screen.surface, Rect(0,0,screen_size.x*2/3,screen_size.y))
+            View(State.screen.surface, Rect(0,0,view_w,screen_size.y))
         )
         self.world_grids = []
         self.make_world()
         self.grid_cache = {}
         self.label_cache = {}
         pygame.display.set_caption('Gummworld2 World Editor')
-        x,y = State.camera.view.rect.topleft
-        w,h = Vec2d(screen_size) - (State.camera.view.rect.right,0)
-        State.gui_panel = View(State.screen.surface, Rect(x,y,w,h))
+#        x,y = State.camera.view.rect.topleft
+#        w,h = Vec2d(screen_size) - (State.camera.view.rect.right,0)
+#        State.gui_panel = View(State.screen.surface, Rect(x,y,w,h))
         State.screen.fill_color = Color('grey')
         
         # Mouse details.
@@ -956,10 +971,11 @@ class MapEditor(object):
         if self.selected:
             self.selected.release()
             self.selected = None
-            self.gui_form['shape_type'].set_text('no selection')
-            self.gui_form['shape_pos'].set_text('')
-            self.gui_form['user_data'].value = ''
-            self.gui_form['user_data'].blur()
+            gui_form = self.gui_form
+            gui_form['shape_type'].set_text('no selection')
+            gui_form['shape_pos'].set_text('')
+            gui_form['user_data'].value = ''
+            gui_form['user_data'].blur()
     
     def set_stamp(self, tilesheet, rect, surf):
         """Set tiles and info attached to the mouse for insertion in the map.
@@ -981,7 +997,7 @@ class MapEditor(object):
         visual aid for quadtree.
         """
         if State.world is not None:
-            entities = State.world.entity_branch.keys()
+            entities = State.world.objects
         else:
             entities = []
         State.world = SpatialHash(State.map.rect, 128)
@@ -989,9 +1005,7 @@ class MapEditor(object):
             State.world.add(e)
         State.camera.position = State.camera.view.center
         del self.world_grids[:]
-#        num_levels = State.world.num_levels
         top_rect = State.world.rect
-#        worst_case = -State.world.worst_case if State.world.worst_case else 0
         def make_grid(branch):
             return
             level = branch.level
@@ -1036,13 +1050,39 @@ class MapEditor(object):
         make_grid(State.world)
     
     def make_gui(self):
+        global gui
         """Make the entire GUI.
         """
+        self.gui_modal_off()
+        
+        gui = None
+        import gui
+        
+        self.gui = None
+        self.gui_form = None
+        self.modal = None
+        
+        # Whack all class variables to default.
+        gui.pguglobals.app = None
+        gui.form.Form.form = None
+        gui.widget.Widget.name = None
+        gui.widget.Widget.container = None
+        gui.widget.Widget._painted = False
+        gui.widget.Widget.background = None
+        gui.widget.Widget._rect_content = None
+        gui.app.App.widget = None
+        gui.app.App.screen = None
+        gui.app.App.appArea = None
+        gui.select.Select.top_arrow = None
+        gui.select.Select.top_selection = None
+        gui.select.Select.firstOption = None
+        gui.select.Select.options = None
+        
         # Make the GUI, a form, and a container.
-        self.gui = gui.App(theme=gui.Theme(dirs=['data/themes/default']))
         self.gui_form = gui.Form()
+        self.gui = gui.App(theme=gui.Theme(dirs=['data/themes/default']))
         width,height = State.screen.size
-        c = gui.Container(width=width,height=height)
+        c = gui.Container(width=width, height=height)
         
         # Menus.
         make_menus(c)
@@ -1071,8 +1111,9 @@ class MapEditor(object):
         #   H-slider.
         minv = view_rect.centerx - thick
 ##        maxv = State.map.tile_size.x * State.map.map_size.x - minv + thick
-        maxv = State.map.tile_width * State.map.width - minv + thick
-        size = max(round(float(w) / State.map.rect.w * w), 25)
+        maxv = State.map.pixel_width - minv + thick
+##        size = max(round(float(w) / State.map.rect.w * w), 25)
+        size = max(round(float(w) / State.map.pixel_width * w), 25)
         if reset:
             val = view_rect.centerx
         else:
@@ -1086,8 +1127,9 @@ class MapEditor(object):
         #   V-slider.
         minv = view_rect.centery - self.gui_form['menus'].rect.bottom - 3
 ##        maxv = State.map.tile_size.y * State.map.map_size.y - minv + thick
-        maxv = State.map.tile_height * State.map.height - minv + thick
-        size = max(round(float(h) / State.map.rect.h * h), 25)
+        maxv = State.map.pixel_height - minv + thick
+##        size = max(round(float(h) / State.map.rect.h * h), 25)
+        size = max(round(float(h) / State.map.pixel_height * h), 25)
         if reset:
             val = view_rect.centery
         else:
@@ -1107,6 +1149,7 @@ class MapEditor(object):
         c.remove(self.h_map_slider)
         c.remove(self.v_map_slider)
         self.make_scrollbars(c, reset)
+        self.update()
     
     def gui_modal_off(self, *args):
         if State.app.modal is not None:
@@ -1648,7 +1691,7 @@ class MapEditor(object):
                 # Import map.
                 if State.file_map.endswith('.tmx'):
                     try:
-                        State.map = toolkit.load_tiled_tmx_map(State.file_map)
+                        State.map = TiledMap(State.file_map)
                         self.make_world()
                     except:
                         exc_type,exc_value,exc_traceback = sys.exc_info()
@@ -1905,6 +1948,7 @@ class MapEditor(object):
                 self.on_mouse_button_down(e, e.pos, e.button)
             elif typ == VIDEORESIZE:
                 self.on_resize(e, e.size, e.w, e.h)
+                return
             elif typ == USEREVENT:
                 self.on_user_event(e)
             elif typ == QUIT:
@@ -1951,6 +1995,10 @@ class MapEditor(object):
                 self.action_shape_paste()
             elif key == K_TAB:
                 GEOM_COLORS.next()
+            elif key == K_SPACE:
+                for name in self.gui_form._emap:
+                    print name,self.gui_form._emap[name]
+                print '## --------'
 #            else:
 #                print 'Key down', pygame.key.name(key)
     
@@ -2013,7 +2061,7 @@ class MapEditor(object):
         screen_size = w,h
         State.screen = Screen(screen_size, RESIZABLE)
         State.camera.view = View(State.screen.surface, Rect(0,0,w*2/3,h))
-        State.screen.clear()
+        State.screen.eraser.fill(Color('grey'))
         
         # Resize the widgets.
         self.gui_modal_off()
@@ -2259,7 +2307,7 @@ def make_side_panel(container):
     x,y = State.camera.view.width,0
     container.add(t, x, y)
 
-# make_form_shape_info
+# make_side_panel
 
 
 def main():
