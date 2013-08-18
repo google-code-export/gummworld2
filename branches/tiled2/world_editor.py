@@ -28,6 +28,7 @@ __doc__ = """world_editor.py - A world editor for Gummworld2.
 ##                                                                        ##
 
 SCREEN_SIZE = (1024,768)
+SCREEN_SIZE = (800,600)
 
 ##                                                                        ##
 ## No more configurables after this point                                 ##
@@ -165,7 +166,7 @@ import paths
 from gummworld2 import (
     model, data, geometry, toolkit, pygame_utils,
     State, Camera, BasicMap, TiledMap, Screen, View, SpatialHash,
-    HUD, Stat, Statf,
+    BasicMapRenderer, HUD, Stat, Statf,
     GameClock, Vec2d,
 )
 import gui
@@ -370,6 +371,111 @@ class ControlPoint(Rect):
         self.parent.adjust(self, self.attr)
         
     # ControlPoint.position
+
+class LineGeom(geometry.LineGeometry):
+    """LineGeom(x1, y1, x2, y2[, pos]) : LineGeom
+    LineGeom(a, b) : LineGeom
+    """
+    
+    typ = 'Line'
+    draw_line = pygame.draw.line
+    
+    def __init__(self, x1, y1, x2, y2, position=None):
+        super(LineGeom, self).__init__(x1, y1, x2, y2, position)
+        
+        self._attrs = 'a','b','center'
+        self._cp = [ControlPoint(self, self._attrs[i]) for i in range(3)]
+        self.grabbed = None
+        self.user_data = ''
+        self.tiles = []
+    
+    # LineGeom.__init__
+    
+    @property
+    def control_points(self):
+        controls = self._cp
+        points = self.points + (self.position,)
+        for i,p in enumerate(points):
+            controls[i].set_position(p)
+        return controls
+    
+    # LineGeom.control_points
+    
+    def setposition(self, val):
+        """Wrap parent class's setter"""
+        super(LineGeom, self).position = val
+        self._cp[self._attrs.index('center')].set_position(val)
+    
+    def grab(self, mouse_rect):
+        for cp in self.control_points:
+            if cp.colliderect(mouse_rect):
+                self.grabbed = cp
+                return True
+        self.grabbed = None
+        return False
+    
+    # LineGeom.grab
+    
+    def release(self):
+        self.grabbed = None
+    
+    # LineGeom.release
+    
+    def adjust(self, cp, attr):
+        if attr == 'center':
+            self.position = cp.center
+        elif attr == 'a':
+            self.p1 = cp.center
+        elif attr == 'b':
+            self.p2 = cp.center
+        
+    # LineGeom.adjust
+    
+    def inflate(self, x, y):
+        x1,y1 = self.p1
+        x2,y2 = self.p2
+        if x1 > x2:
+            x *= -1
+        if y1 > y2:
+            y *= -1
+        x1 -= x
+        y1 -= y
+        self.p1 = x1,y1
+        x2 += x
+        y2 += y
+        self.p2 = x2,y2
+        
+    # LineGeom.inflate
+    
+    def copy(self):
+        (x1,y1),(x2,y2) = self.points
+        dupe = LineGeom(x1, y1, x2, y2)
+        return dupe
+    
+    # LineGeom.copy
+    
+    def draw(self):
+        app = State.app
+        camera = State.camera
+        surface = camera.surface
+        world_to_screen = camera.world_to_screen
+        cam_pos = camera.rect.topleft
+        # Indicate mouse-over, copy, or cut.
+        color = GEOM_COLORS.get(self)
+        # Draw line in screen space.
+        a,b = self.points
+        a = Vec2d(a)
+        b = Vec2d(b)
+        self.draw_line(surface, color, a+cam_pos, b+cam_pos, 1)
+        # If shape is selected, draw control points in screen space.
+        if self is app.selected:
+            for cp in self.control_points:
+                if cp is self.grabbed:
+                    surface.blit(cp.image_grabbed, world_to_screen(cp.topleft))
+                else:
+                    surface.blit(cp.image, world_to_screen(cp.topleft))
+        
+    # LineGeom.draw
 
 class RectGeom(geometry.RectGeometry):
     """RectGeom(x, y, w, h, pos) : RectGeom
@@ -809,7 +915,6 @@ class MapEditor(object):
             model.Object((0,0)),
             View(State.screen.surface, Rect(0,0,view_w,screen_size.y))
         )
-        self.world_grids = []
         self.make_world()
         self.grid_cache = {}
         self.label_cache = {}
@@ -864,6 +969,8 @@ class MapEditor(object):
         State.show_rects = False
         State.show_world_grid = True
         
+        self.renderer = BasicMapRenderer(State.camera.rect)
+        
         ## Test code to launch tilesheet sizer at startup.
         if False:
             self.gui_tilesheet_sizer(
@@ -889,6 +996,7 @@ class MapEditor(object):
         self.update_gui()
         State.camera.update()
         self.update_shapes()
+        self.renderer.set_rect(center=State.camera.rect.center)
         if State.show_hud:
             State.hud.update(State.clock._update_interval)
     
@@ -906,7 +1014,7 @@ class MapEditor(object):
         mouse_shape = self.mouse_shape
 ##        self.mouseover_shapes = [shape for ent,shape in State.world.collisions
 ##            if ent is mouse_shape
-#        ]
+##        ]
         self.mouseover_shapes = State.world.intersect_objects(mouse_shape.rect)
     
     def draw(self):
@@ -915,9 +1023,12 @@ class MapEditor(object):
         # Draw stuff.
         State.camera.interpolate()
         State.screen.clear()
-        toolkit.draw_tiles()
-        toolkit.draw_labels(self.label_cache)
-        toolkit.draw_grid(self.grid_cache)
+#        toolkit.draw_tiles()
+        self.renderer.draw_tiles()
+        if State.show_labels:
+            toolkit.draw_labels(self.label_cache)
+        if State.show_grid:
+            toolkit.draw_grid(self.grid_cache)
         self.draw_world()
         if State.show_hud:
             State.hud.draw()
@@ -934,9 +1045,6 @@ class MapEditor(object):
         camera = State.camera
         blit = camera.view.surface.blit
         world_to_screen = camera.world_to_screen
-        if State.show_world_grid:
-            for grid_line in self.world_grids:
-                blit(grid_line.image, world_to_screen(grid_line.rect.topleft))
         for thing in things:
             if thing not in (mouse_shape,selected):
                 thing.draw()
@@ -1003,51 +1111,7 @@ class MapEditor(object):
         State.world = SpatialHash(State.map.rect, 128)
         for i in entities:
             State.world.add(e)
-        State.camera.position = State.camera.view.center
-        del self.world_grids[:]
-        top_rect = State.world.rect
-        def make_grid(branch):
-            return
-            level = branch.level
-            do_me = level == 2      # this displays critical top-level grids
-            if do_me:
-                rect = branch.rect
-                alpha = 305 - float(level-1)/(num_levels-1)*255
-                if level == 2:
-                    if branch.branch_id > 4:
-                        color = Color('red')
-                        alpha = 255
-                    else:
-                        color = Color('orange')
-                elif level == 3:
-                    color = Color('yellow')
-                elif level == 4:
-                    color = Color('green')
-                if rect.x in (0,worst_case):
-                    # Horizontal line.
-                    s = pygame.sprite.Sprite()
-                    s.image = pygame.surface.Surface((top_rect.w,3))
-                    s.rect = s.image.get_rect()
-                    s.rect.centery = rect.bottom
-                    s.image.fill(color)
-                    pygame.draw.line(s.image, Color('black'), (0,1),(s.rect.w,1))
-                    s.image.set_colorkey(Color('black'))
-                    s.image.set_alpha(alpha)
-                    self.world_grids.append(s)
-                if rect.y in (0,worst_case):
-                    # Vertical line.
-                    s = pygame.sprite.Sprite()
-                    s.image = pygame.surface.Surface((3,top_rect.h))
-                    s.rect = s.image.get_rect()
-                    s.rect.centerx = rect.right
-                    s.image.fill(color)
-                    pygame.draw.line(s.image, Color('black'), (1,0),(1,s.rect.h))
-                    s.image.set_colorkey(Color('black'))
-                    s.image.set_alpha(alpha)
-                    self.world_grids.append(s)
-            for b in branch.branches:
-                make_grid(b)
-        make_grid(State.world)
+        State.camera.init_position(State.camera.view.center)
     
     def make_gui(self):
         global gui
@@ -1560,6 +1624,8 @@ class MapEditor(object):
                     geom = RectGeom(tiles, pos)
                 else:
                     geom = RectGeom(0,0,64,64, pos)
+            elif shape == 'line_tool':
+                geom = LineGeom(0,0,64,64, pos)
             elif shape in POLY_POINT_SETS:
                 points = POLY_POINT_SETS[shape]
                 geom = PolyGeom(points, pos, tiles, auto=True)
@@ -1691,7 +1757,10 @@ class MapEditor(object):
                 # Import map.
                 if State.file_map.endswith('.tmx'):
                     try:
+                        State.camera.init_position(Vec2d(State.camera.rect.size)/2)
+                        self.renderer.set_rect(center=State.camera.rect.center)
                         State.map = TiledMap(State.file_map)
+                        self.renderer.basic_map = State.map
                         self.make_world()
                     except:
                         exc_type,exc_value,exc_traceback = sys.exc_info()
@@ -2191,7 +2260,8 @@ def make_hud():
     
     def get_selected():
         shape = State.app.selected
-        return 'none' if shape is None else '%s'%(shape.rect.center,)
+#        return 'none' if shape is None else '%s'%(shape.rect.center,)
+        return 'none' if shape is None else '%s'%(shape.position,)
     State.hud.add('Selected',
         Statf(next_pos(), 'Selected %s', callback=get_selected, interval=0))
 
@@ -2214,7 +2284,6 @@ def make_menus(container):
         ('Images/Close Tiles',app.action_tiles_close, None),
         ('View/Map Grid',     app.action_view_map_grid, None),
         ('View/Map Labels',   app.action_view_map_labels, None),
-        ('View/World Grid',   app.action_view_world_grid, None),
         ('View/Shape Rects',  app.action_view_rects, None),
         ('View/HUD',          app.action_view_hud, None),
         ('View/Help',         app.action_view_help, None),
@@ -2234,6 +2303,7 @@ def make_toolbar(container):
     t = gui.Table(name='toolbar')
     t.tr()
     t.td(gui.Tool(g, gui.Label('Rect'), 'rect_tool', height=h))
+    t.td(gui.Tool(g, gui.Label('Line'), 'line_tool', height=h))
     t.td(gui.Tool(g, gui.Label('Triangle'), 'triangle_tool', height=h))
     t.td(gui.Tool(g, gui.Label('Quad'), 'quad_tool', height=h))
     t.td(gui.Tool(g, gui.Label('Pent'), 'pent_tool', height=h))
