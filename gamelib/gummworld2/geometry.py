@@ -488,16 +488,16 @@ def poly_collided_other(self, other, rect_pre_tested=None):
 
 class LineGeometry(object):
     
-    def __init__(self, x1, y1, x2, y2):
+    def __init__(self, x1, y1, x2, y2, position=None):
         super(LineGeometry, self).__init__()
         self._p1 = Vec2d(x1,y1)
         self._p2 = Vec2d(x2,y2)
+        if position is not None:
+            self.position = position
     
-    @property
-    def points(self):
-        return tuple(self._p1[:]) + tuple(self._p2[:])
-    @points.setter
-    def points(self, endpoints):
+    def getpoints(self):
+        return tuple(self._p1),tuple(self._p2)
+    def setpoints(self, endpoints):
         """set end points of line
         line.points = x1,y1,x2,y2
         line.points = (x1,y1),(x2,y2)
@@ -511,84 +511,92 @@ class LineGeometry(object):
         else:
             raise ValueError('{0}.points: endpoints={1}'.format(
                 self.__class__.__name__, endpoints))
+    points = property(getpoints, setpoints)
     
-    @property
-    def end_points(self):
+    def getend_points(self):
         return self._p1[:],self._p2[:]
+    end_points = property(getend_points)
     
     ## entity's collided, static method used by QuadTree callback
     collided = staticmethod(line_collided_other)
     
-    @property
-    def position(self):
+    def getposition(self):
         """GOTCHA: Something like "line_geom.position.x += 1" will not do what
         you expect. That operation does not update the line instance variable.
         Instead use "line_geom.position += (1,0)".
         """
-        return self._p1[:]
-    @position.setter
-    def position(self, val):
+        return self._center
+    def setposition(self, val):
         x = val[0]
         y = val[1]
+        cx,cy = self._center
+        dx = x - cx
+        dy = y - cy
+        #
         p1 = self._p1
-        x1 = p1[0]
-        y1 = p1[1]
-        dx = x - x1
-        dy = y - y1
-        p1[0] = x
-        p1[1] = y
-        
+        p1[0] += dx
+        p1[1] += dy
+        #
         p2 = self._p2
         p2[0] += dx
         p2[1] += dy
+    position = property(getposition, setposition)
     
-    @property
-    def p1(self):
+    def _getcenter(self):
+        p1 = self._p1
+        x1 = p1[0]
+        y1 = p1[1]
+        #
+        p2 = self._p2
+        x2 = p2[0]
+        y2 = p2[1]
+        #
+        cx = x1 + (x2 - x1) / 2
+        cy = y1 + (y2 - y1) / 2
+        return Vec2d(cx,cy)
+    _center = property(_getcenter)
+    
+    def getp1(self):
         return self._p1[:]
-    @p1.setter
-    def p1(self, xorxy, y=None):
+    def setp1(self, xorxy, y=None):
         if y is None:
             self._p1[:] = xorxy
         else:
             self._p1[:] = xorxy,y
+    p1 = property(getp1, setp1)
     
-    @property
-    def p2(self):
+    def getp2(self):
         return self._p2[:]
-    @p2.setter
-    def p2(self, xorxy, y=None):
+    def setp2(self, xorxy, y=None):
         if y is None:
             self._p2[:] = xorxy
         else:
             self._p2[:] = xorxy,y
+    p2 = property(getp2, setp2)
     
-    @property
-    def x1(self):
+    def getx1(self):
         return self._p1[0]
-    @x1.setter
-    def x1(self, val):
+    def setx1(self, val):
         self._p1[0] = val
+    x1 = property(getx1, setx1)
     
-    @property
-    def y1(self):
+    def gety1(self):
         return self._p1[1]
-    @x1.setter
-    def y1(self, val):
+    def sety1(self, val):
         self._p1[1] = val
+    y1 = property(gety1, sety1)
     
-    @property
-    def x2(self):
+    def getx2(self):
         return self._p2[0]
-    @x1.setter
-    def x2(self, val):
+    def setx2(self, val):
         self._p2[0] = val
+    x2 = property(getx2, setx2)
     
-    @property
-    def y2(self):
+    def gety2(self):
         return self._p2[1]
-    @x1.setter
-    def y2(self, val):
+    def sety2(self, val):
         self._p2[1] = val
+    y2 = property(gety2, sety2)
 
 
 class RectGeometry(object):
@@ -605,23 +613,22 @@ class RectGeometry(object):
     ## entity's collided, static method used by QuadTree callback
     collided = staticmethod(rect_collided_other)
     
-    @property
-    def points(self):
+    def getpoints(self):
         r = self.rect
         return (r.topleft, r.topright, r.bottomright, r.bottomleft)
+    points = property(getpoints)
     
-    @property
-    def position(self):
+    def getposition(self):
         """GOTCHA: Something like "rect_geom.position.x += 1" will not do what
         you expect. That operation does not update the rect instance variable.
         Instead use "rect_geom.position += (1,0)".
         """
         return self._position
-    @position.setter
-    def position(self, val):
+    def setposition(self, val):
         p = self._position
         p.x,p.y = val
         self.rect.center = round(p.x),round(p.y)
+    position = property(getposition, setposition)
 
 
 class CircleGeometry(object):
@@ -635,30 +642,28 @@ class CircleGeometry(object):
     ## entity's collided, static method used by QuadTree callback
     collided = staticmethod(circle_collided_other)
     
-    @property
-    def origin(self):
+    def getorigin(self):
         return Vec2d(self._position)
+    origin = property(getorigin)
     
-    @property
-    def radius(self):
+    def getradius(self):
         return self.rect.width // 2
-    @radius.setter
-    def radius(self, val):
+    def setradius(self, val):
         self.rect.size = Vec2d(val,val) * 2
         self.position = self.position
+    radius = property(getradius, setradius)
     
-    @property
-    def position(self):
+    def getposition(self):
         """GOTCHA: Something like "circle_geom.position.x += 1" will not do what
         you expect. That operation does not update the rect instance variable.
         Instead use "circle_geom.position += (1,0)".
         """
         return self._position
-    @position.setter
-    def position(self, val):
+    def setposition(self, val):
         p = self._position
         p.x,p.y = val
         self.rect.center = round(p.x),round(p.y)
+    position = property(getposition, setposition)
 
 
 class PolyGeometry(object):
@@ -682,23 +687,22 @@ class PolyGeometry(object):
     ## entity's collided, static method used by QuadTree callback
     collided = staticmethod(poly_collided_other)
     
-    @property
-    def points(self):
+    def getpoints(self):
         left,top = self.rect.topleft
         return [(left+x,top+y) for x,y in self._points]
+    points = property(getpoints)
     
-    @property
-    def position(self):
+    def getposition(self):
         """GOTCHA: Something like "poly_geom.position.x += 1" will not do what
         you expect. That operation does not update the rect instance variable.
         Instead use "poly_geom.position += (1,0)".
         """
         return self._position
-    @position.setter
-    def position(self, val):
+    def setposition(self, val):
         p = self._position
         p.x,p.y = val
         self.rect.center = round(p.x),round(p.y)
+    position = property(getposition, setposition)
 
 
 def circle_intersects_circle(origin1, radius1, origin2, radius2):
