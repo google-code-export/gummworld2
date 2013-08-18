@@ -39,6 +39,8 @@ from weakref import WeakKeyDictionary
 import pygame
 from pygame.locals import Rect
 
+from gummworld2 import geometry
+
 
 class SpatialHash(object):
     
@@ -206,13 +208,24 @@ class SpatialHash(object):
     def intersect_objects(self, rect):
         """Return list of objects whose rects intersect rect.
         """
-        objs = set()
-        set_add = objs.add
+        objs = {}
         colliderect = rect.colliderect
+        rg = geometry.RectGeometry(*rect[:])
         for cell_ids in self.intersect_indices(rect):
             for o in self.get_cell(cell_ids):
-                if colliderect(o.rect):
-                    set_add(o)
+                try:
+                    if colliderect(o.rect):
+                        try:
+                            if o.collided(o, rg, True):
+                                objs[o] = 1
+                        except AttributeError:
+                            objs[o] = 1
+                except AttributeError:
+                    try:
+                        if o.collided(o, rg, True):
+                            objs[o] = 1
+                    except AttributeError:
+                        pass
         return list(objs)
     
     def get_cell_grid(self, cell_id):
@@ -454,10 +467,12 @@ class SpatialHash(object):
         """
         points = obj.points
         rect = self._temp_rect
-        x1 = points[0]
-        y1 = points[1]
-        x2 = points[2]
-        y2 = points[3]
+#        x1 = points[0]
+#        y1 = points[1]
+#        x2 = points[2]
+#        y2 = points[3]
+        x1,y1 = points[0]
+        x2,y2 = points[1]
         if x1 > x2:
             t = x1
             x1 = x2
