@@ -182,7 +182,6 @@ class App(Engine):
     
     def make_space(self):
         State.world = self.world = spatialhash.SpatialHash(State.map.rect, self.cell_size)
-        print State.world
         for thing in self.things:
             State.world.add(thing)
     
