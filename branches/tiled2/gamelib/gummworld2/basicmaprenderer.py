@@ -73,7 +73,8 @@ class BasicMapRenderer(object):
     
     def __init__(self, basic_map, tile_size=0, max_scroll_speed=10):
         self._basic_map = basic_map
-        self._rect = Rect(State.screen.rect)
+##        self._rect = Rect(State.screen.rect)
+        self._rect = Rect(State.camera.view.rect)
         self._max_scroll_speed = max_scroll_speed
         
         self._tiles = {}
@@ -194,9 +195,9 @@ class BasicMapRenderer(object):
     
     def draw_tiles(self):
         """draw the visible tiles on the screen"""
-        self._rect.center = State.camera.rect.center
-        screen = State.screen
-        blit = screen.surface.blit
+        cam_rect = State.camera.rect
+        self._rect.center = cam_rect.center
+        blit = State.camera.view.surface.blit
         view_rect = self._rect
         colliderect = view_rect.colliderect
         x,y = view_rect.topleft
@@ -236,6 +237,7 @@ class BasicMapRenderer(object):
         del self._visible_tiles[:]
         del self._examine_queue[:]
         del self._dead[:]
+        del self.dirty_rects[:]
 
 
 class BasicMapRendererTile(object):
@@ -255,6 +257,8 @@ class BasicMapRendererTile(object):
         cx,cy = self.rect.topleft
         visible_cell_ids = _get_visible_cell_ids(camera, map_, self.rect)
         visible_objects = _get_objects_in_cell_ids(map_, visible_cell_ids)
+#        print self.idx,[o.rect for o in visible_objects[0]]
+#        print ''
         for sprites in visible_objects:
             for sprite in sprites:
                 rect = sprite.rect
