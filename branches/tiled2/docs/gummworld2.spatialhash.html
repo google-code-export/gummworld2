@@ -6,7 +6,7 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.spatialhash</strong></big></big></font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.spatialhash</strong></big></big> (version $Id: spatialhash.py 414 2013-08-19 05:19:47Z stabbingfinger@gmail.com $)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/svn/gummworld2_devel/gamelib/gummworld2/spatialhash.py">c:\cygwin\home\bw\devel\python\svn\gummworld2_devel\gamelib\gummworld2\spatialhash.py</a></font></td></tr></table>
     <p><tt>spatialhash.py&nbsp;-&nbsp;High&nbsp;performance&nbsp;spatial&nbsp;hash&nbsp;for&nbsp;spatial<br>
@@ -27,9 +27,10 @@ This&nbsp;module&nbsp;is&nbsp;derived&nbsp;from&nbsp;the&nbsp;article&nbsp;and&n
 <font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
     
 <tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="pygame.html">pygame</a><br>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="gummworld2.geometry.html">gummworld2.geometry</a><br>
+</td><td width="25%" valign=top><a href="pygame.html">pygame</a><br>
 </td><td width="25%" valign=top><a href="time.html">time</a><br>
-</td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ee77aa">
 <td colspan=3 valign=bottom>&nbsp;<br>
@@ -70,6 +71,8 @@ bounds&nbsp;and&nbsp;cannot&nbsp;be&nbsp;stored&nbsp;in&nbsp;this&nbsp;space.<br
 Note&nbsp;that&nbsp;when&nbsp;obj&nbsp;changes&nbsp;its&nbsp;position,&nbsp;you&nbsp;must&nbsp;add&nbsp;it&nbsp;again&nbsp;so&nbsp;that<br>
 its&nbsp;cell&nbsp;membership&nbsp;is&nbsp;updated.&nbsp;This&nbsp;method&nbsp;first&nbsp;removes&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;if<br>
 it&nbsp;is&nbsp;already&nbsp;in&nbsp;the&nbsp;spatial&nbsp;hash.</tt></dd></dl>
+
+<dl><dt><a name="SpatialHash-clear"><strong>clear</strong></a>(self)</dt><dd><tt>Clear&nbsp;all&nbsp;objects.</tt></dd></dl>
 
 <dl><dt><a name="SpatialHash-collide"><strong>collide</strong></a>(self, obj)</dt><dd><tt>Return&nbsp;list&nbsp;of&nbsp;objects&nbsp;that&nbsp;collide&nbsp;with&nbsp;obj.</tt></dd></dl>
 
@@ -131,10 +134,6 @@ as&nbsp;<a href="#SpatialHash-iterobjects">iterobjects</a>().</tt></dd></dl>
 <dl><dt><a name="SpatialHash-remove"><strong>remove</strong></a>(self, obj)</dt><dd><tt>Remove&nbsp;obj.</tt></dd></dl>
 
 <hr>
-Static methods defined here:<br>
-<dl><dt><a name="SpatialHash-clear"><strong>clear</strong></a>(self)</dt><dd><tt>Clear&nbsp;all&nbsp;objects.</tt></dd></dl>
-
-<hr>
 Data descriptors defined here:<br>
 <dl><dt><strong>__dict__</strong></dt>
 <dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
@@ -156,5 +155,20 @@ Data descriptors defined here:<br>
 &nbsp;<br>
 Return&nbsp;the&nbsp;ceiling&nbsp;of&nbsp;x&nbsp;as&nbsp;a&nbsp;float.<br>
 This&nbsp;is&nbsp;the&nbsp;smallest&nbsp;integral&nbsp;value&nbsp;&gt;=&nbsp;x.</tt></dd></dl>
-</td></tr></table>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>__author__</strong> = 'Gummbum, (c) 2011-2013'<br>
+<strong>__version__</strong> = '$Id: spatialhash.py 414 2013-08-19 05:19:47Z stabbingfinger@gmail.com $'</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#7799ee">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Author</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#7799ee"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Gummbum,&nbsp;(c)&nbsp;2011-2013</td></tr></table>
 </body></html>

@@ -6,7 +6,7 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.geometry</strong></big></big> (version $Id: geometry.py 384 2013-07-27 22:29:03Z stabbingfinger@gmail.com $)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.geometry</strong></big></big> (version $Id: geometry.py 410 2013-08-18 06:19:10Z stabbingfinger@gmail.com $)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/svn/gummworld2_devel/gamelib/gummworld2/geometry.py">c:\cygwin\home\bw\devel\python\svn\gummworld2_devel\gamelib\gummworld2\geometry.py</a></font></td></tr></table>
     <p><tt>geometry.py&nbsp;-&nbsp;Geometry&nbsp;module&nbsp;for&nbsp;Gummworld2.<br>
@@ -54,6 +54,18 @@ Geometry&nbsp;classes&nbsp;and&nbsp;functions.</tt></p>
 <tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
 <dl><dt><a name="CircleGeometry-__init__"><strong>__init__</strong></a>(self, origin, radius)</dt></dl>
+
+<dl><dt><a name="CircleGeometry-getorigin"><strong>getorigin</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="CircleGeometry-getposition"><strong>getposition</strong></a>(self)</dt><dd><tt>GOTCHA:&nbsp;Something&nbsp;like&nbsp;"circle_geom.position.x&nbsp;+=&nbsp;1"&nbsp;will&nbsp;not&nbsp;do&nbsp;what<br>
+you&nbsp;expect.&nbsp;That&nbsp;operation&nbsp;does&nbsp;not&nbsp;update&nbsp;the&nbsp;rect&nbsp;instance&nbsp;variable.<br>
+Instead&nbsp;use&nbsp;"circle_geom.position&nbsp;+=&nbsp;(1,0)".</tt></dd></dl>
+
+<dl><dt><a name="CircleGeometry-getradius"><strong>getradius</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="CircleGeometry-setposition"><strong>setposition</strong></a>(self, val)</dt></dl>
+
+<dl><dt><a name="CircleGeometry-setradius"><strong>setradius</strong></a>(self, val)</dt></dl>
 
 <hr>
 Static methods defined here:<br>
@@ -399,7 +411,45 @@ Data descriptors defined here:<br>
     
 <tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
-<dl><dt><a name="LineGeometry-__init__"><strong>__init__</strong></a>(self, x1, y1, x2, y2)</dt></dl>
+<dl><dt><a name="LineGeometry-__init__"><strong>__init__</strong></a>(self, x1, y1, x2, y2, position<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="LineGeometry-getend_points"><strong>getend_points</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="LineGeometry-getp1"><strong>getp1</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="LineGeometry-getp2"><strong>getp2</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="LineGeometry-getpoints"><strong>getpoints</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="LineGeometry-getposition"><strong>getposition</strong></a>(self)</dt><dd><tt>GOTCHA:&nbsp;Something&nbsp;like&nbsp;"line_geom.position.x&nbsp;+=&nbsp;1"&nbsp;will&nbsp;not&nbsp;do&nbsp;what<br>
+you&nbsp;expect.&nbsp;That&nbsp;operation&nbsp;does&nbsp;not&nbsp;update&nbsp;the&nbsp;line&nbsp;instance&nbsp;variable.<br>
+Instead&nbsp;use&nbsp;"line_geom.position&nbsp;+=&nbsp;(1,0)".</tt></dd></dl>
+
+<dl><dt><a name="LineGeometry-getx1"><strong>getx1</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="LineGeometry-getx2"><strong>getx2</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="LineGeometry-gety1"><strong>gety1</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="LineGeometry-gety2"><strong>gety2</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="LineGeometry-setp1"><strong>setp1</strong></a>(self, xorxy, y<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="LineGeometry-setp2"><strong>setp2</strong></a>(self, xorxy, y<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="LineGeometry-setpoints"><strong>setpoints</strong></a>(self, endpoints)</dt><dd><tt>set&nbsp;end&nbsp;points&nbsp;of&nbsp;line<br>
+line.points&nbsp;=&nbsp;x1,y1,x2,y2<br>
+line.points&nbsp;=&nbsp;(x1,y1),(x2,y2)</tt></dd></dl>
+
+<dl><dt><a name="LineGeometry-setposition"><strong>setposition</strong></a>(self, val)</dt></dl>
+
+<dl><dt><a name="LineGeometry-setx1"><strong>setx1</strong></a>(self, val)</dt></dl>
+
+<dl><dt><a name="LineGeometry-setx2"><strong>setx2</strong></a>(self, val)</dt></dl>
+
+<dl><dt><a name="LineGeometry-sety1"><strong>sety1</strong></a>(self, val)</dt></dl>
+
+<dl><dt><a name="LineGeometry-sety2"><strong>sety2</strong></a>(self, val)</dt></dl>
 
 <hr>
 Static methods defined here:<br>
@@ -448,6 +498,14 @@ Instead&nbsp;use&nbsp;"line_geom.position&nbsp;+=&nbsp;(1,0)".</tt></dd>
 <td width="100%">Methods defined here:<br>
 <dl><dt><a name="PolyGeometry-__init__"><strong>__init__</strong></a>(self, points, position<font color="#909090">=None</font>)</dt></dl>
 
+<dl><dt><a name="PolyGeometry-getpoints"><strong>getpoints</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="PolyGeometry-getposition"><strong>getposition</strong></a>(self)</dt><dd><tt>GOTCHA:&nbsp;Something&nbsp;like&nbsp;"poly_geom.position.x&nbsp;+=&nbsp;1"&nbsp;will&nbsp;not&nbsp;do&nbsp;what<br>
+you&nbsp;expect.&nbsp;That&nbsp;operation&nbsp;does&nbsp;not&nbsp;update&nbsp;the&nbsp;rect&nbsp;instance&nbsp;variable.<br>
+Instead&nbsp;use&nbsp;"poly_geom.position&nbsp;+=&nbsp;(1,0)".</tt></dd></dl>
+
+<dl><dt><a name="PolyGeometry-setposition"><strong>setposition</strong></a>(self, val)</dt></dl>
+
 <hr>
 Static methods defined here:<br>
 <dl><dt><a name="PolyGeometry-collided"><strong>collided</strong></a> = poly_collided_other(self, other, rect_pre_tested<font color="#909090">=None</font>)</dt><dd><tt>Return&nbsp;results&nbsp;of&nbsp;collision&nbsp;test&nbsp;between&nbsp;a&nbsp;poly&nbsp;and&nbsp;other&nbsp;geometry.<br>
@@ -480,6 +538,14 @@ Instead&nbsp;use&nbsp;"poly_geom.position&nbsp;+=&nbsp;(1,0)".</tt></dd>
 <tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
 <dl><dt><a name="RectGeometry-__init__"><strong>__init__</strong></a>(self, x, y, width, height, position<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="RectGeometry-getpoints"><strong>getpoints</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="RectGeometry-getposition"><strong>getposition</strong></a>(self)</dt><dd><tt>GOTCHA:&nbsp;Something&nbsp;like&nbsp;"rect_geom.position.x&nbsp;+=&nbsp;1"&nbsp;will&nbsp;not&nbsp;do&nbsp;what<br>
+you&nbsp;expect.&nbsp;That&nbsp;operation&nbsp;does&nbsp;not&nbsp;update&nbsp;the&nbsp;rect&nbsp;instance&nbsp;variable.<br>
+Instead&nbsp;use&nbsp;"rect_geom.position&nbsp;+=&nbsp;(1,0)".</tt></dd></dl>
+
+<dl><dt><a name="RectGeometry-setposition"><strong>setposition</strong></a>(self, val)</dt></dl>
 
 <hr>
 Static methods defined here:<br>
@@ -696,8 +762,8 @@ The&nbsp;distance&nbsp;argument&nbsp;is&nbsp;the&nbsp;size&nbsp;of&nbsp;the&nbsp
 <font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><strong>__author__</strong> = 'Gummbum, (c) 2011'<br>
-<strong>__version__</strong> = '$Id: geometry.py 384 2013-07-27 22:29:03Z stabbingfinger@gmail.com $'<br>
+<td width="100%"><strong>__author__</strong> = 'Gummbum, (c) 2011-2013'<br>
+<strong>__version__</strong> = '$Id: geometry.py 410 2013-08-18 06:19:10Z stabbingfinger@gmail.com $'<br>
 <strong>pi</strong> = 3.1415926535897931</td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#7799ee">
@@ -705,5 +771,5 @@ The&nbsp;distance&nbsp;argument&nbsp;is&nbsp;the&nbsp;size&nbsp;of&nbsp;the&nbsp
 <font color="#ffffff" face="helvetica, arial"><big><strong>Author</strong></big></font></td></tr>
     
 <tr><td bgcolor="#7799ee"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%">Gummbum,&nbsp;(c)&nbsp;2011</td></tr></table>
+<td width="100%">Gummbum,&nbsp;(c)&nbsp;2011-2013</td></tr></table>
 </body></html>
