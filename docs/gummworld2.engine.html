@@ -6,7 +6,7 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.engine</strong></big></big> (version $Id: engine.py 383 2013-07-27 22:28:24Z stabbingfinger@gmail.com $)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="gummworld2.html"><font color="#ffffff">gummworld2</font></a>.engine</strong></big></big> (version $Id: engine.py 407 2013-08-12 15:11:30Z stabbingfinger@gmail.com $)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/cygwin/home/bw/devel/python/svn/gummworld2_devel/gamelib/gummworld2/engine.py">c:\cygwin\home\bw\devel\python\svn\gummworld2_devel\gamelib\gummworld2\engine.py</a></font></td></tr></table>
     <p><tt>engine.py&nbsp;-&nbsp;A&nbsp;sample&nbsp;engine&nbsp;for&nbsp;Gummworld2.<br>
@@ -37,8 +37,7 @@ though&nbsp;not&nbsp;everything&nbsp;created&nbsp;in&nbsp;the&nbsp;constructor&n
 <a href="gummworld2.model.html">gummworld2.model</a><br>
 </td><td width="25%" valign=top><a href="pygame.html">pygame</a><br>
 <a href="gummworld2.pygame_utils.html">gummworld2.pygame_utils</a><br>
-</td><td width="25%" valign=top><a href="pymunk.html">pymunk</a><br>
-<a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
 </td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ee77aa">
@@ -132,8 +131,7 @@ The&nbsp;following&nbsp;arguments&nbsp;are&nbsp;used&nbsp;to&nbsp;initialize&nbs
 The&nbsp;following&nbsp;arguments&nbsp;are&nbsp;used&nbsp;to&nbsp;initialize&nbsp;a&nbsp;model.World*&nbsp;object:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;world_type&nbsp;argument&nbsp;specifies&nbsp;which&nbsp;of&nbsp;the&nbsp;world&nbsp;classes&nbsp;to<br>
-&nbsp;&nbsp;&nbsp;&nbsp;create.&nbsp;It&nbsp;must&nbsp;be&nbsp;one&nbsp;of&nbsp;engine.NO_WORLD,&nbsp;engine.SIMPLE_WORLD,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;engine.PYMUNK_WORLD.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;create.&nbsp;It&nbsp;must&nbsp;be&nbsp;one&nbsp;of&nbsp;engine.NO_WORLD,&nbsp;or&nbsp;engine.SIMPLE_WORLD.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;world_args&nbsp;argument&nbsp;is&nbsp;a&nbsp;dict&nbsp;that&nbsp;can&nbsp;be&nbsp;passed&nbsp;verbatim&nbsp;to<br>
 &nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;world&nbsp;constructor&nbsp;(see&nbsp;the&nbsp;World*&nbsp;classes&nbsp;in&nbsp;the&nbsp;model&nbsp;module)<br>
@@ -217,8 +215,6 @@ Data descriptors defined here:<br>
 Data and other attributes defined here:<br>
 <dl><dt><strong>NO_WORLD</strong> = 0</dl>
 
-<dl><dt><strong>PYMUNK_WORLD</strong> = 2</dl>
-
 <dl><dt><strong>SIMPLE_WORLD</strong> = 1</dl>
 
 <hr>
@@ -272,19 +268,18 @@ To&nbsp;exit&nbsp;the&nbsp;run&nbsp;loop&nbsp;gracefully,&nbsp;call&nbsp;context
 <strong>MOUSEBUTTONUP</strong> = 6<br>
 <strong>MOUSEMOTION</strong> = 4<br>
 <strong>NO_WORLD</strong> = 0<br>
-<strong>PYMUNK_WORLD</strong> = 2<br>
 <strong>QUIT</strong> = 12<br>
 <strong>SIMPLE_WORLD</strong> = 1<br>
 <strong>USEREVENT</strong> = 24<br>
 <strong>VIDEOEXPOSE</strong> = 17<br>
 <strong>VIDEORESIZE</strong> = 16<br>
-<strong>__author__</strong> = 'Gummbum, (c) 2011'<br>
-<strong>__version__</strong> = '$Id: engine.py 383 2013-07-27 22:28:24Z stabbingfinger@gmail.com $'</td></tr></table><p>
+<strong>__author__</strong> = 'Gummbum, (c) 2011-2013'<br>
+<strong>__version__</strong> = '$Id: engine.py 407 2013-08-12 15:11:30Z stabbingfinger@gmail.com $'</td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#7799ee">
 <td colspan=3 valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Author</strong></big></font></td></tr>
     
 <tr><td bgcolor="#7799ee"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%">Gummbum,&nbsp;(c)&nbsp;2011</td></tr></table>
+<td width="100%">Gummbum,&nbsp;(c)&nbsp;2011-2013</td></tr></table>
 </body></html>
