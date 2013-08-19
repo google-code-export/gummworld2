@@ -34,7 +34,9 @@ from pygame.locals import RLEACCEL, SRCALPHA, BLEND_RGBA_ADD, Color
 from pygame.sprite import Sprite
 
 from gummworld2 import data, State, BasicMap, BasicLayer, Vec2d
-from gummworld2.geometry import RectGeometry, PolyGeometry, CircleGeometry
+from gummworld2.geometry import (
+    RectGeometry, LineGeometry, PolyGeometry, CircleGeometry,
+)
 from gummworld2.ui import HUD, Stat, Statf, hud_font
 from tiledtmxloader.tmxreader import TileMapParser
 from tiledtmxloader.helperspygame import ResourceLoaderPygame
@@ -252,6 +254,18 @@ def export_world(fh, entities):
                 user_data = quote(entity.user_data)
             fh.write('rect %d %d %d %d\n' % (x, y, w, h))
             fh.write('user_data ' + user_data + '\n')
+        elif isinstance(entity, LineGeometry):
+            # format:
+            # rect x y w h
+            # user_data ...
+            x1,y1 = entity.p1
+            x2,y2 = entity.p2
+            posx,posy = entity.position
+            user_data = ''
+            if hasattr(entity, 'user_data'):
+                user_data = quote(entity.user_data)
+            fh.write('line %d %d %d %d %d %d\n' % (x1,y1, x2,y2, posx,posy))
+            fh.write('user_data ' + user_data + '\n')
         elif isinstance(entity, CircleGeometry):
             # format:
             # circle centerx centery radius
@@ -287,21 +301,24 @@ def export_world(fh, entities):
 # export_world
 
 
-def import_world(fh, rect_cls, poly_cls, circle_cls):
+def import_world(
+        fh, rect_cls=RectGeometry, line_cls=LineGeometry,
+        poly_cls=PolyGeometry, circle_cls=CircleGeometry):
     """A world entity importer.
     
     This function is required by world_editor.py, and possibly other scripts, to
     import world entities from a text file. It understands the format of files
     created by export_world().
-
+    
     Geometry classes used by this function to create shape objects are specified
-    by the rect_cls, poly_cls, and circle_cls arguments. The constructor
-    parameters must have the same signature as geometry.RectGeometry, et al.
-
+    by the rect_cls, line_cls, poly_cls, and circle_cls arguments. The
+    constructor parameters must have the same signature as geometry.RectGeometry,
+    et al.
+    
     The values imported are those needed for each shape-class's constructor,
     plus a block of arbitrary user data which will be placed in the shape
     instance's user_data attribute.
-
+    
     The user_data is also parsed for tilesheet info. Tilesets are loaded and
     returned as a dict of toolkit.Tilesheet, keyed by relative path to the
     image file.
@@ -309,6 +326,8 @@ def import_world(fh, rect_cls, poly_cls, circle_cls):
     
     if not issubclass(rect_cls, RectGeometry):
         raise pygame.error, 'argument "rect_cls" must be a subclass of geometry.RectGeometry'
+    if not issubclass(line_cls, LineGeometry):
+        raise pygame.error, 'argument "line_cls" must be a subclass of geometry.LineGeometry'
     if not issubclass(poly_cls, PolyGeometry):
         raise pygame.error, 'argument "poly_cls" must be a subclass of geometry.PolyGeometry'
     if not issubclass(circle_cls, CircleGeometry):
@@ -356,6 +375,14 @@ def import_world(fh, rect_cls, poly_cls, circle_cls):
             x,y = int(parts[1]), int(parts[2])
             w,h = int(parts[3]), int(parts[4])
             entity = rect_cls(x, y, w, h)
+            entities.append(entity)
+        elif what == 'line':
+            # Line format:
+            # line x1 y1 x2 y2 posx posy
+            x1,y1 = int(parts[1]), int(parts[2])
+            x2,y2 = int(parts[3]), int(parts[4])
+            pos = int(parts[5]), int(parts[6])
+            entity = line_cls(x1, y1, x2, y2, pos)
             entities.append(entity)
         elif what == 'circle':
             # Circle format:
