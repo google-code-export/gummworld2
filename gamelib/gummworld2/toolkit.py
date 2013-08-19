@@ -197,19 +197,18 @@ def make_tiles2():
 
 
 def load_entities(filepath, cls_dict={}):
-    """Load entities via the import_world_quadtree plugin. Return a list of
-    entities.
+    """Load entities via import_world() plugin.
     
     The cls_dict argument is a dict of classes to construct when encountering
-    shape data. The following keys are supported: 'rect_cls', 'poly_cls',
-    'circle_cls'. If any of those keys are missing from cls_dict, the following
-    classes will be used by default: geometry.RectGeometry,
-    geometry.PolyGeometry, geometry.CircleGeometry. Classes substituted in this
-    manner must have constructors that are compatible with the default classes.
+    shape data. The following keys are supported: 'rect_cls', 'line_cls',
+    'poly_cls', 'circle_cls'. If any of those keys are missing from cls_dict,
+    the following classes will be used by default: geometry.RectGeometry,
+    geometry.LineGeometry, geometry.PolyGeometry, geometry.CircleGeometry.
+    Classes substituted in this manner must have constructors that are
+    compatible with the default classes.
     """
     file_handle = open(filepath, 'rb')
-    entities,tilesheets = import_world(
-        file_handle, RectGeometry, PolyGeometry, CircleGeometry)
+    entities,tilesheets = import_world(file_handle, **cls_dict)
     file_handle.close()
     return entities,tilesheets
 
