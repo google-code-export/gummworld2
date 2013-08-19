@@ -423,11 +423,12 @@ class SpatialHash(object):
         self.coll_tests = tests
         return collisions
     
-    @staticmethod
+##    @staticmethod
+## why did I make this a static method?
     def clear(self):
         """Clear all objects.
         """
-        for cell in self.buckets.values():
+        for cell in self.buckets:
             del cell[:]
     
     def iterobjects(self):
