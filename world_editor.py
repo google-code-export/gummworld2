@@ -36,8 +36,6 @@ SCREEN_SIZE = (800,600)
 
 
 HELP_TEXT = """
-Saving and loading is fully implemented. The file format may change over time as features are added. However, efforts will be made to keep tools backwards compatible. Finally, the file contents are simply URL-quoted ASCII which should be easy to convert.
-
 Controls
 
     * Menus do what you'd expect.
@@ -53,7 +51,7 @@ Controls
         * Clicking inside stacked shapes selects the next shape.
         * Clicking a shape's control point selects the control point.
         * Clicking and dragging the center control point moves the shape.
-        * Clicking and dragging a corner control point reshapes a shape.
+        * Clicking and dragging a corner control point drags that vertex.
 
     * Left-click in the tile palette:
         * Clicking on an unselected tile selects that tile. All other tiles are deselected.
@@ -65,18 +63,10 @@ Controls
     * Keys:
         * Delete: Delete a shape and its attached tiles from the map.
         * Enter,Escape: Enter and leave the user data input field for the selected shape.
-        * Left,Right,Up,Down: Move an entire shape if the center control point is selected; else, move the selected vertex.
+        * Left,Right,Up,Down: Move an entire shape if the center control point is selected; else, move the selected vertex. Holding down Shift moves faster.
         * Minus,Equals: Scale a shape.
         * Ctrl-C, Ctrl-X, Ctrl-V: Cut-copy-paste the selected shape.
         * Tab: Cycle shape color scheme for visibility.
-
-What are the double lines?
-
-    These are guide lines for QuadTree which is included in the distribution. If the game will be using WorldQuadTree, it's recommended to keep static objects out of the quadtree's layer 1.
-
-    Wherever a red double line crosses an orange one an object at that location will be pushed up to layer 1. Keeping objects in layer 1 is expensive. It increases the number of unnecessary collision checks each time a mobile object repositions. One can control the size and location of static objects, so it makes perfect sense to avoid, where possible, letting static objects overlap these junctions.
-
-    The HUD also gives clues about QuadTree layers: The "Selected" item shows a shape's location and its level in the quadtree; and the "In Top Level" item indicates how many world entities are in level 1.
 """
 
 """
@@ -115,9 +105,6 @@ Basic to do (complete for 1.0 release):
     [X] Single operations: Cut, copy, paste.
     [X] Contrast aid: Cycle through color schemes for world shapes.
     [X] Help viewer.
-    [X] QuadTree 1.5 grid lines.
-    [X] Menu toggle for QuadTree grid lines.
-    [X] HUD item to alert about shapes in top level.
     [X] Dialog to remove tilesheets from the palette.
 
 Advanced to do:
@@ -142,7 +129,7 @@ Advanced to do:
         [_] Group operations: Delete, move; cut, copy, paste?
     [_] Proof-reading:
         [_] List unique user_data and count. Click list item to go to shapes.
-    [_] Clicking on map while dragging scrollbar inserts a shape. Probably
+    [_] Bug: Clicking on map while dragging scrollbar inserts a shape. Probably
         should sense when GUI is clicked/dragged and not do editor actions. Not
         important, but it is kind of sloppy.
 """
@@ -1084,6 +1071,7 @@ class MapEditor(object):
             gui_form['shape_pos'].set_text('')
             gui_form['user_data'].value = ''
             gui_form['user_data'].blur()
+            self.paste = None
     
     def set_stamp(self, tilesheet, rect, surf):
         """Set tiles and info attached to the mouse for insertion in the map.
@@ -1233,6 +1221,13 @@ class MapEditor(object):
         return None
         
     # MapEditor.gui_hover
+    
+    def gui_which_focus(self):
+        widgets = []
+        for w in self.gui.widgets:
+            if w.myfocus:
+                widgets.append(w)
+        return widgets
     
     def gui_confirm_discard(self, callback, ok=True, cancel=False):
         """Confirm discard dialog: Ok or Cancel.
@@ -1592,7 +1587,7 @@ class MapEditor(object):
                 self.select(shape)
             elif action == 'copy':
                 # new_shape = shape.copy()
-                if isinstance(shape, (RectGeom,CircleGeom,PolyGeom)):
+                if isinstance(shape, (RectGeom,LineGeom,CircleGeom,PolyGeom)):
                     shape = shape.copy()
                     shape.position = self.mouse_shape.position
                     State.world.add(shape)
@@ -1848,7 +1843,7 @@ class MapEditor(object):
         elif sub_action == 'check_discard':
             if widget is None or widget.value is True:
                 # Clear out the world.
-                State.world.remove(*State.world.entity_branch.keys())
+                State.world.clear()
                 self.deselect()
                 del self.mouseover_shapes[:]
                 self.changes_unsaved = False
@@ -1878,12 +1873,12 @@ class MapEditor(object):
             if d.value is not None:
                 self.set_entities_file(d.value)
                 # Clear out the world.
-                State.world.remove(*State.world.entity_branch.keys())
+                State.world.clear()
                 # Run the importer plugin.
                 try:
                     file_handle = open(State.file_entities, 'rb')
                     entities,tilesheets = toolkit.import_world(
-                        file_handle, RectGeom, PolyGeom, CircleGeom)
+                        file_handle, RectGeom, LineGeom, PolyGeom, CircleGeom)
                     self.changes_unsaved = False
                 except:
                     exc_type,exc_value,exc_traceback = sys.exc_info()
@@ -1895,7 +1890,8 @@ class MapEditor(object):
                 else:
                     file_handle.close()
                     # Add the entities to the world.
-                    State.world.add_list(entities)
+                    for e in entities:
+                        State.world.add(e)
                     load_tiles(entities, tilesheets)
                     self.deselect()
                 # Put the mouse shape back.
@@ -1917,7 +1913,7 @@ class MapEditor(object):
         # Run the exporter plugin.
         try:
             file_handle = open(State.file_entities, 'wb')
-            entities = State.world.entity_branch.keys()
+            entities = State.world.objects
             toolkit.export_world(file_handle, entities)
             self.changes_unsaved = False
         except:
@@ -2097,8 +2093,11 @@ class MapEditor(object):
                     return
             self.gui.event(e)
         else:
-            if self.gui.widget.myfocus is self.gui_form['side_panel']:
-                user_data.blur()
+#            if self.gui.widget.myfocus is self.gui_form['side_panel']:
+#                user_data.blur()
+            widgets = self.gui_which_focus()
+            for w in widgets:
+                w.blur()
             self.mouse_down = button
             self.action_mouse_click(e)
     
