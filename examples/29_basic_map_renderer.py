@@ -107,6 +107,7 @@ class App(Engine):
         State.hud.update(dt)
     
     def draw(self, dt):
+        State.camera.interpolate()
         State.screen.clear()
         self.renderer.draw_tiles()
         State.hud.draw()
