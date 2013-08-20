@@ -169,7 +169,7 @@ class BasicMapRenderer(object):
         """
         visible_tiles = self._visible_tiles
         if visible_tiles:
-            return visible_tiles
+            return
         
         self._view_count += 1
         self._age_tiles()
@@ -197,10 +197,10 @@ class BasicMapRenderer(object):
         """draw the visible tiles on the screen"""
         cam_rect = State.camera.rect
         self._rect.center = cam_rect.center
-        blit = State.camera.view.surface.blit
+        blit = State.camera.surface.blit
         view_rect = self._rect
         colliderect = view_rect.colliderect
-        x,y = view_rect.topleft
+        x,y = cam_rect.topleft
         for tile in self._visible_tiles:
             r = tile.rect
             if colliderect(r):

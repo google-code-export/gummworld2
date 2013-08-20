@@ -108,6 +108,47 @@ class Widget:
                 app.App()
             pguglobals.app.theme.decorate(self,params['decorate'])
 
+    def reinit(self, **params):
+        """Argh!"""
+        params.setdefault('decorate',True)
+        params.setdefault('style',{})
+        params.setdefault('focusable',self.focusable)
+        params.setdefault('disabled',self.disabled)
+        
+        self.focusable = params['focusable']
+        self.disabled = params['disabled']
+        
+        self.rect = pygame.Rect(params.get('x',0),
+                                params.get('y',0),
+                                params.get('width',0),
+                                params.get('height',0))
+        
+        s = params['style']
+        #some of this is a bit "theme-ish" but it is very handy, so these
+        #things don't have to be put directly into the style.
+        for att in ('align','valign','x','y','width','height','color','font','background'):
+            if att in params: s[att] = params[att]
+        self.style = style.Style(self,s)
+        
+        self.cls = 'default'
+        if 'cls' in params: self.cls = params['cls']
+        if 'name' in params:    
+            import form
+            self.name = params['name']
+            if form.Form.form:
+                form.Form.form.add(self)
+                self.form = form.Form.form
+        if 'value' in params: self.value = params['value']
+        self.pcls = ""
+        
+        if params['decorate'] != False:
+            if (not pguglobals.app):
+                # TODO - fix this somehow
+                import app
+                app.App()
+            pguglobals.app.theme.decorate(self,params['decorate'])
+
+    
     def focus(self):
         """Focus this Widget."""
         if self.container: 

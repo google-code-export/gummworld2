@@ -991,7 +991,7 @@ class MapEditor(object):
         """Update the GUI, then update the app from the GUI.
         """
         # Plucked from gui.App.loop().
-        self.gui.set_global_app()
+#        self.gui.set_global_app()
         self.gui.update()
         State.camera.position = self.h_map_slider.value,self.v_map_slider.value
     
@@ -2128,19 +2128,26 @@ class MapEditor(object):
         if h < 600: h = 600
         screen_size = w,h
         State.screen = Screen(screen_size, RESIZABLE)
-        State.camera.view = View(State.screen.surface, Rect(0,0,w*2/3,h))
+        
+        w = max(w*2/3, w-266)
+        State.camera.view = View(State.screen.surface, Rect(0,0,w,h))
         State.screen.eraser.fill(Color('grey'))
         
         # Resize the widgets.
         self.gui_modal_off()
-        self.gui.screen = State.screen.surface
-        self.gui.resize()
+        
+        self.gui.init(screen=State.screen.surface)
         self.remake_scrollbars(reset=False)
+        
         c = self.gui.widget
         side_panel = self.gui_form['side_panel']
         c.remove(side_panel)
         make_side_panel(c)
+        self.gui.paint()
         self.select(self.selected)
+        
+        self.update()
+        self.draw()
     
     def on_user_event(self, e):
         """Handler for USEREVENT events.
