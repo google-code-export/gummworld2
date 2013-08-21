@@ -85,10 +85,11 @@ class App(Engine):
         self.update_camera_position()
         State.camera.update()
 
-    def draw(self, dt):
+    def draw(self, interp):
         """overrides Engine.draw"""
         # Draw stuff.
-        State.camera.interpolate()
+## Engine does this.
+##        State.camera.interpolate()
         State.camera.view.clear()
         toolkit.draw_tiles()
         if State.name == 'small':

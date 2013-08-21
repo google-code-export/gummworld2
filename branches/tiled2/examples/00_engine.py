@@ -75,7 +75,7 @@ class App(Engine):
             State.camera.position += self.movex,self.movey
         State.camera.update()
     
-    def draw(self, dt):
+    def draw(self, interp):
         ## For each frame cycle, draw the screen contents.
         State.screen.clear()
         toolkit.draw_tiles()

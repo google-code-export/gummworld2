@@ -227,7 +227,7 @@ class App(Engine):
         for c in State.world.collidealllist():
             c[0].hit = True
     
-    def draw(self, dt):
+    def draw(self, interp):
         State.screen.clear()
         self.draw_world()
         self.draw_grid()

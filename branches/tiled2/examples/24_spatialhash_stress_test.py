@@ -274,7 +274,7 @@ class App(Engine):
                     pair = coll[i:i+1]
                     pair[0].hit = True
     
-    def draw(self, dt):
+    def draw(self, interp):
         State.screen.clear()
         self.draw_world()
         self.draw_grid()

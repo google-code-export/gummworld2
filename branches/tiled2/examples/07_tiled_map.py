@@ -145,7 +145,7 @@ class App(Engine):
             wy = max(min(wy,rect.bottom), rect.top)
             camera.position = wx,wy
     
-    def draw(self, dt):
+    def draw(self, interp):
         """overrides Engine.draw"""
         # Draw stuff.
         State.screen.clear()

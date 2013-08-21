@@ -75,7 +75,7 @@ class App(Engine):
         tiled_map = TiledMap(data.filepath('map', 'Gumm no swamps.tmx'))
         
         Engine.__init__(self,
-            caption='07 Tiled Map -  G: grid | L: labels',
+            caption='07 Tiled Map with Renderer -  G: grid | L: labels',
             resolution=resolution,
             camera_target=Avatar((325,420), resolution//2),
             map=tiled_map,
@@ -154,7 +154,7 @@ class App(Engine):
             wy = max(min(wy,rect.bottom), rect.top)
             camera.position = wx,wy
     
-    def draw(self, dt):
+    def draw(self, interp):
         """overrides Engine.draw"""
         # Draw stuff.
         State.screen.clear()

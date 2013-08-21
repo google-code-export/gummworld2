@@ -104,9 +104,8 @@ class MainMenu(Engine):
         if mr.top < 0 or mr.bottom >= sr.bottom: self.move.y *= -1
         self.move_from += self.move
     
-    def draw(self, dt):
+    def draw(self, interp):
         """Draw the text with interpolated movement."""
-        interp = State.clock.interpolate
         pos = toolkit.interpolated_step(self.move_from, self.move, interp)
         self.message_rect.center = round(pos.x),round(pos.y)
         State.screen.clear()
@@ -145,7 +144,7 @@ class Game(Engine):
         State.camera.update(dt)
         self.visible_objects = toolkit.get_object_array()
     
-    def draw(self, dt):
+    def draw(self, interp):
         State.screen.clear()
         toolkit.draw_object_array(self.visible_objects)
         State.screen.flip()

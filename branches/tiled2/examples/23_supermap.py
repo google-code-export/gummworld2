@@ -80,7 +80,7 @@ class App(Engine):
         State.map.update(dt)
         State.hud.update(dt)
     
-    def draw(self, dt):
+    def draw(self, interp):
         State.screen.clear()
         State.map.draw()
         State.hud.draw()
