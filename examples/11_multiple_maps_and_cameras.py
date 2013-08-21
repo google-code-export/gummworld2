@@ -124,7 +124,7 @@ class App(Engine):
     def set_caption(self, dt):
         pygame.display.set_caption(self.caption+' - %d fps' % State.clock.fps)
     
-    def draw(self, dt):
+    def draw(self, interp):
         """overrides Engine.draw"""
         ## Restore each view and draw its map.
         for view in (self.view1, self.view2):

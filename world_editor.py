@@ -1097,7 +1097,7 @@ class MapEditor(object):
         else:
             entities = []
         State.world = SpatialHash(State.map.rect, 128)
-        for i in entities:
+        for e in entities:
             State.world.add(e)
         State.camera.init_position(State.camera.view.center)
     

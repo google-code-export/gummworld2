@@ -160,7 +160,7 @@ class App(Engine):
             count += len(layer)
         return count
     
-    def draw(self, dt):
+    def draw(self, interp):
         State.screen.clear()
         self.renderer.draw_tiles()
         State.hud.draw()

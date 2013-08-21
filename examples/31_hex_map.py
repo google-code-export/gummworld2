@@ -183,8 +183,7 @@ class App(Engine):
         self.renderer.set_rect(center=State.camera.rect.center)
         State.hud.update(dt)
     
-    def draw(self, dt):
-        State.camera.interpolate()
+    def draw(self, interp):
         screen = State.screen
         screen.clear()
         if self.use_renderer:

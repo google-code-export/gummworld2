@@ -188,7 +188,7 @@ class App(Engine):
                     newy = rect.bottom
                 camera.position = newx,newy
         
-    def draw(self, dt):
+    def draw(self, interp):
         """overrides Engine.draw"""
         # Draw stuff.
         State.screen.clear()

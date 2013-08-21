@@ -106,8 +106,7 @@ class App(Engine):
         self.renderer.set_rect(center=State.camera.rect.center)
         State.hud.update(dt)
     
-    def draw(self, dt):
-        State.camera.interpolate()
+    def draw(self, interp):
         State.screen.clear()
         self.renderer.draw_tiles()
         State.hud.draw()

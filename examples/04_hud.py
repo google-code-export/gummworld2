@@ -73,10 +73,11 @@ class App(Engine):
         ## Update the hud.
         State.hud.update(dt)
         
-    def draw(self, dt):
+    def draw(self, interp):
         """overrides Engine.draw"""
         # Draw stuff.
-        State.camera.interpolate()
+## Engine does this.
+##        State.camera.interpolate()
         State.camera.view.clear()
         toolkit.draw_object_array(self.visible_objects)
         ## Draw the hud.
@@ -108,7 +109,7 @@ class App(Engine):
         elif key == K_LEFT:
             self.move_x = -1 * State.speed
         elif key == K_h:
-            State.show_hud = not State.show_hud
+            State.hud.visible = not State.hud.visible
         elif key == K_TAB:
             # Select the next state name and and restore it.
             State.restore(self.next_state[State.name])

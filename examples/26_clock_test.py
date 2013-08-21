@@ -58,7 +58,7 @@ class Meter(object):
             self.val = self.min_val
         self.fill_rect.w = self.rect.w * self.val / (self.max_val-self.min_val)
     
-    def draw(self, dt, surf):
+    def draw(self, surf):
         """Draw the meter."""
         surf.fill((0,0,0), self.rect)
         pygame.draw.rect(surf, self.color, self.rect, 1)
@@ -111,11 +111,11 @@ class App(Engine):
         for meter in self.meters:
             meter.update(dt)
     
-    def draw(self, dt):
+    def draw(self, interp):
         """Draw the view."""
         surf = self.screen.surface
         for meter in self.meters:
-            meter.draw(dt, surf)
+            meter.draw(surf)
         self.screen.flip()
     
     def on_key_down(self, unicode, key, mod):

@@ -75,7 +75,7 @@ class App(Engine):
         State.camera.update(dt)
         State.hud.update(dt)
     
-    def draw(self, dt):
+    def draw(self, interp):
         State.screen.clear()
         self.draw_tiles()
         State.hud.draw()
