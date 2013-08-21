@@ -149,7 +149,11 @@ class App(Engine):
         
         self.renderer = BasicMapRenderer(
             self.map, max_scroll_speed=self.scroll_speed)
-        self.use_renderer = False
+        self.which_renderer = 0
+        self.renderers = [
+            toolkit.draw_tiles,
+            self.renderer.draw_tiles,
+        ]
         
         toolkit.make_hud()
         next_pos = State.hud.next_pos
@@ -163,7 +167,9 @@ class App(Engine):
         State.hud.add('Hex pick', Statf(next_pos(),
             'Hex pick %s', callback=self.hex_pick_for_hud, interval=.2))
         State.hud.add('Using renderer', Statf(next_pos(),
-            'Using renderer %s', callback=lambda:self.use_renderer, interval=.2))
+            'Using renderer %s',
+            callback=lambda:True if self.which_renderer==1 else False,
+            interval=.2))
     
     def _count_map_tiles(self):
         basic_map = State.map
@@ -186,10 +192,7 @@ class App(Engine):
     def draw(self, interp):
         screen = State.screen
         screen.clear()
-        if self.use_renderer:
-            self.renderer.draw_tiles()
-        else:
-            toolkit.draw_tiles()
+        self.renderers[self.which_renderer]()
         self.draw_hex_pick()
         State.hud.draw()
         screen.flip()
@@ -200,7 +203,6 @@ class App(Engine):
             pos = State.camera.world_to_screen(hex.rect.topleft)
             State.screen.blit(hex.image, pos)
     
-    
     def on_mouse_motion(self, pos, rel, buttons):
         self.mouse_pos[:] = pos
         self.mouse_pick()
@@ -209,23 +211,34 @@ class App(Engine):
         worldx,worldy = world_pos = State.camera.screen_to_world(self.mouse_pos)
         space = self.map.layers[0].objects
         cell_id = space.index_at(worldx, worldy)
+        if cell_id is None:
+            self._clear_pick()
+            return
         cell = space.get_cell(cell_id)
         for obj in cell:
             if obj.collide_point(world_pos):
-                if self.hex_pick:
-                    self.hex_pick.normal()
-                    self.renderer.set_dirty(self.hex_pick.rect)
-                obj.highlight()
-                self.renderer.set_dirty(obj.rect)
-                self.hex_pick = obj
-                self.hex_pick.position = obj.position
+                self._clear_pick()
+                self._set_pick(obj)
+    
+    def _set_pick(self, obj):
+        obj.highlight()
+        self.renderer.set_dirty(obj.rect)
+        self.hex_pick = obj
+        self.hex_pick.position = obj.position
+    
+    def _clear_pick(self):
+        if self.hex_pick:
+            self.hex_pick.normal()
+            self.renderer.set_dirty(self.hex_pick.rect)
+            self.hex_pick = None
     
     def on_key_down(self, unicode, key, mod):
         if key == K_DOWN: self.movey += self.scroll_speed
         elif key == K_UP: self.movey += -self.scroll_speed
         elif key == K_RIGHT: self.movex += self.scroll_speed
         elif key == K_LEFT: self.movex += -self.scroll_speed
-        elif key == K_SPACE: self.use_renderer = not self.use_renderer
+        elif key == K_SPACE:
+            self.which_renderer = 0 if self.which_renderer else 1
         elif key == K_ESCAPE: context.pop()
     
     def on_key_up(self, key, mod):
