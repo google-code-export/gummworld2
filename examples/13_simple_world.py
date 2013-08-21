@@ -148,13 +148,13 @@ class App(Engine):
         # Draw stuff.
         State.screen.clear()
         toolkit.draw_tiles()
-        self.draw_scene()
+        self.draw_scene(interp)
         State.screen.flip()
         
-    def draw_scene(self):
+    def draw_scene(self, interp):
         surf = State.camera.surface
         images = self.images
-        interp = State.camera.interpolate()
+##        interp = State.camera.interpolate()
         ## Display the "thing" as a wireframe or an image.
         if self.wireframe:
             for frame in [f for f in State.world.objects() if isinstance(f, Thing)]:
