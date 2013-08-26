@@ -162,7 +162,7 @@ class SpatialHash(object):
         cell_size = self.cell_size
         rect = self.rect
         idx = ((x-rect[0])//cell_size) + ((y-rect[1])//cell_size) * self.cols
-        return idx if -1<idx<self.num_buckets else None
+        return int(idx) if -1<idx<self.num_buckets else None
     
     def intersect_indices(self, rect):
         """Return list of cell ids that intersect rect.
