@@ -127,7 +127,7 @@ class BasicMap(object):
 
 class BasicLayer(object):
     
-    def __init__(self, parent_map, layer_index):
+    def __init__(self, parent_map, layer_index, cell_size=None):
         self.parent_map = parent_map
         
         self.tile_width = parent_map.tile_width
@@ -137,7 +137,8 @@ class BasicLayer(object):
         self.pixel_width = self.width * self.tile_width
         self.pixel_height = self.height * self.tile_height
         
-        cell_size = max(self.tile_width, self.tile_height)
+        if cell_size == None:
+            cell_size = max(self.tile_width, self.tile_height)
         self.rect = pygame.Rect(0,0, self.pixel_width+1, self.pixel_height+1)
         self.objects = spatialhash.SpatialHash(self.rect, cell_size)
         
