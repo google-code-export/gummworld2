@@ -225,7 +225,14 @@ class GameClock(object):
     @property
     def interpolate(self):
         interp = (self._real_time - self._last_update_real) / self._update_interval
-        return interp if interp <= 1.0 else 1.0
+## FIXED: this was getting huge negative value when window focus is gained. Need
+## to protect against this corner case.
+##        return interp if interp <= 1.0 else 1.0
+        if interp < 0.0:
+            return 0.0
+        if interp > 1.0:
+            return 1.0
+        return interp
     
     def tick(self):
         # Now.
