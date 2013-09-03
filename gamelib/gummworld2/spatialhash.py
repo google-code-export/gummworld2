@@ -138,9 +138,13 @@ class SpatialHash(object):
     def get_cell(self, cell_id):
         """Return the cell stored at bucket index cell_id.
         
-        The returned cell is a list of objects.
+        The returned cell is a list of objects. None is returned if a cell does
+        not exist for cell_id.
         """
-        return self.buckets[cell_id]
+        try:
+            return self.buckets[cell_id]
+        except:
+            return None
     
     def index(self, cell):
         """Return the bucket index of cell.
