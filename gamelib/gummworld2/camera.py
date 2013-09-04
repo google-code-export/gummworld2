@@ -187,29 +187,32 @@ class Camera(object):
     def position(self, val):
         self.target.position = val
     
-    @property
-    def anti_interp(self):
-##        return self.target_moved * self.interp - self.target_moved
-        pass
+    def anti_interp(self, obj):
+        """Return x,y to reverse interpolation jitter on an object
+        
+        obj must have a pygame rect attribute.
+        
+        Example:
+            screen.blit(thing.image, thing.rect.move(camera.anti_interp))
+        """
+        crect = self.rect
+        trect = obj.rect
+        t = Vec2d(trect.center) - crect.center
+        c = crect.topleft
+        return -(c+t)
     
     @property
     def steady_target_position(self):
-        """The camera target's position with factored interpolation.
-        
-        Use this to get the interpolated position of camera target. Note that
-        this is different than interpolating a tile or free-roaming sprite,
-        which scroll in the opposite direction of the camera target.
+        """Return x,y to reverse interpolation jitter on the camera target
         
         Example:
-            target_rect.center = camera.steady_target_position
-            screen.blit(target_image, target_rect)
-        
-        Think of it as an alternative to hard-coding screen center:
-            target_rect.center = 300,300
-            screen.blit(target_image, target_rect)
+            screen.blit(thing.image, thing.rect.move(camera.steady_target_position))
         """
-        x,y = self.position + self.anti_interp
-        return round(x),round(y)
+        crect = self.rect
+        trect = self.target.rect
+        t = Vec2d(trect.center) - crect.center
+        c = crect.topleft
+        return -(c+t)
     
     @property
     def screen_center(self):
