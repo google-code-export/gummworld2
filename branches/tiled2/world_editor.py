@@ -27,8 +27,9 @@ __doc__ = """world_editor.py - A world editor for Gummworld2.
 ## Configurables                                                          ##
 ##                                                                        ##
 
-SCREEN_SIZE = (1024,768)
 SCREEN_SIZE = (800,600)
+SCREEN_SIZE = (1024,768)
+SCREEN_SIZE = (1550,800)
 
 ##                                                                        ##
 ## No more configurables after this point                                 ##
@@ -453,7 +454,7 @@ class LineGeom(geometry.LineGeometry):
         a,b = self.points
         a = Vec2d(a)
         b = Vec2d(b)
-        self.draw_line(surface, color, a+cam_pos, b+cam_pos, 1)
+        self.draw_line(surface, color, a-cam_pos, b-cam_pos, 1)
         # If shape is selected, draw control points in screen space.
         if self is app.selected:
             for cp in self.control_points:
@@ -1501,7 +1502,7 @@ class MapEditor(object):
                     return 0
             # Get the Input widgets' values.
             tx,ty = get('tile_sx'),get('tile_sy')
-            mx,my = get('tile_sx'),get('tile_sy')
+            mx,my = get('map_sx'),get('map_sy')
             d.values[:] = mx,my,tx,ty
         
         # Dialog and content.
@@ -1728,9 +1729,9 @@ class MapEditor(object):
                 if v <= 0:
                     self.gui_alert('Negative and zero values not allowed')
                     return
-            map_size = d.values[0:2]
-            tile_size = d.values[2:4]
-            State.map = Map(tile_size, map_size)
+            mapw,maph = d.values[0:2]
+            tilew,tileh = d.values[2:4]
+            State.map = BasicMap(mapw,maph, tilew,tileh)
             self.make_world()
             toolkit.make_tiles2()
             self.remake_scrollbars()
