@@ -717,7 +717,7 @@ def circle_intersects_circle(origin1, radius1, origin2, radius2):
 
 
 def circle_intersects_line(origin, radius, line_segment):
-    """Circle vs line collision test.
+    """Circle vs line collision test. Return point of contact, or None.
     
     Return True if line_segment intersects the circle defined by origin and
     radius. Return False if they do not intersect.
@@ -741,7 +741,11 @@ def circle_intersects_line(origin, radius, line_segment):
     h2 = H.dot(H)
     r2 = radius * radius
     
-    return h2 <= r2
+#    return h2 <= r2
+    if h2 <= r2:
+        return P
+    else:
+        return None
 
 
 def circle_intersects_rect(origin, radius, rect):
