@@ -73,9 +73,13 @@ class App(Engine):
         
         ## Load Tiled TMX map, then update the world's dimensions.
         tiled_map = TiledMap(data.filepath('map', 'Gumm no swamps.tmx'))
+        # If you have The Mana World maps, copy:
+        #   Gfx dir: graphics/ -> data/
+        #   Maps:    *.tmx     -> data/maps/
+        #tiled_map = TiledMap(data.filepath('map', '001-1.tmx'))
         
         Engine.__init__(self,
-            caption='07 Tiled Map with Renderer -  G: grid | L: labels',
+            caption='07 Tiled Map with Renderer -  G: grid | L: labels | 0-9: layer',
             resolution=resolution,
             camera_target=Avatar((325,420), resolution//2),
             map=tiled_map,
@@ -154,6 +158,15 @@ class App(Engine):
             wy = max(min(wy,rect.bottom), rect.top)
             camera.position = wx,wy
     
+    def toggle_layer(self, i):
+        """toggle visibility of layer i"""
+        try:
+            layer = State.map.layers[i]
+            layer.visible = not layer.visible
+            self.renderer.clear()
+        except:
+            pass
+    
     def draw(self, interp):
         """overrides Engine.draw"""
         # Draw stuff.
@@ -187,6 +200,8 @@ class App(Engine):
             State.show_labels = not State.show_labels
         elif key == K_ESCAPE:
             context.pop()
+        elif key >= K_0 and key <= K_9:
+            self.toggle_layer(key - K_0)
     
     def on_quit(self):
         context.pop()
