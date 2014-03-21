@@ -128,7 +128,7 @@ class BasicMapRenderer(object):
         if val <= 0:
             val = self._rect.width / 4
         self._tile_size = val
-        self._clear()
+        self.clear()
         self.get_tiles()
     @property
     def basic_map(self):
@@ -138,7 +138,7 @@ class BasicMapRenderer(object):
         """register a new BasicMap"""
         assert isinstance(val, BasicMap)
         self._basic_map = val
-        self._clear()
+        self.clear()
         self.get_tiles()
     
     def set_dirty(self, *areas):
@@ -203,8 +203,9 @@ class BasicMapRenderer(object):
         x,y = cam_rect.topleft
         for tile in self._visible_tiles:
             r = tile.rect
-            if colliderect(r):
-                blit(tile.image, r.move(-x, -y))
+            im = tile.image
+            if im and colliderect(r):
+                blit(im, r.move(-x, -y))
     
     def _age_tiles(self):
         """weed out aged tiles nicely"""
@@ -231,7 +232,7 @@ class BasicMapRenderer(object):
                 pass
         del dead[:]
     
-    def _clear(self):
+    def clear(self):
         """clear all tile caches"""
         self._tiles.clear()
         del self._visible_tiles[:]
@@ -261,9 +262,12 @@ class BasicMapRendererTile(object):
 #        print ''
         for sprites in visible_objects:
             for sprite in sprites:
-                rect = sprite.rect
-                sx,sy = rect.topleft
-                blit(sprite.image, (sx-cx,sy-cy))
+                im = sprite.image
+                if im:
+#                    rect = sprite.rect
+#                    sx,sy = rect.topleft
+                    sx,sy = sprite.rect[0:2]
+                    blit(im, (sx-cx,sy-cy))
 
 
 # The following functions
@@ -289,7 +293,10 @@ def _get_visible_cell_ids(camera, map_, query_rect):  #, max_speed=10):
 def _get_objects_in_cell_ids(map_, cell_ids_per_layer):
     objects_per_layer = []
     for layeri,cell_ids in enumerate(cell_ids_per_layer):
-        get_cell = map_.layers[layeri].objects.get_cell
+        layer = map_.layers[layeri]
+        if not layer.visible:
+            continue
+        get_cell = layer.objects.get_cell
         objects = set()
         objects_update = objects.update
         for cell_id in cell_ids:
