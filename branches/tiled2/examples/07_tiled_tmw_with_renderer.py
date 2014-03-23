@@ -20,7 +20,7 @@ __version__ = '$Id$'
 __author__ = 'Gummbum, (c) 2011-2013'
 
 
-__doc__ = """07_the_mana_world.py - An example of using a complex map from
+__doc__ = """07_tiled_tmw_with_renderer.py - An example of using a complex map from
 The Mana World with the BasicMapRenderer in Gummworld2.
 
 The demo includes collision detection and proper 2.5D placement of the avatar.
