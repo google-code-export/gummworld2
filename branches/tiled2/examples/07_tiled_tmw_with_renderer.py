@@ -32,6 +32,7 @@ map file and the data directory into the gummworld2/data directory.
 """
 
 
+import sys
 import cProfile, pstats
 
 import pygame
@@ -101,7 +102,12 @@ class App(Engine):
         3. We will draw the layers that are above ground. Because the Fringe
         layer contains mobile objects we need to sort the tiles when drawing.
         """
-        tiled_map = TiledMap(data.filepath('map', '001-1.tmx'))
+        try:
+            tiled_map = TiledMap(data.filepath('map', '001-1.tmx'))
+        except:
+            print 'Sorry! Gummworld2 cannot include The Mana World assets due to licensing.'
+            print 'To use this demo please download gummworld2_tmw.zip and follow its instructions.'
+            sys.exit()
         ## Save special layers.
         self.all_groups = tiled_map.layers[:]
         self.avatar_group = tiled_map.layers[1]

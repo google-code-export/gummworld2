@@ -40,6 +40,8 @@ Watch what happens to the frame rate as tile size increases.
 """
 
 
+import sys
+
 import pygame
 from pygame.sprite import Sprite
 from pygame.locals import *
@@ -69,6 +71,12 @@ class App(Engine):
         
         resolution = Vec2d(resolution)
         self.map_file_name = data.filepath('map', 'Gumm no swamps.tmx')
+        try:
+            tiled_map = TiledMap(self.map_file_name)
+        except pygame.error:
+            print 'Sorry! Gummworld2 cannot include The Mana World assets due to licensing.'
+            print 'To use this demo please download gummworld2_tmw.zip and follow its instructions.'
+            sys.exit()
         
         # Caption for window, and HUD in full-screen mode
         caption = '09 Collapse Map - G: grid | L: labels | Collapse: 1-10 (0 is 10)'
@@ -77,7 +85,7 @@ class App(Engine):
             caption=caption,
             resolution=resolution, #display_flags=FULLSCREEN,
             camera_target=Avatar((325,420), resolution//2),
-            map=TiledMap(self.map_file_name),
+            map=tiled_map,
             frame_speed=0)  #, default_schedules=False)
         
         self.visible_objects = []

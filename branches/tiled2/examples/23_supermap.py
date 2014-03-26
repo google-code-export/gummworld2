@@ -24,6 +24,7 @@ __doc__ = """23_supermap.py - An example of using SuperMap in Gummworld2.
 """
 
 
+import sys
 import cProfile, pstats
 
 import pygame
@@ -114,8 +115,13 @@ class TiledMapHandler(MapHandler):
     collapse_level = (4,4)
     
     def load(self):
-        self.map = TiledMap(
-            data.filepath('map',self.map_file), collapse=self.collapse_level)
+        try:
+            self.map = TiledMap(
+                data.filepath('map',self.map_file), collapse=self.collapse_level)
+        except pygame.error:
+            print 'Sorry! Gummworld2 cannot include The Mana World assets due to licensing.'
+            print 'To use this demo please download gummworld2_tmw.zip and follow its instructions.'
+            sys.exit()
     
     def collapse(self, clevel):
         if clevel > (1,1):
