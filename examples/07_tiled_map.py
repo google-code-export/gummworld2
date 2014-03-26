@@ -35,6 +35,7 @@ Thanks to dr0id for his nice tiledtmxloader module:
 """
 
 
+import sys
 import cProfile, pstats
 
 import pygame
@@ -66,7 +67,12 @@ class App(Engine):
         resolution = Vec2d(resolution)
         
         ## Load Tiled TMX map, then update the world's dimensions.
-        tiled_map = TiledMap(data.filepath('map', 'Gumm no swamps.tmx'))
+        try:
+            tiled_map = TiledMap(data.filepath('map', 'Gumm no swamps.tmx'))
+        except pygame.error:
+            print 'Sorry! Gummworld2 cannot include The Mana World assets due to licensing.'
+            print 'To use this demo please download gummworld2_tmw.zip and follow its instructions.'
+            sys.exit()
         
         Engine.__init__(self,
             caption='07 Tiled Map -  G: grid | L: labels',

@@ -54,6 +54,8 @@ to 400 tiles.
 """
 
 
+import sys
+
 import pygame
 from pygame.sprite import Sprite
 from pygame.locals import *
@@ -95,7 +97,12 @@ class App(Engine):
             frame_speed=0)
         
         ## Load Tiled TMX map, then update the world and camera.
-        self.original_map = TiledMap(map_data_file)
+        try:
+            self.original_map = TiledMap(map_data_file)
+        except pygame.error:
+            print 'Sorry! Gummworld2 cannot include The Mana World assets due to licensing.'
+            print 'To use this demo please download gummworld2_tmw.zip and follow its instructions.'
+            sys.exit()
         self.map = self.original_map
         self.world = model.NoWorld(self.map.rect)
         self.set_state()
